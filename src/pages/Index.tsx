@@ -1,7 +1,9 @@
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
+import TemplatesSection from "@/components/TemplatesSection";
 import PricingSection from "@/components/PricingSection";
+import ResourcesSection from "@/components/ResourcesSection";
 
 const Index = () => {
   return (
@@ -9,7 +11,9 @@ const Index = () => {
       <Navigation />
       <HeroSection />
       <FeaturesSection />
+      <TemplatesSection />
       <PricingSection />
+      <ResourcesSection />
       
       {/* Footer */}
       <footer className="py-12 px-4 border-t border-border/20 glass-card">
