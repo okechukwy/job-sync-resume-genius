@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 
 const ResourcesSection = () => {
   const resources = [
@@ -85,18 +87,23 @@ const ResourcesSection = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">
-                  Access Resource
-                </Button>
+                <Link to="/resources">
+                  <Button variant="outline" className="w-full">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Access Resource
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="hero" size="lg">
-            View All Resources
-          </Button>
+          <Link to="/resources">
+            <Button variant="hero" size="lg">
+              View All Resources
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
