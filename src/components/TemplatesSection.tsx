@@ -93,9 +93,11 @@ const TemplatesSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="hero" size="lg">
-            Browse All Templates
-          </Button>
+          <Link to="/templates">
+            <Button variant="hero" size="lg">
+              Browse All Templates
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

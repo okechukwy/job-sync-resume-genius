@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import Resources from "./pages/Resources";
+import Templates from "./pages/Templates";
 import ResumeWritingGuide from "./pages/resources/ResumeWritingGuide";
 import ATSOptimization from "./pages/resources/ATSOptimization";
 import InterviewPreparation from "./pages/resources/InterviewPreparation";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/get-started" element={<ResumeBuilder />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/templates" element={<Templates />} />
           <Route path="/resources/resume-writing-guide" element={<ResumeWritingGuide />} />
           <Route path="/resources/ats-optimization" element={<ATSOptimization />} />
           <Route path="/resources/interview-preparation" element={<InterviewPreparation />} />
