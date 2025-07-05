@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 240 15% 4%;
-    --foreground: 210 40% 98%;
+    --background: 210 40% 98%;
+    --foreground: 240 15% 15%;
 
     /* Brand colors - Professional blues and purples */
-    --primary: 240 100% 85%;
-    --primary-foreground: 240 15% 4%;
-    --primary-glow: 260 100% 80%;
+    --primary: 240 100% 65%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 260 100% 70%;
     
-    /* Secondary - Silver and light tones */
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary - Light glass tones */
+    --secondary: 240 20% 95%;
+    --secondary-foreground: 240 15% 15%;
     
     /* Accent - Vibrant purple for CTAs */
     --accent: 270 100% 70%;
-    --accent-foreground: 240 15% 4%;
+    --accent-foreground: 210 40% 98%;
     
     /* Muted tones for subtle elements */
-    --muted: 240 5% 10%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 5% 45%;
     
     /* Cards and surfaces */
-    --card: 240 10% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 40% 98% / 0.7;
+    --card-foreground: 240 15% 15%;
     
     /* Borders and inputs */
-    --border: 240 10% 18%;
-    --input: 240 10% 12%;
+    --border: 240 20% 85% / 0.6;
+    --input: 210 40% 98% / 0.8;
     --ring: 270 100% 70%;
     
     /* Status colors */  
@@ -44,26 +44,26 @@
     --destructive-foreground: 210 40% 98%;
     
     /* Popover and overlays */
-    --popover: 240 10% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 40% 98% / 0.95;
+    --popover-foreground: 240 15% 15%;
     
     --radius: 0.75rem;
     
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(240 15% 4%) 0%, hsl(260 20% 8%) 50%, hsl(280 25% 6%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(240 100% 85%) 0%, hsl(270 100% 70%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(240 30% 96%) 30%, hsl(260 40% 94%) 60%, hsl(280 50% 92%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(240 100% 65%) 0%, hsl(270 100% 70%) 100%);
     --gradient-button: linear-gradient(135deg, hsl(270 100% 70%) 0%, hsl(260 100% 75%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(240 10% 8% / 0.9) 0%, hsl(240 15% 6% / 0.95) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 40% 98% / 0.4) 0%, hsl(240 30% 96% / 0.6) 100%);
     
     /* Glass morphism and effects */
-    --glass-bg: hsl(240 10% 8% / 0.8);
-    --glass-border: hsl(240 20% 25% / 0.3);
-    --glass-shadow: hsl(240 20% 0% / 0.2);
+    --glass-bg: hsl(210 40% 98% / 0.3);
+    --glass-border: hsl(240 30% 85% / 0.4);
+    --glass-shadow: hsl(240 50% 50% / 0.1);
     
     /* Shadows and glows */
     --shadow-glass: 0 8px 32px var(--glass-shadow);
-    --shadow-glow: 0 0 40px hsl(270 100% 70% / 0.3);
-    --shadow-card: 0 4px 24px hsl(240 15% 0% / 0.2);
+    --shadow-glow: 0 0 40px hsl(270 100% 70% / 0.2);
+    --shadow-card: 0 4px 24px hsl(240 30% 70% / 0.15);
     
     /* Animation timings */
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,9 +102,23 @@
   /* Glass morphism utility classes */
   .glass-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-glass);
+    position: relative;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, 
+      hsl(210 40% 98% / 0.2) 0%, 
+      hsl(240 30% 96% / 0.1) 50%, 
+      hsl(260 40% 94% / 0.05) 100%);
+    border-radius: inherit;
+    pointer-events: none;
   }
   
   .glow-effect {
@@ -151,7 +165,7 @@
 
 @layer utilities {
   .text-shadow {
-    text-shadow: 0 2px 8px hsl(240 15% 0% / 0.5);
+    text-shadow: 0 2px 8px hsl(240 50% 50% / 0.3);
   }
   
   .smooth-transition {
