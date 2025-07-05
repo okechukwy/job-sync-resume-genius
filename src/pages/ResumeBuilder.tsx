@@ -5,18 +5,25 @@ import { ArrowLeft, Upload, FileText, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef } from "react";
 import ResumeSteps from "@/components/ResumeSteps";
+import CVAnalysis from "@/components/CVAnalysis";
 import { toast } from "sonner";
 
 const ResumeBuilder = () => {
-  const [currentStep, setCurrentStep] = useState<'industry' | 'build' | 'upload'>('industry');
+  const [currentStep, setCurrentStep] = useState<'industry' | 'analysis' | 'build'>('industry');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleIndustrySelect = (industry: string) => {
-    setSelectedIndustry(industry);
-    setCurrentStep('build');
-    toast.success(`${industry} industry selected! Let's build your resume.`);
+    if (uploadedFile) {
+      // If there's an uploaded file, use the optimization flow
+      handleContinueWithUpload(industry);
+    } else {
+      // If no uploaded file, use the standard flow
+      setSelectedIndustry(industry);
+      setCurrentStep('build');
+      toast.success(`${industry} industry selected! Let's build your resume.`);
+    }
   };
 
   const handleUploadClick = () => {
@@ -41,7 +48,8 @@ const ResumeBuilder = () => {
     }
 
     setUploadedFile(file);
-    toast.success('Resume uploaded successfully! Choose an industry to continue.');
+    setCurrentStep('analysis');
+    toast.success('Resume uploaded successfully! Analyzing your resume...');
   };
 
   const handleRemoveFile = () => {
@@ -63,6 +71,19 @@ const ResumeBuilder = () => {
       setCurrentStep('build');
       toast.success(`${industry} industry selected! We'll help you optimize your uploaded resume.`);
     }
+  };
+
+  const handleContinueFromAnalysis = () => {
+    setCurrentStep('industry');
+  };
+
+  const handleReupload = () => {
+    setUploadedFile(null);
+    setCurrentStep('industry');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    toast.info('Ready to upload a new resume');
   };
 
   const industries = [
@@ -106,6 +127,33 @@ const ResumeBuilder = () => {
 
   if (currentStep === 'build') {
     return <ResumeSteps selectedIndustry={selectedIndustry} onBack={() => setCurrentStep('industry')} />;
+  }
+
+  if (currentStep === 'analysis' && uploadedFile) {
+    return (
+      <div className="min-h-screen bg-gradient-hero">
+        {/* Header */}
+        <div className="glass-card border-b border-border/20 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={handleReupload}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Upload
+              </Button>
+              <div className="text-2xl font-bold gradient-text">ResumeAI</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <CVAnalysis 
+            uploadedFile={uploadedFile}
+            onContinue={handleContinueFromAnalysis}
+            onReupload={handleReupload}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -227,42 +275,6 @@ const ResumeBuilder = () => {
             </p>
           </div>
         </div>
-
-        {/* Updated Industry Selection for Uploaded Resume */}
-        {uploadedFile && (
-          <div className="mt-12">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold mb-4">Select Industry for Optimization</h3>
-              <p className="text-muted-foreground">
-                Choose your industry to get tailored optimization suggestions for your uploaded resume.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {industries.map((industry, index) => (
-                <Card 
-                  key={index} 
-                  className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer group"
-                  onClick={() => handleContinueWithUpload(industry.title)}
-                >
-                  <CardHeader className="text-center">
-                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                      {industry.icon}
-                    </div>
-                    <CardTitle className="text-lg mb-2">{industry.title}</CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      Optimize for {industry.title}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <Button variant="outline" className="w-full">
-                      Continue with {industry.title}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
