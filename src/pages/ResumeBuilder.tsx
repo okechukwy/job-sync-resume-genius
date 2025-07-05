@@ -75,6 +75,7 @@ const ResumeBuilder = () => {
 
   const handleContinueFromAnalysis = () => {
     setCurrentStep('industry');
+    toast.success('Choose your industry to continue with optimization');
   };
 
   const handleReupload = () => {
