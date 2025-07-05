@@ -12,6 +12,11 @@ import InterviewPreparation from "./pages/resources/InterviewPreparation";
 import SalaryNegotiation from "./pages/resources/SalaryNegotiation";
 import CareerDevelopment from "./pages/resources/CareerDevelopment";
 import JobSearchStrategy from "./pages/resources/JobSearchStrategy";
+import JobMatching from "./pages/JobMatching";
+import ATSAnalysis from "./pages/ATSAnalysis";
+import CoverLetterGenerator from "./pages/CoverLetterGenerator";
+import PerformanceTracking from "./pages/PerformanceTracking";
+import VersionManagement from "./pages/VersionManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +37,11 @@ const App = () => (
           <Route path="/resources/salary-negotiation" element={<SalaryNegotiation />} />
           <Route path="/resources/career-development" element={<CareerDevelopment />} />
           <Route path="/resources/job-search-strategy" element={<JobSearchStrategy />} />
+          <Route path="/job-matching" element={<JobMatching />} />
+          <Route path="/ats-analysis" element={<ATSAnalysis />} />
+          <Route path="/cover-letter" element={<CoverLetterGenerator />} />
+          <Route path="/performance" element={<PerformanceTracking />} />
+          <Route path="/versions" element={<VersionManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

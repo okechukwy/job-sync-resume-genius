@@ -1,0 +1,281 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Wand2, Download, Copy, RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+
+const CoverLetterGenerator = () => {
+  const [formData, setFormData] = useState({
+    jobTitle: "",
+    companyName: "",
+    hiringManager: "",
+    jobDescription: "",
+    tone: "",
+    keyPoints: ""
+  });
+  const [generatedLetter, setGeneratedLetter] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleGenerate = async () => {
+    if (!formData.jobTitle || !formData.companyName || !formData.jobDescription) {
+      toast.error('Please fill in the required fields');
+      return;
+    }
+
+    setIsGenerating(true);
+    // Simulate AI generation
+    setTimeout(() => {
+      const mockLetter = `Dear ${formData.hiringManager || 'Hiring Manager'},
+
+I am writing to express my strong interest in the ${formData.jobTitle} position at ${formData.companyName}. With my extensive background in software development and passion for creating innovative solutions, I am excited about the opportunity to contribute to your team's success.
+
+In my previous roles, I have demonstrated expertise in the key areas mentioned in your job description. My experience includes:
+
+• Developing scalable web applications using modern technologies
+• Collaborating with cross-functional teams to deliver high-quality products
+• Implementing best practices for code quality and performance optimization
+• Leading projects from conception to deployment
+
+What particularly excites me about ${formData.companyName} is your commitment to innovation and excellence in the tech industry. I am impressed by your recent initiatives and would love to bring my skills and enthusiasm to help drive your continued growth.
+
+${formData.keyPoints ? `Additionally, I would like to highlight: ${formData.keyPoints}` : ''}
+
+I am eager to discuss how my background and passion align with your team's needs. Thank you for considering my application. I look forward to the opportunity to contribute to ${formData.companyName}'s continued success.
+
+Best regards,
+[Your Name]`;
+
+      setGeneratedLetter(mockLetter);
+      setIsGenerating(false);
+      toast.success('Cover letter generated successfully!');
+    }, 3000);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedLetter);
+    toast.success('Cover letter copied to clipboard!');
+  };
+
+  const handleDownload = () => {
+    const element = document.createElement('a');
+    const file = new Blob([generatedLetter], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `cover_letter_${formData.jobTitle}_${formData.companyName}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    toast.success('Cover letter downloaded!');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-hero">
+      {/* Header */}
+      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+            <div className="text-2xl font-bold gradient-text">AI Cover Letter Generator</div>
+            <Badge variant="secondary" className="glass-card">Premium</Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Generate Perfect{" "}
+            <span className="gradient-text">Cover Letters</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Create personalized cover letters that perfectly complement your resume and target role using AI.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Input Form */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-5 w-5" />
+                Job Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="jobTitle">Job Title *</Label>
+                <Input
+                  id="jobTitle"
+                  placeholder="e.g., Senior Software Engineer"
+                  value={formData.jobTitle}
+                  onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company Name *</Label>
+                <Input
+                  id="companyName"
+                  placeholder="e.g., Google"
+                  value={formData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="hiringManager">Hiring Manager Name</Label>
+                <Input
+                  id="hiringManager"
+                  placeholder="e.g., Sarah Johnson (optional)"
+                  value={formData.hiringManager}
+                  onChange={(e) => handleInputChange('hiringManager', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tone">Tone & Style</Label>
+                <Select onValueChange={(value) => handleInputChange('tone', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                    <SelectItem value="confident">Confident</SelectItem>
+                    <SelectItem value="creative">Creative</SelectItem>
+                    <SelectItem value="formal">Formal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="jobDescription">Job Description *</Label>
+                <Textarea
+                  id="jobDescription"
+                  placeholder="Paste the job description here..."
+                  className="min-h-32 resize-none"
+                  value={formData.jobDescription}
+                  onChange={(e) => handleInputChange('jobDescription', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="keyPoints">Key Points to Highlight</Label>
+                <Textarea
+                  id="keyPoints"
+                  placeholder="Any specific achievements or skills you want to emphasize..."
+                  className="min-h-24 resize-none"
+                  value={formData.keyPoints}
+                  onChange={(e) => handleInputChange('keyPoints', e.target.value)}
+                />
+              </div>
+
+              <Button 
+                variant="hero" 
+                className="w-full" 
+                onClick={handleGenerate}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Generate Cover Letter
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Generated Letter */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle>Generated Cover Letter</CardTitle>
+              {generatedLetter && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCopy}>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDownload}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              {generatedLetter ? (
+                <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap font-mono text-sm">
+                  {generatedLetter}
+                </div>
+              ) : (
+                <div className="bg-background/50 rounded-lg p-12 min-h-96 flex items-center justify-center text-center">
+                  <div>
+                    <Wand2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      Your AI-generated cover letter will appear here
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Features */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="glass-card text-center">
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">🎯</div>
+              <h3 className="font-semibold mb-2">Context-Aware Writing</h3>
+              <p className="text-sm text-muted-foreground">
+                AI analyzes job requirements to create targeted content
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card text-center">
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">🎨</div>
+              <h3 className="font-semibold mb-2">Tone Customization</h3>
+              <p className="text-sm text-muted-foreground">
+                Choose from different writing styles to match company culture
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card text-center">
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">🔍</div>
+              <h3 className="font-semibold mb-2">Company Research Integration</h3>
+              <p className="text-sm text-muted-foreground">
+                Incorporates company-specific information for personalization
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CoverLetterGenerator;

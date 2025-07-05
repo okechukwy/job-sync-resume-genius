@@ -67,34 +67,60 @@ const FeaturesSection = () => {
 
         {/* Features grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="glass-card hover:shadow-glow transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {feature.badge}
-                  </Badge>
-                </div>
-                <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  {feature.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {feature.highlights.map((highlight, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
+          {features.map((feature, index) => {
+            const getFeatureLink = (title: string) => {
+              switch (title) {
+                case "Smart Resume Builder":
+                  return "/get-started";
+                case "Job Description Matching":
+                  return "/job-matching";
+                case "ATS Score Optimization":
+                  return "/ats-analysis";
+                case "AI Cover Letter Generator":
+                  return "/cover-letter";
+                case "Performance Tracking":
+                  return "/performance";
+                case "Version Management":
+                  return "/versions";
+                default:
+                  return "/get-started";
+              }
+            };
+
+            return (
+              <Card key={index} className="glass-card hover:shadow-glow transition-all duration-300 group cursor-pointer">
+                <a href={getFeatureLink(feature.title)} className="block h-full">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                        {feature.icon}
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {feature.badge}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 mb-4">
+                      {feature.highlights.map((highlight, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="text-sm font-medium text-primary">Try this feature →</div>
+                    </div>
+                  </CardContent>
+                </a>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Process steps */}
