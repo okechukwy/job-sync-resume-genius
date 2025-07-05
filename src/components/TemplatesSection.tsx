@@ -94,7 +94,7 @@ const TemplatesSection = () => {
 
         <div className="text-center mt-12">
           <Link to="/templates">
-            <Button variant="hero" size="lg">
+            <Button variant="default" size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               Browse All Templates
             </Button>
           </Link>
