@@ -18,7 +18,8 @@ const Resources = () => {
         "Tailoring resumes for different industries",
         "Common resume mistakes to avoid"
       ],
-      estimatedTime: "15 min read"
+      estimatedTime: "15 min read",
+      link: "/resources/resume-writing-guide"
     },
     {
       icon: "🎯",
@@ -32,7 +33,8 @@ const Resources = () => {
         "Testing your resume through ATS",
         "Industry-specific ATS requirements"
       ],
-      estimatedTime: "12 min read"
+      estimatedTime: "12 min read",
+      link: "/resources/ats-optimization"
     },
     {
       icon: "💼",
@@ -46,7 +48,8 @@ const Resources = () => {
         "Questions to ask your interviewer",
         "Post-interview follow-up strategies"
       ],
-      estimatedTime: "25 min read"
+      estimatedTime: "25 min read",
+      link: "/resources/interview-preparation"
     },
     {
       icon: "📊",
@@ -60,7 +63,8 @@ const Resources = () => {
         "Handling counteroffers",
         "When and how to walk away"
       ],
-      estimatedTime: "18 min read"
+      estimatedTime: "18 min read",
+      link: "/resources/salary-negotiation"
     },
     {
       icon: "🚀",
@@ -74,7 +78,8 @@ const Resources = () => {
         "Skill development roadmaps",
         "Career transition planning"
       ],
-      estimatedTime: "30 min read"
+      estimatedTime: "30 min read",
+      link: "/resources/career-development"
     },
     {
       icon: "🔍",
@@ -88,7 +93,8 @@ const Resources = () => {
         "Application tracking systems",
         "Building a job search pipeline"
       ],
-      estimatedTime: "22 min read"
+      estimatedTime: "22 min read",
+      link: "/resources/job-search-strategy"
     }
   ];
 
@@ -165,10 +171,12 @@ const Resources = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <Button variant="outline" className="w-full">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Access Resource
-                </Button>
+                <Link to={resource.link}>
+                  <Button variant="outline" className="w-full">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Access Resource
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
