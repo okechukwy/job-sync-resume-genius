@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -42,9 +43,11 @@ const HeroSection = () => {
         
         {/* CTA buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button variant="hero" size="xl" className="min-w-48">
-            Get Started Free
-          </Button>
+          <Link to="/get-started">
+            <Button variant="hero" size="xl" className="min-w-48">
+              Get Started Free
+            </Button>
+          </Link>
           <Button variant="glass" size="xl" className="min-w-48">
             Watch Demo
           </Button>
