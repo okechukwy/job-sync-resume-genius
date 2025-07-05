@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, FileText, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ResumeSteps from "@/components/ResumeSteps";
 import { toast } from "sonner";
 
 const ResumeBuilder = () => {
   const [currentStep, setCurrentStep] = useState<'industry' | 'build' | 'upload'>('industry');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleIndustrySelect = (industry: string) => {
     setSelectedIndustry(industry);
@@ -17,14 +19,50 @@ const ResumeBuilder = () => {
     toast.success(`${industry} industry selected! Let's build your resume.`);
   };
 
-  const handleUploadResume = () => {
-    toast.info("Upload feature coming soon! For now, let's build from scratch.");
-    setCurrentStep('build');
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PDF, DOC, or DOCX file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadedFile(file);
+    toast.success('Resume uploaded successfully! Choose an industry to continue.');
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    toast.info('Resume removed');
   };
 
   const handleStartFromScratch = () => {
     setCurrentStep('build');
     toast.success("Let's create your amazing resume from scratch!");
+  };
+
+  const handleContinueWithUpload = (industry: string) => {
+    if (uploadedFile) {
+      setSelectedIndustry(industry);
+      setCurrentStep('build');
+      toast.success(`${industry} industry selected! We'll help you optimize your uploaded resume.`);
+    }
   };
 
   const industries = [
@@ -139,17 +177,92 @@ const ResumeBuilder = () => {
             <p className="text-muted-foreground mb-6">
               Upload your existing resume and we'll help you optimize it for ATS systems
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="lg" onClick={handleUploadResume}>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Resume
-              </Button>
-              <Button variant="glass" size="lg" onClick={handleStartFromScratch}>
-                Start from Scratch
-              </Button>
-            </div>
+            
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            {/* Show uploaded file info if file is selected */}
+            {uploadedFile ? (
+              <div className="mb-6">
+                <div className="glass-card p-4 rounded-lg border border-success/20 bg-success/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-success" />
+                      <div className="text-left">
+                        <p className="font-medium text-success">{uploadedFile.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={handleRemoveFile}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Great! Now select your industry to continue with resume optimization.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                <Button variant="hero" size="lg" onClick={handleUploadClick}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Resume
+                </Button>
+                <Button variant="glass" size="lg" onClick={handleStartFromScratch}>
+                  Start from Scratch
+                </Button>
+              </div>
+            )}
+            
+            <p className="text-xs text-muted-foreground">
+              Supported formats: PDF, DOC, DOCX (max 5MB)
+            </p>
           </div>
         </div>
+
+        {/* Updated Industry Selection for Uploaded Resume */}
+        {uploadedFile && (
+          <div className="mt-12">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold mb-4">Select Industry for Optimization</h3>
+              <p className="text-muted-foreground">
+                Choose your industry to get tailored optimization suggestions for your uploaded resume.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {industries.map((industry, index) => (
+                <Card 
+                  key={index} 
+                  className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer group"
+                  onClick={() => handleContinueWithUpload(industry.title)}
+                >
+                  <CardHeader className="text-center">
+                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                      {industry.icon}
+                    </div>
+                    <CardTitle className="text-lg mb-2">{industry.title}</CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      Optimize for {industry.title}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">
+                      Continue with {industry.title}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
