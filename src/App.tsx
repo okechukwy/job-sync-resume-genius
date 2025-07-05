@@ -18,6 +18,12 @@ import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import PerformanceTracking from "./pages/PerformanceTracking";
 import VersionManagement from "./pages/VersionManagement";
 import NotFound from "./pages/NotFound";
+import TechProfessional from "./pages/templates/TechProfessional";
+import HealthcareSpecialist from "./pages/templates/HealthcareSpecialist";
+import FinanceExpert from "./pages/templates/FinanceExpert";
+import CreativeProfessional from "./pages/templates/CreativeProfessional";
+import ExecutiveLeader from "./pages/templates/ExecutiveLeader";
+import RecentGraduate from "./pages/templates/RecentGraduate";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +48,12 @@ const App = () => (
           <Route path="/cover-letter" element={<CoverLetterGenerator />} />
           <Route path="/performance" element={<PerformanceTracking />} />
           <Route path="/versions" element={<VersionManagement />} />
+          <Route path="/templates/tech-professional" element={<TechProfessional />} />
+          <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
+          <Route path="/templates/finance-expert" element={<FinanceExpert />} />
+          <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
+          <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
+          <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const TemplatesSection = () => {
   const templates = [
@@ -81,9 +82,11 @@ const TemplatesSection = () => {
                     </Badge>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full">
-                  Preview Template
-                </Button>
+                <Link to={`/templates/${template.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Button variant="outline" className="w-full">
+                    Preview Template
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
