@@ -1,10 +1,32 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import ResumeSteps from "@/components/ResumeSteps";
+import { toast } from "sonner";
 
 const ResumeBuilder = () => {
+  const [currentStep, setCurrentStep] = useState<'industry' | 'build' | 'upload'>('industry');
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+
+  const handleIndustrySelect = (industry: string) => {
+    setSelectedIndustry(industry);
+    setCurrentStep('build');
+    toast.success(`${industry} industry selected! Let's build your resume.`);
+  };
+
+  const handleUploadResume = () => {
+    toast.info("Upload feature coming soon! For now, let's build from scratch.");
+    setCurrentStep('build');
+  };
+
+  const handleStartFromScratch = () => {
+    setCurrentStep('build');
+    toast.success("Let's create your amazing resume from scratch!");
+  };
+
   const industries = [
     {
       icon: "💻",
@@ -44,6 +66,10 @@ const ResumeBuilder = () => {
     }
   ];
 
+  if (currentStep === 'build') {
+    return <ResumeSteps selectedIndustry={selectedIndustry} onBack={() => setCurrentStep('industry')} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
@@ -80,7 +106,11 @@ const ResumeBuilder = () => {
         {/* Industry Selection Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {industries.map((industry, index) => (
-            <Card key={index} className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer group">
+            <Card 
+              key={index} 
+              className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer group"
+              onClick={() => handleIndustrySelect(industry.title)}
+            >
               <CardHeader className="text-center">
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
                   {industry.icon}
@@ -110,10 +140,11 @@ const ResumeBuilder = () => {
               Upload your existing resume and we'll help you optimize it for ATS systems
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={handleUploadResume}>
+                <Upload className="w-4 h-4 mr-2" />
                 Upload Resume
               </Button>
-              <Button variant="glass" size="lg">
+              <Button variant="glass" size="lg" onClick={handleStartFromScratch}>
                 Start from Scratch
               </Button>
             </div>
