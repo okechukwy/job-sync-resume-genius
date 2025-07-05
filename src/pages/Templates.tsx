@@ -51,7 +51,7 @@ const Templates = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-light">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
