@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ResumeSteps from "@/components/ResumeSteps";
-import CVAnalysis from "@/components/CVAnalysis";
+import CVAnalysis from "@/components/cv-analysis/CVAnalysis";
 import IndustrySelection from "@/components/IndustrySelection";
 import TemplateSelection from "@/components/TemplateSelection";
 import FileUpload from "@/components/FileUpload";
