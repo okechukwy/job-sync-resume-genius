@@ -240,18 +240,59 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         </CardContent>
       </Card>
 
+      {/* Recommendation Actions */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5" />
+            Apply Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Let our AI apply the optimization recommendations directly to your resume for better ATS performance.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              variant="gradient" 
+              size="lg" 
+              onClick={() => {
+                toast.success("Applying recommendations to your resume...");
+                // TODO: Implement recommendation application logic
+              }}
+              className="flex-1"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Apply All Recommendations
+            </Button>
+            <Button 
+              variant="hero" 
+              size="lg" 
+              onClick={() => {
+                toast.success("Downloading your optimized resume...");
+                // TODO: Implement download logic based on subscription level
+              }}
+              className="flex-1"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Download Optimized CV
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button 
-          variant="hero" 
+          variant="outline" 
           size="lg" 
           onClick={handleContinueOptimization}
           className="flex-1 max-w-xs"
         >
-          Continue to Optimization
+          Continue to Manual Editing
         </Button>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="lg" 
           onClick={onReupload}
           className="flex-1 max-w-xs"
