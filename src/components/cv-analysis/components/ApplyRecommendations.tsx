@@ -28,8 +28,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
         currentStep++;
         setTimeout(applyNext, 800);
       } else {
-        toast.success("All recommendations applied to your CV! Continue with manual editing.");
-        onContinue();
+        toast.success("All recommendations applied to your CV! You can now download the optimized version or continue with manual editing.");
       }
     };
     
