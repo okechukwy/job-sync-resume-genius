@@ -95,11 +95,29 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
 
   const handleApplyRecommendations = () => {
     toast.success("Applying recommendations to your resume...");
-    // Simulate processing time then continue to manual editing
-    setTimeout(() => {
-      toast.success("Recommendations applied! Continue with manual editing.");
-      onContinue();
-    }, 2000);
+    
+    // Simulate applying each recommendation to relevant sections
+    const recommendations = [
+      "Adding professional summary section...",
+      "Enhancing experience descriptions with metrics...", 
+      "Expanding skills section with missing keywords...",
+      "Optimizing formatting for ATS compatibility...",
+      "Adding volunteer experience section..."
+    ];
+    
+    let currentStep = 0;
+    const applyNext = () => {
+      if (currentStep < recommendations.length) {
+        toast.info(recommendations[currentStep]);
+        currentStep++;
+        setTimeout(applyNext, 800);
+      } else {
+        toast.success("All recommendations applied to your CV! Continue with manual editing.");
+        onContinue();
+      }
+    };
+    
+    setTimeout(applyNext, 500);
   };
 
   const handleDownloadOptimized = () => {
