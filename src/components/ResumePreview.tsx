@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Share2, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { ResumeData } from "./ResumeSteps";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { useRef } from "react";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -11,12 +14,83 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
-  const handleDownload = () => {
-    toast.success("Resume download started! (Demo - feature coming soon)");
+  const resumeRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = async () => {
+    if (!resumeRef.current) return;
+    
+    try {
+      toast.info("Generating PDF...");
+      
+      const canvas = await html2canvas(resumeRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const fileName = data.personalInfo.fullName 
+        ? `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
+        : 'Resume.pdf';
+      
+      pdf.save(fileName);
+      toast.success("Resume downloaded successfully!");
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Failed to generate PDF. Please try again.");
+    }
   };
 
-  const handleShare = () => {
-    toast.success("Share link copied to clipboard! (Demo - feature coming soon)");
+  const handleShare = async () => {
+    const shareData = {
+      title: `${data.personalInfo.fullName || 'My'} Resume - ${industry}`,
+      text: `Check out my ${industry} resume created with ResumeAI`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast.success("Shared successfully!");
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Resume link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Resume link copied to clipboard!");
+      } catch (clipboardError) {
+        toast.error("Unable to share or copy link");
+      }
+    }
   };
 
   const handleEdit = () => {
@@ -60,7 +134,7 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
       </div>
 
       {/* Resume Preview */}
-      <Card className="glass-card max-w-4xl mx-auto">
+      <Card ref={resumeRef} className="glass-card max-w-4xl mx-auto">
         <CardContent className="p-8 bg-white text-black">
           {/* Header */}
           <div className="text-center border-b border-gray-300 pb-6 mb-6">
