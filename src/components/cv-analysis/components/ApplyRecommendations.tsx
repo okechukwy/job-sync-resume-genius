@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, FileText, Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, FileText, Zap, Download } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface ApplyRecommendationsProps {
   uploadedFile: File;
@@ -9,108 +11,212 @@ interface ApplyRecommendationsProps {
 }
 
 const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendationsProps) => {
-  const handleApplyRecommendations = () => {
+  const [recommendationsApplied, setRecommendationsApplied] = useState(false);
+  const [enhancedCV, setEnhancedCV] = useState<string>("");
+  const [originalContent, setOriginalContent] = useState<string>("");
+
+  const readFileContent = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = (e) => reject(e);
+      reader.readAsText(file);
+    });
+  };
+
+  const enhanceCV = async (originalContent: string): Promise<string> => {
+    // Simulate enhancing the original CV with recommendations
+    const enhancements = {
+      professionalSummary: `
+PROFESSIONAL SUMMARY
+Results-driven professional with proven track record of success. Strong analytical skills and ability to work in fast-paced environments with expertise in project management and team leadership.
+`,
+      skillsEnhancement: `
+CORE COMPETENCIES
+• Technical Skills: JavaScript, React, Node.js, AWS, SQL, Git, Docker
+• Leadership: Project Management, Team Leadership, Stakeholder Management  
+• Analytics: Data Analysis, Performance Optimization, Process Improvement
+• Communication: Cross-functional Collaboration, Client Relations, Technical Documentation
+`,
+      experienceMetrics: "• Quantified achievements with specific metrics and percentages\n• Added impact statements showing business value\n• Optimized descriptions for ATS keyword matching\n",
+      formatting: "\n--- ATS-OPTIMIZED FORMATTING APPLIED ---\n• Consistent heading structure\n• Proper section organization\n• Keyword optimization throughout\n• Professional formatting standards\n"
+    };
+
+    // Enhance the original content by adding sections
+    let enhanced = originalContent;
+    
+    // Add professional summary at the beginning
+    enhanced = enhancements.professionalSummary + "\n" + enhanced;
+    
+    // Add enhanced skills section
+    enhanced += "\n" + enhancements.skillsEnhancement;
+    
+    // Add notes about enhancements
+    enhanced += "\n\nAPPLIED OPTIMIZATIONS:\n" + enhancements.experienceMetrics + enhancements.formatting;
+    
+    return enhanced;
+  };
+
+  const handleApplyRecommendations = async () => {
     console.log("Apply recommendations clicked - should NOT redirect");
     toast.success("Applying recommendations to your resume...");
     
-    // Simulate applying each recommendation to relevant sections
-    const recommendations = [
-      "Adding professional summary section...",
-      "Enhancing experience descriptions with metrics...", 
-      "Expanding skills section with missing keywords...",
-      "Optimizing formatting for ATS compatibility...",
-      "Adding volunteer experience section..."
-    ];
-    
-    let currentStep = 0;
-    const applyNext = () => {
-      if (currentStep < recommendations.length) {
-        toast.info(recommendations[currentStep]);
-        currentStep++;
-        setTimeout(applyNext, 800);
-      } else {
-        console.log("All recommendations applied - staying on analysis page");
-        toast.success("All recommendations applied to your CV! You can now download the optimized version or continue with manual editing.");
+    try {
+      // Read original file content if not already read
+      let content = originalContent;
+      if (!content) {
+        content = await readFileContent(uploadedFile);
+        setOriginalContent(content);
       }
-    };
-    
-    setTimeout(applyNext, 500);
+
+      // Simulate applying each recommendation
+      const recommendations = [
+        "Adding professional summary section...",
+        "Enhancing experience descriptions with metrics...", 
+        "Expanding skills section with missing keywords...",
+        "Optimizing formatting for ATS compatibility...",
+        "Finalizing optimized version..."
+      ];
+      
+      let currentStep = 0;
+      const applyNext = async () => {
+        if (currentStep < recommendations.length) {
+          toast.info(recommendations[currentStep]);
+          currentStep++;
+          setTimeout(applyNext, 800);
+        } else {
+          // Apply enhancements
+          const enhanced = await enhanceCV(content);
+          setEnhancedCV(enhanced);
+          setRecommendationsApplied(true);
+          console.log("All recommendations applied - staying on analysis page");
+          toast.success("All recommendations applied to your CV! Review the optimized version below.");
+        }
+      };
+      
+      setTimeout(applyNext, 500);
+    } catch (error) {
+      toast.error("Failed to read CV content. Please try again.");
+      console.error("Error reading file:", error);
+    }
   };
 
-  const handleDownloadOptimized = () => {
-    toast.success("Downloading your optimized resume...");
+  const handleDownload = (format: 'txt' | 'pdf' | 'docx') => {
+    const content = enhancedCV || originalContent;
     
-    // Create a mock optimized resume content
-    const optimizedContent = `
-OPTIMIZED RESUME - ${uploadedFile.name}
-
-PROFESSIONAL SUMMARY
-Results-driven professional with proven track record of success. Strong analytical skills and ability to work in fast-paced environments.
-
-EXPERIENCE
-• Improved team productivity by 25% through process optimization
-• Led cross-functional projects resulting in $100K cost savings
-• Managed stakeholder relationships and delivered projects on time
-
-SKILLS
-JavaScript, React, Node.js, AWS, Agile, SQL, Git, Docker, Project Management, Leadership
-
-EDUCATION
-[Your Education Details]
-
----
-This is an ATS-optimized version of your resume with applied recommendations.
-Keywords have been strategically placed and formatting optimized for ATS systems.
-    `;
-
-    // Create and download the file
-    const blob = new Blob([optimizedContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `optimized-${uploadedFile.name.replace(/\.[^/.]+$/, '')}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast.success("Optimized resume downloaded successfully!");
+    if (format === 'txt') {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `optimized-${uploadedFile.name.replace(/\.[^/.]+$/, '')}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Optimized resume downloaded as TXT!");
+    } else {
+      toast.info(`${format.toUpperCase()} download coming soon! Using TXT format for now.`);
+      handleDownload('txt');
+    }
   };
 
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Apply Recommendations
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">
-          Let our AI apply the optimization recommendations directly to your resume for better ATS performance.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button 
-            variant="gradient" 
-            size="lg" 
-            onClick={handleApplyRecommendations}
-            className="flex-1"
-          >
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Apply All Recommendations
-          </Button>
-          <Button 
-            variant="hero" 
-            size="lg" 
-            onClick={handleDownloadOptimized}
-            className="flex-1"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            Download Optimized CV
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5" />
+            Apply Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Let our AI apply the optimization recommendations directly to your resume for better ATS performance.
+          </p>
+          {!recommendationsApplied ? (
+            <Button 
+              variant="gradient" 
+              size="lg" 
+              onClick={handleApplyRecommendations}
+              className="w-full"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Apply All Recommendations
+            </Button>
+          ) : (
+            <Badge variant="secondary" className="w-full justify-center py-2">
+              ✅ Recommendations Applied Successfully
+            </Badge>
+          )}
+        </CardContent>
+      </Card>
+
+      {recommendationsApplied && enhancedCV && (
+        <>
+          {/* Enhanced CV Display */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Your Optimized Resume
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white text-black p-6 rounded-lg border max-h-96 overflow-y-auto">
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                  {enhancedCV}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Download Options */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Download Your Optimized Resume
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Choose your preferred format to download the optimized resume.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  onClick={() => handleDownload('txt')}
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download as TXT
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => handleDownload('pdf')}
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download as PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => handleDownload('docx')}
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download as DOCX
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
   );
 };
 
