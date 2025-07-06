@@ -26,6 +26,14 @@ import FinanceExpert from "./pages/templates/FinanceExpert";
 import CreativeProfessional from "./pages/templates/CreativeProfessional";
 import ExecutiveLeader from "./pages/templates/ExecutiveLeader";
 import RecentGraduate from "./pages/templates/RecentGraduate";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
+import Careers from "./pages/Careers";
+import Contact from "./pages/Contact";
+import HelpCenter from "./pages/HelpCenter";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import GDPR from "./pages/GDPR";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +66,14 @@ const App = () => (
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
           <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
           <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/help-center" element={<HelpCenter />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/gdpr" element={<GDPR />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
