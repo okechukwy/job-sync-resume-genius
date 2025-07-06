@@ -1,0 +1,216 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const MinimalistPro = () => {
+  return (
+    <div className="min-h-screen bg-gradient-hero">
+      {/* Header */}
+      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        {/* Template Header */}
+        <div className="text-center mb-12">
+          <div className="text-6xl mb-4">✨</div>
+          <Badge variant="secondary" className="mb-4 glass-card">
+            Minimalist Pro Template
+          </Badge>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Minimalist Pro{" "}
+            <span className="gradient-text">Resume</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Clean, sophisticated design that lets your content shine. 
+            Perfect balance of white space and information for maximum impact.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            <Badge variant="outline">Clean</Badge>
+            <Badge variant="outline">Minimalist</Badge>
+            <Badge variant="outline">Professional</Badge>
+          </div>
+        </div>
+
+        {/* Template Preview and Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          {/* Template Preview */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                Template Preview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white p-8 rounded-lg shadow-lg min-h-[600px] border">
+                <div className="space-y-8">
+                  <div className="border-b border-gray-100 pb-6">
+                    <h2 className="text-3xl font-light text-gray-900 mb-1">Alexandra Smith</h2>
+                    <p className="text-gray-600 text-lg font-light">Product Manager</p>
+                    <div className="flex items-center gap-6 text-sm text-gray-500 mt-3">
+                      <span>alexandra.smith@email.com</span>
+                      <span>•</span>
+                      <span>(555) 123-4567</span>
+                      <span>•</span>
+                      <span>LinkedIn</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Professional Summary</h3>
+                    <p className="text-gray-700 leading-relaxed text-sm">
+                      Strategic product manager with 6+ years of experience driving product development 
+                      from conception to launch. Proven track record of increasing user engagement by 40%.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Experience</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-baseline">
+                          <h4 className="text-gray-900 font-medium">Senior Product Manager</h4>
+                          <span className="text-sm text-gray-500">2022 - Present</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">TechVision Solutions</p>
+                        <div className="mt-2 text-sm text-gray-700">
+                          <p>• Led cross-functional team of 12 members to deliver 3 major product releases</p>
+                          <p>• Increased monthly active users by 65% through data-driven feature optimization</p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between items-baseline">
+                          <h4 className="text-gray-900 font-medium">Product Manager</h4>
+                          <span className="text-sm text-gray-500">2020 - 2022</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">Innovation Labs</p>
+                        <div className="mt-2 text-sm text-gray-700">
+                          <p>• Managed product roadmap for B2B SaaS platform with $2M ARR</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Skills</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">Product Strategy</span>
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">User Research</span>
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">Agile/Scrum</span>
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">Analytics</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Template Details */}
+          <div className="space-y-6">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Template Features</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div>
+                    <h4 className="font-medium">Clean Typography</h4>
+                    <p className="text-sm text-muted-foreground">Elegant font hierarchy for easy scanning</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div>
+                    <h4 className="font-medium">Strategic White Space</h4>
+                    <p className="text-sm text-muted-foreground">Optimal spacing for professional presentation</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div>
+                    <h4 className="font-medium">Subtle Accents</h4>
+                    <p className="text-sm text-muted-foreground">Minimal design elements that enhance content</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div>
+                    <h4 className="font-medium">ATS Friendly</h4>
+                    <p className="text-sm text-muted-foreground">Simple structure that works with all systems</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Perfect For</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    Product Managers
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    Business Analysts
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    Consultants
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    Project Managers
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    Operations Managers
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="text-center space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/get-started">
+              <Button variant="hero" size="lg" className="min-w-48">
+                <FileText className="w-4 h-4 mr-2" />
+                Use This Template
+              </Button>
+            </Link>
+            <Button variant="glass" size="lg" className="min-w-48">
+              <Download className="w-4 h-4 mr-2" />
+              Download Sample
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Free to use • No credit card required
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MinimalistPro;

@@ -12,6 +12,30 @@ const TemplatesSection = () => {
       tags: ["ATS-Optimized", "Modern", "Clean"]
     },
     {
+      name: "Gradient Modern",
+      description: "Stunning gradient backgrounds with modern typography",
+      image: "🌈",
+      tags: ["Gradient Design", "Modern", "Eye-Catching"]
+    },
+    {
+      name: "Minimalist Pro",
+      description: "Clean, sophisticated design that lets your content shine",
+      image: "✨",
+      tags: ["Clean", "Minimalist", "Professional"]
+    },
+    {
+      name: "Colorful Fresh",
+      description: "Vibrant and energetic design for dynamic professionals",
+      image: "🎯",
+      tags: ["Vibrant", "Energetic", "Bold"]
+    },
+    {
+      name: "Elegant Professional",
+      description: "Sophisticated design with refined typography for executives",
+      image: "👑",
+      tags: ["Sophisticated", "Elegant", "Executive"]
+    },
+    {
       name: "Healthcare Specialist",
       description: "Perfect for doctors, nurses, and healthcare professionals",
       image: "🏥",
