@@ -4,6 +4,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import TemplatesSection from "@/components/TemplatesSection";
 import PricingSection from "@/components/PricingSection";
 import ResourcesSection from "@/components/ResourcesSection";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -29,10 +30,10 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Resume Builder</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">ATS Optimization</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Cover Letters</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Templates</a></li>
+                <li><Link to="/get-started" className="hover:text-primary transition-colors">Resume Builder</Link></li>
+                <li><Link to="/ats-analysis" className="hover:text-primary transition-colors">ATS Optimization</Link></li>
+                <li><Link to="/cover-letter" className="hover:text-primary transition-colors">Cover Letters</Link></li>
+                <li><Link to="/templates" className="hover:text-primary transition-colors">Templates</Link></li>
               </ul>
             </div>
             
