@@ -139,7 +139,7 @@ const Templates = () => {
                       Preview Template
                     </Button>
                   </Link>
-                  <Link to="/get-started">
+                  <Link to={`/get-started?template=${encodeURIComponent(template.name.toLowerCase().replace(/\s+/g, '-'))}`}>
                     <Button variant="hero" className="w-full">
                       Use This Template
                     </Button>

@@ -106,7 +106,7 @@ const TemplatesSection = () => {
                     </Badge>
                   ))}
                 </div>
-                <Link to={`/templates/${template.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Link to={`/get-started?template=${template.name.toLowerCase().replace(/\s+/g, '-')}`}>
                   <Button variant="outline" className="w-full">
                     Preview Template
                   </Button>
