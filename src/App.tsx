@@ -19,6 +19,7 @@ import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import PerformanceTracking from "./pages/PerformanceTracking";
 import VersionManagement from "./pages/VersionManagement";
 import NotFound from "./pages/NotFound";
+import Checkout from "./pages/Checkout";
 import TechProfessional from "./pages/templates/TechProfessional";
 import HealthcareSpecialist from "./pages/templates/HealthcareSpecialist";
 import FinanceExpert from "./pages/templates/FinanceExpert";
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/cover-letter" element={<CoverLetterGenerator />} />
           <Route path="/performance" element={<PerformanceTracking />} />
           <Route path="/versions" element={<VersionManagement />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/templates/tech-professional" element={<TechProfessional />} />
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />

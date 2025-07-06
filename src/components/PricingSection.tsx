@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 const PricingSection = () => {
   const plans = [
@@ -133,13 +134,15 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <Button 
-                  variant={plan.buttonVariant} 
-                  size="lg" 
-                  className="w-full"
-                >
-                  {plan.buttonText}
-                </Button>
+                <Link to={`/checkout?plan=${plan.name.toLowerCase()}&price=${plan.price}&period=${plan.period}`}>
+                  <Button 
+                    variant={plan.buttonVariant} 
+                    size="lg" 
+                    className="w-full"
+                  >
+                    {plan.buttonText}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
@@ -156,12 +159,14 @@ const PricingSection = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {payPerUse.map((item, index) => (
-              <Card key={index} className="glass-card text-center p-4">
-                <CardContent className="p-0">
-                  <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
-                  <div className="text-sm text-muted-foreground">{item.item}</div>
-                </CardContent>
-              </Card>
+              <Link key={index} to={`/checkout?type=payperuse&plan=${item.item}&price=${item.price}`}>
+                <Card className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-0">
+                    <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
+                    <div className="text-sm text-muted-foreground">{item.item}</div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
