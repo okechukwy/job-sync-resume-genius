@@ -21,6 +21,10 @@ import VersionManagement from "./pages/VersionManagement";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
 import TechProfessional from "./pages/templates/TechProfessional";
+import GradientModern from "./pages/templates/GradientModern";
+import MinimalistPro from "./pages/templates/MinimalistPro";
+import ColorfulFresh from "./pages/templates/ColorfulFresh";
+import ElegantProfessional from "./pages/templates/ElegantProfessional";
 import HealthcareSpecialist from "./pages/templates/HealthcareSpecialist";
 import FinanceExpert from "./pages/templates/FinanceExpert";
 import CreativeProfessional from "./pages/templates/CreativeProfessional";
@@ -61,6 +65,10 @@ const App = () => (
           <Route path="/versions" element={<VersionManagement />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/templates/tech-professional" element={<TechProfessional />} />
+          <Route path="/templates/gradient-modern" element={<GradientModern />} />
+          <Route path="/templates/minimalist-pro" element={<MinimalistPro />} />
+          <Route path="/templates/colorful-fresh" element={<ColorfulFresh />} />
+          <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
