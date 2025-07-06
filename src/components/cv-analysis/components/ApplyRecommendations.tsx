@@ -10,6 +10,7 @@ interface ApplyRecommendationsProps {
 
 const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendationsProps) => {
   const handleApplyRecommendations = () => {
+    console.log("Apply recommendations clicked - should NOT redirect");
     toast.success("Applying recommendations to your resume...");
     
     // Simulate applying each recommendation to relevant sections
@@ -28,6 +29,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
         currentStep++;
         setTimeout(applyNext, 800);
       } else {
+        console.log("All recommendations applied - staying on analysis page");
         toast.success("All recommendations applied to your CV! You can now download the optimized version or continue with manual editing.");
       }
     };
