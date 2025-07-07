@@ -52,33 +52,37 @@ export const downloadFile = async (
           
           if (!text) return;
           
-          // Extract margin-left for indentation
-          const marginMatch = style.match(/margin-left:\s*(\d+)px/);
-          const marginLeft = marginMatch ? parseInt(marginMatch[1]) : 0;
-          const indentSpaces = Math.floor(marginLeft / 8); // Convert px to approximate spaces
-          const indent = ' '.repeat(indentSpaces);
+          // Extract precise positioning from absolute positioning
+          const leftMatch = style.match(/left:\s*(\d+)px/);
+          const topMatch = style.match(/top:\s*(\d+)px/);
+          const leftPos = leftMatch ? parseInt(leftMatch[1]) : 0;
+          const topPos = topMatch ? parseInt(topMatch[1]) : 0;
           
-          // Extract extra spacing from top margin
-          const topMarginMatch = style.match(/margin:\s*(\d+)px/);
-          const topMargin = topMarginMatch ? parseInt(topMarginMatch[1]) : 0;
-          const extraLines = topMargin > 15 ? Math.floor(topMargin / 15) : 0;
+          // Convert left position to precise indentation
+          const indentSpaces = Math.floor(leftPos / 8); // 8px per space character
+          const indent = ' '.repeat(Math.max(0, indentSpaces));
           
-          // Add extra line breaks for spacing
-          for (let i = 0; i < extraLines; i++) {
+          // Calculate line spacing from top position relative to previous element
+          const currentLineIndex = lines.length;
+          const expectedTopPos = currentLineIndex * 15; // Approximate line height
+          const extraSpacing = Math.max(0, Math.floor((topPos - expectedTopPos) / 15));
+          
+          // Add precise line spacing
+          for (let i = 0; i < extraSpacing; i++) {
             lines.push('');
           }
           
           if (classList.includes('cv-header')) {
             lines.push(`${indent}${text.toUpperCase()}`);
-            lines.push(''); // Add space after headers
+            lines.push(''); // Header spacing
           } else if (classList.includes('cv-subheader')) {
             lines.push(`${indent}${text}`);
           } else if (classList.includes('cv-bullet')) {
-            // Extract bullet character from inline HTML if present
-            const bulletMatch = element.innerHTML.match(/<span[^>]*>([^<]+)<\/span>/);
-            const bulletChar = bulletMatch ? bulletMatch[1] : '•';
-            const bulletText = text.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+-]\s*/, '');
-            lines.push(`${indent}${bulletChar} ${bulletText}`);
+            // Preserve exact bullet formatting
+            const bulletMatch = text.match(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/);
+            const bulletChar = bulletMatch ? bulletMatch[0] : '• ';
+            const bulletText = text.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
+            lines.push(`${indent}${bulletChar}${bulletText}`);
           } else if (classList.includes('cv-numbered')) {
             lines.push(`${indent}${text}`);
           } else if (classList.includes('cv-contact')) {

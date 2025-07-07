@@ -52,22 +52,26 @@ export interface EnhancedCVResult {
 const enhanceHtmlContent = (htmlContent: string): { content: string; changeCount: number } => {
   let enhancementCount = 0;
   
-  // Use DOM parser to work with HTML content while preserving visual formatting
+  // Use DOM parser to work with HTML content while preserving ALL visual formatting
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
   
-  // Find all text nodes and enhance them while preserving structure
+  // Find all text nodes and enhance ONLY content text, never formatting
   const walker = document.createTreeWalker(
     doc.body || doc,
     NodeFilter.SHOW_TEXT,
     {
       acceptNode: (node) => {
         const parent = node.parentElement;
-        // Skip enhancement for elements that contain visual formatting indicators
+        // NEVER enhance structural elements, positioning, or visual formatting
         if (parent && (
           parent.tagName === 'STYLE' ||
           parent.getAttribute('style')?.includes('position: absolute') ||
-          parent.classList.contains('cv-bullet-char')
+          parent.getAttribute('style')?.includes('left:') ||
+          parent.getAttribute('style')?.includes('top:') ||
+          parent.classList.contains('cv-bullet-char') ||
+          parent.classList.contains('cv-spacing') ||
+          parent.classList.contains('cv-positioning')
         )) {
           return NodeFilter.FILTER_REJECT;
         }
@@ -86,18 +90,22 @@ const enhanceHtmlContent = (htmlContent: string): { content: string; changeCount
     const originalText = textNode.textContent || '';
     const parentElement = textNode.parentElement;
     
-    // Only enhance content text, not structural elements
+    // Only enhance actual content text in CV elements
     if (parentElement && (
       parentElement.classList.contains('cv-header') ||
       parentElement.classList.contains('cv-subheader') ||
       parentElement.classList.contains('cv-bullet') ||
+      parentElement.classList.contains('cv-numbered') ||
       parentElement.classList.contains('cv-text')
     )) {
-      const enhancedText = enhanceContentLine(originalText);
-      
-      if (originalText !== enhancedText) {
-        enhancementCount++;
-        textNode.textContent = enhancedText;
+      // CRITICAL: Only enhance if it's meaningful content, not formatting text
+      if (isEnhanceableContent(originalText)) {
+        const enhancedText = enhanceContentLine(originalText);
+        
+        if (originalText !== enhancedText) {
+          enhancementCount++;
+          textNode.textContent = enhancedText;
+        }
       }
     }
   });
