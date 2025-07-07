@@ -92,16 +92,17 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const bulletChars = /^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/;
     const numberedLists = /^(\d+[.)]\s+|[a-zA-Z][.)]\s+|[ivxlcdm]+[.)]\s+)/i;
     
-    // Enhanced bullet detection logic
+    // More aggressive bullet detection for better results
     const startsWithBullet = bulletChars.test(lineText);
-    const hasSignificantIndent = actualIndent > 10; // Lower threshold for better detection
-    const isShortLine = lineText.length < 200;
+    const hasListKeywords = /^(Testing Tools|Tech Skills|Programming Languages|Methodologies|Areas of Expertise)/i.test(lineText);
+    const isListItem = !hasListKeywords && actualIndent > 5 && !lineText.includes(':') && lineText.length < 300;
     const notAllCaps = !/^[A-Z\s&0-9.,'-]+$/.test(lineText);
-    const notHeader = !(maxFontSize > 14 && lineItems.some(item => item.fontWeight === 'bold'));
-    const hasColon = lineText.includes(':');
+    const notHeader = !(maxFontSize > 13 && lineItems.some(item => item.fontWeight === 'bold'));
+    const isAfterListHeader = index > 0 && hasListKeywords;
     
-    // Enhanced bullet detection - check multiple criteria
-    const structuralBullet = hasSignificantIndent && indentLevel > 0 && !hasColon && notAllCaps && notHeader;
+    // Enhanced bullet detection - much more aggressive for CV content
+    const structuralBullet = (isListItem && notAllCaps && notHeader) || 
+                           (actualIndent > 5 && !lineText.includes(':') && lineText.split(',').length > 3);
     const isBullet = startsWithBullet || (structuralBullet && !numberedLists.test(lineText));
     const isNumbered = numberedLists.test(lineText);
     
@@ -140,8 +141,8 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     } else if (isBullet) {
       elementClass = 'cv-bullet';
       marginTop = indentLevel > 0 ? '3px' : '6px';
-      // Adjust indent for bullet positioning - add space for the bullet character
-      finalIndent = finalIndent + 15;
+      // For bullets, use minimal indentation since CSS handles the positioning
+      finalIndent = Math.min(finalIndent, 40); // Cap bullet indentation
       // Remove bullet char from text if it exists since CSS will add it
       lineText = lineText.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
     } else if (isNumbered) {

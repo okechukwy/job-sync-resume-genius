@@ -244,19 +244,22 @@
   
   .cv-bullet {
     position: relative !important;
-    padding-left: 0 !important;
+    padding-left: 16px !important;
     margin-left: 0 !important;
     line-height: 1.4 !important;
     display: block !important;
+    font-size: 12px !important;
+    margin-bottom: 3px !important;
   }
   
   .cv-bullet::before {
     content: "•" !important;
     position: absolute !important;
-    left: -15px !important;
+    left: -1px !important;
     top: 0 !important;
     font-weight: bold !important;
-    color: inherit !important;
+    color: #000000 !important;
+    font-size: 12px !important;
   }
   
   .cv-numbered {
