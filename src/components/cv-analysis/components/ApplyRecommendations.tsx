@@ -156,7 +156,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
                   className="flex-1"
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Download as DOCX
+                  Download as RTF (Word)
                 </Button>
               </div>
             </CardContent>

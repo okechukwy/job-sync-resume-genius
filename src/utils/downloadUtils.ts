@@ -1,4 +1,3 @@
-import { Document, Packer, Paragraph, TextRun } from 'docx';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
@@ -71,78 +70,40 @@ export const downloadFile = async (
       toast.success("Optimized resume downloaded as PDF!");
       
     } else if (format === 'docx') {
-      toast.info("Generating DOCX...");
+      toast.info("Generating RTF...");
       
-      // Parse content into structured sections
+      // Generate RTF content with proper formatting
+      let rtfContent = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}';
+      rtfContent += '\\f0\\fs24 '; // Set font and size
+      
       const lines = content.split('\n');
-      const paragraphs: Paragraph[] = [];
       
       for (const line of lines) {
         if (line.includes('OPTIMIZED RESUME') || line.includes('='.repeat(20))) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: line,
-                  bold: true,
-                  size: 32,
-                }),
-              ],
-              spacing: { after: 200 },
-            })
-          );
+          rtfContent += `\\b\\fs32 ${line.replace(/[{}\\]/g, '')}\\b0\\fs24\\par\\par `;
         } else if (line.includes('-'.repeat(10)) || /^[A-Z\s]+$/.test(line.trim()) && line.trim().length > 5) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: line,
-                  bold: true,
-                  size: 24,
-                }),
-              ],
-              spacing: { before: 200, after: 100 },
-            })
-          );
+          rtfContent += `\\b\\fs28 ${line.replace(/[{}\\]/g, '')}\\b0\\fs24\\par `;
         } else if (line.trim()) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: line,
-                  size: 20,
-                }),
-              ],
-              spacing: { after: 100 },
-            })
-          );
+          rtfContent += `${line.replace(/[{}\\]/g, '')}\\par `;
         } else {
-          paragraphs.push(new Paragraph({}));
+          rtfContent += '\\par ';
         }
       }
       
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: paragraphs,
-          },
-        ],
-      });
+      rtfContent += '}';
       
-      const buffer = await Packer.toBuffer(doc);
-      const blob = new Blob([buffer], { 
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      const blob = new Blob([rtfContent], { 
+        type: 'application/rtf' 
       });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `optimized-${fileName}.docx`;
+      link.download = `optimized-${fileName}.rtf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast.success("Optimized resume downloaded as DOCX!");
+      toast.success("Optimized resume downloaded as RTF (opens in Word)!");
     }
   } catch (error) {
     console.error(`Error generating ${format.toUpperCase()}:`, error);
