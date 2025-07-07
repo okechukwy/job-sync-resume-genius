@@ -8,41 +8,44 @@ export const downloadAsRtf = async (
   try {
     toast.info("Generating RTF...");
     
-    // Generate RTF content with proper formatting
-    let rtfContent = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}';
-    rtfContent += '\\f0\\fs24 '; // Set font and size
+    // Generate RTF content with proper formatting and character encoding
+    let rtfContent = '{\\rtf1\\ansi\\ansicpg1252\\deff0 {\\fonttbl {\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}{\\f1\\fswiss\\fprq2\\fcharset0 Arial;}}';
+    rtfContent += '{\\colortbl ;\\red0\\green0\\blue0;\\red128\\green128\\blue128;\\red0\\green0\\blue255;}'; // Color table
+    rtfContent += '\\viewkind4\\uc1\\pard\\f0\\fs24 '; // Set default formatting
     
-    let textLines: string[];
+    let structuredContent: ContentElement[];
     
     if (isHtmlContent) {
-      textLines = extractTextFromHtml(content);
+      structuredContent = extractStructuredContentFromHtml(content);
     } else {
-      textLines = content.split('\n');
+      structuredContent = parseTextContent(content);
     }
     
-    // Convert lines to RTF format
-    for (const line of textLines) {
-      const trimmedLine = line.trim();
+    // Convert structured content to RTF format
+    for (const element of structuredContent) {
+      const escapedText = escapeRtfText(element.text);
       
-      if (!trimmedLine) {
+      if (element.type === 'title') {
+        // Main title - bold, larger, centered
+        rtfContent += `\\pard\\qc\\b\\fs36 ${escapedText}\\b0\\par\\par `;
+      } else if (element.type === 'header') {
+        // Section headers - bold, larger
+        rtfContent += `\\pard\\ql\\b\\fs30 ${escapedText}\\b0\\fs24\\par\\par `;
+      } else if (element.type === 'subheader') {
+        // Subheaders - bold
+        rtfContent += `\\pard\\ql\\b\\fs26 ${escapedText}\\b0\\fs24\\par `;
+      } else if (element.type === 'bullet') {
+        // Bullet points with proper indentation
+        rtfContent += `\\pard\\li720\\fi-360\\bullet\\tab ${escapedText}\\par `;
+      } else if (element.type === 'indented') {
+        // Indented content
+        rtfContent += `\\pard\\li720 ${escapedText}\\par `;
+      } else if (element.type === 'empty') {
         // Empty line for spacing
         rtfContent += '\\par ';
-        continue;
-      }
-      
-      if (trimmedLine.includes('OPTIMIZED RESUME') || trimmedLine.includes('='.repeat(20))) {
-        // Main title - bold and larger
-        rtfContent += `\\b\\fs32 ${trimmedLine}\\b0\\fs24\\par\\par `;
-      } else if (/^[A-Z\s&0-9.,'-]+$/.test(trimmedLine) && trimmedLine.length > 2 && trimmedLine.length < 50) {
-        // Section headers (all caps) - bold
-        rtfContent += `\\b\\fs28 ${trimmedLine}\\b0\\fs24\\par `;
-      } else if (trimmedLine.startsWith('•') || /^[\s]*[•·▪▫]\s/.test(trimmedLine)) {
-        // Bullet points
-        const bulletText = trimmedLine.replace(/^[\s]*[•·▪▫]\s*/, '');
-        rtfContent += `\\li360 \\bullet ${bulletText}\\par `;
       } else {
         // Regular text
-        rtfContent += `${trimmedLine}\\par `;
+        rtfContent += `\\pard\\ql ${escapedText}\\par `;
       }
     }
     
@@ -67,53 +70,115 @@ export const downloadAsRtf = async (
   }
 };
 
-const extractTextFromHtml = (content: string): string[] => {
+interface ContentElement {
+  type: 'title' | 'header' | 'subheader' | 'bullet' | 'indented' | 'text' | 'empty';
+  text: string;
+  indent?: number;
+}
+
+const escapeRtfText = (text: string): string => {
+  return text
+    .replace(/\\/g, '\\\\')  // Escape backslashes
+    .replace(/\{/g, '\\{')   // Escape opening braces
+    .replace(/\}/g, '\\}')   // Escape closing braces
+    .replace(/\u00A0/g, ' ') // Non-breaking space to regular space
+    .replace(/[^\x00-\x7F]/g, (char) => {
+      // Convert non-ASCII characters to RTF unicode
+      const code = char.charCodeAt(0);
+      return `\\u${code}?`;
+    });
+};
+
+const extractStructuredContentFromHtml = (content: string): ContentElement[] => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(content, 'text/html');
-  const textLines: string[] = [];
+  const elements: ContentElement[] = [];
   
-  // Process CV elements in order to preserve structure
+  // Process CV elements in document order to preserve structure
   const processElement = (element: Element) => {
     const classList = Array.from(element.classList);
     const text = element.textContent?.trim() || '';
     
-    if (!text) return;
+    if (!text) {
+      elements.push({ type: 'empty', text: '' });
+      return;
+    }
     
     if (classList.includes('cv-header')) {
-      // Add section header with proper spacing
-      if (textLines.length > 0) textLines.push(''); // Add space before header
-      textLines.push(text.toUpperCase());
-      textLines.push(''); // Add space after header
+      // Add spacing before header
+      if (elements.length > 0) elements.push({ type: 'empty', text: '' });
+      elements.push({ type: 'header', text: text });
+      elements.push({ type: 'empty', text: '' });
     } else if (classList.includes('cv-subheader')) {
-      textLines.push(text);
+      elements.push({ type: 'subheader', text: text });
     } else if (classList.includes('cv-bullet')) {
-      // Preserve bullet points with proper formatting
-      const bulletText = text.startsWith('•') ? text : '• ' + text;
-      textLines.push(bulletText);
+      // Remove bullet character as RTF will add it
+      const bulletText = text.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
+      elements.push({ type: 'bullet', text: bulletText });
     } else if (classList.includes('cv-numbered')) {
-      textLines.push(text);
+      elements.push({ type: 'text', text: text });
     } else if (classList.includes('cv-text')) {
-      textLines.push(text);
-    } else if (element.tagName === 'DIV' && text) {
-      // Generic div with text content
-      textLines.push(text);
+      // Check if it's indented text
+      const style = element.getAttribute('style') || '';
+      const marginLeft = style.match(/margin-left:\s*(\d+)px/);
+      if (marginLeft && parseInt(marginLeft[1]) > 20) {
+        elements.push({ type: 'indented', text: text });
+      } else {
+        elements.push({ type: 'text', text: text });
+      }
     }
   };
   
+  // Check for title first
+  const titleElement = doc.querySelector('.cv-header, h1, [class*="title"]');
+  if (titleElement && titleElement.textContent?.includes('OPTIMIZED RESUME')) {
+    elements.push({ type: 'title', text: titleElement.textContent.trim() });
+    elements.push({ type: 'empty', text: '' });
+  }
+  
   // Process all CV elements in document order
-  const cvElements = doc.querySelectorAll('.cv-header, .cv-subheader, .cv-bullet, .cv-numbered, .cv-text, div');
+  const cvElements = doc.querySelectorAll('.cv-header, .cv-subheader, .cv-bullet, .cv-numbered, .cv-text');
   cvElements.forEach(element => {
     const text = element.textContent?.trim();
-    if (text && text.length > 0) {
+    if (text && text.length > 0 && !text.includes('OPTIMIZED RESUME')) {
       processElement(element);
     }
   });
   
-  // If no structured elements found, fall back to simple text extraction
-  if (textLines.length === 0) {
+  // If no structured elements found, fall back to simple parsing
+  if (elements.length === 0) {
     const allText = doc.body?.textContent || doc.textContent || content;
-    return allText.split('\n').filter(line => line.trim().length > 0);
+    return parseTextContent(allText);
   }
   
-  return textLines;
+  return elements;
+};
+
+const parseTextContent = (content: string): ContentElement[] => {
+  const lines = content.split('\n');
+  const elements: ContentElement[] = [];
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    if (!trimmedLine) {
+      elements.push({ type: 'empty', text: '' });
+      continue;
+    }
+    
+    if (trimmedLine.includes('OPTIMIZED RESUME') || trimmedLine.includes('='.repeat(10))) {
+      elements.push({ type: 'title', text: trimmedLine });
+    } else if (/^[A-Z\s&0-9.,'-]+$/.test(trimmedLine) && trimmedLine.length > 2 && trimmedLine.length < 80) {
+      elements.push({ type: 'header', text: trimmedLine });
+    } else if (trimmedLine.startsWith('•') || /^[\s]*[•·▪▫]\s/.test(trimmedLine)) {
+      const bulletText = trimmedLine.replace(/^[\s]*[•·▪▫]\s*/, '');
+      elements.push({ type: 'bullet', text: bulletText });
+    } else if (line.startsWith('  ') || line.startsWith('\t')) {
+      elements.push({ type: 'indented', text: trimmedLine });
+    } else {
+      elements.push({ type: 'text', text: trimmedLine });
+    }
+  }
+  
+  return elements;
 };
