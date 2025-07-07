@@ -1,97 +1,40 @@
-export const parseResumeContent = (content: string) => {
-  const sections: any = {};
+const isContentLine = (line: string): boolean => {
+  const trimmed = line.trim();
   
-  // Extract contact information (emails, phones, addresses)
-  const contactRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|[\+]?[1-9]?[\d\s\-\(\)]{10,}|[A-Za-z\s,\d\-]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Court|Ct))/gi;
-  const contactMatches = content.match(contactRegex);
-  if (contactMatches) {
-    sections.contact = contactMatches.join('\n');
-  }
+  // Skip empty lines, section headers, dates, and contact info
+  if (!trimmed) return false;
+  if (/^[A-Z\s]{3,}$/.test(trimmed)) return false; // Section headers
+  if (/^\d{1,2}\/\d{1,4}|^\d{4}/.test(trimmed)) return false; // Dates
+  if (/@|phone|tel|email|linkedin|github/i.test(trimmed)) return false; // Contact
+  if (/^[-=_]{3,}$/.test(trimmed)) return false; // Separators
+  if (trimmed.length < 10) return false; // Too short to be meaningful content
   
-  // Extract experience section
-  const experienceKeywords = /(?:experience|employment|work history|professional experience)(.*?)(?:education|skills|qualifications|certifications|$)/is;
-  const experienceMatch = content.match(experienceKeywords);
-  if (experienceMatch) {
-    sections.experience = experienceMatch[1].trim();
-  }
-  
-  // Extract education section
-  const educationKeywords = /(?:education|academic|degree|university|college|school)(.*?)(?:skills|experience|certifications|$)/is;
-  const educationMatch = content.match(educationKeywords);
-  if (educationMatch) {
-    sections.education = educationMatch[1].trim();
-  }
-  
-  // Extract skills section
-  const skillsKeywords = /(?:skills|competencies|technologies|technical skills|core competencies)(.*?)(?:education|experience|certifications|$)/is;
-  const skillsMatch = content.match(skillsKeywords);
-  if (skillsMatch) {
-    sections.skills = skillsMatch[1].trim();
-  }
-  
-  // Extract summary/objective
-  const summaryKeywords = /(?:summary|objective|profile|about)(.*?)(?:experience|education|skills|$)/is;
-  const summaryMatch = content.match(summaryKeywords);
-  if (summaryMatch) {
-    sections.summary = summaryMatch[1].trim();
-  }
-  
-  return sections;
+  return true;
 };
 
-export const enhanceSummary = (originalSummary: string): string => {
-  // Enhance the existing summary with action words and achievements
-  const enhanced = originalSummary
-    .replace(/\b(worked|did|was|had)\b/gi, 'accomplished')
-    .replace(/\b(good|nice|okay)\b/gi, 'exceptional')
+const enhanceContentLine = (line: string): string => {
+  // Only enhance if it's actual content
+  if (!isContentLine(line)) return line;
+  
+  let enhanced = line
+    // Action verbs enhancement
+    .replace(/\b(worked|did|was responsible for|handled)\b/gi, 'executed')
     .replace(/\b(helped|assisted)\b/gi, 'facilitated')
-    .replace(/\b(made|created)\b/gi, 'developed');
-  
-  return enhanced + '\n\nKey Strengths: Leadership, Problem-solving, Strategic Planning, Cross-functional Collaboration, Results-driven Performance.';
-};
-
-export const enhanceExperience = (originalExperience: string): string => {
-  // Enhance experience with action verbs and quantifiable results
-  let enhanced = originalExperience
-    .replace(/\b(did|was responsible for|worked on)\b/gi, 'Executed')
-    .replace(/\b(helped|assisted)\b/gi, 'Facilitated')
-    .replace(/\b(made|created)\b/gi, 'Developed')
-    .replace(/\b(improved|enhanced)\b/gi, 'Optimized')
-    .replace(/\b(managed|handled)\b/gi, 'Orchestrated');
-  
-  // Add bullet points if not present
-  if (!enhanced.includes('•') && !enhanced.includes('-')) {
-    enhanced = enhanced.split(/\.|;/).filter(s => s.trim()).map(s => `• ${s.trim()}`).join('\n');
-  }
-  
-  return enhanced;
-};
-
-export const enhanceSkills = (originalSkills?: string): string => {
-  const baseSkills = originalSkills || '';
-  
-  // Common professional skills to enhance any resume
-  const enhancedSkills = `
-Technical Skills: ${baseSkills || 'Microsoft Office Suite, Data Analysis, Project Management Tools'}
-Leadership: Team Management, Strategic Planning, Performance Optimization
-Communication: Presentation Skills, Technical Documentation, Stakeholder Management
-Analytical: Problem-solving, Critical Thinking, Process Improvement
-Project Management: Agile Methodologies, Risk Assessment, Quality Assurance`;
-  
-  return enhancedSkills.trim();
-};
-
-export const enhanceEducation = (originalEducation: string): string => {
-  // Enhance education formatting and add relevant details
-  let enhanced = originalEducation
-    .replace(/\b(graduated|completed|finished)\b/gi, 'Earned')
-    .replace(/\b(studied|learned)\b/gi, 'Specialized in');
-  
-  // Ensure proper formatting
-  if (!enhanced.includes('•') && !enhanced.includes('-')) {
-    enhanced = enhanced.split(/\.|;/).filter(s => s.trim()).map(s => `• ${s.trim()}`).join('\n');
-  }
-  
+    .replace(/\b(made|created|built)\b/gi, 'developed')
+    .replace(/\b(improved|enhanced|bettered)\b/gi, 'optimized')
+    .replace(/\b(managed|oversaw)\b/gi, 'orchestrated')
+    .replace(/\b(led|headed)\b/gi, 'spearheaded')
+    .replace(/\b(coordinated|organized)\b/gi, 'streamlined')
+    // Weak words enhancement
+    .replace(/\b(good|nice|okay|fine)\b/gi, 'exceptional')
+    .replace(/\b(many|lots of|a lot of)\b/gi, 'numerous')
+    .replace(/\b(big|large)\b/gi, 'significant')
+    .replace(/\b(small|little)\b/gi, 'strategic')
+    // Professional language
+    .replace(/\b(worked with)\b/gi, 'collaborated with')
+    .replace(/\b(worked on)\b/gi, 'contributed to')
+    .replace(/\b(was part of)\b/gi, 'participated in');
+    
   return enhanced;
 };
 
@@ -101,59 +44,34 @@ export interface EnhancedCVResult {
 }
 
 export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResult> => {
-  // Clean and normalize the content
-  const cleanContent = originalContent.replace(/\s+/g, ' ').trim();
+  // Preserve original structure by enhancing line by line
+  const lines = originalContent.split('\n');
+  const enhancedLines: string[] = [];
+  let enhancementCount = 0;
   
-  // Parse sections from the original content
-  const sections = parseResumeContent(cleanContent);
-  
-  // Build clean resume content without system headers/footers
-  let resumeContent = '';
-  
-  // Add contact information
-  if (sections.contact) {
-    resumeContent += `CONTACT INFORMATION\n${'-'.repeat(20)}\n${sections.contact}\n\n`;
+  for (const line of lines) {
+    const originalLine = line;
+    const enhancedLine = enhanceContentLine(line);
+    
+    if (originalLine !== enhancedLine) {
+      enhancementCount++;
+    }
+    
+    enhancedLines.push(enhancedLine);
   }
   
-  // Add enhanced professional summary
-  resumeContent += `PROFESSIONAL SUMMARY\n${'-'.repeat(20)}\n`;
-  if (sections.summary) {
-    resumeContent += enhanceSummary(sections.summary);
-  } else {
-    resumeContent += `Dynamic professional with proven expertise in delivering results-driven solutions. Strong analytical and problem-solving skills with demonstrated ability to work effectively in fast-paced environments. Committed to continuous improvement and excellence in all endeavors.`;
-  }
-  resumeContent += '\n\n';
-  
-  // Add enhanced experience section
-  if (sections.experience) {
-    resumeContent += `PROFESSIONAL EXPERIENCE\n${'-'.repeat(25)}\n${enhanceExperience(sections.experience)}\n\n`;
-  }
-  
-  // Add enhanced skills section
-  resumeContent += `CORE COMPETENCIES\n${'-'.repeat(18)}\n${enhanceSkills(sections.skills)}\n\n`;
-  
-  // Add enhanced education section
-  if (sections.education) {
-    resumeContent += `EDUCATION\n${'-'.repeat(10)}\n${enhanceEducation(sections.education)}\n\n`;
-  }
-  
-  // Add certifications if any
-  if (sections.certifications) {
-    resumeContent += `CERTIFICATIONS\n${'-'.repeat(14)}\n${sections.certifications}\n\n`;
-  }
-  
-  // Create enhancement log
+  // Create enhancement log based on actual changes made
   const enhancementLog = [
-    'Enhanced keyword density for ATS compatibility',
-    'Improved action verb usage throughout',
-    'Added quantifiable achievements where applicable',
-    'Optimized formatting for better readability',
-    'Strategic placement of industry-relevant terms',
-    'Professional structure and consistent formatting'
+    `Enhanced ${enhancementCount} lines with professional language`,
+    'Improved action verb usage in job descriptions',
+    'Strengthened weak adjectives and phrases',
+    'Maintained original formatting and structure',
+    'Preserved all section headers and dates',
+    'Enhanced content while keeping personal style'
   ];
   
   return {
-    resumeContent: resumeContent.trim(),
+    resumeContent: enhancedLines.join('\n'),
     enhancementLog
   };
 };
