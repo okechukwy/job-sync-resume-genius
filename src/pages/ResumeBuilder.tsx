@@ -219,12 +219,14 @@ const ResumeBuilder = () => {
         {/* Industry Selection Grid */}
         <IndustrySelection onIndustrySelect={handleIndustrySelect} />
 
-        {/* Alternative Options */}
-        <FileUpload 
-          uploadedFile={uploadedFile}
-          onFileChange={handleFileChange}
-          onStartFromScratch={handleStartFromScratch}
-        />
+        {/* File Upload Section - Always visible in industry step */}
+        <div className="mt-12">
+          <FileUpload 
+            uploadedFile={uploadedFile}
+            onFileChange={handleFileChange}
+            onStartFromScratch={handleStartFromScratch}
+          />
+        </div>
       </div>
     </div>
   );
