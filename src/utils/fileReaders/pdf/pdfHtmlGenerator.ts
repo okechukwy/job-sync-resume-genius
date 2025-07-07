@@ -22,32 +22,44 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     
     // Calculate spacing between lines for proper paragraph breaks
     const lineSpacing = index > 0 ? Math.abs(yPos - lastYPos) : 0;
-    const isLargeGap = lineSpacing > 25; // Major section breaks
-    const isMediumGap = lineSpacing > 15; // Paragraph breaks
+    
+    // Analyze font sizes to determine spacing context
+    const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
+    const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
+    
+    // Dynamic gap detection based on font size and content
+    const isLargeGap = lineSpacing > (avgFontSize * 2.5); // Major section breaks
+    const isMediumGap = lineSpacing > (avgFontSize * 1.8); // Paragraph breaks
+    const isSmallGap = lineSpacing > (avgFontSize * 0.8); // Line breaks within paragraphs
     
     // Calculate precise measurements from PDF coordinates
     const leftmostX = Math.min(...lineItems.map(item => item.x));
-    const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
-    const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
     
     // Use the actual document baseline for precise indentation
     const actualIndent = Math.max(0, leftmostX - documentLeftBase);
     
-    // Create precise indentation levels
+    // Improved indentation logic with better level detection
     let indentLevel = 0;
     let finalIndent = actualIndent;
     
-    // Categorize indentation levels based on actual PDF positioning
-    if (actualIndent > 5) {
-      if (actualIndent < 25) {
+    // More precise indentation categorization
+    if (actualIndent > 3) {
+      // Calculate indent level based on common PDF spacing patterns
+      if (actualIndent < 15) {
+        indentLevel = 0;
+        finalIndent = 0; // Main content
+      } else if (actualIndent < 35) {
         indentLevel = 1;
         finalIndent = 20; // First level indent
-      } else if (actualIndent < 45) {
+      } else if (actualIndent < 55) {
         indentLevel = 2;
         finalIndent = 40; // Second level indent
+      } else if (actualIndent < 75) {
+        indentLevel = 3;
+        finalIndent = 60; // Third level indent
       } else {
         indentLevel = Math.floor(actualIndent / 20);
-        finalIndent = indentLevel * 20;
+        finalIndent = Math.min(indentLevel * 20, 100); // Cap at 100px
       }
     }
     
@@ -59,10 +71,21 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     
     lineItems.forEach((item, itemIndex) => {
       const gap = item.x - lastEndX;
-      if (itemIndex > 0 && gap > 3) {
-        // Convert pixel gap to spaces
-        const spaceCount = Math.round(gap / 4);
-        lineText += ' '.repeat(Math.min(spaceCount, 15));
+      
+      // Improved spacing logic for better text formatting
+      if (itemIndex > 0 && gap > 2) {
+        // Calculate spaces based on font size and gap
+        const avgCharWidth = avgFontSize * 0.6; // Approximate character width
+        const spaceCount = Math.round(gap / avgCharWidth);
+        
+        // Apply spacing rules
+        if (gap > avgCharWidth * 3) {
+          // Large gap - likely a tab or major spacing
+          lineText += '\t';
+        } else if (spaceCount > 0) {
+          // Normal spacing between words
+          lineText += ' '.repeat(Math.min(spaceCount, 8));
+        }
       }
       
       // Check for color changes within the line
@@ -70,10 +93,16 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
         hasMultipleColors = true;
       }
       
-      lineText += item.str;
+      // Clean up text content
+      let itemText = item.str;
+      // Remove extra whitespace but preserve intentional spacing
+      itemText = itemText.replace(/\s+/g, ' ');
+      
+      lineText += itemText;
       lastEndX = item.x + item.width;
     });
     
+    // Clean up the final line text
     lineText = lineText.trim();
     if (!lineText) return;
     
@@ -121,17 +150,20 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     let elementClass = 'cv-text';
     let marginTop = '2px';
     
-    // Set spacing based on gap analysis
+    // Enhanced spacing logic based on content analysis and gaps
     if (isLargeGap) {
-      marginTop = '24px'; // Major section breaks
+      marginTop = '20px'; // Major section breaks
     } else if (isMediumGap) {
       marginTop = '12px'; // Paragraph breaks
+    } else if (isSmallGap) {
+      marginTop = '6px'; // Line breaks within content
     } else if (index > 0) {
-      marginTop = '3px'; // Normal line spacing
+      marginTop = '2px'; // Tight line spacing
     } else {
       marginTop = '0px'; // First line
     }
     
+    // Apply content-specific spacing adjustments
     if (isHeader) {
       elementClass = 'cv-header';
       marginTop = index > 0 ? '24px' : '0px';

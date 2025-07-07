@@ -44,8 +44,24 @@ export const processTextItems = (
       fontFamilies.push(fontFamily);
     }
     
+    // Clean and normalize text content
+    let cleanedText = item.str;
+    
+    // Handle special characters and whitespace
+    cleanedText = cleanedText
+      .replace(/\u00A0/g, ' ') // Replace non-breaking spaces
+      .replace(/\u2000-\u200F/g, ' ') // Replace various unicode spaces
+      .replace(/\u2028/g, '\n') // Line separator
+      .replace(/\u2029/g, '\n') // Paragraph separator
+      .replace(/[\u0000-\u001F\u007F]/g, '') // Remove control characters
+      .trim();
+    
+    // Calculate accurate width based on text and font
+    const estimatedWidth = cleanedText.length * fontSize * 0.6; // Rough character width estimation
+    const actualWidth = item.width || estimatedWidth;
+    
     return {
-      str: item.str,
+      str: cleanedText,
       x,
       y,
       fontSize,
@@ -53,17 +69,21 @@ export const processTextItems = (
       fontWeight,
       fontStyle,
       color: normalizedColor,
-      width: item.width || 0,
+      width: actualWidth,
       height: fontSize
     };
-  });
+  }).filter(item => item.str.length > 0); // Filter out empty text items
 };
 
 export const groupItemsByLines = (items: ProcessedTextItem[]): { [key: number]: ProcessedTextItem[] } => {
   const lineGroups: { [key: number]: ProcessedTextItem[] } = {};
   
-  items.forEach((item) => {
-    const tolerance = 2;
+  // Sort items by Y position first to ensure proper processing order
+  const sortedItems = items.sort((a, b) => a.y - b.y);
+  
+  sortedItems.forEach((item) => {
+    // Use dynamic tolerance based on font size for better line detection
+    const tolerance = Math.max(2, item.fontSize * 0.3);
     let matchingY = Object.keys(lineGroups)
       .map(Number)
       .find(y => Math.abs(y - item.y) <= tolerance);
@@ -76,7 +96,31 @@ export const groupItemsByLines = (items: ProcessedTextItem[]): { [key: number]: 
     lineGroups[matchingY].push(item);
   });
   
-  return lineGroups;
+  // Post-process to merge lines that are very close together
+  const processedGroups: { [key: number]: ProcessedTextItem[] } = {};
+  const yPositions = Object.keys(lineGroups).map(Number).sort((a, b) => a - b);
+  
+  for (let i = 0; i < yPositions.length; i++) {
+    const currentY = yPositions[i];
+    const currentItems = lineGroups[currentY];
+    
+    // Check if this line should be merged with the previous one
+    if (i > 0) {
+      const prevY = yPositions[i - 1];
+      const gap = Math.abs(currentY - prevY);
+      const avgFontSize = currentItems.reduce((sum, item) => sum + item.fontSize, 0) / currentItems.length;
+      
+      // If lines are very close (less than half the font size), merge them
+      if (gap < avgFontSize * 0.6 && processedGroups[prevY]) {
+        processedGroups[prevY] = [...processedGroups[prevY], ...currentItems];
+        continue;
+      }
+    }
+    
+    processedGroups[currentY] = currentItems;
+  }
+  
+  return processedGroups;
 };
 
 // Helper function to convert rgb to hex
