@@ -68,9 +68,16 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const bulletChars = /^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/;
     const numberedLists = /^(\d+[.)]\s+|[a-zA-Z][.)]\s+|[ivxlcdm]+[.)]\s+)/i;
     
-    // Better bullet detection - check for indentation and bullet patterns
-    const isBullet = bulletChars.test(lineText) || 
-                   (exactIndent > 15 && lineText.length > 3 && !numberedLists.test(lineText) && !lineText.match(/^[A-Z][A-Z\s&]+$/));
+    // Improved bullet detection logic
+    const startsWithBullet = bulletChars.test(lineText);
+    const hasSignificantIndent = exactIndent > 20;
+    const isShortLine = lineText.length < 150;
+    const notAllCaps = !/^[A-Z\s&0-9.,'-]+$/.test(lineText);
+    const notHeader = !(maxFontSize > 14 && lineItems.some(item => item.fontWeight === 'bold'));
+    
+    // A line is a bullet if it starts with bullet char OR has indent + characteristics of bullet
+    const isBullet = startsWithBullet || 
+                   (hasSignificantIndent && isShortLine && notAllCaps && notHeader && !numberedLists.test(lineText));
     const isNumbered = numberedLists.test(lineText);
     
     // Enhanced header detection based on font size and formatting
@@ -80,24 +87,29 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const isHeader = (isAllCaps && isLargeFont) || (isBoldText && maxFontSize > 16) || (textColor !== '#000000' && isBoldText);
     const isSubHeader = (isBoldText && maxFontSize >= 12) && !isHeader && !isBullet && !isNumbered;
     
+    // Debug logging
+    console.log(`Line: "${lineText.slice(0, 50)}..." | Indent: ${exactIndent} | isBullet: ${isBullet} | isHeader: ${isHeader} | Color: ${textColor} | FontSize: ${maxFontSize} | Bold: ${isBoldText}`);
+    
     let elementTag = 'div';
     let elementClass = 'cv-text';
-    let marginTop = needsExtraSpacing ? '16px' : '0px';
+    let marginTop = needsExtraSpacing ? '16px' : '2px';
     
     if (isHeader) {
       elementTag = 'div';
       elementClass = 'cv-header';
-      marginTop = index > 0 ? '20px' : '0px';
+      marginTop = index > 0 ? '24px' : '0px';
     } else if (isSubHeader) {
       elementTag = 'div';
       elementClass = 'cv-subheader';
-      marginTop = index > 0 ? '12px' : '0px';
+      marginTop = index > 0 ? '16px' : '8px';
     } else if (isBullet) {
       elementClass = 'cv-bullet';
-      marginTop = '4px';
+      marginTop = '3px';
+      // Remove bullet char from text if it exists since CSS will add it
+      lineText = lineText.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
     } else if (isNumbered) {
       elementClass = 'cv-numbered';
-      marginTop = '4px';
+      marginTop = '3px';
     }
     
     const elementStyle = `

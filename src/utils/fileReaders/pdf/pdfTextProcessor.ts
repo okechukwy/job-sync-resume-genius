@@ -31,7 +31,10 @@ export const processTextItems = (
     const { fontFamily, fontWeight, fontStyle } = processFontName(fontName);
     
     // Use extracted color or fall back to current fill color
-    const textColor = item.color || currentFillColor;
+    const textColor = item.color || currentFillColor || '#000000';
+    
+    // Convert rgb to hex for consistency
+    const normalizedColor = textColor.startsWith('rgb') ? rgbToHex(textColor) : textColor;
     
     // Store unique colors and fonts
     if (textColor && !documentColors.includes(textColor)) {
@@ -49,7 +52,7 @@ export const processTextItems = (
       fontFamily,
       fontWeight,
       fontStyle,
-      color: textColor,
+      color: normalizedColor,
       width: item.width || 0,
       height: fontSize
     };
@@ -74,4 +77,18 @@ export const groupItemsByLines = (items: ProcessedTextItem[]): { [key: number]: 
   });
   
   return lineGroups;
+};
+
+// Helper function to convert rgb to hex
+const rgbToHex = (rgb: string): string => {
+  const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!match) return rgb;
+  
+  const [, r, g, b] = match;
+  const toHex = (n: string) => {
+    const hex = parseInt(n, 10).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
