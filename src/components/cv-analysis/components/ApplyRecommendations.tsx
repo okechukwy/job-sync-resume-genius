@@ -111,34 +111,16 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white text-black p-4 rounded-lg border max-h-96 overflow-y-auto shadow-inner">
+              <div className="cv-display-container">
                 {enhancedResult.isHtmlContent ? (
                   <div 
-                    className="cv-preview"
+                    className="cv-preview-html"
                     dangerouslySetInnerHTML={{ __html: enhancedResult.resumeContent }}
-                    style={{
-                      background: '#ffffff',
-                      color: '#000000',
-                      fontFamily: '"Times New Roman", serif',
-                      fontSize: '12px',
-                      lineHeight: '1.6',
-                      padding: '10px',
-                      minHeight: '200px'
-                    }}
                   />
                 ) : (
-                  <pre 
-                    className="whitespace-pre-wrap text-sm leading-relaxed"
-                    style={{
-                      fontFamily: '"Times New Roman", serif',
-                      color: '#000',
-                      background: '#fff',
-                      padding: '10px',
-                      margin: '0'
-                    }}
-                  >
+                  <div className="cv-preview-text">
                     {enhancedResult.resumeContent}
-                  </pre>
+                  </div>
                 )}
               </div>
             </CardContent>

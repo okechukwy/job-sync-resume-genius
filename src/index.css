@@ -175,4 +175,67 @@
   .bounce-transition {
     transition: all var(--transition-bounce);
   }
+  
+  /* CV Display Components */
+  .cv-display-container {
+    @apply bg-white rounded-lg border shadow-inner;
+    max-height: 600px;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .cv-preview-html {
+    position: relative;
+    min-height: 600px;
+    width: 100%;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Times New Roman', serif;
+    font-size: 12px;
+    line-height: 1.0;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .cv-preview-text {
+    @apply whitespace-pre-wrap text-sm;
+    font-family: 'Times New Roman', serif;
+    color: #000000;
+    background: #ffffff;
+    padding: 20px;
+    margin: 0;
+    line-height: 1.6;
+  }
+  
+  /* CV Content Elements */
+  .cv-header {
+    font-weight: bold !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+  }
+  
+  .cv-subheader {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+  }
+  
+  .cv-text {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+  }
+  
+  .cv-bullet {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+  }
+  
+  .cv-numbered {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+  }
 }
