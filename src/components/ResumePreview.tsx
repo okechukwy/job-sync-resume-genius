@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { ResumeData } from "@/hooks/useResumeSteps";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
+import { calculateATSScore } from "@/utils/atsScoreCalculator";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -213,6 +214,22 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
 
   const styles = getTemplateStyles();
 
+  // Calculate dynamic ATS score
+  const atsResult = useMemo(() => calculateATSScore(data, industry), [data, industry]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'complete':
+      case 'excellent':
+        return 'bg-success';
+      case 'good':
+      case 'partial':
+        return 'bg-warning';
+      default:
+        return 'bg-destructive';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -357,32 +374,42 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
         </CardContent>
       </Card>
 
-      {/* ATS Score Card */}
+      {/* Dynamic ATS Score Card */}
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             📊 ATS Optimization Score
-            <Badge variant="secondary">85/100</Badge>
+            <Badge variant="secondary">{atsResult.overallScore}/100</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-success rounded-full"></div>
-              <span>Contact Information Complete</span>
+              <div className={`w-3 h-3 rounded-full ${getStatusColor(atsResult.checks.contactInfo.status)}`}></div>
+              <span>{atsResult.checks.contactInfo.message}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-success rounded-full"></div>
-              <span>Industry Keywords Present</span>
+              <div className={`w-3 h-3 rounded-full ${getStatusColor(atsResult.checks.keywords.status)}`}></div>
+              <span>{atsResult.checks.keywords.message}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-warning rounded-full"></div>
-              <span>Consider Adding More Metrics</span>
+              <div className={`w-3 h-3 rounded-full ${getStatusColor(atsResult.checks.metrics.status)}`}></div>
+              <span>{atsResult.checks.metrics.message}</span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Your resume is well-optimized for ATS systems. Consider adding more quantifiable achievements to improve your score further.
-          </p>
+          {atsResult.suggestions.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Suggestions for improvement:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                {atsResult.suggestions.slice(0, 3).map((suggestion, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <div className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
