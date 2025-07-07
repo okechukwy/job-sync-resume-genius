@@ -40,24 +40,50 @@ export const downloadFile = async (
       
       let lines: string[];
       if (isHtmlContent) {
-        // Extract text from HTML while preserving structure and indentation
+        // Extract text from HTML while preserving exact structure, spacing, and formatting
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
         lines = [];
         
-        const processElement = (element: Element, indentLevel: number = 0) => {
-          const indent = '  '.repeat(indentLevel);
+        const processElement = (element: Element) => {
+          const classList = Array.from(element.classList);
+          const style = element.getAttribute('style') || '';
           const text = element.textContent?.trim() || '';
           
-          if (element.classList.contains('cv-header')) {
-            lines.push(`\n${text.toUpperCase()}\n`);
-          } else if (element.classList.contains('cv-subheader')) {
-            lines.push(`\n${text}`);
-          } else if (element.classList.contains('cv-bullet')) {
-            lines.push(`${indent}• ${text}`);
-          } else if (element.classList.contains('cv-numbered')) {
+          if (!text) return;
+          
+          // Extract margin-left for indentation
+          const marginMatch = style.match(/margin-left:\s*(\d+)px/);
+          const marginLeft = marginMatch ? parseInt(marginMatch[1]) : 0;
+          const indentSpaces = Math.floor(marginLeft / 8); // Convert px to approximate spaces
+          const indent = ' '.repeat(indentSpaces);
+          
+          // Extract extra spacing from top margin
+          const topMarginMatch = style.match(/margin:\s*(\d+)px/);
+          const topMargin = topMarginMatch ? parseInt(topMarginMatch[1]) : 0;
+          const extraLines = topMargin > 15 ? Math.floor(topMargin / 15) : 0;
+          
+          // Add extra line breaks for spacing
+          for (let i = 0; i < extraLines; i++) {
+            lines.push('');
+          }
+          
+          if (classList.includes('cv-header')) {
+            lines.push(`${indent}${text.toUpperCase()}`);
+            lines.push(''); // Add space after headers
+          } else if (classList.includes('cv-subheader')) {
             lines.push(`${indent}${text}`);
-          } else if (text) {
+          } else if (classList.includes('cv-bullet')) {
+            // Extract bullet character from inline HTML if present
+            const bulletMatch = element.innerHTML.match(/<span[^>]*>([^<]+)<\/span>/);
+            const bulletChar = bulletMatch ? bulletMatch[1] : '•';
+            const bulletText = text.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+-]\s*/, '');
+            lines.push(`${indent}${bulletChar} ${bulletText}`);
+          } else if (classList.includes('cv-numbered')) {
+            lines.push(`${indent}${text}`);
+          } else if (classList.includes('cv-contact')) {
+            lines.push(`${indent}${text}`);
+          } else {
             lines.push(`${indent}${text}`);
           }
         };

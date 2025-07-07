@@ -52,15 +52,28 @@ export interface EnhancedCVResult {
 const enhanceHtmlContent = (htmlContent: string): { content: string; changeCount: number } => {
   let enhancementCount = 0;
   
-  // Use DOM parser to work with HTML content
+  // Use DOM parser to work with HTML content while preserving visual formatting
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
   
-  // Find all text nodes and enhance them
+  // Find all text nodes and enhance them while preserving structure
   const walker = document.createTreeWalker(
     doc.body || doc,
     NodeFilter.SHOW_TEXT,
-    null
+    {
+      acceptNode: (node) => {
+        const parent = node.parentElement;
+        // Skip enhancement for elements that contain visual formatting indicators
+        if (parent && (
+          parent.tagName === 'STYLE' ||
+          parent.getAttribute('style')?.includes('position: absolute') ||
+          parent.classList.contains('cv-bullet-char')
+        )) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
   );
   
   const textNodes: Text[] = [];
@@ -71,11 +84,21 @@ const enhanceHtmlContent = (htmlContent: string): { content: string; changeCount
   
   textNodes.forEach(textNode => {
     const originalText = textNode.textContent || '';
-    const enhancedText = enhanceContentLine(originalText);
+    const parentElement = textNode.parentElement;
     
-    if (originalText !== enhancedText) {
-      enhancementCount++;
-      textNode.textContent = enhancedText;
+    // Only enhance content text, not structural elements
+    if (parentElement && (
+      parentElement.classList.contains('cv-header') ||
+      parentElement.classList.contains('cv-subheader') ||
+      parentElement.classList.contains('cv-bullet') ||
+      parentElement.classList.contains('cv-text')
+    )) {
+      const enhancedText = enhanceContentLine(originalText);
+      
+      if (originalText !== enhancedText) {
+        enhancementCount++;
+        textNode.textContent = enhancedText;
+      }
     }
   });
   

@@ -18,20 +18,26 @@ export const readFileContent = async (file: File): Promise<string> => {
         reader.readAsText(file, 'UTF-8');
       });
     } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-      // Handle PDF files with enhanced structure preservation
+      // Handle PDF files with comprehensive visual preservation
       return new Promise(async (resolve, reject) => {
         try {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          
+          // Extract color palette and visual metadata
+          const documentColors: string[] = [];
+          const fontFamilies: string[] = [];
+          
           let htmlContent = `
             <div class="cv-document" style="
               font-family: 'Times New Roman', serif;
-              line-height: 1.6;
-              color: #000;
-              background: #fff;
-              padding: 20px;
+              line-height: 1.2;
+              color: #000000;
+              background: #ffffff;
+              padding: 24px;
               max-width: 8.5in;
               margin: 0 auto;
+              box-sizing: border-box;
             ">`;
           
           for (let i = 1; i <= pdf.numPages; i++) {
@@ -39,29 +45,58 @@ export const readFileContent = async (file: File): Promise<string> => {
             const content = await page.getTextContent();
             const viewport = page.getViewport({ scale: 1.0 });
             
-            // Group text items by Y position with tolerance for line grouping
-            const lineGroups: { [key: number]: any[] } = {};
-            content.items.forEach((item: any) => {
-              const yPos = Math.round(viewport.height - item.transform[5]); // Convert to top-down
-              const tolerance = 3;
+            // Enhanced text item processing with visual data
+            const enrichedItems = content.items.map((item: any) => {
+              const fontName = item.fontName || 'Times-Roman';
+              const fontSize = item.height || 12;
+              const color = item.color || '#000000';
               
-              // Find existing line group within tolerance
+              // Extract font family from font name
+              let fontFamily = 'Times New Roman, serif';
+              if (fontName.includes('Arial') || fontName.includes('Helvetica')) {
+                fontFamily = 'Arial, sans-serif';
+              } else if (fontName.includes('Calibri')) {
+                fontFamily = 'Calibri, sans-serif';
+              } else if (fontName.includes('Verdana')) {
+                fontFamily = 'Verdana, sans-serif';
+              }
+              
+              // Store unique colors and fonts
+              if (color && !documentColors.includes(color)) {
+                documentColors.push(color);
+              }
+              if (fontFamily && !fontFamilies.includes(fontFamily)) {
+                fontFamilies.push(fontFamily);
+              }
+              
+              return {
+                ...item,
+                x: item.transform[4],
+                y: Math.round(viewport.height - item.transform[5]),
+                width: item.width,
+                height: fontSize,
+                fontSize,
+                fontFamily,
+                color,
+                isBold: fontName.includes('Bold'),
+                isItalic: fontName.includes('Italic') || fontName.includes('Oblique')
+              };
+            });
+            
+            // Group by Y position with tighter tolerance for better line detection
+            const lineGroups: { [key: number]: any[] } = {};
+            enrichedItems.forEach((item: any) => {
+              const tolerance = Math.max(1, item.fontSize * 0.1);
               let matchingY = Object.keys(lineGroups)
                 .map(Number)
-                .find(y => Math.abs(y - yPos) <= tolerance);
+                .find(y => Math.abs(y - item.y) <= tolerance);
               
               if (!matchingY) {
-                matchingY = yPos;
+                matchingY = item.y;
                 lineGroups[matchingY] = [];
               }
               
-              lineGroups[matchingY].push({
-                ...item,
-                x: item.transform[4],
-                y: yPos,
-                width: item.width,
-                height: item.height
-              });
+              lineGroups[matchingY].push(item);
             });
             
             // Process lines in order from top to bottom
@@ -69,103 +104,172 @@ export const readFileContent = async (file: File): Promise<string> => {
               .map(Number)
               .sort((a, b) => a - b);
             
-            sortedLines.forEach(yPos => {
+            let previousY = 0;
+            
+            sortedLines.forEach((yPos, lineIndex) => {
               const lineItems = lineGroups[yPos].sort((a, b) => a.x - b.x);
               
               if (lineItems.length === 0) return;
               
-              // Calculate indentation based on first item's X position
+              // Calculate precise indentation from leftmost item
               const firstX = lineItems[0].x;
-              const baseIndent = 40; // Base left margin
-              const indentLevel = Math.max(0, Math.floor((firstX - baseIndent) / 20));
-              const indentPx = indentLevel * 20;
+              const pageMargin = 72; // Standard 1 inch margin in PDF points
+              const relativeIndent = Math.max(0, firstX - pageMargin);
+              const indentLevel = Math.round(relativeIndent / 36); // 0.5 inch increments
+              const indentPx = indentLevel * 24;
               
-              // Determine font properties
-              const avgFontSize = lineItems.reduce((sum, item) => sum + (item.height || 12), 0) / lineItems.length;
-              const maxFontSize = Math.max(...lineItems.map(item => item.height || 12));
+              // Calculate line spacing
+              const lineSpacing = lineIndex > 0 ? Math.max(0, yPos - previousY) : 0;
+              const extraSpacing = lineSpacing > 20 ? Math.floor(lineSpacing / 10) * 2 : 0;
               
-              // Build line text while preserving spacing
+              // Determine font properties from dominant item
+              const dominantItem = lineItems.reduce((prev, current) => 
+                current.fontSize > prev.fontSize ? current : prev
+              );
+              
+              const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
+              const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
+              
+              // Build line text with precise spacing preservation
               let lineText = '';
-              let lastX = lineItems[0].x;
+              let lastEndX = lineItems[0].x;
               
               lineItems.forEach((item, index) => {
-                const gap = index > 0 ? item.x - lastX : 0;
-                const spaces = gap > 10 ? '  ' : gap > 5 ? ' ' : '';
-                lineText += spaces + item.str;
-                lastX = item.x + item.width;
+                if (index > 0) {
+                  const gap = item.x - lastEndX;
+                  if (gap > 8) {
+                    const spaceCount = Math.round(gap / 4);
+                    lineText += ' '.repeat(Math.min(spaceCount, 10));
+                  } else if (gap > 3) {
+                    lineText += ' ';
+                  }
+                }
+                lineText += item.str;
+                lastEndX = item.x + item.width;
               });
               
               lineText = lineText.trim();
               if (!lineText) return;
               
-              // Detect content type and apply appropriate styling
-              const isBullet = /^[•·▪▫▸▹◦‣⁃]\s*/.test(lineText) || /^[-*+]\s+/.test(lineText);
-              const isNumbered = /^\d+[\.)]\s+/.test(lineText);
-              const isHeader = maxFontSize > 14 || /^[A-Z][A-Z\s&]{2,}[A-Z]$/.test(lineText) || avgFontSize > 13;
-              const isSubHeader = maxFontSize > 11 && avgFontSize > 11 && !isBullet && !isNumbered;
-              const isEmail = /@/.test(lineText) && lineText.length < 50;
-              const isPhone = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/.test(lineText);
-              const isUrl = /https?:\/\/|www\./.test(lineText);
+              // Enhanced content type detection
+              const bulletChars = /^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓]\s*/;
+              const dashBullets = /^[-–—*+]\s+/;
+              const numberedLists = /^(\d+[.)]\s+|[a-zA-Z][.)]\s+|[ivxlcdm]+[.)]\s+)/i;
+              const romanNumerals = /^[ivxlcdm]+[.)]\s+/i;
               
-              let elementStyle = `margin: 0; padding: 0; margin-left: ${indentPx}px;`;
+              const isBullet = bulletChars.test(lineText) || 
+                             dashBullets.test(lineText) ||
+                             (indentLevel > 0 && lineText.length > 0 && /^[^\w]/.test(lineText));
+              
+              const isNumbered = numberedLists.test(lineText);
+              const isRomanNumeral = romanNumerals.test(lineText);
+              
+              // Enhanced header detection
+              const isAllCaps = /^[A-Z\s&0-9.,'-]+$/.test(lineText) && lineText.length > 2;
+              const isLargeFont = maxFontSize > avgFontSize * 1.2;
+              const isBoldText = lineItems.some(item => item.isBold);
+              const isHeader = (isAllCaps && isBoldText) || (isLargeFont && maxFontSize > 14);
+              const isSubHeader = (isBoldText && maxFontSize > avgFontSize) && !isHeader && !isBullet && !isNumbered;
+              
+              // Contact information detection
+              const isEmail = /@\w+\.\w+/.test(lineText);
+              const isPhone = /(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/.test(lineText);
+              const isUrl = /https?:\/\/[\w.-]+|www\.[\w.-]+/.test(lineText);
+              const isAddress = /\d+\s+[\w\s]+,\s*[\w\s]+,?\s*[A-Z]{2}\s*\d{5}/.test(lineText);
+              
+              // Apply colors from original document
+              const textColor = dominantItem.color || '#000000';
+              const fontFamily = dominantItem.fontFamily || 'Times New Roman, serif';
+              const fontWeight = dominantItem.isBold ? 'bold' : 'normal';
+              const fontStyle = dominantItem.isItalic ? 'italic' : 'normal';
+              
               let elementTag = 'p';
               let elementClass = 'cv-text';
+              let elementStyle = '';
               
               if (isHeader) {
-                elementTag = 'h2';
+                elementTag = 'h1';
                 elementClass = 'cv-header';
                 elementStyle = `
-                  font-size: ${Math.max(16, maxFontSize)}px;
+                  font-size: ${Math.max(18, maxFontSize * 1.1)}px;
                   font-weight: bold;
-                  color: #1a1a1a;
-                  margin: 15px 0 8px ${indentPx}px;
+                  color: ${textColor};
+                  font-family: ${fontFamily};
+                  margin: ${20 + extraSpacing}px 0 12px ${indentPx}px;
                   padding: 0;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
+                  text-transform: ${isAllCaps ? 'uppercase' : 'none'};
+                  letter-spacing: ${isAllCaps ? '1px' : '0'};
+                  line-height: 1.2;
                 `;
               } else if (isSubHeader) {
-                elementTag = 'h3';
+                elementTag = 'h2';
                 elementClass = 'cv-subheader';
                 elementStyle = `
-                  font-size: ${Math.max(13, avgFontSize)}px;
-                  font-weight: bold;
-                  color: #2a2a2a;
-                  margin: 10px 0 5px ${indentPx}px;
+                  font-size: ${Math.max(14, maxFontSize)}px;
+                  font-weight: ${fontWeight};
+                  font-style: ${fontStyle};
+                  color: ${textColor};
+                  font-family: ${fontFamily};
+                  margin: ${12 + extraSpacing}px 0 6px ${indentPx}px;
                   padding: 0;
+                  line-height: 1.3;
                 `;
               } else if (isBullet) {
                 elementClass = 'cv-bullet';
+                const bulletMatch = lineText.match(bulletChars) || lineText.match(dashBullets);
+                const bulletChar = bulletMatch ? bulletMatch[0].trim() : '•';
+                const bulletContent = lineText.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+-]\s*/, '');
+                
                 elementStyle = `
-                  margin: 3px 0 3px ${indentPx + 15}px;
-                  text-indent: -15px;
-                  color: #333;
+                  position: relative;
+                  margin: ${4 + extraSpacing}px 0 4px ${indentPx + 24}px;
+                  padding-left: 0;
                   font-size: ${avgFontSize}px;
+                  font-weight: ${fontWeight};
+                  font-style: ${fontStyle};
+                  color: ${textColor};
+                  font-family: ${fontFamily};
+                  line-height: 1.4;
                 `;
-              } else if (isNumbered) {
+                
+                lineText = `<span style="position: absolute; left: -20px; color: ${textColor};">${bulletChar}</span>${bulletContent}`;
+              } else if (isNumbered || isRomanNumeral) {
                 elementClass = 'cv-numbered';
                 elementStyle = `
-                  margin: 3px 0 3px ${indentPx + 20}px;
-                  text-indent: -20px;
-                  color: #333;
+                  margin: ${4 + extraSpacing}px 0 4px ${indentPx + 32}px;
+                  text-indent: -28px;
                   font-size: ${avgFontSize}px;
+                  font-weight: ${fontWeight};
+                  font-style: ${fontStyle};
+                  color: ${textColor};
+                  font-family: ${fontFamily};
+                  line-height: 1.4;
                 `;
-              } else if (isEmail || isPhone || isUrl) {
+              } else if (isEmail || isPhone || isUrl || isAddress) {
                 elementClass = 'cv-contact';
                 elementStyle = `
-                  margin: 2px 0 2px ${indentPx}px;
-                  color: #0066cc;
+                  margin: ${2 + extraSpacing}px 0 2px ${indentPx}px;
                   font-size: ${avgFontSize}px;
+                  font-weight: ${fontWeight};
+                  font-style: ${fontStyle};
+                  color: ${isEmail || isUrl ? '#0066cc' : textColor};
+                  font-family: ${fontFamily};
+                  line-height: 1.3;
                 `;
               } else {
                 elementStyle = `
-                  margin: 3px 0 3px ${indentPx}px;
-                  color: #333;
+                  margin: ${4 + extraSpacing}px 0 4px ${indentPx}px;
                   font-size: ${avgFontSize}px;
-                  line-height: 1.4;
+                  font-weight: ${fontWeight};
+                  font-style: ${fontStyle};
+                  color: ${textColor};
+                  font-family: ${fontFamily};
+                  line-height: 1.5;
                 `;
               }
               
               htmlContent += `<${elementTag} class="${elementClass}" style="${elementStyle}">${lineText}</${elementTag}>`;
+              previousY = yPos;
             });
           }
           
