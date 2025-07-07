@@ -38,10 +38,13 @@ const PersonalInfoForm = ({ data, onUpdate, onValidationChange }: PersonalInfoFo
     const subscription = form.watch((value) => {
       const formData = value as PersonalInfo;
       onUpdate(formData);
-      onValidationChange(form.formState.isValid);
     });
     return () => subscription.unsubscribe();
-  }, [form, onUpdate, onValidationChange]);
+  }, [form, onUpdate]);
+
+  useEffect(() => {
+    onValidationChange(form.formState.isValid);
+  }, [form.formState.isValid, onValidationChange]);
 
   return (
     <div className="space-y-6">
