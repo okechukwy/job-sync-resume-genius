@@ -192,9 +192,22 @@
     color: #000000;
     font-family: 'Times New Roman', serif;
     font-size: 12px;
-    line-height: 1.0;
+    line-height: 1.4;
     margin: 0;
-    padding: 0;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .cv-document {
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Times New Roman', serif;
+    line-height: 1.4;
+    padding: 20px;
+    margin: 0;
+    box-sizing: border-box;
   }
   
   .cv-preview-text {
@@ -230,19 +243,20 @@
   }
   
   .cv-bullet {
-    font-size: 12px !important;
-    margin-bottom: 3px !important;
-    padding-left: 16px !important;
     position: relative !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
     line-height: 1.4 !important;
+    display: block !important;
   }
   
   .cv-bullet::before {
     content: "•" !important;
     position: absolute !important;
-    left: 0 !important;
+    left: -15px !important;
     top: 0 !important;
     font-weight: bold !important;
+    color: inherit !important;
   }
   
   .cv-numbered {
@@ -254,13 +268,34 @@
   /* Override inline colors to preserve original formatting */
   .cv-preview-html * {
     color: inherit !important;
+    box-sizing: border-box !important;
   }
   
   .cv-preview-html .cv-header {
     color: #000000 !important;
+    display: block !important;
   }
   
   .cv-preview-html .cv-subheader {
     color: #000000 !important;
+    display: block !important;
+  }
+  
+  .cv-preview-html .cv-text {
+    display: block !important;
+  }
+  
+  .cv-preview-html .cv-bullet {
+    display: block !important;
+    position: relative !important;
+  }
+  
+  .cv-preview-html .cv-numbered {
+    display: block !important;
+  }
+  
+  /* Ensure proper line breaks and spacing */
+  .cv-preview-html div {
+    white-space: pre-wrap !important;
   }
 }

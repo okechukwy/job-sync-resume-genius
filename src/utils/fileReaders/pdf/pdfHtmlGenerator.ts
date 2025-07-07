@@ -1,12 +1,18 @@
 import { ProcessedTextItem } from './pdfTextProcessor';
 
 export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextItem[] }): string => {
-  let htmlContent = `<div class="cv-document" style="position: relative; font-family: 'Times New Roman', serif; line-height: 1.4; color: #000000; background: #ffffff; padding: 20px; margin: 0; box-sizing: border-box; min-height: 800px;">`;
-  
   const sortedLines = Object.keys(lineGroups)
     .map(Number)
     .sort((a, b) => a - b);
   
+  // Analyze document structure first
+  const documentLeftBase = Math.min(...sortedLines.map(yPos => 
+    Math.min(...lineGroups[yPos].map(item => item.x))
+  ));
+  
+  console.log('Document analysis:', { documentLeftBase, totalLines: sortedLines.length });
+  
+  let htmlContent = `<div class="cv-document">`;
   let lastYPos = 0;
   
   sortedLines.forEach((yPos, index) => {
@@ -14,26 +20,35 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     
     if (lineItems.length === 0) return;
     
-    // Calculate spacing between lines
+    // Calculate spacing between lines for proper paragraph breaks
     const lineSpacing = index > 0 ? Math.abs(yPos - lastYPos) : 0;
-    const needsExtraSpacing = lineSpacing > 20; // Detect paragraph breaks
+    const isLargeGap = lineSpacing > 25; // Major section breaks
+    const isMediumGap = lineSpacing > 15; // Paragraph breaks
     
     // Calculate precise measurements from PDF coordinates
     const leftmostX = Math.min(...lineItems.map(item => item.x));
     const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
     const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
     
-    // Dynamic baseline detection - find the leftmost position of main content
-    const documentLeftBase = 14; // Base margin from PDF coordinates analysis
+    // Use the actual document baseline for precise indentation
     const actualIndent = Math.max(0, leftmostX - documentLeftBase);
     
-    // Create indentation levels based on actual PDF positioning
+    // Create precise indentation levels
     let indentLevel = 0;
     let finalIndent = actualIndent;
     
-    if (actualIndent > 15) {
-      indentLevel = Math.floor(actualIndent / 18);
-      finalIndent = indentLevel * 18; // 18px per indent level
+    // Categorize indentation levels based on actual PDF positioning
+    if (actualIndent > 5) {
+      if (actualIndent < 25) {
+        indentLevel = 1;
+        finalIndent = 20; // First level indent
+      } else if (actualIndent < 45) {
+        indentLevel = 2;
+        finalIndent = 40; // Second level indent
+      } else {
+        indentLevel = Math.floor(actualIndent / 20);
+        finalIndent = indentLevel * 20;
+      }
     }
     
     // Build line text preserving exact spacing and formatting
@@ -77,16 +92,17 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const bulletChars = /^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/;
     const numberedLists = /^(\d+[.)]\s+|[a-zA-Z][.)]\s+|[ivxlcdm]+[.)]\s+)/i;
     
-    // Improved bullet detection logic
+    // Enhanced bullet detection logic
     const startsWithBullet = bulletChars.test(lineText);
-    const hasSignificantIndent = actualIndent > 15;
-    const isShortLine = lineText.length < 150;
+    const hasSignificantIndent = actualIndent > 10; // Lower threshold for better detection
+    const isShortLine = lineText.length < 200;
     const notAllCaps = !/^[A-Z\s&0-9.,'-]+$/.test(lineText);
     const notHeader = !(maxFontSize > 14 && lineItems.some(item => item.fontWeight === 'bold'));
+    const hasColon = lineText.includes(':');
     
-    // A line is a bullet if it starts with bullet char OR has indent + characteristics of bullet
-    const isBullet = startsWithBullet || 
-                   (hasSignificantIndent && isShortLine && notAllCaps && notHeader && !numberedLists.test(lineText));
+    // Enhanced bullet detection - check multiple criteria
+    const structuralBullet = hasSignificantIndent && indentLevel > 0 && !hasColon && notAllCaps && notHeader;
+    const isBullet = startsWithBullet || (structuralBullet && !numberedLists.test(lineText));
     const isNumbered = numberedLists.test(lineText);
     
     // Enhanced header detection based on font size and formatting
@@ -96,25 +112,36 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const isHeader = (isAllCaps && isLargeFont) || (isBoldText && maxFontSize > 16) || (textColor !== '#000000' && isBoldText);
     const isSubHeader = (isBoldText && maxFontSize >= 12) && !isHeader && !isBullet && !isNumbered;
     
-    // Debug logging
-    console.log(`Line: "${lineText.slice(0, 50)}..." | Indent: ${actualIndent} | isBullet: ${isBullet} | isHeader: ${isHeader} | Color: ${textColor} | FontSize: ${maxFontSize} | Bold: ${isBoldText}`);
+    // Enhanced debug logging
+    console.log(`Line ${index}: "${lineText.slice(0, 30)}..." | ActualIndent: ${actualIndent} | FinalIndent: ${finalIndent} | IndentLevel: ${indentLevel} | isBullet: ${isBullet} | isHeader: ${isHeader} | isSubHeader: ${isSubHeader} | FontSize: ${maxFontSize} | Bold: ${isBoldText} | Gap: ${lineSpacing}`);
     
+    // Determine element type and spacing
     let elementTag = 'div';
     let elementClass = 'cv-text';
-    let marginTop = needsExtraSpacing ? '16px' : '2px';
+    let marginTop = '2px';
+    
+    // Set spacing based on gap analysis
+    if (isLargeGap) {
+      marginTop = '24px'; // Major section breaks
+    } else if (isMediumGap) {
+      marginTop = '12px'; // Paragraph breaks
+    } else if (index > 0) {
+      marginTop = '3px'; // Normal line spacing
+    } else {
+      marginTop = '0px'; // First line
+    }
     
     if (isHeader) {
-      elementTag = 'div';
       elementClass = 'cv-header';
       marginTop = index > 0 ? '24px' : '0px';
     } else if (isSubHeader) {
-      elementTag = 'div';
       elementClass = 'cv-subheader';
       marginTop = index > 0 ? '16px' : '8px';
     } else if (isBullet) {
       elementClass = 'cv-bullet';
-      marginTop = '3px';
-      finalIndent = finalIndent + 16; // Extra indent for bullets
+      marginTop = indentLevel > 0 ? '3px' : '6px';
+      // Adjust indent for bullet positioning - add space for the bullet character
+      finalIndent = finalIndent + 15;
       // Remove bullet char from text if it exists since CSS will add it
       lineText = lineText.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
     } else if (isNumbered) {
@@ -132,6 +159,7 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
       color: ${textColor};
       line-height: 1.3;
       white-space: pre-wrap;
+      display: block;
     `;
     
     htmlContent += `<${elementTag} class="${elementClass}" style="${elementStyle}">${lineText}</${elementTag}>`;
@@ -139,5 +167,6 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
   });
   
   htmlContent += '</div>';
+  console.log('Generated HTML structure:', htmlContent.slice(0, 500) + '...');
   return htmlContent;
 };
