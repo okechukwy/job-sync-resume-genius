@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { personalInfoSchema, PersonalInfoFormData } from "@/schemas/resumeFormSchemas";
 
 interface PersonalInfo {
   fullName: string;
@@ -16,21 +18,30 @@ interface PersonalInfo {
 interface PersonalInfoFormProps {
   data: PersonalInfo;
   onUpdate: (data: PersonalInfo) => void;
+  onValidationChange: (isValid: boolean) => void;
 }
 
-const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
-  const [formData, setFormData] = useState<PersonalInfo>(data);
+const PersonalInfoForm = ({ data, onUpdate, onValidationChange }: PersonalInfoFormProps) => {
+  const form = useForm<PersonalInfoFormData>({
+    resolver: zodResolver(personalInfoSchema),
+    defaultValues: {
+      fullName: data.fullName || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      location: data.location || '',
+      website: data.website || '',
+      linkedin: data.linkedin || '',
+    },
+  });
 
   useEffect(() => {
-    onUpdate(formData);
-  }, [formData, onUpdate]);
-
-  const handleChange = (field: keyof PersonalInfo, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    const subscription = form.watch((value) => {
+      const formData = value as PersonalInfo;
+      onUpdate(formData);
+      onValidationChange(form.formState.isValid);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onUpdate, onValidationChange]);
 
   return (
     <div className="space-y-6">
@@ -41,74 +52,118 @@ const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name *</Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => handleChange('fullName', e.target.value)}
-            placeholder="John Doe"
-            className="glass-card"
+      <Form {...form}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="John Doe"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            placeholder="john.doe@example.com"
-            className="glass-card"
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Address *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="john.doe@example.com"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number *</Label>
-          <Input
-            id="phone"
-            value={formData.phone}
-            onChange={(e) => handleChange('phone', e.target.value)}
-            placeholder="+1 (555) 123-4567"
-            className="glass-card"
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="+1 (555) 123-4567"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="location">Location *</Label>
-          <Input
-            id="location"
-            value={formData.location}
-            onChange={(e) => handleChange('location', e.target.value)}
-            placeholder="New York, NY"
-            className="glass-card"
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="New York, NY"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="website">Website (Optional)</Label>
-          <Input
-            id="website"
-            value={formData.website || ''}
-            onChange={(e) => handleChange('website', e.target.value)}
-            placeholder="https://johndoe.com"
-            className="glass-card"
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://johndoe.com"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="linkedin">LinkedIn (Optional)</Label>
-          <Input
-            id="linkedin"
-            value={formData.linkedin || ''}
-            onChange={(e) => handleChange('linkedin', e.target.value)}
-            placeholder="https://linkedin.com/in/johndoe"
-            className="glass-card"
+          <FormField
+            control={form.control}
+            name="linkedin"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>LinkedIn (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://linkedin.com/in/johndoe"
+                    className="glass-card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
+      </Form>
 
       <Card className="glass-card">
         <CardHeader>

@@ -19,9 +19,10 @@ interface Education {
 interface EducationFormProps {
   data: Education[];
   onUpdate: (data: Education[]) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-const EducationForm = ({ data, onUpdate }: EducationFormProps) => {
+const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProps) => {
   const [educations, setEducations] = useState<Education[]>(
     data.length > 0 ? data : [{
       id: crypto.randomUUID(),
@@ -34,9 +35,20 @@ const EducationForm = ({ data, onUpdate }: EducationFormProps) => {
     }]
   );
 
+  const validateEducations = () => {
+    return educations.every(edu => 
+      edu.school.trim() !== '' && 
+      edu.degree.trim() !== '' && 
+      edu.field.trim() !== '' && 
+      edu.startDate.trim() !== '' && 
+      edu.endDate.trim() !== ''
+    );
+  };
+
   useEffect(() => {
     onUpdate(educations);
-  }, [educations, onUpdate]);
+    onValidationChange?.(validateEducations());
+  }, [educations, onUpdate, onValidationChange]);
 
   const handleAddEducation = () => {
     const newEducation: Education = {

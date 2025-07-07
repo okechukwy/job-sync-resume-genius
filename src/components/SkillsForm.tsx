@@ -15,17 +15,23 @@ interface Skills {
 interface SkillsFormProps {
   data: Skills;
   onUpdate: (data: Skills) => void;
+  onValidationChange?: (isValid: boolean) => void;
   industry: string;
 }
 
-const SkillsForm = ({ data, onUpdate, industry }: SkillsFormProps) => {
+const SkillsForm = ({ data, onUpdate, onValidationChange, industry }: SkillsFormProps) => {
   const [skills, setSkills] = useState<Skills>(data);
   const [newTechnicalSkill, setNewTechnicalSkill] = useState('');
   const [newSoftSkill, setNewSoftSkill] = useState('');
 
+  const validateSkills = () => {
+    return skills.technical.length > 0 && skills.soft.length > 0;
+  };
+
   useEffect(() => {
     onUpdate(skills);
-  }, [skills, onUpdate]);
+    onValidationChange?.(validateSkills());
+  }, [skills, onUpdate, onValidationChange]);
 
   const addTechnicalSkill = () => {
     if (newTechnicalSkill.trim() && !skills.technical.includes(newTechnicalSkill.trim())) {

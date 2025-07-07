@@ -51,6 +51,12 @@ export interface ResumeData {
 
 const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [formValidation, setFormValidation] = useState({
+    personalInfo: false,
+    experience: false,
+    education: false,
+    skills: false,
+  });
   const [resumeData, setResumeData] = useState<ResumeData>({
     personalInfo: {
       fullName: '',
@@ -77,6 +83,22 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
   ];
 
   const handleNext = () => {
+    // Check validation for current step
+    const stepValidationMap = {
+      1: formValidation.personalInfo,
+      2: formValidation.experience,
+      3: formValidation.education,
+      4: formValidation.skills,
+      5: true, // Preview step doesn't need validation
+    };
+
+    const isCurrentStepValid = stepValidationMap[currentStep as keyof typeof stepValidationMap];
+    
+    if (!isCurrentStepValid) {
+      toast.error("Please fill in all required fields before proceeding.");
+      return;
+    }
+
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
       toast.success(`Step ${currentStep + 1} completed!`);
@@ -96,6 +118,13 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
     }));
   };
 
+  const handleValidationChange = (step: keyof typeof formValidation, isValid: boolean) => {
+    setFormValidation(prev => ({
+      ...prev,
+      [step]: isValid,
+    }));
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -103,6 +132,7 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
           <PersonalInfoForm
             data={resumeData.personalInfo}
             onUpdate={(data) => handleDataUpdate('personalInfo', data)}
+            onValidationChange={(isValid) => handleValidationChange('personalInfo', isValid)}
           />
         );
       case 2:
@@ -110,6 +140,7 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
           <ExperienceForm
             data={resumeData.experience}
             onUpdate={(data) => handleDataUpdate('experience', data)}
+            onValidationChange={(isValid) => handleValidationChange('experience', isValid)}
             industry={selectedIndustry}
           />
         );
@@ -118,6 +149,7 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
           <EducationForm
             data={resumeData.education}
             onUpdate={(data) => handleDataUpdate('education', data)}
+            onValidationChange={(isValid) => handleValidationChange('education', isValid)}
           />
         );
       case 4:
@@ -125,6 +157,7 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
           <SkillsForm
             data={resumeData.skills}
             onUpdate={(data) => handleDataUpdate('skills', data)}
+            onValidationChange={(isValid) => handleValidationChange('skills', isValid)}
             industry={selectedIndustry}
           />
         );

@@ -21,10 +21,11 @@ interface Experience {
 interface ExperienceFormProps {
   data: Experience[];
   onUpdate: (data: Experience[]) => void;
+  onValidationChange?: (isValid: boolean) => void;
   industry: string;
 }
 
-const ExperienceForm = ({ data, onUpdate, industry }: ExperienceFormProps) => {
+const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: ExperienceFormProps) => {
   const [experiences, setExperiences] = useState<Experience[]>(
     data.length > 0 ? data : [{
       id: crypto.randomUUID(),
@@ -37,9 +38,19 @@ const ExperienceForm = ({ data, onUpdate, industry }: ExperienceFormProps) => {
     }]
   );
 
+  const validateExperiences = () => {
+    return experiences.every(exp => 
+      exp.company.trim() !== '' && 
+      exp.position.trim() !== '' && 
+      exp.startDate.trim() !== '' && 
+      exp.description.trim() !== ''
+    );
+  };
+
   useEffect(() => {
     onUpdate(experiences);
-  }, [experiences, onUpdate]);
+    onValidationChange?.(validateExperiences());
+  }, [experiences, onUpdate, onValidationChange]);
 
   const handleAddExperience = () => {
     const newExperience: Experience = {
