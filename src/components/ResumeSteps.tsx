@@ -10,10 +10,11 @@ import StepContent from "@/components/resume-steps/StepContent";
 
 interface ResumeStepsProps {
   selectedIndustry: string;
+  selectedTemplate: string;
   onBack: () => void;
 }
 
-const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
+const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeStepsProps) => {
   const {
     currentStep,
     resumeData,
@@ -66,6 +67,7 @@ const ResumeSteps = ({ selectedIndustry, onBack }: ResumeStepsProps) => {
               currentStep={currentStep}
               resumeData={resumeData}
               selectedIndustry={selectedIndustry}
+              selectedTemplate={selectedTemplate}
               onDataUpdate={handleDataUpdate}
               onValidationChange={handleValidationChange}
             />

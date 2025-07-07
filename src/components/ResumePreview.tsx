@@ -11,9 +11,10 @@ import { useRef } from "react";
 interface ResumePreviewProps {
   data: ResumeData;
   industry: string;
+  template: string;
 }
 
-const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
+const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = async () => {
@@ -103,6 +104,115 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
   };
 
+  // Get template-specific styles
+  const getTemplateStyles = () => {
+    const templateName = template.toLowerCase().replace(/\s+/g, '-');
+    
+    switch (templateName) {
+      case 'tech-professional':
+        return {
+          headerBg: 'bg-blue-900',
+          headerText: 'text-white',
+          accentColor: 'text-blue-600',
+          borderColor: 'border-blue-200',
+          sectionBorder: 'border-l-4 border-blue-600 pl-3',
+          skillsGrid: true
+        };
+      case 'creative-professional':
+        return {
+          headerBg: 'bg-purple-100',
+          headerText: 'text-purple-900',
+          accentColor: 'text-purple-600',
+          borderColor: 'border-purple-200',
+          sectionBorder: 'border-l-4 border-purple-400 pl-3',
+          skillsGrid: true
+        };
+      case 'gradient-modern':
+        return {
+          headerBg: 'bg-gradient-to-r from-pink-500 to-purple-600',
+          headerText: 'text-white',
+          accentColor: 'text-pink-600',
+          borderColor: 'border-pink-200',
+          sectionBorder: 'border-l-4 border-pink-500 pl-3',
+          skillsGrid: true
+        };
+      case 'minimalist-pro':
+        return {
+          headerBg: 'bg-gray-50',
+          headerText: 'text-gray-800',
+          accentColor: 'text-gray-700',
+          borderColor: 'border-gray-100',
+          sectionBorder: 'border-l-2 border-gray-400 pl-3',
+          skillsGrid: false
+        };
+      case 'colorful-fresh':
+        return {
+          headerBg: 'bg-orange-100',
+          headerText: 'text-orange-900',
+          accentColor: 'text-orange-600',
+          borderColor: 'border-orange-200',
+          sectionBorder: 'border-l-4 border-orange-500 pl-3',
+          skillsGrid: true
+        };
+      case 'elegant-professional':
+        return {
+          headerBg: 'bg-indigo-50',
+          headerText: 'text-indigo-900',
+          accentColor: 'text-indigo-600',
+          borderColor: 'border-indigo-200',
+          sectionBorder: 'border-l-3 border-indigo-600 pl-4',
+          skillsGrid: false
+        };
+      case 'healthcare-specialist':
+        return {
+          headerBg: 'bg-green-50',
+          headerText: 'text-green-900',
+          accentColor: 'text-green-600',
+          borderColor: 'border-green-200',
+          sectionBorder: 'border-l-4 border-green-500 pl-3',
+          skillsGrid: false
+        };
+      case 'finance-expert':
+        return {
+          headerBg: 'bg-slate-100',
+          headerText: 'text-slate-900',
+          accentColor: 'text-slate-700',
+          borderColor: 'border-slate-200',
+          sectionBorder: 'border-l-3 border-slate-600 pl-3',
+          skillsGrid: false
+        };
+      case 'executive-leader':
+        return {
+          headerBg: 'bg-amber-50',
+          headerText: 'text-amber-900',
+          accentColor: 'text-amber-700',
+          borderColor: 'border-amber-200',
+          sectionBorder: 'border-l-4 border-amber-600 pl-4',
+          skillsGrid: false
+        };
+      case 'recent-graduate':
+        return {
+          headerBg: 'bg-teal-50',
+          headerText: 'text-teal-900',
+          accentColor: 'text-teal-600',
+          borderColor: 'border-teal-200',
+          sectionBorder: 'border-l-4 border-teal-500 pl-3',
+          skillsGrid: true
+        };
+      default:
+        return {
+          headerBg: 'bg-white',
+          headerText: 'text-gray-800',
+          accentColor: 'text-blue-600',
+          borderColor: 'border-gray-300',
+          sectionBorder: 'border-l-2 border-gray-400 pl-3',
+          skillsGrid: false
+        };
+    }
+  };
+
+  const styles = getTemplateStyles();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -137,19 +247,19 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
       <Card ref={resumeRef} className="glass-card max-w-4xl mx-auto">
         <CardContent className="p-8 bg-white text-black">
           {/* Header */}
-          <div className="text-center border-b border-gray-300 pb-6 mb-6">
-            <h1 className="text-3xl font-bold mb-2">{data.personalInfo.fullName || 'Your Name'}</h1>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+          <div className={`text-center ${styles.headerBg} ${styles.borderColor} pb-6 mb-6 rounded-t-lg p-6 -mx-8 -mt-8 mb-8`}>
+            <h1 className={`text-3xl font-bold mb-2 ${styles.headerText}`}>{data.personalInfo.fullName || 'Your Name'}</h1>
+            <div className={`flex flex-wrap justify-center gap-4 text-sm ${styles.headerText} opacity-90`}>
               {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
               {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
               {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
             </div>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600 mt-2">
+            <div className={`flex flex-wrap justify-center gap-4 text-sm mt-2`}>
               {data.personalInfo.website && (
-                <span className="text-blue-600">{data.personalInfo.website}</span>
+                <span className={`${styles.headerBg.includes('gradient') || styles.headerBg.includes('900') ? 'text-white' : styles.accentColor} font-medium`}>{data.personalInfo.website}</span>
               )}
               {data.personalInfo.linkedin && (
-                <span className="text-blue-600">{data.personalInfo.linkedin}</span>
+                <span className={`${styles.headerBg.includes('gradient') || styles.headerBg.includes('900') ? 'text-white' : styles.accentColor} font-medium`}>{data.personalInfo.linkedin}</span>
               )}
             </div>
           </div>
@@ -157,7 +267,7 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
           {/* Experience */}
           {data.experience.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2">
+              <h2 className={`text-xl font-bold mb-4 text-gray-800 ${styles.sectionBorder}`}>
                 EXPERIENCE
               </h2>
               {data.experience.map((exp, index) => (
@@ -167,7 +277,7 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
                       <h3 className="font-semibold text-lg">{exp.position}</h3>
                       <p className="text-gray-700 font-medium">{exp.company}</p>
                     </div>
-                    <div className="text-right text-sm text-gray-600">
+                    <div className={`text-right text-sm ${styles.accentColor} font-medium`}>
                       <p>
                         {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
                       </p>
@@ -184,7 +294,7 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
           {/* Education */}
           {data.education.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2">
+              <h2 className={`text-xl font-bold mb-4 text-gray-800 ${styles.sectionBorder}`}>
                 EDUCATION
               </h2>
               {data.education.map((edu, index) => (
@@ -195,7 +305,7 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
                       <p className="text-gray-700">{edu.school}</p>
                       {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
                     </div>
-                    <div className="text-right text-sm text-gray-600">
+                    <div className={`text-right text-sm ${styles.accentColor} font-medium`}>
                       <p>{formatDate(edu.startDate)} - {formatDate(edu.endDate)}</p>
                     </div>
                   </div>
@@ -207,23 +317,39 @@ const ResumePreview = ({ data, industry }: ResumePreviewProps) => {
           {/* Skills */}
           {(data.skills.technical.length > 0 || data.skills.soft.length > 0) && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2">
+              <h2 className={`text-xl font-bold mb-4 text-gray-800 ${styles.sectionBorder}`}>
                 SKILLS
               </h2>
               {data.skills.technical.length > 0 && (
                 <div className="mb-3">
                   <h3 className="font-semibold mb-2">Technical Skills:</h3>
-                  <p className="text-sm text-gray-700">
-                    {data.skills.technical.join(' • ')}
-                  </p>
+                  {styles.skillsGrid ? (
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                      {data.skills.technical.map((skill, index) => (
+                        <div key={index} className={`${styles.accentColor} font-medium`}>• {skill}</div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-700">
+                      {data.skills.technical.join(' • ')}
+                    </p>
+                  )}
                 </div>
               )}
               {data.skills.soft.length > 0 && (
                 <div>
                   <h3 className="font-semibold mb-2">Core Competencies:</h3>
-                  <p className="text-sm text-gray-700">
-                    {data.skills.soft.join(' • ')}
-                  </p>
+                  {styles.skillsGrid ? (
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                      {data.skills.soft.map((skill, index) => (
+                        <div key={index} className={`${styles.accentColor} font-medium`}>• {skill}</div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-700">
+                      {data.skills.soft.join(' • ')}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

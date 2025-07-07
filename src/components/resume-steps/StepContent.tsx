@@ -9,6 +9,7 @@ interface StepContentProps {
   currentStep: number;
   resumeData: ResumeData;
   selectedIndustry: string;
+  selectedTemplate: string;
   onDataUpdate: (section: keyof ResumeData, data: any) => void;
   onValidationChange: (step: string, isValid: boolean) => void;
 }
@@ -17,6 +18,7 @@ const StepContent = ({
   currentStep, 
   resumeData, 
   selectedIndustry, 
+  selectedTemplate,
   onDataUpdate, 
   onValidationChange 
 }: StepContentProps) => {
@@ -56,7 +58,7 @@ const StepContent = ({
         />
       );
     case 5:
-      return <ResumePreview data={resumeData} industry={selectedIndustry} />;
+      return <ResumePreview data={resumeData} industry={selectedIndustry} template={selectedTemplate} />;
     default:
       return null;
   }

@@ -92,7 +92,7 @@ const ResumeBuilder = () => {
   };
 
   if (currentStep === 'build') {
-    return <ResumeSteps selectedIndustry={selectedIndustry} onBack={() => setCurrentStep('industry')} />;
+    return <ResumeSteps selectedIndustry={selectedIndustry} selectedTemplate={selectedTemplate} onBack={() => setCurrentStep('industry')} />;
   }
 
   if (currentStep === 'analysis' && uploadedFile) {
