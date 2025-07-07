@@ -142,16 +142,69 @@ export const downloadFile = async (
       let rtfContent = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}';
       rtfContent += '\\f0\\fs24 '; // Set font and size
       
-      const lines = content.split('\n');
+      let lines: string[];
+      if (isHtmlContent) {
+        // Process HTML content to extract structured text with proper formatting
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        lines = [];
+        
+        const processElement = (element: Element) => {
+          const classList = Array.from(element.classList);
+          const style = element.getAttribute('style') || '';
+          const text = element.textContent?.trim() || '';
+          
+          if (!text) return;
+          
+          // Extract indentation from margin-left style
+          const marginMatch = style.match(/margin-left:\s*(\d+)px/);
+          const indentLevel = marginMatch ? Math.floor(parseInt(marginMatch[1]) / 20) : 0;
+          const indent = '    '.repeat(indentLevel); // 4 spaces per indent level
+          
+          if (classList.includes('cv-header')) {
+            lines.push(`${text.toUpperCase()}`);
+            lines.push(''); // Add spacing after headers
+          } else if (classList.includes('cv-subheader')) {
+            lines.push(''); // Add spacing before subheaders
+            lines.push(`${text}`);
+          } else if (classList.includes('cv-bullet')) {
+            // Add bullet point with proper indentation
+            lines.push(`${indent}• ${text}`);
+          } else if (classList.includes('cv-numbered')) {
+            lines.push(`${indent}${text}`);
+          } else {
+            lines.push(`${indent}${text}`);
+          }
+        };
+        
+        // Process all div elements in order to maintain structure
+        const allElements = doc.querySelectorAll('div');
+        allElements.forEach(element => processElement(element));
+      } else {
+        lines = content.split('\n');
+      }
       
+      // Convert lines to RTF format with proper formatting
       for (const line of lines) {
         if (line.includes('OPTIMIZED RESUME') || line.includes('='.repeat(20))) {
+          // Main title
           rtfContent += `\\b\\fs32 ${line.replace(/[{}\\]/g, '')}\\b0\\fs24\\par\\par `;
-        } else if (line.includes('-'.repeat(10)) || /^[A-Z\s]+$/.test(line.trim()) && line.trim().length > 5) {
+        } else if (/^[A-Z\s&0-9.,'-]+$/.test(line.trim()) && line.trim().length > 2 && line.trim().length < 50) {
+          // Section headers (all caps)
           rtfContent += `\\b\\fs28 ${line.replace(/[{}\\]/g, '')}\\b0\\fs24\\par `;
+        } else if (line.trim().startsWith('•')) {
+          // Bullet points
+          const bulletText = line.replace(/^[\s]*•[\s]*/, '');
+          const indentLevel = (line.length - line.trimLeft().length) / 4;
+          const rtfIndent = '\\li' + (indentLevel * 360); // 360 twips per indent level
+          rtfContent += `{${rtfIndent} \\bullet ${bulletText.replace(/[{}\\]/g, '')}\\par}`;
         } else if (line.trim()) {
-          rtfContent += `${line.replace(/[{}\\]/g, '')}\\par `;
+          // Regular text
+          const indentLevel = (line.length - line.trimLeft().length) / 4;
+          const rtfIndent = indentLevel > 0 ? '\\li' + (indentLevel * 360) : '';
+          rtfContent += `{${rtfIndent} ${line.trim().replace(/[{}\\]/g, '')}\\par}`;
         } else {
+          // Empty line for spacing
           rtfContent += '\\par ';
         }
       }
