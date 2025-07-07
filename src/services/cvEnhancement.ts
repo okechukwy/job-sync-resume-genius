@@ -95,56 +95,65 @@ export const enhanceEducation = (originalEducation: string): string => {
   return enhanced;
 };
 
-export const enhanceCV = async (originalContent: string): Promise<string> => {
+export interface EnhancedCVResult {
+  resumeContent: string;
+  enhancementLog: string[];
+}
+
+export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResult> => {
   // Clean and normalize the content
   const cleanContent = originalContent.replace(/\s+/g, ' ').trim();
   
   // Parse sections from the original content
   const sections = parseResumeContent(cleanContent);
   
-  // Apply optimizations to each section
-  let optimizedContent = `OPTIMIZED RESUME\n${'='.repeat(50)}\n\n`;
+  // Build clean resume content without system headers/footers
+  let resumeContent = '';
   
-  // Add enhanced professional summary
+  // Add contact information
   if (sections.contact) {
-    optimizedContent += `CONTACT INFORMATION\n${'-'.repeat(20)}\n${sections.contact}\n\n`;
+    resumeContent += `CONTACT INFORMATION\n${'-'.repeat(20)}\n${sections.contact}\n\n`;
   }
   
   // Add enhanced professional summary
-  optimizedContent += `PROFESSIONAL SUMMARY\n${'-'.repeat(20)}\n`;
+  resumeContent += `PROFESSIONAL SUMMARY\n${'-'.repeat(20)}\n`;
   if (sections.summary) {
-    optimizedContent += enhanceSummary(sections.summary);
+    resumeContent += enhanceSummary(sections.summary);
   } else {
-    optimizedContent += `Dynamic professional with proven expertise in delivering results-driven solutions. Strong analytical and problem-solving skills with demonstrated ability to work effectively in fast-paced environments. Committed to continuous improvement and excellence in all endeavors.`;
+    resumeContent += `Dynamic professional with proven expertise in delivering results-driven solutions. Strong analytical and problem-solving skills with demonstrated ability to work effectively in fast-paced environments. Committed to continuous improvement and excellence in all endeavors.`;
   }
-  optimizedContent += '\n\n';
+  resumeContent += '\n\n';
   
   // Add enhanced experience section
   if (sections.experience) {
-    optimizedContent += `PROFESSIONAL EXPERIENCE\n${'-'.repeat(25)}\n${enhanceExperience(sections.experience)}\n\n`;
+    resumeContent += `PROFESSIONAL EXPERIENCE\n${'-'.repeat(25)}\n${enhanceExperience(sections.experience)}\n\n`;
   }
   
   // Add enhanced skills section
-  optimizedContent += `CORE COMPETENCIES\n${'-'.repeat(18)}\n${enhanceSkills(sections.skills)}\n\n`;
+  resumeContent += `CORE COMPETENCIES\n${'-'.repeat(18)}\n${enhanceSkills(sections.skills)}\n\n`;
   
   // Add enhanced education section
   if (sections.education) {
-    optimizedContent += `EDUCATION\n${'-'.repeat(10)}\n${enhanceEducation(sections.education)}\n\n`;
+    resumeContent += `EDUCATION\n${'-'.repeat(10)}\n${enhanceEducation(sections.education)}\n\n`;
   }
   
   // Add certifications if any
   if (sections.certifications) {
-    optimizedContent += `CERTIFICATIONS\n${'-'.repeat(14)}\n${sections.certifications}\n\n`;
+    resumeContent += `CERTIFICATIONS\n${'-'.repeat(14)}\n${sections.certifications}\n\n`;
   }
   
-  // Add optimization notes
-  optimizedContent += `\n${'='.repeat(50)}\nOPTIMIZATION ENHANCEMENTS APPLIED:\n${'='.repeat(50)}\n`;
-  optimizedContent += `✓ Enhanced keyword density for ATS compatibility\n`;
-  optimizedContent += `✓ Improved action verb usage throughout\n`;
-  optimizedContent += `✓ Added quantifiable achievements where applicable\n`;
-  optimizedContent += `✓ Optimized formatting for better readability\n`;
-  optimizedContent += `✓ Strategic placement of industry-relevant terms\n`;
-  optimizedContent += `✓ Professional structure and consistent formatting\n`;
+  // Create enhancement log
+  const enhancementLog = [
+    'Enhanced keyword density for ATS compatibility',
+    'Improved action verb usage throughout',
+    'Added quantifiable achievements where applicable',
+    'Optimized formatting for better readability',
+    'Strategic placement of industry-relevant terms',
+    'Professional structure and consistent formatting'
+  ];
   
-  return optimizedContent;
+  return {
+    resumeContent: resumeContent.trim(),
+    enhancementLog
+  };
 };

@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, FileText, Zap, Download } from "lucide-react";
+import { CheckCircle, FileText, Zap, Download, History } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { readFileContent } from "@/utils/fileReader";
-import { enhanceCV } from "@/services/cvEnhancement";
+import { enhanceCV, EnhancedCVResult } from "@/services/cvEnhancement";
 import { downloadFile } from "@/utils/downloadUtils";
 
 interface ApplyRecommendationsProps {
@@ -15,7 +15,7 @@ interface ApplyRecommendationsProps {
 
 const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendationsProps) => {
   const [recommendationsApplied, setRecommendationsApplied] = useState(false);
-  const [enhancedCV, setEnhancedCV] = useState<string>("");
+  const [enhancedResult, setEnhancedResult] = useState<EnhancedCVResult | null>(null);
   const [originalContent, setOriginalContent] = useState<string>("");
 
   const handleApplyRecommendations = async () => {
@@ -48,7 +48,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
         } else {
           // Apply enhancements
           const enhanced = await enhanceCV(content);
-          setEnhancedCV(enhanced);
+          setEnhancedResult(enhanced);
           setRecommendationsApplied(true);
           console.log("All recommendations applied - staying on analysis page");
           toast.success("All recommendations applied to your CV! Review the optimized version below.");
@@ -63,7 +63,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
   };
 
   const handleDownload = async (format: 'txt' | 'pdf' | 'docx') => {
-    const content = enhancedCV || originalContent;
+    const content = enhancedResult?.resumeContent || originalContent;
     const fileName = uploadedFile.name.replace(/\.[^/.]+$/, '');
     await downloadFile(content, fileName, format);
   };
@@ -99,7 +99,7 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
         </CardContent>
       </Card>
 
-      {recommendationsApplied && enhancedCV && (
+      {recommendationsApplied && enhancedResult && (
         <>
           {/* Enhanced CV Display */}
           <Card className="glass-card">
@@ -112,8 +112,28 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
             <CardContent>
               <div className="bg-white text-black p-6 rounded-lg border max-h-96 overflow-y-auto">
                 <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                  {enhancedCV}
+                  {enhancedResult.resumeContent}
                 </pre>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Enhancement Log */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Applied Enhancements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {enhancedResult.enhancementLog.map((enhancement, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                    <span>{enhancement}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
