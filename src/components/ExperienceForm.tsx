@@ -39,12 +39,21 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: Experi
   );
 
   const validateExperiences = () => {
-    return experiences.every(exp => 
-      exp.company.trim() !== '' && 
-      exp.position.trim() !== '' && 
-      exp.startDate.trim() !== '' && 
-      exp.description.trim() !== ''
-    );
+    return experiences.every(exp => {
+      const basicValidation = exp.company.trim() !== '' && 
+        exp.position.trim() !== '' && 
+        exp.startDate.trim() !== '' && 
+        exp.description.trim() !== '';
+      
+      // Check date validation if both dates are provided
+      if (basicValidation && exp.startDate && exp.endDate && !exp.current) {
+        const startDate = new Date(exp.startDate);
+        const endDate = new Date(exp.endDate);
+        return endDate >= startDate;
+      }
+      
+      return basicValidation;
+    });
   };
 
   useEffect(() => {
@@ -77,6 +86,17 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: Experi
     setExperiences(experiences.map(exp =>
       exp.id === id ? { ...exp, [field]: value } : exp
     ));
+  };
+
+  const getDateValidationError = (experience: Experience) => {
+    if (experience.startDate && experience.endDate && !experience.current) {
+      const startDate = new Date(experience.startDate);
+      const endDate = new Date(experience.endDate);
+      if (endDate < startDate) {
+        return "End date cannot be earlier than start date";
+      }
+    }
+    return null;
   };
 
   const getIndustryTips = () => {
@@ -184,8 +204,13 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: Experi
                   value={experience.endDate}
                   onChange={(e) => handleExperienceChange(experience.id, 'endDate', e.target.value)}
                   disabled={experience.current}
-                  className="glass-card"
+                  className={`glass-card ${getDateValidationError(experience) ? 'border-destructive' : ''}`}
                 />
+                {getDateValidationError(experience) && (
+                  <p className="text-sm font-medium text-destructive">
+                    {getDateValidationError(experience)}
+                  </p>
+                )}
               </div>
             </div>
 
