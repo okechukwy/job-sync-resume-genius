@@ -40,23 +40,30 @@ export const downloadFile = async (
       
       let lines: string[];
       if (isHtmlContent) {
-        // Extract text from HTML while preserving structure
+        // Extract text from HTML while preserving structure and indentation
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
-        const elements = doc.body?.children || doc.children;
         lines = [];
         
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i];
-          if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
-            lines.push(`\n${element.textContent || ''}\n`);
-          } else if (element.tagName === 'P' || element.tagName === 'DIV') {
-            const text = element.textContent || '';
-            if (text.trim()) {
-              lines.push(text);
-            }
+        const processElement = (element: Element, indentLevel: number = 0) => {
+          const indent = '  '.repeat(indentLevel);
+          const text = element.textContent?.trim() || '';
+          
+          if (element.classList.contains('cv-header')) {
+            lines.push(`\n${text.toUpperCase()}\n`);
+          } else if (element.classList.contains('cv-subheader')) {
+            lines.push(`\n${text}`);
+          } else if (element.classList.contains('cv-bullet')) {
+            lines.push(`${indent}• ${text}`);
+          } else if (element.classList.contains('cv-numbered')) {
+            lines.push(`${indent}${text}`);
+          } else if (text) {
+            lines.push(`${indent}${text}`);
           }
-        }
+        };
+        
+        const allElements = doc.querySelectorAll('h1, h2, h3, p');
+        allElements.forEach(element => processElement(element));
       } else {
         lines = content.split('\n');
       }

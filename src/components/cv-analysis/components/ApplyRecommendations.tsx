@@ -111,19 +111,32 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white text-black p-6 rounded-lg border max-h-96 overflow-y-auto">
+              <div className="bg-white text-black p-4 rounded-lg border max-h-96 overflow-y-auto shadow-inner">
                 {enhancedResult.isHtmlContent ? (
                   <div 
-                    className="cv-preview text-sm leading-relaxed"
+                    className="cv-preview"
                     dangerouslySetInnerHTML={{ __html: enhancedResult.resumeContent }}
                     style={{
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
-                      color: '#000',
-                      lineHeight: '1.6'
+                      background: '#ffffff',
+                      color: '#000000',
+                      fontFamily: '"Times New Roman", serif',
+                      fontSize: '12px',
+                      lineHeight: '1.6',
+                      padding: '10px',
+                      minHeight: '200px'
                     }}
                   />
                 ) : (
-                  <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                  <pre 
+                    className="whitespace-pre-wrap text-sm leading-relaxed"
+                    style={{
+                      fontFamily: '"Times New Roman", serif',
+                      color: '#000',
+                      background: '#fff',
+                      padding: '10px',
+                      margin: '0'
+                    }}
+                  >
                     {enhancedResult.resumeContent}
                   </pre>
                 )}
