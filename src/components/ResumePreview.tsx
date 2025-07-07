@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, Share2, Edit } from "lucide-react";
 import { toast } from "sonner";
-import { ResumeData } from "./ResumeSteps";
+import { ResumeData } from "@/hooks/useResumeSteps";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useRef } from "react";
