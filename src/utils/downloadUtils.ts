@@ -145,36 +145,52 @@ export const downloadFile = async (
       let textLines: string[];
       
       if (isHtmlContent) {
-        // Extract text from HTML while preserving structure
+        // Extract text from HTML while preserving CV structure
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
         textLines = [];
         
-        // Process all text elements in order
-        const walkTextNodes = (node: Node) => {
-          if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent?.trim();
-            if (text) {
-              textLines.push(text);
-            }
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as Element;
-            // Add line breaks for div elements
-            if (element.tagName === 'DIV' && textLines.length > 0) {
-              textLines.push('');
-            }
-            // Process child nodes
-            for (const child of Array.from(element.childNodes)) {
-              walkTextNodes(child);
-            }
+        // Process CV elements in order to preserve structure
+        const processElement = (element: Element) => {
+          const classList = Array.from(element.classList);
+          const text = element.textContent?.trim() || '';
+          
+          if (!text) return;
+          
+          if (classList.includes('cv-header')) {
+            // Add section header with proper spacing
+            if (textLines.length > 0) textLines.push(''); // Add space before header
+            textLines.push(text.toUpperCase());
+            textLines.push(''); // Add space after header
+          } else if (classList.includes('cv-subheader')) {
+            textLines.push(text);
+          } else if (classList.includes('cv-bullet')) {
+            // Preserve bullet points with proper formatting
+            const bulletText = text.startsWith('•') ? text : '• ' + text;
+            textLines.push(bulletText);
+          } else if (classList.includes('cv-numbered')) {
+            textLines.push(text);
+          } else if (classList.includes('cv-text')) {
+            textLines.push(text);
+          } else if (element.tagName === 'DIV' && text) {
+            // Generic div with text content
+            textLines.push(text);
           }
         };
         
-        walkTextNodes(doc.body || doc);
+        // Process all CV elements in document order
+        const cvElements = doc.querySelectorAll('.cv-header, .cv-subheader, .cv-bullet, .cv-numbered, .cv-text, div');
+        cvElements.forEach(element => {
+          const text = element.textContent?.trim();
+          if (text && text.length > 0) {
+            processElement(element);
+          }
+        });
         
-        // Remove empty lines at the beginning
-        while (textLines.length > 0 && !textLines[0].trim()) {
-          textLines.shift();
+        // If no structured elements found, fall back to simple text extraction
+        if (textLines.length === 0) {
+          const allText = doc.body?.textContent || doc.textContent || content;
+          textLines = allText.split('\n').filter(line => line.trim().length > 0);
         }
       } else {
         textLines = content.split('\n');
