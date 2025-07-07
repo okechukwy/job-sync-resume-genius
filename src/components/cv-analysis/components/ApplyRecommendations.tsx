@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import jsPDF from 'jspdf';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -274,23 +276,150 @@ Project Management: Agile Methodologies, Risk Assessment, Quality Assurance`;
     }
   };
 
-  const handleDownload = (format: 'txt' | 'pdf' | 'docx') => {
+  const handleDownload = async (format: 'txt' | 'pdf' | 'docx') => {
     const content = enhancedCV || originalContent;
+    const fileName = uploadedFile.name.replace(/\.[^/.]+$/, '');
     
-    if (format === 'txt') {
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `optimized-${uploadedFile.name.replace(/\.[^/.]+$/, '')}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      toast.success("Optimized resume downloaded as TXT!");
-    } else {
-      toast.info(`${format.toUpperCase()} download coming soon! Using TXT format for now.`);
-      handleDownload('txt');
+    try {
+      if (format === 'txt') {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `optimized-${fileName}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Optimized resume downloaded as TXT!");
+        
+      } else if (format === 'pdf') {
+        toast.info("Generating PDF...");
+        
+        const pdf = new jsPDF();
+        const pageWidth = pdf.internal.pageSize.width;
+        const pageHeight = pdf.internal.pageSize.height;
+        const margin = 20;
+        const lineHeight = 6;
+        let currentY = margin;
+        
+        // Split content into lines and process each line
+        const lines = content.split('\n');
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          
+          // Check if we need a new page
+          if (currentY > pageHeight - margin) {
+            pdf.addPage();
+            currentY = margin;
+          }
+          
+          // Handle different line types
+          if (line.includes('OPTIMIZED RESUME') || line.includes('='.repeat(20))) {
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+          } else if (line.includes('-'.repeat(10)) || /^[A-Z\s]+$/.test(line.trim()) && line.trim().length > 5) {
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+          } else {
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+          }
+          
+          // Split long lines to fit page width
+          const splitLines = pdf.splitTextToSize(line, pageWidth - 2 * margin);
+          
+          for (const splitLine of splitLines) {
+            if (currentY > pageHeight - margin) {
+              pdf.addPage();
+              currentY = margin;
+            }
+            pdf.text(splitLine, margin, currentY);
+            currentY += lineHeight;
+          }
+        }
+        
+        pdf.save(`optimized-${fileName}.pdf`);
+        toast.success("Optimized resume downloaded as PDF!");
+        
+      } else if (format === 'docx') {
+        toast.info("Generating DOCX...");
+        
+        // Parse content into structured sections
+        const lines = content.split('\n');
+        const paragraphs: Paragraph[] = [];
+        
+        for (const line of lines) {
+          if (line.includes('OPTIMIZED RESUME') || line.includes('='.repeat(20))) {
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: line,
+                    bold: true,
+                    size: 32,
+                  }),
+                ],
+                spacing: { after: 200 },
+              })
+            );
+          } else if (line.includes('-'.repeat(10)) || /^[A-Z\s]+$/.test(line.trim()) && line.trim().length > 5) {
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: line,
+                    bold: true,
+                    size: 24,
+                  }),
+                ],
+                spacing: { before: 200, after: 100 },
+              })
+            );
+          } else if (line.trim()) {
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: line,
+                    size: 20,
+                  }),
+                ],
+                spacing: { after: 100 },
+              })
+            );
+          } else {
+            paragraphs.push(new Paragraph({}));
+          }
+        }
+        
+        const doc = new Document({
+          sections: [
+            {
+              properties: {},
+              children: paragraphs,
+            },
+          ],
+        });
+        
+        const buffer = await Packer.toBuffer(doc);
+        const blob = new Blob([buffer], { 
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `optimized-${fileName}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Optimized resume downloaded as DOCX!");
+      }
+    } catch (error) {
+      console.error(`Error generating ${format.toUpperCase()}:`, error);
+      toast.error(`Failed to generate ${format.toUpperCase()}. Please try again.`);
     }
   };
 
