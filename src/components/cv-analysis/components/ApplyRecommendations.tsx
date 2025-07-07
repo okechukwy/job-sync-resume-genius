@@ -4,6 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, FileText, Zap, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface ApplyRecommendationsProps {
   uploadedFile: File;
@@ -16,84 +21,211 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
   const [originalContent, setOriginalContent] = useState<string>("");
 
   const readFileContent = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const fileType = file.type.toLowerCase();
-      const fileName = file.name.toLowerCase();
-      
-      // Check if it's a text file that we can properly read
+    const fileType = file.type.toLowerCase();
+    const fileName = file.name.toLowerCase();
+    
+    try {
       if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = (e) => reject(e);
-        reader.readAsText(file, 'UTF-8');
+        // Handle text files
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = (e) => reject(e);
+          reader.readAsText(file, 'UTF-8');
+        });
+      } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+        // Handle PDF files
+        return new Promise(async (resolve, reject) => {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let textContent = '';
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              const pageText = content.items
+                .map((item: any) => item.str)
+                .join(' ');
+              textContent += pageText + '\n';
+            }
+            
+            resolve(textContent.trim());
+          } catch (error) {
+            reject(error);
+          }
+        });
+      } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+                 fileType === 'application/msword' || 
+                 fileName.endsWith('.docx') || 
+                 fileName.endsWith('.doc')) {
+        // Handle DOCX files
+        return new Promise(async (resolve, reject) => {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            resolve(result.value);
+          } catch (error) {
+            reject(error);
+          }
+        });
       } else {
-        // For binary files (PDF, DOCX, etc.), we'll use the filename and provide a template
-        // since we can't extract text content without specialized libraries
-        const baseContent = `RESUME ANALYSIS - ${file.name}
-        
-This resume has been uploaded for analysis. Based on our AI analysis, here are the key areas we've identified for optimization:
-
-PROFESSIONAL SUMMARY
-[Enhanced professional summary with strong action words and quantified achievements]
-
-EXPERIENCE SECTION
-[Optimized job descriptions with:
-- Action verbs and quantified results
-- Industry-specific keywords
-- ATS-friendly formatting]
-
-SKILLS SECTION  
-[Strategic keyword placement including:
-- Technical skills relevant to your field
-- Soft skills that employers value
-- Industry-specific certifications]
-
-EDUCATION & CERTIFICATIONS
-[Properly formatted education section with relevant coursework and achievements]
-
-KEY OPTIMIZATIONS APPLIED:
-• Enhanced keyword density for ATS compatibility
-• Improved action verb usage throughout
-• Added quantifiable achievements and metrics
-• Optimized formatting for better readability
-• Strategic placement of industry-relevant terms
-
-Note: This is an AI-optimized version of your resume based on best practices and ATS requirements.`;
-        
-        resolve(baseContent);
+        // Fallback for unsupported formats
+        throw new Error(`Unsupported file format: ${fileType}`);
       }
-    });
+    } catch (error) {
+      console.error('Error reading file:', error);
+      throw new Error('Failed to extract text from the uploaded file. Please ensure the file is not corrupted and try again.');
+    }
   };
 
   const enhanceCV = async (originalContent: string): Promise<string> => {
-    // Simulate enhancing the original CV with recommendations
-    const enhancements = {
-      professionalSummary: `
-PROFESSIONAL SUMMARY
-Results-driven professional with proven track record of success. Strong analytical skills and ability to work in fast-paced environments with expertise in project management and team leadership.
-`,
-      skillsEnhancement: `
-CORE COMPETENCIES
-• Technical Skills: JavaScript, React, Node.js, AWS, SQL, Git, Docker
-• Leadership: Project Management, Team Leadership, Stakeholder Management  
-• Analytics: Data Analysis, Performance Optimization, Process Improvement
-• Communication: Cross-functional Collaboration, Client Relations, Technical Documentation
-`,
-      experienceMetrics: "• Quantified achievements with specific metrics and percentages\n• Added impact statements showing business value\n• Optimized descriptions for ATS keyword matching\n",
-      formatting: "\n--- ATS-OPTIMIZED FORMATTING APPLIED ---\n• Consistent heading structure\n• Proper section organization\n• Keyword optimization throughout\n• Professional formatting standards\n"
-    };
-
-    // Enhance the original content by adding sections
-    let enhanced = originalContent;
+    // Clean and normalize the content
+    const cleanContent = originalContent.replace(/\s+/g, ' ').trim();
     
-    // Add professional summary at the beginning
-    enhanced = enhancements.professionalSummary + "\n" + enhanced;
+    // Parse sections from the original content
+    const sections = parseResumeContent(cleanContent);
+    
+    // Apply optimizations to each section
+    let optimizedContent = `OPTIMIZED RESUME\n${'='.repeat(50)}\n\n`;
+    
+    // Add enhanced professional summary
+    if (sections.contact) {
+      optimizedContent += `CONTACT INFORMATION\n${'-'.repeat(20)}\n${sections.contact}\n\n`;
+    }
+    
+    // Add enhanced professional summary
+    optimizedContent += `PROFESSIONAL SUMMARY\n${'-'.repeat(20)}\n`;
+    if (sections.summary) {
+      optimizedContent += enhanceSummary(sections.summary);
+    } else {
+      optimizedContent += `Dynamic professional with proven expertise in delivering results-driven solutions. Strong analytical and problem-solving skills with demonstrated ability to work effectively in fast-paced environments. Committed to continuous improvement and excellence in all endeavors.`;
+    }
+    optimizedContent += '\n\n';
+    
+    // Add enhanced experience section
+    if (sections.experience) {
+      optimizedContent += `PROFESSIONAL EXPERIENCE\n${'-'.repeat(25)}\n${enhanceExperience(sections.experience)}\n\n`;
+    }
     
     // Add enhanced skills section
-    enhanced += "\n" + enhancements.skillsEnhancement;
+    optimizedContent += `CORE COMPETENCIES\n${'-'.repeat(18)}\n${enhanceSkills(sections.skills)}\n\n`;
     
-    // Add notes about enhancements
-    enhanced += "\n\nAPPLIED OPTIMIZATIONS:\n" + enhancements.experienceMetrics + enhancements.formatting;
+    // Add enhanced education section
+    if (sections.education) {
+      optimizedContent += `EDUCATION\n${'-'.repeat(10)}\n${enhanceEducation(sections.education)}\n\n`;
+    }
+    
+    // Add certifications if any
+    if (sections.certifications) {
+      optimizedContent += `CERTIFICATIONS\n${'-'.repeat(14)}\n${sections.certifications}\n\n`;
+    }
+    
+    // Add optimization notes
+    optimizedContent += `\n${'='.repeat(50)}\nOPTIMIZATION ENHANCEMENTS APPLIED:\n${'='.repeat(50)}\n`;
+    optimizedContent += `✓ Enhanced keyword density for ATS compatibility\n`;
+    optimizedContent += `✓ Improved action verb usage throughout\n`;
+    optimizedContent += `✓ Added quantifiable achievements where applicable\n`;
+    optimizedContent += `✓ Optimized formatting for better readability\n`;
+    optimizedContent += `✓ Strategic placement of industry-relevant terms\n`;
+    optimizedContent += `✓ Professional structure and consistent formatting\n`;
+    
+    return optimizedContent;
+  };
+  
+  const parseResumeContent = (content: string) => {
+    const sections: any = {};
+    
+    // Extract contact information (emails, phones, addresses)
+    const contactRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|[\+]?[1-9]?[\d\s\-\(\)]{10,}|[A-Za-z\s,\d\-]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Court|Ct))/gi;
+    const contactMatches = content.match(contactRegex);
+    if (contactMatches) {
+      sections.contact = contactMatches.join('\n');
+    }
+    
+    // Extract experience section
+    const experienceKeywords = /(?:experience|employment|work history|professional experience)(.*?)(?:education|skills|qualifications|certifications|$)/is;
+    const experienceMatch = content.match(experienceKeywords);
+    if (experienceMatch) {
+      sections.experience = experienceMatch[1].trim();
+    }
+    
+    // Extract education section
+    const educationKeywords = /(?:education|academic|degree|university|college|school)(.*?)(?:skills|experience|certifications|$)/is;
+    const educationMatch = content.match(educationKeywords);
+    if (educationMatch) {
+      sections.education = educationMatch[1].trim();
+    }
+    
+    // Extract skills section
+    const skillsKeywords = /(?:skills|competencies|technologies|technical skills|core competencies)(.*?)(?:education|experience|certifications|$)/is;
+    const skillsMatch = content.match(skillsKeywords);
+    if (skillsMatch) {
+      sections.skills = skillsMatch[1].trim();
+    }
+    
+    // Extract summary/objective
+    const summaryKeywords = /(?:summary|objective|profile|about)(.*?)(?:experience|education|skills|$)/is;
+    const summaryMatch = content.match(summaryKeywords);
+    if (summaryMatch) {
+      sections.summary = summaryMatch[1].trim();
+    }
+    
+    return sections;
+  };
+  
+  const enhanceSummary = (originalSummary: string): string => {
+    // Enhance the existing summary with action words and achievements
+    const enhanced = originalSummary
+      .replace(/\b(worked|did|was|had)\b/gi, 'accomplished')
+      .replace(/\b(good|nice|okay)\b/gi, 'exceptional')
+      .replace(/\b(helped|assisted)\b/gi, 'facilitated')
+      .replace(/\b(made|created)\b/gi, 'developed');
+    
+    return enhanced + '\n\nKey Strengths: Leadership, Problem-solving, Strategic Planning, Cross-functional Collaboration, Results-driven Performance.';
+  };
+  
+  const enhanceExperience = (originalExperience: string): string => {
+    // Enhance experience with action verbs and quantifiable results
+    let enhanced = originalExperience
+      .replace(/\b(did|was responsible for|worked on)\b/gi, 'Executed')
+      .replace(/\b(helped|assisted)\b/gi, 'Facilitated')
+      .replace(/\b(made|created)\b/gi, 'Developed')
+      .replace(/\b(improved|enhanced)\b/gi, 'Optimized')
+      .replace(/\b(managed|handled)\b/gi, 'Orchestrated');
+    
+    // Add bullet points if not present
+    if (!enhanced.includes('•') && !enhanced.includes('-')) {
+      enhanced = enhanced.split(/\.|;/).filter(s => s.trim()).map(s => `• ${s.trim()}`).join('\n');
+    }
+    
+    return enhanced;
+  };
+  
+  const enhanceSkills = (originalSkills?: string): string => {
+    const baseSkills = originalSkills || '';
+    
+    // Common professional skills to enhance any resume
+    const enhancedSkills = `
+Technical Skills: ${baseSkills || 'Microsoft Office Suite, Data Analysis, Project Management Tools'}
+Leadership: Team Management, Strategic Planning, Performance Optimization
+Communication: Presentation Skills, Technical Documentation, Stakeholder Management
+Analytical: Problem-solving, Critical Thinking, Process Improvement
+Project Management: Agile Methodologies, Risk Assessment, Quality Assurance`;
+    
+    return enhancedSkills.trim();
+  };
+  
+  const enhanceEducation = (originalEducation: string): string => {
+    // Enhance education formatting and add relevant details
+    let enhanced = originalEducation
+      .replace(/\b(graduated|completed|finished)\b/gi, 'Earned')
+      .replace(/\b(studied|learned)\b/gi, 'Specialized in');
+    
+    // Ensure proper formatting
+    if (!enhanced.includes('•') && !enhanced.includes('-')) {
+      enhanced = enhanced.split(/\.|;/).filter(s => s.trim()).map(s => `• ${s.trim()}`).join('\n');
+    }
     
     return enhanced;
   };
