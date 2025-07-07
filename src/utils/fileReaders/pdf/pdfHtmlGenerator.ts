@@ -23,15 +23,18 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
     const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
     
-    // Find the absolute leftmost position across all pages for proper baseline
-    const globalLeftMargin = 40;
+    // Dynamic baseline detection - find the leftmost position of main content
+    const documentLeftBase = 14; // Base margin from PDF coordinates analysis
+    const actualIndent = Math.max(0, leftmostX - documentLeftBase);
     
-    // Calculate indentation relative to document baseline
-    const exactIndent = Math.max(0, leftmostX - globalLeftMargin);
+    // Create indentation levels based on actual PDF positioning
+    let indentLevel = 0;
+    let finalIndent = actualIndent;
     
-    // Detect relative indentation levels (for bullets and sub-items)
-    const indentLevel = Math.floor(exactIndent / 20); // Every 20px is a new indent level
-    const normalizedIndent = indentLevel * 20; // Snap to 20px intervals
+    if (actualIndent > 15) {
+      indentLevel = Math.floor(actualIndent / 18);
+      finalIndent = indentLevel * 18; // 18px per indent level
+    }
     
     // Build line text preserving exact spacing and formatting
     let lineText = '';
@@ -76,7 +79,7 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     
     // Improved bullet detection logic
     const startsWithBullet = bulletChars.test(lineText);
-    const hasSignificantIndent = exactIndent > 20;
+    const hasSignificantIndent = actualIndent > 15;
     const isShortLine = lineText.length < 150;
     const notAllCaps = !/^[A-Z\s&0-9.,'-]+$/.test(lineText);
     const notHeader = !(maxFontSize > 14 && lineItems.some(item => item.fontWeight === 'bold'));
@@ -94,7 +97,7 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const isSubHeader = (isBoldText && maxFontSize >= 12) && !isHeader && !isBullet && !isNumbered;
     
     // Debug logging
-    console.log(`Line: "${lineText.slice(0, 50)}..." | Indent: ${exactIndent} | isBullet: ${isBullet} | isHeader: ${isHeader} | Color: ${textColor} | FontSize: ${maxFontSize} | Bold: ${isBoldText}`);
+    console.log(`Line: "${lineText.slice(0, 50)}..." | Indent: ${actualIndent} | isBullet: ${isBullet} | isHeader: ${isHeader} | Color: ${textColor} | FontSize: ${maxFontSize} | Bold: ${isBoldText}`);
     
     let elementTag = 'div';
     let elementClass = 'cv-text';
@@ -111,15 +114,13 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     } else if (isBullet) {
       elementClass = 'cv-bullet';
       marginTop = '3px';
+      finalIndent = finalIndent + 16; // Extra indent for bullets
       // Remove bullet char from text if it exists since CSS will add it
       lineText = lineText.replace(/^[•·▪▫▸▹◦‣⁃○●■□▲►▼◄♦♠♣♥★☆✓✗→←↑↓–—*+\-]\s*/, '');
     } else if (isNumbered) {
       elementClass = 'cv-numbered';
       marginTop = '3px';
     }
-    
-    // Use normalized indent for cleaner display and add extra bullet indent
-    const finalIndent = isBullet ? normalizedIndent + 20 : normalizedIndent;
     
     const elementStyle = `
       margin-left: ${finalIndent}px;
