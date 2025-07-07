@@ -4,11 +4,20 @@ import { toast } from 'sonner';
 export const downloadFile = async (
   content: string,
   fileName: string,
-  format: 'txt' | 'pdf' | 'docx'
+  format: 'txt' | 'pdf' | 'docx',
+  isHtmlContent: boolean = false
 ) => {
   try {
     if (format === 'txt') {
-      const blob = new Blob([content], { type: 'text/plain' });
+      // For HTML content, extract plain text
+      let textContent = content;
+      if (isHtmlContent) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        textContent = doc.body?.textContent || doc.textContent || content;
+      }
+      
+      const blob = new Blob([textContent], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -29,8 +38,28 @@ export const downloadFile = async (
       const lineHeight = 6;
       let currentY = margin;
       
-      // Split content into lines and process each line
-      const lines = content.split('\n');
+      let lines: string[];
+      if (isHtmlContent) {
+        // Extract text from HTML while preserving structure
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        const elements = doc.body?.children || doc.children;
+        lines = [];
+        
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i];
+          if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
+            lines.push(`\n${element.textContent || ''}\n`);
+          } else if (element.tagName === 'P' || element.tagName === 'DIV') {
+            const text = element.textContent || '';
+            if (text.trim()) {
+              lines.push(text);
+            }
+          }
+        }
+      } else {
+        lines = content.split('\n');
+      }
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];

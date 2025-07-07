@@ -46,37 +46,88 @@ const enhanceContentLine = (line: string): string => {
 export interface EnhancedCVResult {
   resumeContent: string;
   enhancementLog: string[];
+  isHtmlContent: boolean;
 }
 
-export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResult> => {
-  // Preserve original structure by enhancing line by line
-  const lines = originalContent.split('\n');
-  const enhancedLines: string[] = [];
+const enhanceHtmlContent = (htmlContent: string): { content: string; changeCount: number } => {
   let enhancementCount = 0;
   
-  for (const line of lines) {
-    const originalLine = line;
-    const enhancedLine = enhanceContentLine(line);
+  // Use DOM parser to work with HTML content
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+  
+  // Find all text nodes and enhance them
+  const walker = document.createTreeWalker(
+    doc.body || doc,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+  
+  const textNodes: Text[] = [];
+  let node;
+  while (node = walker.nextNode()) {
+    textNodes.push(node as Text);
+  }
+  
+  textNodes.forEach(textNode => {
+    const originalText = textNode.textContent || '';
+    const enhancedText = enhanceContentLine(originalText);
     
-    if (originalLine !== enhancedLine) {
+    if (originalText !== enhancedText) {
       enhancementCount++;
+      textNode.textContent = enhancedText;
+    }
+  });
+  
+  return {
+    content: doc.documentElement?.outerHTML || htmlContent,
+    changeCount: enhancementCount
+  };
+};
+
+export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResult> => {
+  const isHtml = originalContent.includes('<') && originalContent.includes('>');
+  let enhancedContent: string;
+  let enhancementCount: number;
+  
+  if (isHtml) {
+    // Handle HTML content
+    const result = enhanceHtmlContent(originalContent);
+    enhancedContent = result.content;
+    enhancementCount = result.changeCount;
+  } else {
+    // Handle plain text content
+    const lines = originalContent.split('\n');
+    const enhancedLines: string[] = [];
+    enhancementCount = 0;
+    
+    for (const line of lines) {
+      const originalLine = line;
+      const enhancedLine = enhanceContentLine(line);
+      
+      if (originalLine !== enhancedLine) {
+        enhancementCount++;
+      }
+      
+      enhancedLines.push(enhancedLine);
     }
     
-    enhancedLines.push(enhancedLine);
+    enhancedContent = enhancedLines.join('\n');
   }
   
   // Create enhancement log based on actual changes made
   const enhancementLog = [
-    `Enhanced ${enhancementCount} lines with professional language`,
+    `Enhanced ${enhancementCount} sections with professional language`,
     'Improved action verb usage in job descriptions',
     'Strengthened weak adjectives and phrases',
     'Maintained original formatting and structure',
     'Preserved all section headers and dates',
-    'Enhanced content while keeping personal style'
+    'Enhanced content while keeping visual styling'
   ];
   
   return {
-    resumeContent: enhancedLines.join('\n'),
-    enhancementLog
+    resumeContent: enhancedContent,
+    enhancementLog,
+    isHtmlContent: isHtml
   };
 };

@@ -65,7 +65,8 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
   const handleDownload = async (format: 'txt' | 'pdf' | 'docx') => {
     const content = enhancedResult?.resumeContent || originalContent;
     const fileName = uploadedFile.name.replace(/\.[^/.]+$/, '');
-    await downloadFile(content, fileName, format);
+    const isHtml = enhancedResult?.isHtmlContent || false;
+    await downloadFile(content, fileName, format, isHtml);
   };
 
   return (
@@ -111,9 +112,21 @@ const ApplyRecommendations = ({ uploadedFile, onContinue }: ApplyRecommendations
             </CardHeader>
             <CardContent>
               <div className="bg-white text-black p-6 rounded-lg border max-h-96 overflow-y-auto">
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                  {enhancedResult.resumeContent}
-                </pre>
+                {enhancedResult.isHtmlContent ? (
+                  <div 
+                    className="cv-preview text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: enhancedResult.resumeContent }}
+                    style={{
+                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      color: '#000',
+                      lineHeight: '1.6'
+                    }}
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                    {enhancedResult.resumeContent}
+                  </pre>
+                )}
               </div>
             </CardContent>
           </Card>
