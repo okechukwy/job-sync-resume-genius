@@ -36,13 +36,22 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
   );
 
   const validateEducations = () => {
-    return educations.every(edu => 
-      edu.school.trim() !== '' && 
-      edu.degree.trim() !== '' && 
-      edu.field.trim() !== '' && 
-      edu.startDate.trim() !== '' && 
-      edu.endDate.trim() !== ''
-    );
+    return educations.every(edu => {
+      const basicValidation = edu.school.trim() !== '' && 
+        edu.degree.trim() !== '' && 
+        edu.field.trim() !== '' && 
+        edu.startDate.trim() !== '' && 
+        edu.endDate.trim() !== '';
+      
+      // Check date validation if both dates are provided
+      if (basicValidation && edu.startDate && edu.endDate) {
+        const startDate = new Date(edu.startDate);
+        const endDate = new Date(edu.endDate);
+        return endDate >= startDate;
+      }
+      
+      return basicValidation;
+    });
   };
 
   useEffect(() => {
@@ -75,6 +84,17 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
     setEducations(educations.map(edu =>
       edu.id === id ? { ...edu, [field]: value } : edu
     ));
+  };
+
+  const getDateValidationError = (education: Education) => {
+    if (education.startDate && education.endDate) {
+      const startDate = new Date(education.startDate);
+      const endDate = new Date(education.endDate);
+      if (endDate < startDate) {
+        return "End date cannot be earlier than start date";
+      }
+    }
+    return null;
   };
 
   return (
@@ -156,8 +176,13 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
                   type="month"
                   value={education.endDate}
                   onChange={(e) => handleEducationChange(education.id, 'endDate', e.target.value)}
-                  className="glass-card"
+                  className={`glass-card ${getDateValidationError(education) ? 'border-destructive' : ''}`}
                 />
+                {getDateValidationError(education) && (
+                  <p className="text-sm font-medium text-destructive">
+                    {getDateValidationError(education)}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`gpa-${education.id}`}>GPA (Optional)</Label>
