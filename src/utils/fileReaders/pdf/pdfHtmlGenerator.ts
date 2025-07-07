@@ -23,9 +23,15 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
     const maxFontSize = Math.max(...lineItems.map(item => item.fontSize));
     const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
     
-    // Precise indentation - use actual PDF coordinates
-    const baseLeftMargin = 50; // Adjusted base margin
-    const exactIndent = Math.max(0, leftmostX - baseLeftMargin);
+    // Find the absolute leftmost position across all pages for proper baseline
+    const globalLeftMargin = 40;
+    
+    // Calculate indentation relative to document baseline
+    const exactIndent = Math.max(0, leftmostX - globalLeftMargin);
+    
+    // Detect relative indentation levels (for bullets and sub-items)
+    const indentLevel = Math.floor(exactIndent / 20); // Every 20px is a new indent level
+    const normalizedIndent = indentLevel * 20; // Snap to 20px intervals
     
     // Build line text preserving exact spacing and formatting
     let lineText = '';
@@ -112,8 +118,11 @@ export const generateHtmlContent = (lineGroups: { [key: number]: ProcessedTextIt
       marginTop = '3px';
     }
     
+    // Use normalized indent for cleaner display and add extra bullet indent
+    const finalIndent = isBullet ? normalizedIndent + 20 : normalizedIndent;
+    
     const elementStyle = `
-      margin-left: ${exactIndent}px;
+      margin-left: ${finalIndent}px;
       margin-top: ${marginTop};
       font-size: ${avgFontSize}px;
       font-weight: ${fontWeight};
