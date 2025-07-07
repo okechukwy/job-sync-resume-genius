@@ -44,6 +44,7 @@ const ResumeBuilder = () => {
     if (file) {
       setUploadedFile(file);
       setCurrentStep('analysis');
+      toast.success('Resume uploaded successfully! Analyzing your resume...');
     } else {
       setUploadedFile(null);
       if (fileInputRef.current) {

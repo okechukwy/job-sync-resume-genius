@@ -34,7 +34,6 @@ const FileUpload = ({ uploadedFile, onFileChange, onStartFromScratch }: FileUplo
     }
 
     onFileChange(file);
-    toast.success('Resume uploaded successfully! Analyzing your resume...');
   };
 
   const handleRemoveFile = () => {
