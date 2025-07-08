@@ -57,6 +57,15 @@ import MarketingManager from "./pages/templates/MarketingManager";
 import ContentCreator from "./pages/templates/ContentCreator";
 import ExecutiveLeader from "./pages/templates/ExecutiveLeader";
 import RecentGraduate from "./pages/templates/RecentGraduate";
+import VideoEditor from "./pages/templates/VideoEditor";
+import Copywriter from "./pages/templates/Copywriter";
+import BrandManager from "./pages/templates/BrandManager";
+import ArtDirector from "./pages/templates/ArtDirector";
+import DigitalMarketer from "./pages/templates/DigitalMarketer";
+import SocialMediaManager from "./pages/templates/SocialMediaManager";
+import WebDesigner from "./pages/templates/WebDesigner";
+import MotionGraphics from "./pages/templates/MotionGraphics";
+import CreativeDirector from "./pages/templates/CreativeDirector";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
@@ -122,6 +131,15 @@ const App = () => (
           <Route path="/templates/content-creator" element={<ContentCreator />} />
           <Route path="/templates/ux-ui-designer" element={<UxUiDesigner />} />
           <Route path="/templates/photographer" element={<Photographer />} />
+          <Route path="/templates/video-editor" element={<VideoEditor />} />
+          <Route path="/templates/copywriter" element={<Copywriter />} />
+          <Route path="/templates/brand-manager" element={<BrandManager />} />
+          <Route path="/templates/art-director" element={<ArtDirector />} />
+          <Route path="/templates/digital-marketer" element={<DigitalMarketer />} />
+          <Route path="/templates/social-media-manager" element={<SocialMediaManager />} />
+          <Route path="/templates/web-designer" element={<WebDesigner />} />
+          <Route path="/templates/motion-graphics" element={<MotionGraphics />} />
+          <Route path="/templates/creative-director" element={<CreativeDirector />} />
           
           {/* Business Templates */}
           <Route path="/templates/business-professional" element={<BusinessProfessional />} />
