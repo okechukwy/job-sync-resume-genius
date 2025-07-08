@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Upload, FileText, Target, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Target, CheckCircle, AlertCircle, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { analyzeJobMatch, JobMatchingResult } from "@/utils/jobMatchingAnalyzer";
@@ -28,6 +28,15 @@ const JobMatching = () => {
 
     setUploadedResume(file);
     toast.success('Resume uploaded successfully!');
+  };
+
+  const handleRemoveResume = () => {
+    setUploadedResume(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setAnalysis(null); // Clear any existing analysis
+    toast.info('Resume removed. You can upload a new one.');
   };
 
   const handleAnalyze = async () => {
@@ -116,14 +125,24 @@ const JobMatching = () => {
               
               {uploadedResume ? (
                 <div className="glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-success" />
-                    <div>
-                      <p className="font-medium text-success">{uploadedResume.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(uploadedResume.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-success" />
+                      <div>
+                        <p className="font-medium text-success">{uploadedResume.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(uploadedResume.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveResume}
+                      className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ) : (
