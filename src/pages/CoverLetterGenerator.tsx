@@ -26,6 +26,48 @@ const CoverLetterGenerator = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const generateToneSpecificContent = () => {
+    const toneStyles = {
+      professional: {
+        greeting: `Dear ${formData.hiringManager || 'Hiring Manager'},`,
+        opening: `I am writing to express my interest in the ${formData.jobTitle} position at ${formData.companyName}. With my extensive background and proven track record, I believe I would be a valuable addition to your team.`,
+        experience: `Throughout my career, I have consistently demonstrated expertise in the areas outlined in your job description. My professional experience encompasses:`,
+        closing: `I would welcome the opportunity to discuss how my qualifications align with your team's objectives. Thank you for your consideration, and I look forward to hearing from you.`,
+        signature: `Sincerely,\n[Your Name]`
+      },
+      enthusiastic: {
+        greeting: `Dear ${formData.hiringManager || 'Hiring Manager'},`,
+        opening: `I'm thrilled to apply for the ${formData.jobTitle} position at ${formData.companyName}! Your company's innovative approach and commitment to excellence perfectly align with my passion and career goals.`,
+        experience: `I'm excited to share how my background makes me an ideal candidate for this role. My journey has been filled with amazing opportunities where I've excelled in:`,
+        closing: `I can't wait to discuss how my enthusiasm and skills can contribute to ${formData.companyName}'s continued success! Thank you for considering my application - I'm looking forward to the possibility of joining your incredible team.`,
+        signature: `With excitement,\n[Your Name]`
+      },
+      confident: {
+        greeting: `Dear ${formData.hiringManager || 'Hiring Manager'},`,
+        opening: `I am the ideal candidate for the ${formData.jobTitle} position at ${formData.companyName}. My proven expertise and track record of success make me uniquely qualified to excel in this role.`,
+        experience: `I have consistently delivered exceptional results in my previous positions, with particular strength in:`,
+        closing: `I am confident that my skills and experience will drive significant value for ${formData.companyName}. I look forward to discussing how I can contribute to your team's success.`,
+        signature: `Best regards,\n[Your Name]`
+      },
+      creative: {
+        greeting: `Hello ${formData.hiringManager || 'Creative Team'},`,
+        opening: `Imagine a ${formData.jobTitle} who brings fresh perspectives, innovative solutions, and boundless creativity to every project. That's exactly what I offer ${formData.companyName}.`,
+        experience: `My creative journey has been shaped by diverse experiences that have honed my ability to think outside the box:`,
+        closing: `I'd love to brainstorm together about how my creative approach can bring new energy to ${formData.companyName}. Let's connect and explore the possibilities!`,
+        signature: `Creatively yours,\n[Your Name]`
+      },
+      formal: {
+        greeting: `Dear Sir or Madam,`,
+        opening: `I respectfully submit my application for the ${formData.jobTitle} position at ${formData.companyName}. I believe my qualifications and professional background align well with your requirements.`,
+        experience: `I have maintained a distinguished record of achievement in my professional endeavors, with particular competencies in:`,
+        closing: `I would be honored to discuss my candidacy further at your convenience. Please accept my gratitude for your time and consideration.`,
+        signature: `Respectfully,\n[Your Name]`
+      }
+    };
+
+    return toneStyles[formData.tone as keyof typeof toneStyles] || toneStyles.professional;
+  };
+
   const handleGenerate = async () => {
     if (!formData.jobTitle || !formData.companyName || !formData.jobDescription) {
       toast.error('Please fill in the required fields');
@@ -35,25 +77,26 @@ const CoverLetterGenerator = () => {
     setIsGenerating(true);
     // Simulate AI generation
     setTimeout(() => {
-      const mockLetter = `Dear ${formData.hiringManager || 'Hiring Manager'},
+      const toneContent = generateToneSpecificContent();
+      
+      const mockLetter = `${toneContent.greeting}
 
-I am writing to express my strong interest in the ${formData.jobTitle} position at ${formData.companyName}. With my extensive background in software development and passion for creating innovative solutions, I am excited about the opportunity to contribute to your team's success.
+${toneContent.opening}
 
-In my previous roles, I have demonstrated expertise in the key areas mentioned in your job description. My experience includes:
+${toneContent.experience}
 
 • Developing scalable web applications using modern technologies
 • Collaborating with cross-functional teams to deliver high-quality products
 • Implementing best practices for code quality and performance optimization
 • Leading projects from conception to deployment
 
-What particularly excites me about ${formData.companyName} is your commitment to innovation and excellence in the tech industry. I am impressed by your recent initiatives and would love to bring my skills and enthusiasm to help drive your continued growth.
+What particularly draws me to ${formData.companyName} is your reputation for innovation and excellence in the industry. I am impressed by your recent initiatives and would be excited to contribute my skills and expertise to help drive your continued growth.
 
 ${formData.keyPoints ? `Additionally, I would like to highlight: ${formData.keyPoints}` : ''}
 
-I am eager to discuss how my background and passion align with your team's needs. Thank you for considering my application. I look forward to the opportunity to contribute to ${formData.companyName}'s continued success.
+${toneContent.closing}
 
-Best regards,
-[Your Name]`;
+${toneContent.signature}`;
 
       setGeneratedLetter(mockLetter);
       setIsGenerating(false);
