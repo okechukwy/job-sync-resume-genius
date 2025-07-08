@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getIndustryTemplateCount } from "@/data/templateData";
 
 interface IndustrySelectionProps {
   onIndustrySelect: (industry: string) => void;
@@ -11,38 +12,32 @@ const IndustrySelection = ({ onIndustrySelect }: IndustrySelectionProps) => {
     {
       icon: "💻",
       title: "Technology",
-      description: "Software engineers, data scientists, product managers",
-      templates: 12
+      description: "Software engineers, data scientists, product managers"
     },
     {
       icon: "🏥",
       title: "Healthcare",
-      description: "Doctors, nurses, medical professionals",
-      templates: 8
+      description: "Doctors, nurses, medical professionals"
     },
     {
       icon: "💰",
       title: "Finance",
-      description: "Analysts, consultants, investment professionals",
-      templates: 10
+      description: "Analysts, consultants, investment professionals"
     },
     {
       icon: "🎨",
       title: "Creative",
-      description: "Designers, writers, marketing professionals",
-      templates: 15
+      description: "Designers, writers, marketing professionals"
     },
     {
       icon: "📊",
       title: "Business",
-      description: "Management, sales, operations professionals",
-      templates: 11
+      description: "Management, sales, operations professionals"
     },
     {
       icon: "🔬",
       title: "Research",
-      description: "Scientists, academics, research professionals",
-      templates: 7
+      description: "Scientists, academics, research professionals"
     }
   ];
 
@@ -63,7 +58,7 @@ const IndustrySelection = ({ onIndustrySelect }: IndustrySelectionProps) => {
               {industry.description}
             </p>
             <Badge variant="outline" className="text-xs">
-              {industry.templates} Templates Available
+              {getIndustryTemplateCount(industry.title)} Templates Available
             </Badge>
           </CardHeader>
           <CardContent>

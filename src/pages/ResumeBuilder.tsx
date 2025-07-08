@@ -161,6 +161,7 @@ const ResumeBuilder = () => {
           <TemplateSelection 
             selectedTemplate={selectedTemplate}
             onTemplateSelect={handleTemplateSelect}
+            selectedIndustry={selectedIndustry}
           />
 
           {/* Continue Section */}
