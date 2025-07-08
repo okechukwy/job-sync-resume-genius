@@ -24,11 +24,14 @@ import TechProfessional from "./pages/templates/TechProfessional";
 import SoftwareEngineerPro from "./pages/templates/SoftwareEngineerPro";
 import DataScientistElite from "./pages/templates/DataScientistElite";
 import DevOpsEngineer from "./pages/templates/DevOpsEngineer";
+import MobileDeveloper from "./pages/templates/MobileDeveloper";
 import UxUiDesigner from "./pages/templates/UxUiDesigner";
 import Photographer from "./pages/templates/Photographer";
 import BusinessProfessional from "./pages/templates/BusinessProfessional";
 import MedicalDoctor from "./pages/templates/MedicalDoctor";
+import RegisteredNurse from "./pages/templates/RegisteredNurse";
 import InvestmentBanker from "./pages/templates/InvestmentBanker";
+import FinancialAnalyst from "./pages/templates/FinancialAnalyst";
 import GradientModern from "./pages/templates/GradientModern";
 import MinimalistPro from "./pages/templates/MinimalistPro";
 import ColorfulFresh from "./pages/templates/ColorfulFresh";
@@ -80,14 +83,17 @@ const App = () => (
           <Route path="/templates/software-engineer-pro" element={<SoftwareEngineerPro />} />
           <Route path="/templates/data-scientist-elite" element={<DataScientistElite />} />
           <Route path="/templates/devops-engineer" element={<DevOpsEngineer />} />
+          <Route path="/templates/mobile-developer" element={<MobileDeveloper />} />
           
           {/* Healthcare Templates */}
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
           <Route path="/templates/medical-doctor" element={<MedicalDoctor />} />
+          <Route path="/templates/registered-nurse" element={<RegisteredNurse />} />
           
           {/* Finance Templates */}
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />
           <Route path="/templates/investment-banker" element={<InvestmentBanker />} />
+          <Route path="/templates/financial-analyst" element={<FinancialAnalyst />} />
           
           {/* Creative Templates */}
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
