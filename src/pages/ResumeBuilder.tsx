@@ -33,10 +33,10 @@ const ResumeBuilder = () => {
       // If there's an uploaded file, use the optimization flow
       handleContinueWithUpload(industry);
     } else {
-      // If no uploaded file, use the standard flow
+      // If no uploaded file, use the standard flow - go to template selection first
       setSelectedIndustry(industry);
-      setCurrentStep('build');
-      toast.success(`${industry} industry selected! Let's build your resume.`);
+      setCurrentStep('templates');
+      toast.success(`${industry} industry selected! Choose your template.`);
     }
   };
 
