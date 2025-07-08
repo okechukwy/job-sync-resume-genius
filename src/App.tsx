@@ -21,6 +21,14 @@ import VersionManagement from "./pages/VersionManagement";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
 import TechProfessional from "./pages/templates/TechProfessional";
+import SoftwareEngineerPro from "./pages/templates/SoftwareEngineerPro";
+import DataScientistElite from "./pages/templates/DataScientistElite";
+import DevOpsEngineer from "./pages/templates/DevOpsEngineer";
+import UxUiDesigner from "./pages/templates/UxUiDesigner";
+import Photographer from "./pages/templates/Photographer";
+import BusinessProfessional from "./pages/templates/BusinessProfessional";
+import MedicalDoctor from "./pages/templates/MedicalDoctor";
+import InvestmentBanker from "./pages/templates/InvestmentBanker";
 import GradientModern from "./pages/templates/GradientModern";
 import MinimalistPro from "./pages/templates/MinimalistPro";
 import ColorfulFresh from "./pages/templates/ColorfulFresh";
@@ -67,19 +75,40 @@ const App = () => (
           <Route path="/performance" element={<PerformanceTracking />} />
           <Route path="/versions" element={<VersionManagement />} />
           <Route path="/checkout" element={<Checkout />} />
+          {/* Technology Templates */}
           <Route path="/templates/tech-professional" element={<TechProfessional />} />
-          <Route path="/templates/gradient-modern" element={<GradientModern />} />
-          <Route path="/templates/minimalist-pro" element={<MinimalistPro />} />
-          <Route path="/templates/colorful-fresh" element={<ColorfulFresh />} />
-          <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
+          <Route path="/templates/software-engineer-pro" element={<SoftwareEngineerPro />} />
+          <Route path="/templates/data-scientist-elite" element={<DataScientistElite />} />
+          <Route path="/templates/devops-engineer" element={<DevOpsEngineer />} />
+          
+          {/* Healthcare Templates */}
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
+          <Route path="/templates/medical-doctor" element={<MedicalDoctor />} />
+          
+          {/* Finance Templates */}
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />
+          <Route path="/templates/investment-banker" element={<InvestmentBanker />} />
+          
+          {/* Creative Templates */}
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
           <Route path="/templates/graphic-designer" element={<GraphicDesigner />} />
           <Route path="/templates/marketing-manager" element={<MarketingManager />} />
           <Route path="/templates/content-creator" element={<ContentCreator />} />
+          <Route path="/templates/ux-ui-designer" element={<UxUiDesigner />} />
+          <Route path="/templates/photographer" element={<Photographer />} />
+          
+          {/* Business Templates */}
+          <Route path="/templates/business-professional" element={<BusinessProfessional />} />
           <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
+          <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
+          
+          {/* Research Templates */}
           <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
+          
+          {/* Multi-industry Templates */}
+          <Route path="/templates/gradient-modern" element={<GradientModern />} />
+          <Route path="/templates/minimalist-pro" element={<MinimalistPro />} />
+          <Route path="/templates/colorful-fresh" element={<ColorfulFresh />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/careers" element={<Careers />} />
