@@ -7,11 +7,12 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Upload, FileText, Target, CheckCircle, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { analyzeJobMatch, JobMatchingResult } from "@/utils/jobMatchingAnalyzer";
 
 const JobMatching = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<JobMatchingResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,27 +37,16 @@ const JobMatching = () => {
     }
 
     setIsAnalyzing(true);
-    // Simulate analysis
-    setTimeout(() => {
-      const mockAnalysis = {
-        matchScore: 78,
-        matchedKeywords: ['JavaScript', 'React', 'Node.js', 'API', 'Database'],
-        missingKeywords: ['TypeScript', 'GraphQL', 'Docker', 'AWS'],
-        skillsGap: [
-          { skill: 'Cloud Computing', importance: 'High', hasSkill: false },
-          { skill: 'TypeScript', importance: 'Medium', hasSkill: false },
-          { skill: 'React', importance: 'High', hasSkill: true },
-        ],
-        recommendations: [
-          'Add TypeScript experience to your skills section',
-          'Include cloud computing projects in your experience',
-          'Highlight your API development experience more prominently'
-        ]
-      };
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
+    try {
+      const result = await analyzeJobMatch(jobDescription, uploadedResume);
+      setAnalysis(result);
       toast.success('Analysis complete!');
-    }, 3000);
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast.error('Failed to analyze job match. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
