@@ -185,50 +185,139 @@ const JobMatching = () => {
               <div>
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertCircle className="h-5 w-5 text-destructive" />
-                  Missing Keywords
+                  Missing Keywords ({analysis.missingKeywords.length})
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {analysis.missingKeywords.map((keyword: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="bg-destructive/10 text-destructive">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
+                {analysis.missingKeywords.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {analysis.missingKeywords.map((keyword: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="glass-card p-4 rounded-lg border-destructive/20 bg-destructive/5">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Action Required:</strong> Consider adding these keywords to your resume. Include them in your skills section, work experience descriptions, or project summaries where relevant and truthful.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="glass-card p-4 rounded-lg border-success/20 bg-success/5">
+                    <p className="text-sm text-success">Excellent! Your resume contains all the key terms from the job description.</p>
+                  </div>
+                )}
               </div>
 
-              {/* Skills Gap */}
+              {/* Skills Gap Analysis */}
               <div>
                 <h3 className="font-semibold mb-3">Skills Gap Analysis</h3>
-                <div className="space-y-2">
-                  {analysis.skillsGap.map((skill: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {skill.hasSkill ? (
-                          <CheckCircle className="h-5 w-5 text-success" />
-                        ) : (
-                          <AlertCircle className="h-5 w-5 text-destructive" />
-                        )}
-                        <span>{skill.skill}</span>
+                <div className="space-y-4">
+                  {/* Missing High Priority Skills */}
+                  {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance === 'High').length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        Critical Skills Missing
+                      </h4>
+                      <div className="space-y-2">
+                        {analysis.skillsGap
+                          .filter(skill => !skill.hasSkill && skill.importance === 'High')
+                          .map((skill: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-destructive/20 bg-destructive/5">
+                              <div className="flex items-center gap-3">
+                                <AlertCircle className="h-5 w-5 text-destructive" />
+                                <span className="font-medium">{skill.skill}</span>
+                              </div>
+                              <Badge variant="destructive">
+                                {skill.importance} Priority
+                              </Badge>
+                            </div>
+                          ))}
                       </div>
-                      <Badge variant={skill.importance === 'High' ? 'destructive' : 'secondary'}>
-                        {skill.importance} Priority
-                      </Badge>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Skills You Have */}
+                  {analysis.skillsGap.filter(skill => skill.hasSkill).length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-success mb-2 flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        Skills You Have
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {analysis.skillsGap
+                          .filter(skill => skill.hasSkill)
+                          .map((skill: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-success/20 bg-success/5">
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="h-5 w-5 text-success" />
+                                <span>{skill.skill}</span>
+                              </div>
+                              <Badge variant={skill.importance === 'High' ? 'destructive' : 'secondary'} className="bg-success/20 text-success">
+                                ✓ Match
+                              </Badge>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Medium/Low Priority Missing Skills */}
+                  {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance !== 'High').length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                        Additional Skills to Consider
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {analysis.skillsGap
+                          .filter(skill => !skill.hasSkill && skill.importance !== 'High')
+                          .map((skill: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                                <span>{skill.skill}</span>
+                              </div>
+                              <Badge variant="secondary">
+                                {skill.importance} Priority
+                              </Badge>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Recommendations */}
               <div>
-                <h3 className="font-semibold mb-3">Recommendations</h3>
-                <ul className="space-y-2">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Action Plan for CV Optimization
+                </h3>
+                <div className="space-y-3">
                   {analysis.recommendations.map((rec: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {rec}
-                    </li>
+                    <div key={index} className="glass-card p-4 rounded-lg border border-primary/20 bg-primary/5">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <p className="text-sm">{rec}</p>
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                  
+                  {/* Additional optimization tips */}
+                  <div className="mt-6 p-4 glass-card rounded-lg border border-blue-500/20 bg-blue-500/5">
+                    <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">💡 Pro Tips</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• Quantify achievements with numbers and percentages</li>
+                      <li>• Use action verbs at the beginning of bullet points</li>
+                      <li>• Mirror the language and terminology used in the job posting</li>
+                      <li>• Keep your resume to 1-2 pages for maximum impact</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
