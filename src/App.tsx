@@ -28,6 +28,13 @@ import MobileDeveloper from "./pages/templates/MobileDeveloper";
 import UxUiDesigner from "./pages/templates/UxUiDesigner";
 import Photographer from "./pages/templates/Photographer";
 import BusinessProfessional from "./pages/templates/BusinessProfessional";
+import CloudArchitect from "./pages/templates/CloudArchitect";
+import CybersecurityExpert from "./pages/templates/CybersecurityExpert";
+import AiMlEngineer from "./pages/templates/AiMlEngineer";
+import FrontendDeveloper from "./pages/templates/FrontendDeveloper";
+import ProductManagerTech from "./pages/templates/ProductManagerTech";
+import QaEngineer from "./pages/templates/QaEngineer";
+import ItSupportSpecialist from "./pages/templates/ItSupportSpecialist";
 import MedicalDoctor from "./pages/templates/MedicalDoctor";
 import RegisteredNurse from "./pages/templates/RegisteredNurse";
 import ResearchScientist from "./pages/templates/ResearchScientist";
@@ -90,6 +97,13 @@ const App = () => (
           <Route path="/templates/data-scientist-elite" element={<DataScientistElite />} />
           <Route path="/templates/devops-engineer" element={<DevOpsEngineer />} />
           <Route path="/templates/mobile-developer" element={<MobileDeveloper />} />
+          <Route path="/templates/cloud-architect" element={<CloudArchitect />} />
+          <Route path="/templates/cybersecurity-expert" element={<CybersecurityExpert />} />
+          <Route path="/templates/ai-ml-engineer" element={<AiMlEngineer />} />
+          <Route path="/templates/frontend-developer" element={<FrontendDeveloper />} />
+          <Route path="/templates/product-manager-tech" element={<ProductManagerTech />} />
+          <Route path="/templates/qa-engineer" element={<QaEngineer />} />
+          <Route path="/templates/it-support-specialist" element={<ItSupportSpecialist />} />
           
           {/* Healthcare Templates */}
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
