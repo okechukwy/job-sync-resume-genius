@@ -28,6 +28,9 @@ import ElegantProfessional from "./pages/templates/ElegantProfessional";
 import HealthcareSpecialist from "./pages/templates/HealthcareSpecialist";
 import FinanceExpert from "./pages/templates/FinanceExpert";
 import CreativeProfessional from "./pages/templates/CreativeProfessional";
+import GraphicDesigner from "./pages/templates/GraphicDesigner";
+import MarketingManager from "./pages/templates/MarketingManager";
+import ContentCreator from "./pages/templates/ContentCreator";
 import ExecutiveLeader from "./pages/templates/ExecutiveLeader";
 import RecentGraduate from "./pages/templates/RecentGraduate";
 import About from "./pages/About";
@@ -72,6 +75,9 @@ const App = () => (
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
+          <Route path="/templates/graphic-designer" element={<GraphicDesigner />} />
+          <Route path="/templates/marketing-manager" element={<MarketingManager />} />
+          <Route path="/templates/content-creator" element={<ContentCreator />} />
           <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
           <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
           <Route path="/about" element={<About />} />
