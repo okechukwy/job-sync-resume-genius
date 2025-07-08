@@ -30,6 +30,12 @@ import Photographer from "./pages/templates/Photographer";
 import BusinessProfessional from "./pages/templates/BusinessProfessional";
 import MedicalDoctor from "./pages/templates/MedicalDoctor";
 import RegisteredNurse from "./pages/templates/RegisteredNurse";
+import ResearchScientist from "./pages/templates/ResearchScientist";
+import AcademicResearcher from "./pages/templates/AcademicResearcher";
+import LabTechnician from "./pages/templates/LabTechnician";
+import ClinicalResearcher from "./pages/templates/ClinicalResearcher";
+import DataResearcher from "./pages/templates/DataResearcher";
+import EnvironmentalScientist from "./pages/templates/EnvironmentalScientist";
 import InvestmentBanker from "./pages/templates/InvestmentBanker";
 import FinancialAnalyst from "./pages/templates/FinancialAnalyst";
 import GradientModern from "./pages/templates/GradientModern";
@@ -109,6 +115,12 @@ const App = () => (
           <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
           
           {/* Research Templates */}
+          <Route path="/templates/research-scientist" element={<ResearchScientist />} />
+          <Route path="/templates/academic-researcher" element={<AcademicResearcher />} />
+          <Route path="/templates/lab-technician" element={<LabTechnician />} />
+          <Route path="/templates/clinical-researcher" element={<ClinicalResearcher />} />
+          <Route path="/templates/data-researcher" element={<DataResearcher />} />
+          <Route path="/templates/environmental-scientist" element={<EnvironmentalScientist />} />
           <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
           
           {/* Multi-industry Templates */}
