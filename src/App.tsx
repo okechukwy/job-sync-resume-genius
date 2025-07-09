@@ -66,6 +66,13 @@ import SocialMediaManager from "./pages/templates/SocialMediaManager";
 import WebDesigner from "./pages/templates/WebDesigner";
 import MotionGraphics from "./pages/templates/MotionGraphics";
 import CreativeDirector from "./pages/templates/CreativeDirector";
+import OperationsManager from "./pages/templates/OperationsManager";
+import SalesManager from "./pages/templates/SalesManager";
+import ProjectManager from "./pages/templates/ProjectManager";
+import BusinessAnalyst from "./pages/templates/BusinessAnalyst";
+import HrManager from "./pages/templates/HrManager";
+import PharmacistPro from "./pages/templates/PharmacistPro";
+import AccountantPro from "./pages/templates/AccountantPro";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
@@ -118,11 +125,13 @@ const App = () => (
           <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
           <Route path="/templates/medical-doctor" element={<MedicalDoctor />} />
           <Route path="/templates/registered-nurse" element={<RegisteredNurse />} />
+          <Route path="/templates/pharmacist-pro" element={<PharmacistPro />} />
           
           {/* Finance Templates */}
           <Route path="/templates/finance-expert" element={<FinanceExpert />} />
           <Route path="/templates/investment-banker" element={<InvestmentBanker />} />
           <Route path="/templates/financial-analyst" element={<FinancialAnalyst />} />
+          <Route path="/templates/accountant-pro" element={<AccountantPro />} />
           
           {/* Creative Templates */}
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
@@ -145,6 +154,11 @@ const App = () => (
           <Route path="/templates/business-professional" element={<BusinessProfessional />} />
           <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
           <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
+          <Route path="/templates/operations-manager" element={<OperationsManager />} />
+          <Route path="/templates/sales-manager" element={<SalesManager />} />
+          <Route path="/templates/project-manager" element={<ProjectManager />} />
+          <Route path="/templates/business-analyst" element={<BusinessAnalyst />} />
+          <Route path="/templates/hr-manager" element={<HrManager />} />
           
           {/* Research Templates */}
           <Route path="/templates/research-scientist" element={<ResearchScientist />} />
