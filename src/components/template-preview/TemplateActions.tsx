@@ -10,12 +10,12 @@ export const TemplateActions = ({ templateName }: TemplateActionsProps) => {
   return (
     <div className="text-center space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link to={`/get-started?template=${encodeURIComponent(templateName.toLowerCase().replace(/\s+/g, '-'))}`}>
-          <Button variant="hero" size="lg" className="min-w-48">
+        <Button asChild variant="hero" size="lg" className="min-w-48">
+          <Link to={`/get-started?template=${encodeURIComponent(templateName.toLowerCase().replace(/\s+/g, '-'))}`}>
             <FileText className="w-4 h-4 mr-2" />
             Use This Template
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <Button variant="glass" size="lg" className="min-w-48">
           <Download className="w-4 h-4 mr-2" />
           Download Sample
