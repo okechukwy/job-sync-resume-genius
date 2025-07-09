@@ -7,7 +7,7 @@ import ProgressHeader from "@/components/resume-steps/ProgressHeader";
 import StepIndicator from "@/components/resume-steps/StepIndicator";
 import NavigationButtons from "@/components/resume-steps/NavigationButtons";
 import StepContent from "@/components/resume-steps/StepContent";
-import LivePreview from "@/components/LivePreview";
+import { LivePreview } from "@/components/live-preview";
 
 interface ResumeStepsProps {
   selectedIndustry: string;
