@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { allTemplates } from "@/data/templateData";
 
 export type ResumeBuilderStep = 'industry' | 'templates' | 'analysis' | 'build';
 
@@ -16,11 +17,18 @@ export const useResumeBuilder = () => {
   useEffect(() => {
     const templateParam = searchParams.get('template');
     if (templateParam) {
-      // Decode and format the template name properly
-      const decodedTemplate = decodeURIComponent(templateParam).replace(/-/g, ' ');
-      setSelectedTemplate(decodedTemplate);
-      setCurrentStep('build');
-      toast.success(`${decodedTemplate} template selected! Let's build your resume.`);
+      // Find the template by matching the route parameter with actual template routes
+      const decodedParam = decodeURIComponent(templateParam);
+      const template = allTemplates.find(t => 
+        t.route.includes(decodedParam) || 
+        t.name.toLowerCase().replace(/\s+/g, '-') === decodedParam
+      );
+      
+      if (template) {
+        setSelectedTemplate(template.name);
+        setCurrentStep('build');
+        toast.success(`${template.name} template selected! Let's build your resume.`);
+      }
     }
   }, [searchParams]);
 
