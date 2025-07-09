@@ -171,13 +171,6 @@ const PricingSection = () => {
           </div>
         </div>
 
-        {/* Money back guarantee */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 glass-card px-6 py-3 rounded-full">
-            <span className="text-2xl">🛡️</span>
-            <span className="font-medium">30-day money-back guarantee</span>
-          </div>
-        </div>
       </div>
     </section>
   );

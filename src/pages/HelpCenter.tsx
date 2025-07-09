@@ -65,7 +65,7 @@ const HelpCenter = () => {
     },
     {
       question: "Do you offer refunds?",
-      answer: "We offer a 30-day money-back guarantee for all premium subscriptions. Contact our support team if you're not satisfied with our service."
+      answer: "Contact our support team if you're not satisfied with our service and we'll work with you to find a solution."
     },
     {
       question: "Can I download my resume in different formats?",
