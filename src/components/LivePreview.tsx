@@ -13,7 +13,7 @@ interface LivePreviewProps {
 }
 
 const LivePreview = ({ data, industry, template, className = "" }: LivePreviewProps) => {
-  const [zoomLevel, setZoomLevel] = useState(0.7);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
 
