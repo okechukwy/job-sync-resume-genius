@@ -9,7 +9,7 @@ const Navigation = () => {
     { label: "Features", href: "#features", type: "anchor" },
     { label: "Templates", href: "#templates", type: "anchor" },
     { label: "Pricing", href: "#pricing", type: "anchor" },
-    { label: "Resources", href: "/resources", type: "link" },
+    { label: "Resources", href: "#resources", type: "anchor" },
   ];
 
   return (
