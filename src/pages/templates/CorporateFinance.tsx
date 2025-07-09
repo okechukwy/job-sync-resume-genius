@@ -4,12 +4,24 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
-import { businessProfessionalSample, templateStyles } from "@/data/sampleResumeData";
+import { financeResumeData } from "@/data/sampleResumeData";
 import { formatDate } from "@/lib/utils";
 
-const BusinessProfessional = () => {
+const CorporateFinance = () => {
+  const financeStyles = {
+    headerBg: "bg-gradient-finance",
+    headerText: "text-finance-text",
+    accentColor: "text-finance-primary",
+    borderColor: "border-finance-border",
+    sectionBorder: "border-l-4 border-finance-primary pl-3",
+    layout: "sophisticated",
+    spacing: "elegant",
+    skillsGrid: true,
+    backgroundPattern: "bg-finance-bg"
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-business relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-sophisticated relative overflow-hidden">
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -26,33 +38,32 @@ const BusinessProfessional = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <div className="text-6xl mb-4 animate-bounce-subtle">📊</div>
+          <div className="text-6xl mb-4 animate-bounce-subtle">🏢</div>
           <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
-            Business Professional Template
+            Corporate Finance Template
           </Badge>
           <h1 className="typography-display mb-6 animate-fade-in">
-            Business Professional{" "}
+            Corporate Finance{" "}
             <span className="gradient-text">Resume</span>
           </h1>
           <p className="typography-body max-w-2xl mx-auto animate-fade-in text-contrast-medium">
-            Management, sales, and operations professionals. 
-            Perfect for showcasing leadership and business results.
+            Corporate financial planning and analysis professionals showcasing strategic expertise.
           </p>
           
           <div className="flex flex-wrap justify-center gap-2 mt-6 animate-fade-in">
-            <Badge variant="outline" className="hover-scale">Professional</Badge>
-            <Badge variant="outline" className="hover-scale">Leadership</Badge>
-            <Badge variant="outline" className="hover-scale">Results-Driven</Badge>
+            <Badge variant="outline" className="hover-scale">Corporate</Badge>
+            <Badge variant="outline" className="hover-scale">Strategic</Badge>
+            <Badge variant="outline" className="hover-scale">Executive</Badge>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <Card className="glass-card hover-lift animate-fade-in">
             <CardContent className="p-6">
-              <div className="bg-business-background rounded-lg p-6 min-h-[600px] business-shadows">
+              <div className="bg-finance-background rounded-lg p-6 min-h-[600px] finance-shadows">
                 <ResumeLayoutRenderer 
-                  data={businessProfessionalSample}
-                  styles={templateStyles.business}
+                  data={financeResumeData}
+                  styles={financeStyles}
                   layoutVariant="classic-professional"
                   formatDate={formatDate}
                 />
@@ -63,50 +74,23 @@ const BusinessProfessional = () => {
           <div className="space-y-6">
             <Card className="glass-card hover-lift animate-fade-in">
               <CardContent className="p-6 space-y-4">
-                <h3 className="typography-heading">Template Features</h3>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Leadership Impact</h4>
-                    <p className="text-sm text-contrast-medium">Showcase team management and strategic results</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Financial Results</h4>
-                    <p className="text-sm text-contrast-medium">Highlight revenue growth and cost savings</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Professional Development</h4>
-                    <p className="text-sm text-contrast-medium">Display certifications and continuous learning</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card hover-lift animate-fade-in">
-              <CardContent className="p-6 space-y-4">
                 <h3 className="typography-heading">Perfect For</h3>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Business Managers
+                    <div className="w-1.5 h-1.5 bg-finance-accent rounded-full"></div>
+                    Corporate Finance Managers
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Operations Directors
+                    <div className="w-1.5 h-1.5 bg-finance-accent rounded-full"></div>
+                    Financial Planning & Analysis
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Sales Leaders
+                    <div className="w-1.5 h-1.5 bg-finance-accent rounded-full"></div>
+                    Treasury Managers
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Project Managers
+                    <div className="w-1.5 h-1.5 bg-finance-accent rounded-full"></div>
+                    Corporate Development
                   </li>
                 </ul>
               </CardContent>
@@ -136,4 +120,4 @@ const BusinessProfessional = () => {
   );
 };
 
-export default BusinessProfessional;
+export default CorporateFinance;

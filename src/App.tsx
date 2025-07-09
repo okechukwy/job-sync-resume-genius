@@ -73,6 +73,9 @@ import BusinessAnalyst from "./pages/templates/BusinessAnalyst";
 import HrManager from "./pages/templates/HrManager";
 import PharmacistPro from "./pages/templates/PharmacistPro";
 import AccountantPro from "./pages/templates/AccountantPro";
+import RiskManager from "./pages/templates/RiskManager";
+import PortfolioManager from "./pages/templates/PortfolioManager";
+import CorporateFinance from "./pages/templates/CorporateFinance";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Careers from "./pages/Careers";
@@ -132,6 +135,9 @@ const App = () => (
           <Route path="/templates/investment-banker" element={<InvestmentBanker />} />
           <Route path="/templates/financial-analyst" element={<FinancialAnalyst />} />
           <Route path="/templates/accountant-pro" element={<AccountantPro />} />
+          <Route path="/templates/risk-manager" element={<RiskManager />} />
+          <Route path="/templates/portfolio-manager" element={<PortfolioManager />} />
+          <Route path="/templates/corporate-finance" element={<CorporateFinance />} />
           
           {/* Creative Templates */}
           <Route path="/templates/creative-professional" element={<CreativeProfessional />} />

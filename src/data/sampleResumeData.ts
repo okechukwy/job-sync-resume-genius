@@ -242,67 +242,6 @@ export const templateStyles = {
   }
 };
 
-// Sample data for Creative industry
-export const creativeProfessionalSample: ResumeData = {
-  personalInfo: {
-    fullName: "Luna Creative",
-    email: "luna.creative@design.studio",
-    phone: "(555) 246-8135",
-    location: "Los Angeles, CA",
-    website: "lunacreative.portfolio",
-    linkedin: "linkedin.com/in/lunacreative"
-  },
-  experience: [
-    {
-      id: "1",
-      position: "Creative Director",
-      company: "Vibrant Studios",
-      startDate: "2021-03",
-      endDate: "",
-      current: true,
-      description: "Leading creative vision for 50+ brand campaigns, increasing client engagement by 200%. Managed multidisciplinary team of designers, photographers, and content creators. Pioneered innovative visual storytelling techniques that became industry standards."
-    },
-    {
-      id: "2",
-      position: "Senior Art Director",
-      company: "ColorBox Agency",
-      startDate: "2018-06",
-      endDate: "2021-02",
-      current: false,
-      description: "Conceptualized and executed award-winning visual campaigns for Fortune 500 clients. Collaborated with brand strategists to develop compelling visual narratives. Led rebranding initiatives resulting in 85% brand recognition improvement."
-    }
-  ],
-  education: [
-    {
-      id: "1",
-      degree: "Master of Fine Arts",
-      field: "Visual Design",
-      school: "Art Center College of Design",
-      startDate: "2016-09",
-      endDate: "2018-05",
-      gpa: "3.9"
-    }
-  ],
-  skills: {
-    technical: [
-      "Adobe Creative Suite",
-      "Figma & Sketch",
-      "3D Modeling",
-      "Motion Graphics",
-      "Brand Identity Design",
-      "Typography Design"
-    ],
-    soft: [
-      "Creative Vision",
-      "Visual Storytelling",
-      "Art Direction",
-      "Team Leadership",
-      "Client Collaboration",
-      "Trend Analysis"
-    ]
-  }
-};
-
 // Sample data for Finance industry
 export const financeProfessionalSample: ResumeData = {
   personalInfo: {
@@ -360,6 +299,68 @@ export const financeProfessionalSample: ResumeData = {
       "Risk Management",
       "Wealth Preservation",
       "Investment Strategy"
+    ]
+  }
+};
+
+// Export finance data with consistent naming
+export const financeResumeData = financeProfessionalSample;
+export const creativeProfessionalSample: ResumeData = {
+  personalInfo: {
+    fullName: "Luna Creative",
+    email: "luna.creative@design.studio",
+    phone: "(555) 246-8135",
+    location: "Los Angeles, CA",
+    website: "lunacreative.portfolio",
+    linkedin: "linkedin.com/in/lunacreative"
+  },
+  experience: [
+    {
+      id: "1",
+      position: "Creative Director",
+      company: "Vibrant Studios",
+      startDate: "2021-03",
+      endDate: "",
+      current: true,
+      description: "Leading creative vision for 50+ brand campaigns, increasing client engagement by 200%. Managed multidisciplinary team of designers, photographers, and content creators. Pioneered innovative visual storytelling techniques that became industry standards."
+    },
+    {
+      id: "2",
+      position: "Senior Art Director",
+      company: "ColorBox Agency",
+      startDate: "2018-06",
+      endDate: "2021-02",
+      current: false,
+      description: "Conceptualized and executed award-winning visual campaigns for Fortune 500 clients. Collaborated with brand strategists to develop compelling visual narratives. Led rebranding initiatives resulting in 85% brand recognition improvement."
+    }
+  ],
+  education: [
+    {
+      id: "1",
+      degree: "Master of Fine Arts",
+      field: "Visual Design",
+      school: "Art Center College of Design",
+      startDate: "2016-09",
+      endDate: "2018-05",
+      gpa: "3.9"
+    }
+  ],
+  skills: {
+    technical: [
+      "Adobe Creative Suite",
+      "Figma & Sketch",
+      "3D Modeling",
+      "Motion Graphics",
+      "Brand Identity Design",
+      "Typography Design"
+    ],
+    soft: [
+      "Creative Vision",
+      "Visual Storytelling",
+      "Art Direction",
+      "Team Leadership",
+      "Client Collaboration",
+      "Trend Analysis"
     ]
   }
 };
