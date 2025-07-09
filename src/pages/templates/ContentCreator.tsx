@@ -6,7 +6,27 @@ import { Link } from "react-router-dom";
 
 const ContentCreator = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Content Creation Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-20 w-32 h-24 border border-primary/20 rounded-xl transform rotate-12">
+          <div className="absolute inset-3 border border-primary/15 rounded-lg transform -rotate-6"></div>
+        </div>
+        <div className="absolute bottom-32 right-24 w-28 h-28 bg-gradient-to-br from-primary/15 to-primary/8 rounded-full"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-20 border border-primary/12 rounded-lg transform -rotate-8"></div>
+      </div>
+      
+      {/* Social Media Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-1/6 w-6 h-6 bg-primary/15 rounded-full"></div>
+        <div className="absolute top-1/4 left-1/6 w-4 h-4 bg-primary/12 rounded-full ml-8 mt-2"></div>
+        <div className="absolute top-1/4 left-1/6 w-5 h-5 bg-primary/10 rounded-full ml-14 mt-4"></div>
+        
+        <div className="absolute bottom-1/3 right-1/5 w-16 h-2 bg-primary/12 rounded-full"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-12 h-2 bg-primary/15 rounded-full mt-1"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-20 h-2 bg-primary/10 rounded-full mt-2"></div>
+      </div>
+      
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -25,32 +45,32 @@ const ContentCreator = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Template Header */}
         <div className="text-center mb-12">
-          <div className="text-6xl mb-4">📝</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+          <div className="text-6xl mb-4 animate-bounce-subtle">📝</div>
+          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
             Content Creator Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="visual-hierarchy-1 mb-6 animate-fade-in">
             Content Creator{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="visual-hierarchy-body max-w-2xl mx-auto animate-fade-in">
             Social media and content creation specialists design. 
             Perfect for showcasing your creative content and engagement metrics.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Content</Badge>
-            <Badge variant="outline">Social Media</Badge>
-            <Badge variant="outline">Engaging</Badge>
+          <div className="flex flex-wrap justify-center spacing-grid mt-6 animate-fade-in">
+            <Badge variant="outline" className="hover-scale">Content</Badge>
+            <Badge variant="outline" className="hover-scale">Social Media</Badge>
+            <Badge variant="outline" className="hover-scale">Engaging</Badge>
           </div>
         </div>
 
         {/* Template Preview and Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 spacing-grid mb-12">
           {/* Template Preview */}
-          <Card className="glass-card">
+          <Card className="glass-card hover-lift animate-fade-in">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="visual-hierarchy-3 flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Template Preview
               </CardTitle>
@@ -103,10 +123,10 @@ const ContentCreator = () => {
           </Card>
 
           {/* Template Details */}
-          <div className="space-y-6">
-            <Card className="glass-card">
+          <div className="spacing-content">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Template Features</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Template Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -133,9 +153,9 @@ const ContentCreator = () => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Perfect For</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Perfect For</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">

@@ -6,7 +6,22 @@ import { Link } from "react-router-dom";
 
 const MinimalistPro = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Minimalist Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.015]">
+        <div className="absolute top-32 left-24 w-24 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent"></div>
+        <div className="absolute top-48 left-32 w-32 h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
+        <div className="absolute bottom-48 right-32 w-28 h-px bg-gradient-to-r from-transparent via-primary/8 to-transparent"></div>
+        <div className="absolute bottom-32 right-24 w-24 h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent"></div>
+      </div>
+      
+      {/* Subtle Geometric Elements */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-1/4 right-1/6 w-px h-24 bg-gradient-to-b from-transparent via-primary/10 to-transparent"></div>
+        <div className="absolute bottom-1/4 left-1/6 w-px h-32 bg-gradient-to-b from-transparent via-primary/8 to-transparent"></div>
+        <div className="absolute top-1/2 left-1/2 w-6 h-6 border border-primary/8 rounded-full"></div>
+      </div>
+      
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -25,32 +40,32 @@ const MinimalistPro = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Template Header */}
         <div className="text-center mb-12">
-          <div className="text-6xl mb-4">✨</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+          <div className="text-6xl mb-4 animate-bounce-subtle">✨</div>
+          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
             Minimalist Pro Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="visual-hierarchy-1 mb-6 animate-fade-in">
             Minimalist Pro{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="visual-hierarchy-body max-w-2xl mx-auto animate-fade-in">
             Clean, sophisticated design that lets your content shine. 
             Perfect balance of white space and information for maximum impact.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Clean</Badge>
-            <Badge variant="outline">Minimalist</Badge>
-            <Badge variant="outline">Professional</Badge>
+          <div className="flex flex-wrap justify-center spacing-grid mt-6 animate-fade-in">
+            <Badge variant="outline" className="hover-scale">Clean</Badge>
+            <Badge variant="outline" className="hover-scale">Minimalist</Badge>
+            <Badge variant="outline" className="hover-scale">Professional</Badge>
           </div>
         </div>
 
         {/* Template Preview and Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 spacing-grid mb-12">
           {/* Template Preview */}
-          <Card className="glass-card">
+          <Card className="glass-card hover-lift animate-fade-in">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="visual-hierarchy-3 flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Template Preview
               </CardTitle>
@@ -121,10 +136,10 @@ const MinimalistPro = () => {
           </Card>
 
           {/* Template Details */}
-          <div className="space-y-6">
-            <Card className="glass-card">
+          <div className="spacing-content">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Template Features</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Template Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -158,9 +173,9 @@ const MinimalistPro = () => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Perfect For</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Perfect For</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
