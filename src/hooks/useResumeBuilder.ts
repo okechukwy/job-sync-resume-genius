@@ -27,8 +27,16 @@ export const useResumeBuilder = () => {
       const template = allTemplates.find(t => {
         const routeMatch = t.route.includes(decodedParam);
         const nameMatch = t.name.toLowerCase().replace(/\s+/g, '-') === decodedParam;
-        console.log(`🔍 Checking template "${t.name}":`, { routeMatch, nameMatch, route: t.route });
-        return routeMatch || nameMatch;
+        const exactNameMatch = t.name.toLowerCase() === decodedParam.replace(/-/g, ' ');
+        console.log(`🔍 Checking template "${t.name}":`, { 
+          routeMatch, 
+          nameMatch, 
+          exactNameMatch, 
+          route: t.route,
+          templateNameSlug: t.name.toLowerCase().replace(/\s+/g, '-'),
+          paramSlug: decodedParam
+        });
+        return routeMatch || nameMatch || exactNameMatch;
       });
       
       console.log('🔍 Found template:', template);
