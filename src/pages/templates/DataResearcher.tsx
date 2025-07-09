@@ -6,7 +6,30 @@ import { Link } from "react-router-dom";
 
 const DataResearcher = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Data Research Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-16 left-12 w-32 h-4 bg-primary/20 rounded-full"></div>
+        <div className="absolute top-20 left-16 w-28 h-4 bg-primary/15 rounded-full"></div>
+        <div className="absolute top-24 left-20 w-24 h-4 bg-primary/12 rounded-full"></div>
+        <div className="absolute bottom-32 right-16 w-4 h-20 bg-primary/18"></div>
+        <div className="absolute bottom-32 right-20 w-4 h-16 bg-primary/15"></div>
+        <div className="absolute bottom-32 right-24 w-4 h-24 bg-primary/12"></div>
+      </div>
+      
+      {/* Statistical Charts */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/3 left-1/6 w-24 h-16 border border-primary/15 rounded-lg">
+          <div className="absolute inset-2 border border-primary/12 rounded-md">
+            <div className="absolute bottom-2 left-2 w-2 h-8 bg-primary/10"></div>
+            <div className="absolute bottom-2 left-5 w-2 h-6 bg-primary/8"></div>
+            <div className="absolute bottom-2 left-8 w-2 h-10 bg-primary/12"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-1/4 right-1/5 w-20 h-20 border border-primary/12 rounded-full">
+          <div className="absolute inset-3 border border-primary/10 rounded-full"></div>
+        </div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

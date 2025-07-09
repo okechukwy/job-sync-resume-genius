@@ -6,7 +6,21 @@ import { Link } from "react-router-dom";
 
 const EnvironmentalScientist = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Environmental Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-20 h-32 bg-gradient-to-t from-primary/20 via-primary/15 to-primary/8 rounded-full transform rotate-12"></div>
+        <div className="absolute bottom-32 right-20 w-16 h-28 bg-gradient-to-b from-primary/18 via-primary/12 to-primary/6 rounded-full transform -rotate-15"></div>
+        <div className="absolute top-1/2 left-1/4 w-12 h-24 bg-gradient-to-t from-primary/15 to-primary/5 rounded-full"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-14 h-20 bg-gradient-to-b from-primary/12 to-primary/4 rounded-full transform rotate-8"></div>
+      </div>
+      
+      {/* Organic Flowing Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-10 w-40 h-2 bg-gradient-to-r from-primary/15 via-primary/10 to-transparent rounded-full transform rotate-6"></div>
+        <div className="absolute bottom-1/3 right-12 w-32 h-2 bg-gradient-to-l from-primary/12 via-primary/8 to-transparent rounded-full transform -rotate-12"></div>
+        <div className="absolute top-2/3 left-1/3 w-28 h-2 bg-gradient-to-r from-transparent via-primary/8 to-primary/12 rounded-full transform rotate-3"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
