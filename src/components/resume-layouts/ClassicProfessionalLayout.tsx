@@ -8,8 +8,16 @@ export const ClassicProfessionalLayout = ({ data, styles, formatDate, renderSumm
     <div className={`${styles.headerBg} ${styles.borderColor} rounded-xl p-10 -mx-8 -mt-8 mb-8 hover-lift`}>
       <div className="flex items-center justify-center gap-8 mb-6">
         {/* Professional Photo Placeholder */}
-        <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 shadow-xl hover-scale">
-          <User className="w-16 h-16 text-white/80" />
+        <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 shadow-xl hover-scale overflow-hidden">
+          {data.personalInfo.profilePicture ? (
+            <img 
+              src={data.personalInfo.profilePicture} 
+              alt="Profile" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User className="w-16 h-16 text-white/80" />
+          )}
         </div>
         
         <div className="text-center">

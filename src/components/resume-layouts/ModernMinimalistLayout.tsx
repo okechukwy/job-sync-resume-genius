@@ -7,8 +7,16 @@ export const ModernMinimalistLayout = ({ data, styles, formatDate, renderSummary
     <div className="text-left border-b border-gray-200 pb-10 mb-12 hover-scale">
       <div className="flex items-start gap-8 mb-6">
         {/* Professional Photo Placeholder */}
-        <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200 shadow-sm hover-scale">
-          <User className="w-12 h-12 text-gray-400" />
+        <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200 shadow-sm hover-scale overflow-hidden">
+          {data.personalInfo.profilePicture ? (
+            <img 
+              src={data.personalInfo.profilePicture} 
+              alt="Profile" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User className="w-12 h-12 text-gray-400" />
+          )}
         </div>
         
         <div className="flex-1">

@@ -9,6 +9,7 @@ export interface ResumeData {
     location: string;
     website?: string;
     linkedin?: string;
+    profilePicture?: string;
   };
   summary: {
     content: string;
@@ -54,6 +55,7 @@ export const useResumeSteps = () => {
       location: '',
       website: '',
       linkedin: '',
+      profilePicture: '',
     },
     summary: {
       content: '',
