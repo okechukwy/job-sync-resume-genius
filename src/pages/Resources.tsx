@@ -2,10 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
 
 const Resources = () => {
+  const navigate = useNavigate();
+  
+  const handleBackToHome = () => {
+    navigate("/");
+  };
+
   const resources = [
     {
       icon: "📚",
@@ -101,7 +107,7 @@ const Resources = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <PageHeader />
+      <PageHeader backLabel="Back to Home" onCustomBack={handleBackToHome} />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Page Header */}
