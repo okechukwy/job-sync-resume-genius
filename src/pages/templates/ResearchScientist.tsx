@@ -6,7 +6,29 @@ import { Link } from "react-router-dom";
 
 const ResearchScientist = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Research Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-16 left-12 w-24 h-24 border border-primary/20 rounded-full">
+          <div className="absolute inset-2 border border-primary/15 rounded-full">
+            <div className="absolute inset-2 border border-primary/10 rounded-full">
+              <div className="absolute inset-2 bg-primary/5 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute bottom-24 right-16 w-20 h-20 border border-primary/15 rounded-full">
+          <div className="absolute inset-3 border border-primary/10 rounded-full"></div>
+        </div>
+      </div>
+      
+      {/* Molecular Structure Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/3 left-1/4 w-32 h-px bg-primary/15 transform rotate-45"></div>
+        <div className="absolute top-1/3 left-1/4 w-24 h-px bg-primary/12 transform -rotate-45 mt-6"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-28 h-px bg-primary/10 transform rotate-30"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-20 h-px bg-primary/8 transform -rotate-30 mt-4"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

@@ -6,7 +6,23 @@ import { Link } from "react-router-dom";
 
 const WebDesigner = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Web Design Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-16 left-12 w-32 h-20 border border-primary/20 rounded-lg">
+          <div className="absolute inset-3 border border-primary/15 rounded-md"></div>
+          <div className="absolute inset-6 bg-primary/8 rounded-sm"></div>
+        </div>
+        <div className="absolute bottom-28 right-16 w-28 h-18 border border-primary/15 rounded-lg transform rotate-6"></div>
+        <div className="absolute top-1/3 right-1/4 w-24 h-16 border border-primary/12 rounded-md transform -rotate-3"></div>
+      </div>
+      
+      {/* Responsive Design Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-40 left-1/5 w-8 h-12 bg-primary/10 rounded-sm"></div>
+        <div className="absolute top-42 left-1/5 w-16 h-10 border border-primary/12 rounded-sm ml-10"></div>
+        <div className="absolute top-44 left-1/5 w-24 h-8 border border-primary/8 rounded-sm ml-28"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

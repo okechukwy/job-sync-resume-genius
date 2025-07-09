@@ -6,7 +6,20 @@ import { Link } from "react-router-dom";
 
 const ArtDirector = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Creative Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute top-20 left-16 w-32 h-2 bg-gradient-to-r from-primary/20 to-transparent transform rotate-12"></div>
+        <div className="absolute top-40 right-24 w-24 h-3 bg-gradient-to-l from-accent/20 to-transparent transform -rotate-6"></div>
+        <div className="absolute bottom-60 left-1/3 w-40 h-1 bg-gradient-to-r from-transparent via-primary/15 to-transparent transform rotate-45"></div>
+        <div className="absolute bottom-32 right-1/4 w-28 h-2 bg-gradient-to-l from-primary/10 to-transparent transform -rotate-12"></div>
+      </div>
+      
+      {/* Abstract Brush Strokes */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-1/3 left-10 w-48 h-8 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 transform rotate-3 rounded-full"></div>
+        <div className="absolute bottom-1/4 right-16 w-36 h-6 bg-gradient-to-l from-accent/8 via-transparent to-accent/12 transform -rotate-6 rounded-full"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

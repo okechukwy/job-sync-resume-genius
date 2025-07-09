@@ -6,7 +6,26 @@ import { Link } from "react-router-dom";
 
 const DevOpsEngineer = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* DevOps Infrastructure Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-24 left-20 w-20 h-12 border border-primary/20 rounded-sm">
+          <div className="absolute inset-2 border border-primary/15">
+            <div className="absolute inset-1 bg-primary/10"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-40 right-24 w-16 h-10 border border-primary/15 rounded-sm transform rotate-12"></div>
+        <div className="absolute top-1/2 left-1/4 w-18 h-8 border border-primary/12 rounded-sm transform -rotate-6"></div>
+      </div>
+      
+      {/* Pipeline Connection Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/3 left-10 w-48 h-px bg-gradient-to-r from-primary/15 via-primary/20 to-primary/10"></div>
+        <div className="absolute bottom-1/3 right-12 w-40 h-px bg-gradient-to-l from-primary/12 via-primary/18 to-primary/8"></div>
+        
+        <div className="absolute left-1/4 top-16 w-px h-32 bg-gradient-to-b from-primary/12 via-primary/15 to-primary/8"></div>
+        <div className="absolute right-1/3 bottom-20 w-px h-28 bg-gradient-to-t from-primary/10 via-primary/12 to-primary/6"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

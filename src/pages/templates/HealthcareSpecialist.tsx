@@ -6,7 +6,23 @@ import { Link } from "react-router-dom";
 
 const HealthcareSpecialist = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Healthcare Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-10 left-10 w-32 h-32 border border-primary/20 rounded-full"></div>
+        <div className="absolute top-32 right-20 w-24 h-24 bg-primary/10 rounded-full"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 border-2 border-primary/15 rounded-full"></div>
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-primary/5 rounded-full"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-primary/10 rounded-full"></div>
+      </div>
+      
+      {/* Subtle Medical Cross Pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute top-1/4 left-1/6 w-6 h-20 bg-primary/10"></div>
+        <div className="absolute top-1/4 left-1/6 w-20 h-6 bg-primary/10 mt-7"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-4 h-16 bg-primary/8"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-16 h-4 bg-primary/8 mt-6"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">

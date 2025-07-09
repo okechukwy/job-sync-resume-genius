@@ -6,7 +6,25 @@ import { Link } from "react-router-dom";
 
 const BrandManager = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Brand Strategy Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-24 left-20 w-20 h-20 border-2 border-primary/20 rounded-full">
+          <div className="absolute inset-2 border border-primary/15 rounded-full">
+            <div className="absolute inset-2 bg-primary/10 rounded-full"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-36 right-24 w-16 h-16 border border-primary/15 transform rotate-45">
+          <div className="absolute inset-2 border border-primary/12 transform -rotate-45"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 border border-primary/12 rounded-lg transform rotate-12"></div>
+      </div>
+      
+      {/* Brand Identity Elements */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-1/4 left-1/6 w-32 h-8 bg-gradient-to-r from-primary/15 to-transparent rounded-full transform rotate-6"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-28 h-6 bg-gradient-to-l from-accent/12 to-transparent rounded-full transform -rotate-8"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

@@ -6,7 +6,30 @@ import { Link } from "react-router-dom";
 
 const QaEngineer = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* QA Testing Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-24 left-16 w-20 h-20 border-2 border-primary/20">
+          <div className="absolute inset-2 border border-primary/15">
+            <div className="absolute inset-2 border border-primary/10">
+              <div className="absolute inset-1 bg-primary/8"></div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-16 h-16 border border-primary/15 rotate-45">
+          <div className="absolute inset-2 border border-primary/12 rotate-45"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/3 w-18 h-18 border border-primary/12 rounded-sm"></div>
+      </div>
+      
+      {/* Test Case Grid */}
+      <div className="absolute inset-0 opacity-[0.015]">
+        <div className="absolute top-1/3 left-1/5 w-32 h-24 border-l border-t border-primary/10">
+          <div className="absolute top-2 left-2 w-6 h-4 bg-primary/8"></div>
+          <div className="absolute top-8 left-2 w-8 h-4 bg-primary/6"></div>
+          <div className="absolute top-14 left-2 w-4 h-4 bg-primary/10"></div>
+        </div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

@@ -6,7 +6,24 @@ import { Link } from "react-router-dom";
 
 const UxUiDesigner = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* UX/UI Design Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-20 left-16 w-24 h-24 border border-primary/20 rounded-lg transform rotate-12">
+          <div className="absolute inset-2 border border-primary/15 rounded-md transform -rotate-6"></div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-20 h-20 border border-primary/15 rounded-full">
+          <div className="absolute inset-3 bg-primary/8 rounded-full"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/4 w-16 h-16 border-2 border-primary/10 transform rotate-45"></div>
+      </div>
+      
+      {/* Design Grid Lines */}
+      <div className="absolute inset-0 opacity-[0.015]">
+        <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent"></div>
+        <div className="absolute bottom-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
+        <div className="absolute left-1/3 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/8 to-transparent"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">

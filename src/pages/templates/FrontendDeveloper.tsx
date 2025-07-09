@@ -6,7 +6,28 @@ import { Link } from "react-router-dom";
 
 const FrontendDeveloper = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Frontend Development Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-32 h-24 border border-primary/20 rounded-lg">
+          <div className="absolute inset-3 border border-primary/15 rounded-md">
+            <div className="absolute inset-2 bg-primary/10 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-28 h-20 border border-primary/15 rounded-lg transform rotate-6"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-18 border border-primary/12 rounded-md transform -rotate-3"></div>
+      </div>
+      
+      {/* UI Component Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-1/6 w-24 h-4 bg-primary/15 rounded-md"></div>
+        <div className="absolute top-1/4 left-1/6 w-20 h-3 bg-primary/12 rounded-sm mt-2"></div>
+        <div className="absolute top-1/4 left-1/6 w-16 h-2 bg-primary/10 rounded-sm mt-4"></div>
+        
+        <div className="absolute bottom-1/3 right-1/5 w-6 h-6 bg-primary/12 rounded-full"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-4 h-4 bg-primary/15 rounded-full ml-8"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-3 h-3 bg-primary/10 rounded-full ml-14"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

@@ -6,7 +6,26 @@ import { Link } from "react-router-dom";
 
 const SoftwareEngineerPro = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Tech Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-20 w-16 h-16 border border-primary/20">
+          <div className="absolute inset-2 border border-primary/15"></div>
+          <div className="absolute inset-4 bg-primary/10"></div>
+        </div>
+        <div className="absolute top-40 right-32 w-12 h-12 border border-primary/15 rotate-45"></div>
+        <div className="absolute bottom-40 left-1/4 w-20 h-20 border border-primary/10">
+          <div className="absolute inset-3 border border-primary/8 rotate-45"></div>
+        </div>
+      </div>
+      
+      {/* Circuit-like Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-32 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+        <div className="absolute top-64 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"></div>
+        <div className="absolute left-32 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent"></div>
+        <div className="absolute right-48 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/15 to-transparent"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">

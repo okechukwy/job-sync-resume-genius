@@ -6,7 +6,28 @@ import { Link } from "react-router-dom";
 
 const CybersecurityExpert = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Cybersecurity Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-20 h-20 border-2 border-primary/20 transform rotate-45">
+          <div className="absolute inset-2 border border-primary/15 transform -rotate-45">
+            <div className="absolute inset-2 border border-primary/10">
+              <div className="absolute inset-1 bg-primary/8"></div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-16 h-16 border border-primary/15 transform rotate-12">
+          <div className="absolute inset-2 border border-primary/12 transform -rotate-12"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/3 w-18 h-18 border border-primary/12 transform -rotate-30"></div>
+      </div>
+      
+      {/* Security Shield Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-1/6 w-12 h-16 bg-primary/10 rounded-t-full"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-10 h-14 bg-primary/8 rounded-t-full transform rotate-15"></div>
+        <div className="absolute top-1/2 right-1/3 w-8 h-12 bg-primary/6 rounded-t-full transform -rotate-12"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

@@ -6,7 +6,24 @@ import { Link } from "react-router-dom";
 
 const CloudArchitect = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Cloud Architecture Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-32 h-20 border border-primary/20 rounded-lg">
+          <div className="absolute inset-3 border border-primary/15 rounded-md">
+            <div className="absolute inset-2 bg-primary/10 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-36 right-20 w-28 h-18 border border-primary/15 rounded-lg transform rotate-6"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-16 border border-primary/12 rounded-md transform -rotate-3"></div>
+      </div>
+      
+      {/* Cloud Connection Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/3 left-12 w-40 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent"></div>
+        <div className="absolute bottom-1/3 right-16 w-36 h-px bg-gradient-to-l from-primary/12 via-primary/6 to-transparent"></div>
+        <div className="absolute left-1/3 top-20 w-px h-32 bg-gradient-to-b from-primary/10 via-primary/15 to-primary/5"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

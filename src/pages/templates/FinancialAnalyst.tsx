@@ -6,7 +6,26 @@ import { Link } from "react-router-dom";
 
 const FinancialAnalyst = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Finance Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-24 left-16 w-40 h-1 bg-gradient-to-r from-primary/15 via-primary/25 to-primary/10"></div>
+        <div className="absolute top-28 left-20 w-32 h-1 bg-gradient-to-r from-primary/10 via-primary/20 to-primary/5"></div>
+        <div className="absolute top-32 left-24 w-24 h-1 bg-gradient-to-r from-primary/8 via-primary/15 to-transparent"></div>
+        
+        <div className="absolute bottom-32 right-20 w-36 h-1 bg-gradient-to-l from-primary/20 via-primary/15 to-primary/8"></div>
+        <div className="absolute bottom-28 right-16 w-28 h-1 bg-gradient-to-l from-primary/15 via-primary/20 to-primary/10"></div>
+      </div>
+      
+      {/* Chart-like Grid */}
+      <div className="absolute inset-0 opacity-[0.015]">
+        <div className="absolute bottom-20 left-1/4 w-48 h-32 border-l border-b border-primary/20">
+          <div className="absolute bottom-0 left-4 w-px h-8 bg-primary/15"></div>
+          <div className="absolute bottom-0 left-12 w-px h-16 bg-primary/15"></div>
+          <div className="absolute bottom-0 left-20 w-px h-12 bg-primary/15"></div>
+          <div className="absolute bottom-0 left-28 w-px h-20 bg-primary/15"></div>
+        </div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

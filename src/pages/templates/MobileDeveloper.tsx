@@ -6,7 +6,28 @@ import { Link } from "react-router-dom";
 
 const MobileDeveloper = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Mobile Development Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-16 h-28 border border-primary/20 rounded-lg">
+          <div className="absolute inset-2 border border-primary/15 rounded-md">
+            <div className="absolute inset-2 bg-primary/8 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-14 h-24 border border-primary/15 rounded-lg transform rotate-6"></div>
+        <div className="absolute top-1/2 left-1/3 w-12 h-20 border border-primary/12 rounded-md transform -rotate-3"></div>
+      </div>
+      
+      {/* App Interface Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-40 left-1/5 w-20 h-2 bg-primary/15 rounded-full"></div>
+        <div className="absolute top-44 left-1/5 w-16 h-2 bg-primary/12 rounded-full"></div>
+        <div className="absolute top-48 left-1/5 w-12 h-2 bg-primary/10 rounded-full"></div>
+        
+        <div className="absolute bottom-40 right-1/4 w-4 h-4 bg-primary/15 rounded-full"></div>
+        <div className="absolute bottom-44 right-1/4 w-3 h-3 bg-primary/12 rounded-full ml-6"></div>
+        <div className="absolute bottom-48 right-1/4 w-2 h-2 bg-primary/10 rounded-full ml-10"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

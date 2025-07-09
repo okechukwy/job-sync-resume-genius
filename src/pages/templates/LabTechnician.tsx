@@ -6,7 +6,27 @@ import { Link } from "react-router-dom";
 
 const LabTechnician = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Laboratory Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-20 h-32 border border-primary/20 rounded-t-full">
+          <div className="absolute inset-2 border border-primary/15 rounded-t-full">
+            <div className="absolute inset-2 bg-primary/10 rounded-t-full"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-16 h-28 border border-primary/15 rounded-t-full transform rotate-12"></div>
+        <div className="absolute top-1/2 left-1/3 w-14 h-24 border border-primary/12 rounded-t-full transform -rotate-6"></div>
+      </div>
+      
+      {/* Laboratory Equipment Elements */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-1/6 w-24 h-16 border border-primary/15 rounded-lg">
+          <div className="absolute inset-2 border border-primary/12 rounded-md">
+            <div className="absolute inset-1 bg-primary/8 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-1/3 right-1/5 w-20 h-12 border border-primary/12 rounded-md"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">

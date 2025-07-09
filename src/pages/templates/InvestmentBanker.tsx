@@ -6,7 +6,27 @@ import { Link } from "react-router-dom";
 
 const InvestmentBanker = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Investment Banking Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-20 left-16 w-28 h-28 border border-primary/20 rounded-lg transform rotate-12">
+          <div className="absolute inset-3 border border-primary/15 rounded-md transform -rotate-6">
+            <div className="absolute inset-2 bg-primary/10 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-32 right-20 w-24 h-24 border border-primary/15 rounded-md transform rotate-45"></div>
+        <div className="absolute top-1/2 left-1/3 w-20 h-20 border border-primary/12 rounded-lg transform -rotate-12"></div>
+      </div>
+      
+      {/* Financial Market Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-1/6 w-48 h-px bg-gradient-to-r from-primary/15 via-primary/25 to-primary/10"></div>
+        <div className="absolute top-1/4 left-1/6 w-44 h-px bg-gradient-to-r from-primary/12 via-primary/22 to-primary/8 mt-2"></div>
+        <div className="absolute top-1/4 left-1/6 w-40 h-px bg-gradient-to-r from-primary/10 via-primary/18 to-primary/6 mt-4"></div>
+        
+        <div className="absolute bottom-1/3 right-1/5 w-px h-32 bg-gradient-to-b from-primary/18 via-primary/12 to-primary/6"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-px h-28 bg-gradient-to-b from-primary/15 via-primary/20 to-primary/8 ml-2"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">

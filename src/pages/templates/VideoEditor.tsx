@@ -6,7 +6,24 @@ import { Link } from "react-router-dom";
 
 const VideoEditor = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Video Editing Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-20 left-16 w-40 h-6 bg-gradient-to-r from-primary/15 via-primary/20 to-primary/10 rounded-sm"></div>
+        <div className="absolute top-28 left-18 w-36 h-4 bg-gradient-to-r from-primary/10 via-primary/15 to-primary/8 rounded-sm"></div>
+        <div className="absolute top-34 left-20 w-32 h-3 bg-gradient-to-r from-primary/8 via-primary/12 to-primary/6 rounded-sm"></div>
+        
+        <div className="absolute bottom-32 right-20 w-38 h-5 bg-gradient-to-l from-accent/12 via-accent/18 to-accent/8 rounded-sm"></div>
+        <div className="absolute bottom-38 right-18 w-34 h-4 bg-gradient-to-l from-accent/10 via-accent/15 to-accent/6 rounded-sm"></div>
+      </div>
+      
+      {/* Timeline Elements */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-1/3 left-1/6 w-48 h-2 bg-primary/12 rounded-full"></div>
+        <div className="absolute top-1/3 left-1/6 w-16 h-3 bg-primary/20 rounded-sm mt-1"></div>
+        <div className="absolute top-1/3 left-1/6 w-12 h-3 bg-accent/15 rounded-sm mt-1 ml-20"></div>
+        <div className="absolute top-1/3 left-1/6 w-20 h-3 bg-primary/18 rounded-sm mt-1 ml-36"></div>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
