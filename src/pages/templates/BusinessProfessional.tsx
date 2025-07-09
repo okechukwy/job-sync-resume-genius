@@ -1,136 +1,70 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
-import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
+import { 
+  TemplateHeader, 
+  TemplateFeatures, 
+  ResumePreviewCard, 
+  TemplateActions 
+} from "@/components/template-preview";
 import { businessProfessionalSample, templateStyles } from "@/data/sampleResumeData";
 import { formatDate } from "@/lib/utils";
 
 const BusinessProfessional = () => {
+  const templateData = {
+    emoji: "📊",
+    title: "Business Professional",
+    description: "Management, sales, and operations professionals. Perfect for showcasing leadership and business results.",
+    badgeText: "Business Professional Template",
+    tags: ["Professional", "Leadership", "Results-Driven"],
+    features: [
+      {
+        title: "Leadership Impact",
+        description: "Showcase team management and strategic results"
+      },
+      {
+        title: "Financial Results", 
+        description: "Highlight revenue growth and cost savings"
+      },
+      {
+        title: "Professional Development",
+        description: "Display certifications and continuous learning"
+      }
+    ],
+    roles: [
+      { name: "Business Managers" },
+      { name: "Operations Directors" },
+      { name: "Sales Leaders" },
+      { name: "Project Managers" }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gradient-business relative overflow-hidden">
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4 animate-bounce-subtle">📊</div>
-          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
-            Business Professional Template
-          </Badge>
-          <h1 className="typography-display mb-6 animate-fade-in">
-            Business Professional{" "}
-            <span className="gradient-text">Resume</span>
-          </h1>
-          <p className="typography-body max-w-2xl mx-auto animate-fade-in text-contrast-medium">
-            Management, sales, and operations professionals. 
-            Perfect for showcasing leadership and business results.
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-2 mt-6 animate-fade-in">
-            <Badge variant="outline" className="hover-scale">Professional</Badge>
-            <Badge variant="outline" className="hover-scale">Leadership</Badge>
-            <Badge variant="outline" className="hover-scale">Results-Driven</Badge>
-          </div>
-        </div>
+        <TemplateHeader
+          emoji={templateData.emoji}
+          title={templateData.title}
+          description={templateData.description}
+          tags={templateData.tags}
+          badgeText={templateData.badgeText}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          <Card className="glass-card hover-lift animate-fade-in">
-            <CardContent className="p-6">
-              <div className="bg-business-background rounded-lg p-6 min-h-[600px] business-shadows">
-                <ResumeLayoutRenderer 
-                  data={businessProfessionalSample}
-                  styles={templateStyles.business}
-                  layoutVariant="classic-professional"
-                  formatDate={formatDate}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <ResumePreviewCard
+            data={businessProfessionalSample}
+            styles={templateStyles.business}
+            layoutVariant="classic-professional"
+            formatDate={formatDate}
+            backgroundClass="bg-business-background"
+            shadowClass="business-shadows"
+          />
 
-          <div className="space-y-6">
-            <Card className="glass-card hover-lift animate-fade-in">
-              <CardContent className="p-6 space-y-4">
-                <h3 className="typography-heading">Template Features</h3>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Leadership Impact</h4>
-                    <p className="text-sm text-contrast-medium">Showcase team management and strategic results</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Financial Results</h4>
-                    <p className="text-sm text-contrast-medium">Highlight revenue growth and cost savings</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-business-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Professional Development</h4>
-                    <p className="text-sm text-contrast-medium">Display certifications and continuous learning</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card hover-lift animate-fade-in">
-              <CardContent className="p-6 space-y-4">
-                <h3 className="typography-heading">Perfect For</h3>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Business Managers
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Operations Directors
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Sales Leaders
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-business-accent rounded-full"></div>
-                    Project Managers
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+          <TemplateFeatures
+            features={templateData.features}
+            roles={templateData.roles}
+            themeClass="bg-business"
+          />
         </div>
 
-        <div className="text-center space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-started">
-              <Button variant="hero" size="lg" className="min-w-48">
-                <FileText className="w-4 h-4 mr-2" />
-                Use This Template
-              </Button>
-            </Link>
-            <Button variant="glass" size="lg" className="min-w-48">
-              <Download className="w-4 h-4 mr-2" />
-              Download Sample
-            </Button>
-          </div>
-          <p className="text-sm text-contrast-medium">
-            Free to use • No credit card required
-          </p>
-        </div>
+        <TemplateActions />
       </div>
     </div>
   );
