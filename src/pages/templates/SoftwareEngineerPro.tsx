@@ -144,7 +144,7 @@ const SoftwareEngineerPro = () => {
         {/* Action Buttons */}
         <div className="text-center space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-started">
+            <Link to={`/get-started?template=${encodeURIComponent('software-engineer-pro')}`}>
               <Button variant="hero" size="lg" className="min-w-48">
                 <FileText className="w-4 h-4 mr-2" />
                 Use This Template

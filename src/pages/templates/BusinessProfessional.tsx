@@ -64,7 +64,7 @@ const BusinessProfessional = () => {
           />
         </div>
 
-        <TemplateActions />
+        <TemplateActions templateName="Business Professional" />
       </div>
     </div>
   );

@@ -2,11 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export const TemplateActions = () => {
+interface TemplateActionsProps {
+  templateName: string;
+}
+
+export const TemplateActions = ({ templateName }: TemplateActionsProps) => {
   return (
     <div className="text-center space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link to="/get-started">
+        <Link to={`/get-started?template=${encodeURIComponent(templateName.toLowerCase().replace(/\s+/g, '-'))}`}>
           <Button variant="hero" size="lg" className="min-w-48">
             <FileText className="w-4 h-4 mr-2" />
             Use This Template
