@@ -134,38 +134,17 @@ export const createSectionRenderers = (data: ResumeData, styles: TemplateStyles,
                 <Zap className="w-5 h-5 text-primary" />
                 Technical Skills
               </h3>
-              <div className="space-y-4">
-                {data.skills.technical.map((skill, index) => {
-                  const level = getSkillLevel(index);
-                  return (
-                    <div key={index} className="hover-lift">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className={`${styles.accentColor} typography-body font-medium flex items-center gap-2`}>
-                          <Code className="w-4 h-4" />
-                          {skill}
-                        </span>
-                        <span className="text-sm text-contrast-medium font-medium">{level}%</span>
-                      </div>
-                      <Progress value={level} className="h-2" />
+              <div className="grid grid-cols-2 gap-4">
+                {data.skills.technical.map((skill, index) => (
+                  <div key={index} className="flex items-center gap-3 hover-lift group">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Code className="w-4 h-4 text-primary" />
                     </div>
-                  );
-                })}
-              </div>
-              
-              {/* Skill Rating Legend */}
-              <div className="mt-4 flex items-center gap-4 text-xs text-contrast-medium">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  Expert (90%+)
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-primary/70 rounded-full"></div>
-                  Advanced (80%+)
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-primary/40 rounded-full"></div>
-                  Intermediate (70%+)
-                </div>
+                    <span className={`${styles.accentColor} typography-body font-medium`}>
+                      {skill}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
