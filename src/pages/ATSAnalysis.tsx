@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle, XCircle, Info } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info } from "lucide-react";
+import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 
 const ATSAnalysis = () => {
@@ -109,21 +109,7 @@ const ATSAnalysis = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ATS Score Optimization</div>
-            <Badge variant="secondary" className="glass-card">Essential</Badge>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">

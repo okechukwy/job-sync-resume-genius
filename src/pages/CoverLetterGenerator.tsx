@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Wand2, Download, Copy, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Wand2, Download, Copy, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 
 const CoverLetterGenerator = () => {
@@ -123,21 +123,7 @@ ${toneContent.signature}`;
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">AI Cover Letter Generator</div>
-            <Badge variant="secondary" className="glass-card">Premium</Badge>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">

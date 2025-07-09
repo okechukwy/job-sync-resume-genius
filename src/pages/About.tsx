@@ -1,25 +1,10 @@
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const About = () => {
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
