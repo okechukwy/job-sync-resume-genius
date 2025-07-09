@@ -16,8 +16,11 @@ export const useResumeBuilder = () => {
   useEffect(() => {
     const templateParam = searchParams.get('template');
     if (templateParam) {
-      setSelectedTemplate(templateParam);
-      setCurrentStep('templates');
+      // Decode and format the template name properly
+      const decodedTemplate = decodeURIComponent(templateParam).replace(/-/g, ' ');
+      setSelectedTemplate(decodedTemplate);
+      setCurrentStep('build');
+      toast.success(`${decodedTemplate} template selected! Let's build your resume.`);
     }
   }, [searchParams]);
 
