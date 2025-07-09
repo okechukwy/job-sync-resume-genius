@@ -93,8 +93,41 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
     font-feature-settings: 'liga' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Enhanced Typography Classes */
+  .typography-display {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .typography-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .typography-body {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+
+  .typography-caption {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
   }
 }
 
@@ -160,6 +193,137 @@
   
   .animated-border:hover::before {
     left: 100%;
+  }
+
+  /* Enhanced Visual Hierarchy */
+  .visual-hierarchy-1 {
+    @apply typography-display text-5xl md:text-6xl font-bold;
+    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--primary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .visual-hierarchy-2 {
+    @apply typography-heading text-3xl md:text-4xl font-semibold;
+    color: hsl(var(--foreground));
+  }
+
+  .visual-hierarchy-3 {
+    @apply typography-heading text-xl md:text-2xl font-medium;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .visual-hierarchy-body {
+    @apply typography-body text-base md:text-lg;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .visual-hierarchy-caption {
+    @apply typography-caption text-sm;
+    color: hsl(var(--muted-foreground) / 0.8);
+  }
+
+  /* Micro-interactions */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsl(var(--primary) / 0.15);
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease-out;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.3s ease-out;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.3);
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  /* Enhanced Spacing System */
+  .spacing-section {
+    @apply py-16 md:py-24;
+  }
+
+  .spacing-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .spacing-content {
+    @apply space-y-8 md:space-y-12;
+  }
+
+  .spacing-grid {
+    @apply gap-6 md:gap-8 lg:gap-12;
+  }
+
+  /* Improved Contrast and Readability */
+  .text-contrast-high {
+    color: hsl(var(--foreground));
+    font-weight: 600;
+  }
+
+  .text-contrast-medium {
+    color: hsl(var(--foreground) / 0.8);
+    font-weight: 500;
+  }
+
+  .text-contrast-low {
+    color: hsl(var(--muted-foreground));
+    font-weight: 400;
+  }
+
+  .bg-contrast-high {
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .bg-contrast-medium {
+    background-color: hsl(var(--muted) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Resume-specific enhancements */
+  .resume-section-title {
+    @apply typography-heading text-xl font-semibold tracking-wide;
+    color: hsl(var(--foreground));
+    position: relative;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .resume-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  .resume-content-text {
+    @apply typography-body text-sm leading-relaxed;
+    color: hsl(var(--foreground) / 0.8);
+  }
+
+  .resume-meta-text {
+    @apply typography-caption text-xs;
+    color: hsl(var(--muted-foreground));
   }
 }
 

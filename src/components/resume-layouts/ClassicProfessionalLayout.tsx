@@ -2,10 +2,10 @@ import { ResumeData } from "@/hooks/useResumeSteps";
 import { LayoutProps } from "./types";
 
 export const ClassicProfessionalLayout = ({ data, styles, formatDate, renderExperienceSection, renderEducationSection, renderSkillsSection }: LayoutProps) => (
-  <div className="space-y-8">
+  <div className="spacing-content animate-fade-in">
     {/* Header */}
-    <div className={`text-center ${styles.headerBg} ${styles.borderColor} rounded-lg p-8 -mx-8 -mt-8 mb-8`}>
-      <h1 className={`text-3xl font-bold mb-3 ${styles.headerText}`}>{data.personalInfo.fullName || 'Your Name'}</h1>
+    <div className={`text-center ${styles.headerBg} ${styles.borderColor} rounded-xl p-10 -mx-8 -mt-8 mb-8 hover-lift`}>
+      <h1 className={`typography-heading text-4xl font-bold mb-4 ${styles.headerText} tracking-tight`}>{data.personalInfo.fullName || 'Your Name'}</h1>
       <div className={`flex flex-wrap justify-center gap-4 text-sm ${styles.headerText} opacity-90`}>
         {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
         {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
