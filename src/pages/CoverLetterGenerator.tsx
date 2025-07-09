@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Wand2, Download, Copy, RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
-
 const CoverLetterGenerator = () => {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -22,11 +21,12 @@ const CoverLetterGenerator = () => {
   });
   const [generatedLetter, setGeneratedLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
   const generateToneSpecificContent = () => {
     const toneStyles = {
       professional: {
@@ -65,21 +65,17 @@ const CoverLetterGenerator = () => {
         signature: `Respectfully,\n${formData.fullName || '[Your Name]'}`
       }
     };
-
     return toneStyles[formData.tone as keyof typeof toneStyles] || toneStyles.professional;
   };
-
   const handleGenerate = async () => {
     if (!formData.fullName || !formData.jobTitle || !formData.companyName || !formData.jobDescription) {
       toast.error('Please fill in the required fields');
       return;
     }
-
     setIsGenerating(true);
     // Simulate AI generation
     setTimeout(() => {
       const toneContent = generateToneSpecificContent();
-      
       const mockLetter = `${toneContent.greeting}
 
 ${toneContent.opening}
@@ -98,21 +94,20 @@ ${formData.keyPoints ? `${formData.keyPoints}
 ` : ''}${toneContent.closing}
 
 ${toneContent.signature}`;
-
       setGeneratedLetter(mockLetter);
       setIsGenerating(false);
       toast.success('Cover letter generated successfully!');
     }, 3000);
   };
-
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedLetter);
     toast.success('Cover letter copied to clipboard!');
   };
-
   const handleDownload = () => {
     const element = document.createElement('a');
-    const file = new Blob([generatedLetter], { type: 'text/plain' });
+    const file = new Blob([generatedLetter], {
+      type: 'text/plain'
+    });
     element.href = URL.createObjectURL(file);
     element.download = `cover_letter_${formData.jobTitle}_${formData.companyName}.txt`;
     document.body.appendChild(element);
@@ -120,9 +115,7 @@ ${toneContent.signature}`;
     document.body.removeChild(element);
     toast.success('Cover letter downloaded!');
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  return <div className="min-h-screen bg-gradient-hero">
       <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -148,47 +141,27 @@ ${toneContent.signature}`;
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name *</Label>
-                <Input
-                  id="fullName"
-                  placeholder="e.g., John Smith"
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                />
+                <Input id="fullName" placeholder="e.g., John Smith" value={formData.fullName} onChange={e => handleInputChange('fullName', e.target.value)} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="jobTitle">Job Title *</Label>
-                <Input
-                  id="jobTitle"
-                  placeholder="e.g., Senior Software Engineer"
-                  value={formData.jobTitle}
-                  onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                />
+                <Input id="jobTitle" placeholder="e.g., Senior Software Engineer" value={formData.jobTitle} onChange={e => handleInputChange('jobTitle', e.target.value)} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name *</Label>
-                <Input
-                  id="companyName"
-                  placeholder="e.g., Google"
-                  value={formData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
-                />
+                <Input id="companyName" placeholder="e.g., Google" value={formData.companyName} onChange={e => handleInputChange('companyName', e.target.value)} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="hiringManager">Hiring Manager Name</Label>
-                <Input
-                  id="hiringManager"
-                  placeholder="e.g., Sarah Johnson (optional)"
-                  value={formData.hiringManager}
-                  onChange={(e) => handleInputChange('hiringManager', e.target.value)}
-                />
+                <Input id="hiringManager" placeholder="e.g., Sarah Johnson (optional)" value={formData.hiringManager} onChange={e => handleInputChange('hiringManager', e.target.value)} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="tone">Tone & Style</Label>
-                <Select onValueChange={(value) => handleInputChange('tone', value)}>
+                <Select onValueChange={value => handleInputChange('tone', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select tone" />
                   </SelectTrigger>
@@ -204,43 +177,22 @@ ${toneContent.signature}`;
 
               <div className="space-y-2">
                 <Label htmlFor="jobDescription">Job Description *</Label>
-                <Textarea
-                  id="jobDescription"
-                  placeholder="Paste the job description here..."
-                  className="min-h-32 resize-none"
-                  value={formData.jobDescription}
-                  onChange={(e) => handleInputChange('jobDescription', e.target.value)}
-                />
+                <Textarea id="jobDescription" placeholder="Paste the job description here..." className="min-h-32 resize-none" value={formData.jobDescription} onChange={e => handleInputChange('jobDescription', e.target.value)} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="keyPoints">Key Points to Highlight</Label>
-                <Textarea
-                  id="keyPoints"
-                  placeholder="Any specific achievements or skills you want to emphasize..."
-                  className="min-h-24 resize-none"
-                  value={formData.keyPoints}
-                  onChange={(e) => handleInputChange('keyPoints', e.target.value)}
-                />
+                <Textarea id="keyPoints" placeholder="Any specific achievements or skills you want to emphasize..." className="min-h-24 resize-none" value={formData.keyPoints} onChange={e => handleInputChange('keyPoints', e.target.value)} />
               </div>
 
-              <Button 
-                variant="hero" 
-                className="w-full" 
-                onClick={handleGenerate}
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>
+              <Button variant="hero" className="w-full" onClick={handleGenerate} disabled={isGenerating}>
+                {isGenerating ? <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                     Generating...
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <Wand2 className="w-4 h-4 mr-2" />
                     Generate Cover Letter
-                  </>
-                )}
+                  </>}
               </Button>
             </CardContent>
           </Card>
@@ -249,8 +201,7 @@ ${toneContent.signature}`;
           <Card className="glass-card">
             <CardHeader>
               <CardTitle>Generated Cover Letter</CardTitle>
-              {generatedLetter && (
-                <div className="flex gap-2">
+              {generatedLetter && <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={handleCopy}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
@@ -259,24 +210,17 @@ ${toneContent.signature}`;
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
-                </div>
-              )}
+                </div>}
             </CardHeader>
             <CardContent>
-              {generatedLetter ? (
-                <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap font-mono text-sm">
+              {generatedLetter ? <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap font-mono text-sm">
                   {generatedLetter}
-                </div>
-              ) : (
-                <div className="bg-background/50 rounded-lg p-12 min-h-96 flex items-center justify-center text-center">
+                </div> : <div className="bg-background/50 rounded-lg p-12 min-h-96 flex items-center justify-center text-center">
                   <div>
                     <Wand2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">
-                      Your AI-generated cover letter will appear here
-                    </p>
+                    <p className="text-muted-foreground">Your cover letter will appear here</p>
                   </div>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
@@ -314,8 +258,6 @@ ${toneContent.signature}`;
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CoverLetterGenerator;
