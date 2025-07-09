@@ -20,12 +20,11 @@ export const PageHeader = ({
     if (onCustomBack) {
       onCustomBack();
     } else {
-      // Check if we have history to go back to
-      if (window.history.length > 1 && location.key !== "default") {
+      // Try to go back, fallback to templates page if no history
+      if (window.history.length > 1) {
         navigate(-1);
       } else {
-        // Fallback to home if no history
-        navigate("/");
+        navigate("/templates");
       }
     }
   };
