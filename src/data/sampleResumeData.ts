@@ -62,6 +62,46 @@ export const marketingManagerSample: ResumeData = {
       "ROI Analysis",
       "Cross-functional Collaboration"
     ]
+  },
+  certificates: [
+    {
+      id: "1",
+      name: "Google Ads Certification",
+      issuer: "Google",
+      issueDate: "2023-06",
+      expiryDate: "2024-06",
+      credentialId: "12345"
+    }
+  ],
+  projects: [],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    },
+    {
+      id: "2",
+      language: "Spanish",
+      proficiency: "Intermediate"
+    }
+  ],
+  volunteering: [],
+  awards: [
+    {
+      id: "1",
+      title: "Marketing Excellence Award",
+      issuer: "Growth Corp",
+      date: "2023-12",
+      description: "Recognized for outstanding campaign performance"
+    }
+  ],
+  publications: [],
+  interests: {
+    interests: ["Digital Innovation", "Brand Strategy", "Data Analytics", "Travel"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };
 
@@ -125,6 +165,45 @@ export const techProfessionalSample: ResumeData = {
       "Code Review",
       "System Design"
     ]
+  },
+  certificates: [
+    {
+      id: "1",
+      name: "AWS Solutions Architect",
+      issuer: "Amazon Web Services",
+      issueDate: "2023-03",
+      expiryDate: "2026-03",
+      credentialId: "AWS-12345"
+    }
+  ],
+  projects: [
+    {
+      id: "1",
+      name: "E-commerce Platform",
+      description: "Built scalable microservices platform handling 10M+ users",
+      technologies: ["React", "Node.js", "PostgreSQL", "AWS"],
+      startDate: "2022-01",
+      endDate: "2023-06",
+      current: false,
+      projectUrl: "https://platform.demo.com",
+      githubUrl: "https://github.com/alexdev/ecommerce"
+    }
+  ],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    }
+  ],
+  volunteering: [],
+  awards: [],
+  publications: [],
+  interests: {
+    interests: ["Open Source", "Machine Learning", "Blockchain", "Gaming"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };
 
@@ -179,6 +258,24 @@ export const businessProfessionalSample: ResumeData = {
       "Strategic Thinking",
       "Team Management"
     ]
+  },
+  certificates: [],
+  projects: [],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    }
+  ],
+  volunteering: [],
+  awards: [],
+  publications: [],
+  interests: {
+    interests: ["Business Strategy", "Leadership", "Networking", "Golf"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };
 
@@ -312,6 +409,32 @@ export const financeProfessionalSample: ResumeData = {
       "Wealth Preservation",
       "Investment Strategy"
     ]
+  },
+  certificates: [
+    {
+      id: "1",
+      name: "CFA Charter",
+      issuer: "CFA Institute",
+      issueDate: "2020-06",
+      credentialId: "CFA-12345"
+    }
+  ],
+  projects: [],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    }
+  ],
+  volunteering: [],
+  awards: [],
+  publications: [],
+  interests: {
+    interests: ["Financial Markets", "Investment Research", "Sailing", "Chess"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };
 
@@ -377,6 +500,43 @@ export const creativeProfessionalSample: ResumeData = {
       "Client Collaboration",
       "Trend Analysis"
     ]
+  },
+  certificates: [],
+  projects: [
+    {
+      id: "1",
+      name: "Rebranding Campaign",
+      description: "Complete visual identity overhaul for Fortune 500 client",
+      technologies: ["Adobe Creative Suite", "Figma", "After Effects"],
+      startDate: "2023-01",
+      endDate: "2023-06",
+      current: false,
+      projectUrl: "https://portfolio.lunacreative.com/rebrand"
+    }
+  ],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    }
+  ],
+  volunteering: [],
+  awards: [
+    {
+      id: "1",
+      title: "Creative Excellence Award",
+      issuer: "Design Institute",
+      date: "2023-11",
+      description: "For outstanding innovation in visual design"
+    }
+  ],
+  publications: [],
+  interests: {
+    interests: ["Modern Art", "Photography", "Design Trends", "Travel"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };
 
@@ -441,5 +601,57 @@ export const healthcareProfessionalSample: ResumeData = {
       "Healthcare Innovation",
       "Compassionate Care"
     ]
+  },
+  certificates: [
+    {
+      id: "1",
+      name: "Board Certification - Internal Medicine",
+      issuer: "American Board of Internal Medicine",
+      issueDate: "2015-07",
+      credentialId: "ABIM-12345"
+    }
+  ],
+  projects: [],
+  languages: [
+    {
+      id: "1",
+      language: "English",
+      proficiency: "Native"
+    }
+  ],
+  volunteering: [
+    {
+      id: "1",
+      organization: "Doctors Without Borders",
+      role: "Volunteer Physician",
+      startDate: "2020-01",
+      endDate: "2020-06",
+      current: false,
+      description: "Provided medical care in underserved communities"
+    }
+  ],
+  awards: [
+    {
+      id: "1",
+      title: "Healthcare Innovation Award",
+      issuer: "Seattle Medical Association",
+      date: "2023-08",
+      description: "For implementing digital health initiatives"
+    }
+  ],
+  publications: [
+    {
+      id: "1",
+      title: "Digital Health in Primary Care",
+      publisher: "Journal of Medical Innovation",
+      date: "2023-03",
+      url: "https://journal.medical.com/digital-health"
+    }
+  ],
+  interests: {
+    interests: ["Medical Research", "Digital Health", "Global Health", "Marathon Running"]
+  },
+  additionalInfo: {
+    content: ""
   }
 };

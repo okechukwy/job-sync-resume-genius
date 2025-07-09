@@ -36,6 +36,61 @@ export interface ResumeData {
     technical: string[];
     soft: string[];
   };
+  certificates: Array<{
+    id: string;
+    name: string;
+    issuer: string;
+    issueDate: string;
+    expiryDate?: string;
+    credentialId?: string;
+    credentialUrl?: string;
+  }>;
+  projects: Array<{
+    id: string;
+    name: string;
+    description: string;
+    technologies: string[];
+    startDate: string;
+    endDate?: string;
+    current: boolean;
+    projectUrl?: string;
+    githubUrl?: string;
+  }>;
+  languages: Array<{
+    id: string;
+    language: string;
+    proficiency: "Beginner" | "Intermediate" | "Advanced" | "Native";
+  }>;
+  volunteering: Array<{
+    id: string;
+    organization: string;
+    role: string;
+    startDate: string;
+    endDate?: string;
+    current: boolean;
+    description: string;
+  }>;
+  awards: Array<{
+    id: string;
+    title: string;
+    issuer: string;
+    date: string;
+    description?: string;
+  }>;
+  publications: Array<{
+    id: string;
+    title: string;
+    publisher: string;
+    date: string;
+    url?: string;
+    description?: string;
+  }>;
+  interests: {
+    interests: string[];
+  };
+  additionalInfo: {
+    content: string;
+  };
 }
 
 export const useResumeSteps = () => {
@@ -65,6 +120,18 @@ export const useResumeSteps = () => {
     skills: {
       technical: [],
       soft: [],
+    },
+    certificates: [],
+    projects: [],
+    languages: [],
+    volunteering: [],
+    awards: [],
+    publications: [],
+    interests: {
+      interests: [],
+    },
+    additionalInfo: {
+      content: '',
     },
   });
 
