@@ -42,28 +42,34 @@ const IndustrySelection = ({ onIndustrySelect }: IndustrySelectionProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    <div className="spacing-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-12">
       {industries.map((industry, index) => (
         <Card 
           key={index} 
-          className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer group"
+          className="glass-card hover-lift hover-glow transition-all duration-300 cursor-pointer group animate-fade-in border-border/50"
           onClick={() => onIndustrySelect(industry.title)}
+          style={{ animationDelay: `${index * 0.1}s` }}
         >
-          <CardHeader className="text-center">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+          <CardHeader className="text-center spacing-content">
+            <div className="text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 smooth-transition text-shadow">
               {industry.icon}
             </div>
-            <CardTitle className="text-xl mb-2">{industry.title}</CardTitle>
-            <p className="text-sm text-muted-foreground mb-4">
+            <CardTitle className="typography-heading text-xl font-semibold mb-3 text-contrast-high group-hover:gradient-text smooth-transition">
+              {industry.title}
+            </CardTitle>
+            <p className="typography-body text-sm text-contrast-medium mb-4 leading-relaxed">
               {industry.description}
             </p>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="typography-caption text-xs glass-card border-primary/30 hover-scale">
               {getIndustryTemplateCount(industry.title)} Templates Available
             </Badge>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">
-              Select {industry.title}
+          <CardContent className="pt-2">
+            <Button 
+              variant="outline" 
+              className="w-full hover-lift smooth-transition border-primary/30 hover:border-primary hover:bg-primary/5 focus-ring"
+            >
+              <span className="typography-body font-medium">Select {industry.title}</span>
             </Button>
           </CardContent>
         </Card>
