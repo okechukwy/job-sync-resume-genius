@@ -8,6 +8,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useRef, useMemo } from "react";
 import { calculateATSScore } from "@/utils/atsScoreCalculator";
+import { ResumeLayoutRenderer } from "./resume-layouts/ResumeLayoutRenderer";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -493,7 +494,12 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
       {/* Resume Preview */}
       <Card ref={resumeRef} className="glass-card max-w-4xl mx-auto">
         <CardContent className={`${getLayoutSpacing()} bg-white text-black`}>
-          {renderLayout()}
+          <ResumeLayoutRenderer 
+            data={data}
+            styles={styles}
+            layoutVariant={layoutVariant}
+            formatDate={formatDate}
+          />
         </CardContent>
       </Card>
 
