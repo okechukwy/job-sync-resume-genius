@@ -41,30 +41,30 @@ const BusinessProfessional = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <div className="text-6xl mb-4">📊</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+          <div className="text-6xl mb-4 animate-bounce-subtle">📊</div>
+          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
             Business Professional Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="visual-hierarchy-1 mb-6 animate-fade-in">
             Business Professional{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="visual-hierarchy-body max-w-2xl mx-auto animate-fade-in">
             Management, sales, and operations professionals. 
             Perfect for showcasing leadership and business results.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Professional</Badge>
-            <Badge variant="outline">Leadership</Badge>
-            <Badge variant="outline">Results-Driven</Badge>
+          <div className="flex flex-wrap justify-center spacing-grid mt-6 animate-fade-in">
+            <Badge variant="outline" className="hover-scale">Professional</Badge>
+            <Badge variant="outline" className="hover-scale">Leadership</Badge>
+            <Badge variant="outline" className="hover-scale">Results-Driven</Badge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          <Card className="glass-card">
+        <div className="grid grid-cols-1 lg:grid-cols-2 spacing-grid mb-12">
+          <Card className="glass-card hover-lift animate-fade-in">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="visual-hierarchy-3 flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Template Preview
               </CardTitle>
@@ -125,10 +125,10 @@ const BusinessProfessional = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
-            <Card className="glass-card">
+          <div className="spacing-content">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Template Features</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Template Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -155,9 +155,9 @@ const BusinessProfessional = () => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Perfect For</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Perfect For</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">

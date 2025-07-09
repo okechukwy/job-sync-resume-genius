@@ -6,7 +6,24 @@ import { Link } from "react-router-dom";
 
 const CreativeProfessional = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Creative Industry Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-16 left-16 w-32 h-32 border border-primary/20 rounded-lg transform rotate-12">
+          <div className="absolute inset-4 border border-primary/15 rounded-md transform -rotate-6"></div>
+        </div>
+        <div className="absolute bottom-32 right-24 w-24 h-24 border border-primary/15 rounded-full">
+          <div className="absolute inset-3 bg-primary/8 rounded-full"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/4 w-20 h-20 border-2 border-primary/12 transform rotate-45"></div>
+      </div>
+      
+      {/* Creative Design Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"></div>
+        <div className="absolute bottom-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent"></div>
+        <div className="absolute left-1/3 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -25,32 +42,32 @@ const CreativeProfessional = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Template Header */}
         <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🎨</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+          <div className="text-6xl mb-4 animate-bounce-subtle">🎨</div>
+          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
             Creative Professional Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="visual-hierarchy-1 mb-6 animate-fade-in">
             Creative Professional{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="visual-hierarchy-body max-w-2xl mx-auto animate-fade-in">
             Ideal for designers, marketers, and creative roles. 
             Visually appealing format that showcases your creativity and design skills.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Creative</Badge>
-            <Badge variant="outline">Visual</Badge>
-            <Badge variant="outline">Unique</Badge>
+          <div className="flex flex-wrap justify-center spacing-grid mt-6 animate-fade-in">
+            <Badge variant="outline" className="hover-scale">Creative</Badge>
+            <Badge variant="outline" className="hover-scale">Visual</Badge>
+            <Badge variant="outline" className="hover-scale">Unique</Badge>
           </div>
         </div>
 
         {/* Template Preview and Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 spacing-grid mb-12">
           {/* Template Preview */}
-          <Card className="glass-card">
+          <Card className="glass-card hover-lift animate-fade-in">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="visual-hierarchy-3 flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Template Preview
               </CardTitle>
@@ -112,10 +129,10 @@ const CreativeProfessional = () => {
           </Card>
 
           {/* Template Details */}
-          <div className="space-y-6">
-            <Card className="glass-card">
+          <div className="spacing-content">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Template Features</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Template Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -149,9 +166,9 @@ const CreativeProfessional = () => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="glass-card hover-lift animate-fade-in">
               <CardHeader>
-                <CardTitle>Perfect For</CardTitle>
+                <CardTitle className="visual-hierarchy-3">Perfect For</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
