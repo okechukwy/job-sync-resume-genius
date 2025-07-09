@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Plus, Trash2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Education {
   id: string;
@@ -86,6 +90,15 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
     ));
   };
 
+  const handleDateChange = (id: string, field: 'startDate' | 'endDate', date: Date | undefined) => {
+    if (date) {
+      const formattedDate = format(date, 'yyyy-MM');
+      handleEducationChange(id, field, formattedDate);
+    } else {
+      handleEducationChange(id, field, '');
+    }
+  };
+
   const getDateValidationError = (education: Education) => {
     if (education.startDate && education.endDate) {
       const startDate = new Date(education.startDate);
@@ -160,24 +173,57 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor={`startDate-${education.id}`}>Start Date *</Label>
-                <Input
-                  id={`startDate-${education.id}`}
-                  type="month"
-                  value={education.startDate}
-                  onChange={(e) => handleEducationChange(education.id, 'startDate', e.target.value)}
-                  className="glass-card"
-                />
+                <Label>Start Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal glass-card",
+                        !education.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {education.startDate ? format(new Date(education.startDate + '-01'), "MMM yyyy") : "Pick start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={education.startDate ? new Date(education.startDate + '-01') : undefined}
+                      onSelect={(date) => handleDateChange(education.id, 'startDate', date)}
+                      className="pointer-events-auto"
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`endDate-${education.id}`}>End Date *</Label>
-                <Input
-                  id={`endDate-${education.id}`}
-                  type="month"
-                  value={education.endDate}
-                  onChange={(e) => handleEducationChange(education.id, 'endDate', e.target.value)}
-                  className={`glass-card ${getDateValidationError(education) ? 'border-destructive' : ''}`}
-                />
+                <Label>End Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal glass-card",
+                        !education.endDate && "text-muted-foreground",
+                        getDateValidationError(education) && "border-destructive"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {education.endDate ? format(new Date(education.endDate + '-01'), "MMM yyyy") : "Pick end date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={education.endDate ? new Date(education.endDate + '-01') : undefined}
+                      onSelect={(date) => handleDateChange(education.id, 'endDate', date)}
+                      className="pointer-events-auto"
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 {getDateValidationError(education) && (
                   <p className="text-sm font-medium text-destructive">
                     {getDateValidationError(education)}
