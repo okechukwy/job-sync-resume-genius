@@ -57,9 +57,6 @@ const HeroSection = () => {
               Get Started Free
             </Button>
           </Link>
-          <Button variant="glass" size="xl" className="min-w-48">
-            Watch Demo
-          </Button>
         </div>
         
         {/* Trust indicators */}
