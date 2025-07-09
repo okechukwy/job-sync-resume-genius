@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface TemplateHeaderProps {
   emoji: string;
@@ -12,17 +12,17 @@ interface TemplateHeaderProps {
 }
 
 export const TemplateHeader = ({ emoji, title, description, tags, badgeText }: TemplateHeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
             <div className="text-2xl font-bold gradient-text">ResumeAI</div>
           </div>
         </div>
