@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
+import { techProfessionalSample, templateStyles } from "@/data/sampleResumeData";
 
 const TechProfessional = () => {
   return (
@@ -78,65 +80,19 @@ const TechProfessional = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-8 rounded-xl shadow-lg min-h-[600px] border hover-lift animate-fade-in">
-                <div className="spacing-content">
-                  <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-xl p-8 -mx-8 -mt-8 mb-8">
-                    <h2 className="typography-heading text-3xl font-bold mb-3">John Developer</h2>
-                    <p className="typography-body text-blue-100 font-medium text-lg">Senior Software Engineer</p>
-                    <p className="typography-caption text-blue-200 mt-2">john.developer@email.com | (555) 123-4567 | LinkedIn</p>
-                  </div>
-                  
-                  <div className="hover-scale">
-                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">PROFESSIONAL SUMMARY</h3>
-                    <p className="resume-content-text">
-                      Experienced software engineer with 5+ years developing scalable web applications using modern technologies and best practices...
-                    </p>
-                  </div>
-                  
-                  <div className="hover-scale">
-                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">TECHNICAL SKILLS</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        JavaScript, TypeScript, Python
-                      </div>
-                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        React, Node.js, Express
-                      </div>
-                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        AWS, Docker, Kubernetes
-                      </div>
-                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        PostgreSQL, MongoDB
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="hover-scale">
-                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">EXPERIENCE</h3>
-                    <div className="bg-contrast-medium rounded-lg p-6">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="typography-heading font-semibold text-lg text-contrast-high">Senior Software Engineer</h4>
-                          <p className="typography-body text-contrast-medium font-medium">Tech Corp Inc.</p>
-                        </div>
-                        <span className="resume-meta-text text-blue-600">2021 - Present</span>
-                      </div>
-                      <ul className="space-y-2 resume-content-text">
-                        <li className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
-                          Led development of microservices architecture
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
-                          Improved application performance by 40%
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
+              <div className="bg-white p-4 rounded-lg shadow-lg min-h-[600px] border overflow-hidden">
+                <div className="scale-75 origin-top-left w-[133%] h-[133%]">
+                  <ResumeLayoutRenderer 
+                    data={techProfessionalSample}
+                    styles={templateStyles.tech}
+                    layoutVariant="classic-professional"
+                    formatDate={(date) => {
+                      if (!date) return '';
+                      const [year, month] = date.split('-');
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[parseInt(month) - 1]} ${year}`;
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>

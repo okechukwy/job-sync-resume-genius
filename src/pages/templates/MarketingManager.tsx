@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
+import { marketingManagerSample, templateStyles } from "@/data/sampleResumeData";
 
 const MarketingManager = () => {
   return (
@@ -55,47 +57,19 @@ const MarketingManager = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b-2 border-blue-200 pb-4">
-                    <h2 className="text-2xl font-bold text-blue-900">Sarah Marketing</h2>
-                    <p className="text-blue-600 font-medium">Senior Marketing Manager</p>
-                    <p className="text-sm text-gray-600">sarah.marketing@company.com | (555) 123-4567 | LinkedIn: /in/sarahmarketing</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">MARKETING SUMMARY</h3>
-                    <p className="text-sm text-gray-700">
-                      Strategic marketing leader with 7+ years driving growth through innovative campaigns...
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">CORE COMPETENCIES</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• Digital Marketing Strategy</div>
-                      <div>• Campaign Management</div>
-                      <div>• Brand Development</div>
-                      <div>• Analytics & ROI</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Senior Marketing Manager</h4>
-                          <span className="text-sm text-blue-600 font-medium">2019 - Present</span>
-                        </div>
-                        <p className="text-sm text-gray-600">Growth Corp</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Increased lead generation by 150% through multi-channel campaigns</li>
-                          <li>Managed $2M marketing budget with 25% YoY growth</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+              <div className="bg-white p-4 rounded-lg shadow-lg min-h-[600px] border overflow-hidden">
+                <div className="scale-75 origin-top-left w-[133%] h-[133%]">
+                  <ResumeLayoutRenderer 
+                    data={marketingManagerSample}
+                    styles={templateStyles.marketing}
+                    layoutVariant="classic-professional"
+                    formatDate={(date) => {
+                      if (!date) return '';
+                      const [year, month] = date.split('-');
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[parseInt(month) - 1]} ${year}`;
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>
