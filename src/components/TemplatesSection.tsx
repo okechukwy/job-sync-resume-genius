@@ -5,8 +5,23 @@ import { Link } from "react-router-dom";
 import { allTemplates } from "@/data/templateData";
 
 const TemplatesSection = () => {
-  // Show a curated selection of featured templates
-  const featuredTemplates = allTemplates.slice(0, 10);
+  // Show a curated selection of featured templates from different industries
+  const featuredTemplateNames = [
+    "Tech Professional",
+    "Healthcare Specialist", 
+    "Finance Expert",
+    "Creative Professional",
+    "Business Professional",
+    "Research Scientist",
+    "Gradient Modern",
+    "Minimalist Pro",
+    "Executive Leader",
+    "Recent Graduate"
+  ];
+  
+  const featuredTemplates = featuredTemplateNames.map(name => 
+    allTemplates.find(template => template.name === name)
+  ).filter(Boolean);
 
   return (
     <section id="templates" className="py-24 px-4 relative">
