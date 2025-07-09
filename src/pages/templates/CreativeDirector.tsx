@@ -3,10 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
+import { creativeProfessionalSample, templateStyles } from "@/data/sampleResumeData";
 
 const CreativeDirector = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-creative relative overflow-hidden">
+      {/* Creative Background with Artistic Elements */}
+      <div className="absolute inset-0 opacity-[0.05]">
+        <div className="absolute top-20 left-16 w-32 h-2 bg-gradient-to-r from-creative-primary to-creative-secondary transform rotate-12"></div>
+        <div className="absolute top-40 right-24 w-24 h-3 bg-gradient-to-l from-creative-accent to-transparent transform -rotate-6"></div>
+        <div className="absolute bottom-60 left-1/3 w-40 h-1 bg-gradient-to-r from-transparent via-creative-primary to-transparent transform rotate-45"></div>
+        <div className="absolute bottom-32 right-1/4 w-28 h-2 bg-gradient-to-l from-creative-secondary to-transparent transform -rotate-12"></div>
+        
+        {/* Artistic brush strokes */}
+        <svg className="absolute top-1/4 left-1/4 opacity-10" width="200" height="100" viewBox="0 0 200 100">
+          <path d="M10,50 Q50,10 100,50 T190,50" stroke="hsl(var(--creative-primary))" strokeWidth="3" fill="none" />
+          <path d="M10,30 Q80,70 150,30" stroke="hsl(var(--creative-accent))" strokeWidth="2" fill="none" />
+        </svg>
+        
+        <svg className="absolute bottom-1/3 right-1/3 opacity-10" width="150" height="80" viewBox="0 0 150 80">
+          <path d="M20,40 Q60,10 100,40 T140,40" stroke="hsl(var(--creative-secondary))" strokeWidth="2" fill="none" />
+        </svg>
+      </div>
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -52,47 +71,19 @@ const CreativeDirector = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b-2 border-amber-200 pb-4">
-                    <h2 className="text-2xl font-bold text-amber-900">Alex CreativeLeader</h2>
-                    <p className="text-amber-600 font-medium">Executive Creative Director</p>
-                    <p className="text-sm text-gray-600">alex.creativeleader@agency.com | (555) 123-4567 | Cannes Grand Prix Winner</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-amber-900 mb-2 border-l-4 border-amber-400 pl-3">CREATIVE VISION</h3>
-                    <p className="text-sm text-gray-700">
-                      Visionary creative director with 15+ years leading global creative teams and award-winning campaigns...
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-amber-900 mb-2 border-l-4 border-amber-400 pl-3">LEADERSHIP EXPERTISE</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• Creative Strategy</div>
-                      <div>• Team Leadership</div>
-                      <div>• Brand Vision</div>
-                      <div>• Client Relations</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-amber-900 mb-2 border-l-4 border-amber-400 pl-3">EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Executive Creative Director</h4>
-                          <span className="text-sm text-amber-600 font-medium">2015 - Present</span>
-                        </div>
-                        <p className="text-sm text-gray-600">Global Creative Agency</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Led creative team of 50+ across 12 global offices</li>
-                          <li>Won 25+ international creative awards including Cannes Lions</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+              <div className="bg-white p-4 rounded-lg shadow-lg min-h-[600px] border overflow-hidden">
+                <div className="scale-75 origin-top-left w-[133%] h-[133%]">
+                  <ResumeLayoutRenderer 
+                    data={creativeProfessionalSample}
+                    styles={templateStyles.creative}
+                    layoutVariant="classic-professional"
+                    formatDate={(date) => {
+                      if (!date) return '';
+                      const [year, month] = date.split('-');
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[parseInt(month) - 1]} ${year}`;
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>

@@ -3,31 +3,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ResumeLayoutRenderer } from "@/components/resume-layouts/ResumeLayoutRenderer";
+import { financeProfessionalSample, templateStyles } from "@/data/sampleResumeData";
 
 const FinanceExpert = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
-      {/* Finance Expert Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute top-20 left-16 w-32 h-20 border border-primary/20 rounded-lg">
-          <div className="absolute inset-3 border border-primary/15 rounded-md">
-            <div className="absolute inset-2 bg-primary/10 rounded-sm"></div>
+    <div className="min-h-screen bg-gradient-finance relative overflow-hidden">
+      {/* Sophisticated Finance Background with Gold Accents */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute top-20 left-16 w-32 h-20 border border-finance-primary/30 rounded-lg">
+          <div className="absolute inset-3 border border-finance-secondary/20 rounded-md">
+            <div className="absolute inset-2 bg-finance-primary/10 rounded-sm"></div>
           </div>
         </div>
-        <div className="absolute bottom-32 right-20 w-28 h-18 border border-primary/15 rounded-lg transform rotate-6"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-16 border border-primary/12 rounded-md transform -rotate-3"></div>
+        <div className="absolute bottom-32 right-20 w-28 h-18 border border-finance-border rounded-lg transform rotate-6"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-16 border border-finance-accent/20 rounded-md transform -rotate-3"></div>
       </div>
       
-      {/* Financial Chart Elements */}
-      <div className="absolute inset-0 opacity-[0.025]">
-        <div className="absolute top-1/3 left-1/6 w-40 h-2 bg-gradient-to-r from-primary/15 via-primary/20 to-primary/10 rounded-full"></div>
-        <div className="absolute top-1/3 left-1/6 w-36 h-2 bg-gradient-to-r from-primary/12 via-primary/18 to-primary/8 rounded-full mt-1"></div>
-        <div className="absolute top-1/3 left-1/6 w-32 h-2 bg-gradient-to-r from-primary/10 via-primary/15 to-primary/6 rounded-full mt-2"></div>
+      {/* Financial Chart Elements with Gold Accents */}
+      <div className="absolute inset-0 opacity-[0.04]">
+        {/* Rising chart bars in gold */}
+        <div className="absolute top-1/3 left-1/6">
+          <div className="flex items-end gap-1">
+            <div className="w-3 h-8 bg-finance-primary/20"></div>
+            <div className="w-3 h-12 bg-finance-primary/25"></div>
+            <div className="w-3 h-16 bg-finance-primary/30"></div>
+            <div className="w-3 h-20 bg-finance-primary/35"></div>
+            <div className="w-3 h-14 bg-finance-primary/25"></div>
+          </div>
+        </div>
         
-        <div className="absolute bottom-1/4 right-1/5 w-4 h-16 bg-primary/15"></div>
-        <div className="absolute bottom-1/4 right-1/5 w-4 h-20 bg-primary/12 ml-2"></div>
-        <div className="absolute bottom-1/4 right-1/5 w-4 h-12 bg-primary/18 ml-4"></div>
-        <div className="absolute bottom-1/4 right-1/5 w-4 h-24 bg-primary/10 ml-6"></div>
+        {/* Sophisticated grid pattern */}
+        <svg className="absolute bottom-1/4 right-1/5 opacity-20" width="100" height="100" viewBox="0 0 100 100">
+          <defs>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="hsl(var(--finance-primary))" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+        </svg>
       </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
@@ -78,56 +92,19 @@ const FinanceExpert = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b pb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Michael Thompson, CFA</h2>
-                    <p className="text-gray-600">Senior Financial Analyst</p>
-                    <p className="text-sm text-gray-500">michael.thompson@finance.com | (555) 123-4567 | CFA Institute Member</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">PROFESSIONAL SUMMARY</h3>
-                    <p className="text-sm text-gray-700">
-                      Results-driven financial analyst with 7+ years of experience in investment banking...
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">CORE COMPETENCIES</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• Financial Modeling & Valuation</div>
-                      <div>• Risk Assessment & Management</div>
-                      <div>• Excel, Bloomberg, SAP</div>
-                      <div>• Portfolio Management</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">PROFESSIONAL EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Senior Financial Analyst</h4>
-                          <span className="text-sm text-gray-500">2021 - Present</span>
-                        </div>
-                        <p className="text-sm text-gray-600">Goldman Sachs</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Developed financial models resulting in $50M cost savings</li>
-                          <li>Led due diligence for M&A transactions worth $2B+</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">EDUCATION & CERTIFICATIONS</h3>
-                    <div className="text-sm text-gray-700">
-                      <div>• MBA Finance - Wharton School (2018)</div>
-                      <div>• CFA Charter - CFA Institute (2019)</div>
-                      <div>• BS Economics - University of Chicago (2016)</div>
-                    </div>
-                  </div>
+              <div className="bg-white p-4 rounded-lg shadow-lg min-h-[600px] border overflow-hidden">
+                <div className="scale-75 origin-top-left w-[133%] h-[133%]">
+                  <ResumeLayoutRenderer 
+                    data={financeProfessionalSample}
+                    styles={templateStyles.finance}
+                    layoutVariant="classic-professional"
+                    formatDate={(date) => {
+                      if (!date) return '';
+                      const [year, month] = date.split('-');
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[parseInt(month) - 1]} ${year}`;
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>

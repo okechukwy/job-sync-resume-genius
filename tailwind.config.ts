@@ -70,13 +70,67 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Industry-specific color schemes
+				tech: {
+					primary: 'hsl(var(--tech-primary))',
+					secondary: 'hsl(var(--tech-secondary))',
+					accent: 'hsl(var(--tech-accent))',
+					bg: 'hsl(var(--tech-bg))',
+					surface: 'hsl(var(--tech-surface))',
+					text: 'hsl(var(--tech-text))',
+					border: 'hsl(var(--tech-border))'
+				},
+				creative: {
+					primary: 'hsl(var(--creative-primary))',
+					secondary: 'hsl(var(--creative-secondary))',
+					accent: 'hsl(var(--creative-accent))',
+					bg: 'hsl(var(--creative-bg))',
+					surface: 'hsl(var(--creative-surface))',
+					text: 'hsl(var(--creative-text))',
+					border: 'hsl(var(--creative-border))'
+				},
+				finance: {
+					primary: 'hsl(var(--finance-primary))',
+					secondary: 'hsl(var(--finance-secondary))',
+					accent: 'hsl(var(--finance-accent))',
+					bg: 'hsl(var(--finance-bg))',
+					surface: 'hsl(var(--finance-surface))',
+					text: 'hsl(var(--finance-text))',
+					border: 'hsl(var(--finance-border))'
+				},
+				healthcare: {
+					primary: 'hsl(var(--healthcare-primary))',
+					secondary: 'hsl(var(--healthcare-secondary))',
+					accent: 'hsl(var(--healthcare-accent))',
+					bg: 'hsl(var(--healthcare-bg))',
+					surface: 'hsl(var(--healthcare-surface))',
+					text: 'hsl(var(--healthcare-text))',
+					border: 'hsl(var(--healthcare-border))'
+				},
+				business: {
+					primary: 'hsl(var(--business-primary))',
+					secondary: 'hsl(var(--business-secondary))',
+					accent: 'hsl(var(--business-accent))',
+					bg: 'hsl(var(--business-bg))',
+					surface: 'hsl(var(--business-surface))',
+					text: 'hsl(var(--business-text))',
+					border: 'hsl(var(--business-border))'
 				}
 			},
 			backgroundImage: {
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-button': 'var(--gradient-button)',
-				'gradient-card': 'var(--gradient-card)'
+				'gradient-card': 'var(--gradient-card)',
+				// Industry-specific gradients
+				'gradient-tech': 'linear-gradient(135deg, hsl(var(--tech-primary)), hsl(var(--tech-secondary)))',
+				'gradient-creative': 'linear-gradient(135deg, hsl(var(--creative-primary)), hsl(var(--creative-secondary)), hsl(var(--creative-accent)))',
+				'gradient-finance': 'linear-gradient(135deg, hsl(var(--finance-bg)), hsl(var(--finance-surface)))',
+				'gradient-healthcare': 'linear-gradient(135deg, hsl(var(--healthcare-bg)), hsl(var(--healthcare-surface)))',
+				'gradient-business': 'linear-gradient(135deg, hsl(var(--business-bg)), hsl(var(--business-surface)))',
+				// Circuit pattern for tech
+				'circuit-pattern': 'radial-gradient(circle at 20% 20%, hsl(var(--tech-primary) / 0.1) 0%, transparent 20%), radial-gradient(circle at 80% 80%, hsl(var(--tech-secondary) / 0.1) 0%, transparent 20%)'
 			},
 			boxShadow: {
 				'glass': 'var(--shadow-glass)',

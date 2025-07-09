@@ -48,6 +48,53 @@
     --popover-foreground: 240 15% 15%;
     
     --radius: 0.75rem;
+
+    /* Industry-Specific Color Palettes */
+    
+    /* Technology - Circuit patterns, blue/purple gradients */
+    --tech-primary: 240 100% 60%;
+    --tech-secondary: 260 100% 70%;
+    --tech-accent: 280 100% 80%;
+    --tech-bg: 240 10% 3%;
+    --tech-surface: 240 12% 6%;
+    --tech-text: 210 40% 98%;
+    --tech-border: 240 50% 20%;
+    
+    /* Creative - Artistic brushstrokes, vibrant colors */
+    --creative-primary: 320 100% 60%;
+    --creative-secondary: 45 100% 60%;
+    --creative-accent: 180 100% 50%;
+    --creative-bg: 320 20% 5%;
+    --creative-surface: 320 15% 8%;
+    --creative-text: 320 5% 95%;
+    --creative-border: 320 40% 25%;
+    
+    /* Finance - Sophisticated dark themes, gold accents */
+    --finance-primary: 45 100% 50%;
+    --finance-secondary: 45 80% 40%;
+    --finance-accent: 45 100% 60%;
+    --finance-bg: 220 15% 8%;
+    --finance-surface: 220 10% 12%;
+    --finance-text: 45 20% 95%;
+    --finance-border: 45 30% 25%;
+    
+    /* Healthcare - Clean whites, calming blues/greens */
+    --healthcare-primary: 200 100% 50%;
+    --healthcare-secondary: 160 100% 40%;
+    --healthcare-accent: 180 100% 60%;
+    --healthcare-bg: 200 50% 98%;
+    --healthcare-surface: 200 30% 95%;
+    --healthcare-text: 200 20% 15%;
+    --healthcare-border: 200 20% 85%;
+    
+    /* Business - Professional grays, corporate blues */
+    --business-primary: 210 100% 50%;
+    --business-secondary: 210 50% 40%;
+    --business-accent: 210 100% 60%;
+    --business-bg: 210 15% 8%;
+    --business-surface: 210 10% 12%;
+    --business-text: 210 15% 95%;
+    --business-border: 210 20% 25%;
     
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(240 30% 96%) 30%, hsl(260 40% 94%) 60%, hsl(280 50% 92%) 100%);
