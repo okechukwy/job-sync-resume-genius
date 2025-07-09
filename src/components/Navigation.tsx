@@ -1,9 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const handleAnchorClick = (href: string) => {
+    if (location.pathname !== '/') {
+      // If not on homepage, navigate to homepage with anchor
+      window.location.href = `/${href}`;
+    }
+  };
 
   const navItems = [
     { label: "Features", href: "#features", type: "anchor" },
@@ -40,6 +48,9 @@ const Navigation = () => {
                     key={item.label}
                     href={item.href}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    onClick={(e) => {
+                      handleAnchorClick(item.href);
+                    }}
                   >
                     {item.label}
                   </a>
@@ -96,7 +107,10 @@ const Navigation = () => {
                     key={item.label}
                     href={item.href}
                     className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={(e) => {
+                      handleAnchorClick(item.href);
+                      setIsMenuOpen(false);
+                    }}
                   >
                     {item.label}
                   </a>
