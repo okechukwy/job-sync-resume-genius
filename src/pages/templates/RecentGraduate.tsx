@@ -6,7 +6,27 @@ import { Link } from "react-router-dom";
 
 const RecentGraduate = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Academic Graduate Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-16 left-12 w-24 h-32 border border-primary/20 rounded-lg transform rotate-12">
+          <div className="absolute inset-2 border border-primary/15 rounded-md transform -rotate-6">
+            <div className="absolute inset-2 bg-primary/10 rounded-sm"></div>
+          </div>
+        </div>
+        <div className="absolute bottom-24 right-16 w-20 h-20 border border-primary/15 rounded-full">
+          <div className="absolute inset-3 bg-primary/8 rounded-full"></div>
+        </div>
+        <div className="absolute top-1/2 right-1/4 w-16 h-24 border border-primary/12 rounded-lg transform -rotate-15"></div>
+      </div>
+      
+      {/* Academic Achievement Lines */}
+      <div className="absolute inset-0 opacity-[0.025]">
+        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent"></div>
+        <div className="absolute bottom-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/12 to-transparent"></div>
+        <div className="absolute left-1/4 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent"></div>
+        <div className="absolute right-1/4 top-0 w-px h-full bg-gradient-to-b from-transparent via-primary/8 to-transparent"></div>
+      </div>
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
