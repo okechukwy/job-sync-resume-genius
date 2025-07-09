@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Eye, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Eye } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { TemplateActions } from "@/components/template-preview";
 
 const MobileDeveloper = () => {
   return (
@@ -184,23 +183,7 @@ const MobileDeveloper = () => {
           </div>
         </div>
 
-        <div className="text-center spacing-content animate-fade-in" style={{ animationDelay: "0.8s" }}>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-started">
-              <Button variant="hero" size="lg" className="min-w-48 hover-lift focus-ring">
-                <FileText className="w-4 h-4 mr-2" />
-                <span className="typography-body font-medium">Use This Template</span>
-              </Button>
-            </Link>
-            <Button variant="glass" size="lg" className="min-w-48 hover-lift focus-ring">
-              <Download className="w-4 h-4 mr-2" />
-              <span className="typography-body font-medium">Download Sample</span>
-            </Button>
-          </div>
-          <p className="typography-caption text-contrast-medium mt-6">
-            Free to use • No credit card required
-          </p>
-        </div>
+        <TemplateActions templateName="Mobile Developer" />
       </div>
     </div>
   );
