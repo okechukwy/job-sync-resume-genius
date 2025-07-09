@@ -21,25 +21,25 @@ const ArtDirector = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🎨</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+      <div className="max-w-6xl mx-auto px-4 py-12 spacing-content">
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="text-6xl mb-6 hover-scale text-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>🎨</div>
+          <Badge variant="secondary" className="mb-6 glass-card typography-caption hover-scale" style={{ animationDelay: "0.2s" }}>
             Art Director Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="typography-display text-4xl md:text-5xl font-bold mb-6 text-contrast-high animate-fade-in" style={{ animationDelay: "0.3s" }}>
             Art Director{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="typography-body text-lg text-contrast-medium max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: "0.4s" }}>
             Visionary design for creative leaders. 
             Perfect for showcasing your creative vision, team leadership, and award-winning campaigns.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Visionary</Badge>
-            <Badge variant="outline">Leadership</Badge>
-            <Badge variant="outline">Award-Winning</Badge>
+          <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Visionary</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Leadership</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Award-Winning</Badge>
           </div>
         </div>
 

@@ -21,25 +21,25 @@ const WebDesigner = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">💻</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+      <div className="max-w-6xl mx-auto px-4 py-12 spacing-content">
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="text-6xl mb-6 hover-scale text-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>💻</div>
+          <Badge variant="secondary" className="mb-6 glass-card typography-caption hover-scale" style={{ animationDelay: "0.2s" }}>
             Web Designer Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="typography-display text-4xl md:text-5xl font-bold mb-6 text-contrast-high animate-fade-in" style={{ animationDelay: "0.3s" }}>
             Web Designer{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="typography-body text-lg text-contrast-medium max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: "0.4s" }}>
             Modern design for web professionals. 
             Perfect for showcasing your design portfolio, technical skills, and user-centered approach.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Modern</Badge>
-            <Badge variant="outline">User-Centered</Badge>
-            <Badge variant="outline">Responsive</Badge>
+          <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Modern</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">User-Centered</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Responsive</Badge>
           </div>
         </div>
 

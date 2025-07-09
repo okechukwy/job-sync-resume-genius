@@ -21,76 +21,94 @@ const DevOpsEngineer = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🔧</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+      <div className="max-w-6xl mx-auto px-4 py-12 spacing-content">
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="text-6xl mb-6 hover-scale text-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>🔧</div>
+          <Badge variant="secondary" className="mb-6 glass-card typography-caption hover-scale" style={{ animationDelay: "0.2s" }}>
             DevOps Engineer Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="typography-display text-4xl md:text-5xl font-bold mb-6 text-contrast-high animate-fade-in" style={{ animationDelay: "0.3s" }}>
             DevOps Engineer{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="typography-body text-lg text-contrast-medium max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: "0.4s" }}>
             Tailored for DevOps and infrastructure professionals. 
             Perfect for showcasing automation and cloud expertise.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Infrastructure</Badge>
-            <Badge variant="outline">Cloud</Badge>
-            <Badge variant="outline">Technical</Badge>
+          <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Infrastructure</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Cloud</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Technical</Badge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
+        <div className="spacing-grid grid grid-cols-1 lg:grid-cols-2 mb-12">
+          <Card className="glass-card hover-lift animate-fade-in" style={{ animationDelay: "0.6s" }}>
+            <CardHeader className="spacing-content">
+              <CardTitle className="typography-heading flex items-center gap-2 text-contrast-high">
+                <Eye className="w-5 h-5 text-primary" />
                 Template Preview
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b-2 border-green-200 pb-4">
-                    <h2 className="text-2xl font-bold text-green-900">Chris Infrastructure</h2>
-                    <p className="text-green-600 font-medium">Senior DevOps Engineer</p>
-                    <p className="text-sm text-gray-600">chris.devops@cloud.com | (555) 123-4567 | AWS Certified</p>
+              <div className="bg-white p-8 rounded-xl shadow-lg min-h-[600px] border hover-lift animate-fade-in">
+                <div className="spacing-content">
+                  <div className="bg-gradient-to-r from-green-900 to-emerald-900 text-white rounded-xl p-8 -mx-8 -mt-8 mb-8">
+                    <h2 className="typography-heading text-3xl font-bold mb-3">Chris Infrastructure</h2>
+                    <p className="typography-body text-green-100 font-medium text-lg">Senior DevOps Engineer</p>
+                    <p className="typography-caption text-green-200 mt-2">chris.devops@cloud.com | (555) 123-4567 | AWS Certified</p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-green-900 mb-2 border-l-4 border-green-400 pl-3">TECHNICAL SUMMARY</h3>
-                    <p className="text-sm text-gray-700">
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-green-600 pl-4">TECHNICAL SUMMARY</h3>
+                    <p className="resume-content-text">
                       DevOps engineer with 7+ years automating infrastructure and CI/CD pipelines...
                     </p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-green-900 mb-2 border-l-4 border-green-400 pl-3">INFRASTRUCTURE SKILLS</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• AWS, Azure, GCP</div>
-                      <div>• Docker, Kubernetes</div>
-                      <div>• Terraform, Ansible</div>
-                      <div>• Jenkins, GitLab CI</div>
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-green-600 pl-4">INFRASTRUCTURE SKILLS</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-green-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                        AWS, Azure, GCP
+                      </div>
+                      <div className="text-green-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                        Docker, Kubernetes
+                      </div>
+                      <div className="text-green-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                        Terraform, Ansible
+                      </div>
+                      <div className="text-green-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                        Jenkins, GitLab CI
+                      </div>
                     </div>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-green-900 mb-2 border-l-4 border-green-400 pl-3">EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Senior DevOps Engineer</h4>
-                          <span className="text-sm text-green-600 font-medium">2020 - Present</span>
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-green-600 pl-4">EXPERIENCE</h3>
+                    <div className="bg-contrast-medium rounded-lg p-6">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="typography-heading font-semibold text-lg text-contrast-high">Senior DevOps Engineer</h4>
+                          <p className="typography-body text-contrast-medium font-medium">Cloud Solutions Corp</p>
                         </div>
-                        <p className="text-sm text-gray-600">Cloud Solutions Corp</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Reduced deployment time by 80% through automation</li>
-                          <li>Managed infrastructure for 50+ microservices</li>
-                        </ul>
+                        <span className="resume-meta-text text-green-600">2020 - Present</span>
                       </div>
+                      <ul className="space-y-2 resume-content-text">
+                        <li className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0"></span>
+                          Reduced deployment time by 80% through automation
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0"></span>
+                          Managed infrastructure for 50+ microservices
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>

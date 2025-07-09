@@ -21,25 +21,25 @@ const VideoEditor = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4">🎬</div>
-          <Badge variant="secondary" className="mb-4 glass-card">
+      <div className="max-w-6xl mx-auto px-4 py-12 spacing-content">
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="text-6xl mb-6 hover-scale text-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>🎬</div>
+          <Badge variant="secondary" className="mb-6 glass-card typography-caption hover-scale" style={{ animationDelay: "0.2s" }}>
             Video Editor Template
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="typography-display text-4xl md:text-5xl font-bold mb-6 text-contrast-high animate-fade-in" style={{ animationDelay: "0.3s" }}>
             Video Editor{" "}
             <span className="gradient-text">Resume</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="typography-body text-lg text-contrast-medium max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: "0.4s" }}>
             Creative design for video professionals. 
             Perfect for showcasing your portfolio, technical skills, and visual storytelling expertise.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            <Badge variant="outline">Creative</Badge>
-            <Badge variant="outline">Technical</Badge>
-            <Badge variant="outline">Storytelling</Badge>
+          <div className="flex flex-wrap justify-center gap-3 mt-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Creative</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Technical</Badge>
+            <Badge variant="outline" className="typography-caption hover-scale border-primary/30">Storytelling</Badge>
           </div>
         </div>
 
