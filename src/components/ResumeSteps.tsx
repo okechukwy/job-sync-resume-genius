@@ -7,6 +7,7 @@ import ProgressHeader from "@/components/resume-steps/ProgressHeader";
 import StepIndicator from "@/components/resume-steps/StepIndicator";
 import NavigationButtons from "@/components/resume-steps/NavigationButtons";
 import StepContent from "@/components/resume-steps/StepContent";
+import LivePreview from "@/components/LivePreview";
 
 interface ResumeStepsProps {
   selectedIndustry: string;
@@ -46,7 +47,7 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Progress Section */}
         <ProgressHeader 
           currentStep={currentStep}
@@ -60,19 +61,48 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
           currentStep={currentStep}
         />
 
-        {/* Main Content */}
-        <Card className="glass-card mb-8">
-          <CardContent className="p-8">
-            <StepContent
-              currentStep={currentStep}
-              resumeData={resumeData}
-              selectedIndustry={selectedIndustry}
-              selectedTemplate={selectedTemplate}
-              onDataUpdate={handleDataUpdate}
-              onValidationChange={handleValidationChange}
-            />
-          </CardContent>
-        </Card>
+        {/* Main Content - Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Left Column - Form */}
+          <Card className="glass-card">
+            <CardContent className="p-8">
+              <StepContent
+                currentStep={currentStep}
+                resumeData={resumeData}
+                selectedIndustry={selectedIndustry}
+                selectedTemplate={selectedTemplate}
+                onDataUpdate={handleDataUpdate}
+                onValidationChange={handleValidationChange}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Right Column - Live Preview */}
+          <Card className="glass-card hidden lg:block">
+            <CardContent className="p-0 h-full">
+              <LivePreview
+                data={resumeData}
+                industry={selectedIndustry}
+                template={selectedTemplate}
+                className="h-full min-h-[600px]"
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Mobile Preview Button */}
+        <div className="lg:hidden mb-8">
+          <Card className="glass-card">
+            <CardContent className="p-4">
+              <LivePreview
+                data={resumeData}
+                industry={selectedIndustry}
+                template={selectedTemplate}
+                className="h-96"
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Navigation Buttons */}
         <NavigationButtons
