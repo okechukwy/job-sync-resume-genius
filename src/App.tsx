@@ -84,6 +84,7 @@ import HelpCenter from "./pages/HelpCenter";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import GDPR from "./pages/GDPR";
+import LinkedInOptimization from "./pages/LinkedInOptimization";
 
 const queryClient = new QueryClient();
 
@@ -187,6 +188,7 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/gdpr" element={<GDPR />} />
+          <Route path="/linkedin-optimization" element={<LinkedInOptimization />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
