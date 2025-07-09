@@ -2,7 +2,7 @@ import { ResumeData } from "@/hooks/useResumeSteps";
 import { LayoutProps } from "./types";
 import { Mail, Phone, MapPin, Globe, Linkedin, Github, User } from "lucide-react";
 
-export const ClassicProfessionalLayout = ({ data, styles, formatDate, renderExperienceSection, renderEducationSection, renderSkillsSection }: LayoutProps) => (
+export const ClassicProfessionalLayout = ({ data, styles, formatDate, renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection }: LayoutProps) => (
   <div className="spacing-content animate-fade-in">
     {/* Header */}
     <div className={`${styles.headerBg} ${styles.borderColor} rounded-xl p-10 -mx-8 -mt-8 mb-8 hover-lift`}>
@@ -60,6 +60,7 @@ export const ClassicProfessionalLayout = ({ data, styles, formatDate, renderExpe
         </div>
       </div>
     </div>
+    {renderSummarySection()}
     {renderExperienceSection()}
     {renderEducationSection()}
     {renderSkillsSection()}

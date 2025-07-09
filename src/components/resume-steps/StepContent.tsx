@@ -1,4 +1,5 @@
 import PersonalInfoForm from "@/components/PersonalInfoForm";
+import SummaryForm from "@/components/SummaryForm";
 import ExperienceForm from "@/components/ExperienceForm";
 import EducationForm from "@/components/EducationForm";
 import SkillsForm from "@/components/SkillsForm";
@@ -33,6 +34,15 @@ const StepContent = ({
       );
     case 2:
       return (
+        <SummaryForm
+          data={resumeData.summary}
+          onUpdate={(data) => onDataUpdate('summary', data)}
+          onValidationChange={(isValid) => onValidationChange('summary', isValid)}
+          industry={selectedIndustry}
+        />
+      );
+    case 3:
+      return (
         <ExperienceForm
           data={resumeData.experience}
           onUpdate={(data) => onDataUpdate('experience', data)}
@@ -40,7 +50,7 @@ const StepContent = ({
           industry={selectedIndustry}
         />
       );
-    case 3:
+    case 4:
       return (
         <EducationForm
           data={resumeData.education}
@@ -48,7 +58,7 @@ const StepContent = ({
           onValidationChange={(isValid) => onValidationChange('education', isValid)}
         />
       );
-    case 4:
+    case 5:
       return (
         <SkillsForm
           data={resumeData.skills}
@@ -57,7 +67,7 @@ const StepContent = ({
           industry={selectedIndustry}
         />
       );
-    case 5:
+    case 6:
       return <ResumePreview data={resumeData} industry={selectedIndustry} template={selectedTemplate} />;
     default:
       return null;

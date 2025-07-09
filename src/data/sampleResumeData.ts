@@ -11,6 +11,9 @@ export const marketingManagerSample: ResumeData = {
     website: "sarahmarketing.com",
     linkedin: "linkedin.com/in/sarahmarketing"
   },
+  summary: {
+    content: "Results-driven Marketing Manager with 7+ years of experience driving strategic marketing campaigns and leading high-performing teams. Proven track record of increasing lead generation by 150% and managing multi-million dollar budgets. Expertise in digital marketing, brand development, and ROI optimization."
+  },
   experience: [
     {
       id: "1",
@@ -71,6 +74,9 @@ export const techProfessionalSample: ResumeData = {
     website: "alexdev.io",
     linkedin: "linkedin.com/in/alexdeveloper"
   },
+  summary: {
+    content: "Senior Software Engineer with 6+ years of experience building scalable applications serving millions of users. Expert in full-stack development with React, Node.js, and cloud technologies. Passionate about mentoring teams and implementing best practices that improve development efficiency by 75%."
+  },
   experience: [
     {
       id: "1",
@@ -130,6 +136,9 @@ export const businessProfessionalSample: ResumeData = {
     location: "Chicago, IL",
     website: "michaelbusiness.pro",
     linkedin: "linkedin.com/in/michaelbusiness"
+  },
+  summary: {
+    content: "Dynamic Business Development Director with 8+ years of experience driving strategic partnerships and revenue growth. Successfully generated $15M in new revenue streams through market expansion initiatives. Expert in building and leading high-performing teams across multiple territories."
   },
   experience: [
     {
@@ -252,6 +261,9 @@ export const financeProfessionalSample: ResumeData = {
     website: "marcusfinance.pro",
     linkedin: "linkedin.com/in/marcusfinance"
   },
+  summary: {
+    content: "Senior Investment Analyst with 6+ years managing $500M+ portfolios and delivering consistent 18% annual returns. Expert in risk assessment, algorithmic trading models, and wealth management for high-net-worth clients. Harvard MBA with proven track record in financial strategy and portfolio optimization."
+  },
   experience: [
     {
       id: "1",
@@ -314,6 +326,9 @@ export const creativeProfessionalSample: ResumeData = {
     website: "lunacreative.portfolio",
     linkedin: "linkedin.com/in/lunacreative"
   },
+  summary: {
+    content: "Visionary Creative Director with 8+ years of experience leading brand campaigns that increase client engagement by 200%. Expert in visual storytelling, team leadership, and developing innovative design solutions that become industry standards. Master's in Visual Design with award-winning portfolio."
+  },
   experience: [
     {
       id: "1",
@@ -374,6 +389,9 @@ export const healthcareProfessionalSample: ResumeData = {
     location: "Seattle, WA",
     website: "drsarahwellness.com",
     linkedin: "linkedin.com/in/drsarahwellness"
+  },
+  summary: {
+    content: "Board-certified Chief Medical Officer with 12+ years of experience leading healthcare operations for 500-bed hospital serving 100,000+ patients annually. Expert in implementing evidence-based protocols that reduce readmission rates by 25%. University of Washington MD with specialization in digital health innovation."
   },
   experience: [
     {

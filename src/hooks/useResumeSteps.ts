@@ -10,6 +10,9 @@ export interface ResumeData {
     website?: string;
     linkedin?: string;
   };
+  summary: {
+    content: string;
+  };
   experience: Array<{
     id: string;
     company: string;
@@ -38,6 +41,7 @@ export const useResumeSteps = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formValidation, setFormValidation] = useState({
     personalInfo: false,
+    summary: false,
     experience: false,
     education: false,
     skills: false,
@@ -51,6 +55,9 @@ export const useResumeSteps = () => {
       website: '',
       linkedin: '',
     },
+    summary: {
+      content: '',
+    },
     experience: [],
     education: [],
     skills: {
@@ -61,19 +68,21 @@ export const useResumeSteps = () => {
 
   const steps = [
     { number: 1, title: "Personal Info", description: "Basic contact information" },
-    { number: 2, title: "Experience", description: "Work history and achievements" },
-    { number: 3, title: "Education", description: "Academic background" },
-    { number: 4, title: "Skills", description: "Technical and soft skills" },
-    { number: 5, title: "Preview", description: "Review and download" },
+    { number: 2, title: "Summary", description: "Professional summary" },
+    { number: 3, title: "Experience", description: "Work history and achievements" },
+    { number: 4, title: "Education", description: "Academic background" },
+    { number: 5, title: "Skills", description: "Technical and soft skills" },
+    { number: 6, title: "Preview", description: "Review and download" },
   ];
 
   const handleNext = () => {
     const stepValidationMap = {
       1: formValidation.personalInfo,
-      2: formValidation.experience,
-      3: formValidation.education,
-      4: formValidation.skills,
-      5: true,
+      2: formValidation.summary,
+      3: formValidation.experience,
+      4: formValidation.education,
+      5: formValidation.skills,
+      6: true,
     };
 
     const isCurrentStepValid = stepValidationMap[currentStep as keyof typeof stepValidationMap];
@@ -83,7 +92,7 @@ export const useResumeSteps = () => {
       return;
     }
 
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
       toast.success(`Step ${currentStep + 1} completed!`);
     }
@@ -109,7 +118,7 @@ export const useResumeSteps = () => {
     }));
   };
 
-  const progress = (currentStep / 5) * 100;
+  const progress = (currentStep / 6) * 100;
 
   return {
     currentStep,

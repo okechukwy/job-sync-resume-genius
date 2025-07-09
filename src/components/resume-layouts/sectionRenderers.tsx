@@ -5,10 +5,32 @@ import {
   Mail, Phone, MapPin, Globe, Linkedin, Github, 
   Calendar, MapPinIcon, Building, GraduationCap, 
   Code, Lightbulb, Award, TrendingUp, Star,
-  CheckCircle, Target, Users, Zap
+  CheckCircle, Target, Users, Zap, User, FileText
 } from "lucide-react";
 
 export const createSectionRenderers = (data: ResumeData, styles: TemplateStyles, formatDate: (dateString: string) => string) => {
+  const renderSummarySection = () => (
+    data.summary.content && (
+      <div className="space-y-6 animate-fade-in">
+        <h2 className={`resume-section-title ${styles.sectionBorder} hover-lift flex items-center gap-2`}>
+          <FileText className="w-5 h-5" />
+          PROFESSIONAL SUMMARY
+        </h2>
+        <div className="bg-contrast-medium rounded-lg p-6 hover-scale border-l-4 border-primary">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+              <User className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="resume-content-text text-contrast-high leading-relaxed">
+                {data.summary.content}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  );
   const renderExperienceSection = () => (
     data.experience.length > 0 && (
       <div className="space-y-6 animate-fade-in">
@@ -174,5 +196,5 @@ export const createSectionRenderers = (data: ResumeData, styles: TemplateStyles,
     );
   };
 
-  return { renderExperienceSection, renderEducationSection, renderSkillsSection };
+  return { renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection };
 };

@@ -27,12 +27,17 @@ export const educationSchema = z.object({
   gpa: z.string().optional(),
 });
 
+export const summarySchema = z.object({
+  content: z.string().min(50, "Summary must be at least 50 characters long").max(500, "Summary must be less than 500 characters"),
+});
+
 export const skillsSchema = z.object({
   technical: z.array(z.string()).min(1, "At least one technical skill is required"),
   soft: z.array(z.string()).min(1, "At least one soft skill is required"),
 });
 
 export type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
+export type SummaryFormData = z.infer<typeof summarySchema>;
 export type ExperienceFormData = z.infer<typeof experienceSchema>;
 export type EducationFormData = z.infer<typeof educationSchema>;
 export type SkillsFormData = z.infer<typeof skillsSchema>;

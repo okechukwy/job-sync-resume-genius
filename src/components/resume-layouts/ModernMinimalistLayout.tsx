@@ -1,7 +1,7 @@
 import { LayoutProps } from "./types";
 import { Mail, Phone, MapPin, Globe, Linkedin, Github, User } from "lucide-react";
 
-export const ModernMinimalistLayout = ({ data, styles, formatDate, renderExperienceSection, renderEducationSection, renderSkillsSection }: LayoutProps) => (
+export const ModernMinimalistLayout = ({ data, styles, formatDate, renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection }: LayoutProps) => (
   <div className="spacing-content animate-slide-up">
     {/* Clean Header */}
     <div className="text-left border-b border-gray-200 pb-10 mb-12 hover-scale">
@@ -59,6 +59,7 @@ export const ModernMinimalistLayout = ({ data, styles, formatDate, renderExperie
         </div>
       </div>
     </div>
+    {renderSummarySection()}
     {renderExperienceSection()}
     {renderEducationSection()}
     {renderSkillsSection()}

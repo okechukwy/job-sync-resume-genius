@@ -12,12 +12,13 @@ interface ResumeLayoutRendererProps {
 }
 
 export const ResumeLayoutRenderer = ({ data, styles, layoutVariant, formatDate }: ResumeLayoutRendererProps) => {
-  const { renderExperienceSection, renderEducationSection, renderSkillsSection } = createSectionRenderers(data, styles, formatDate);
+  const { renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection } = createSectionRenderers(data, styles, formatDate);
 
   const layoutProps = {
     data,
     styles,
     formatDate,
+    renderSummarySection,
     renderExperienceSection,
     renderEducationSection,
     renderSkillsSection

@@ -15,6 +15,7 @@ export interface LayoutProps {
   data: ResumeData;
   styles: TemplateStyles;
   formatDate: (dateString: string) => string;
+  renderSummarySection: () => JSX.Element | false;
   renderExperienceSection: () => JSX.Element | false;
   renderEducationSection: () => JSX.Element | false;
   renderSkillsSection: () => JSX.Element | false;
