@@ -16,16 +16,6 @@ const resources = [
         "How to structure your resume for maximum impact",
         "Writing compelling professional summaries",
         "Quantifying achievements with metrics"
-      ],
-      externalLinks: [
-        {
-          title: "Harvard Resume Guide",
-          url: "https://ocs.fas.harvard.edu/files/ocs/files/hes-resume-cover-letter-guide.pdf"
-        },
-        {
-          title: "Resume Templates by Industry",
-          url: "https://www.indeed.com/career-advice/resumes-cover-letters/resume-examples"
-        }
       ]
     },
     {
@@ -38,16 +28,6 @@ const resources = [
         "Understanding how ATS systems work",
         "Keyword optimization strategies",
         "Formatting for ATS compatibility"
-      ],
-      externalLinks: [
-        {
-          title: "ATS Resume Checker Tool",
-          url: "https://www.jobscan.co/"
-        },
-        {
-          title: "ATS Best Practices Guide",
-          url: "https://www.topresume.com/career-advice/ats-resume-guide"
-        }
       ]
     },
     {
@@ -60,16 +40,6 @@ const resources = [
         "50+ most common interview questions",
         "STAR method for behavioral questions",
         "Technical interview preparation"
-      ],
-      externalLinks: [
-        {
-          title: "Glassdoor Interview Questions",
-          url: "https://www.glassdoor.com/Interview/index.htm"
-        },
-        {
-          title: "LeetCode Interview Prep",
-          url: "https://leetcode.com/explore/interview/"
-        }
       ]
     },
     {
@@ -82,16 +52,6 @@ const resources = [
         "Research and benchmarking your worth",
         "Negotiation scripts and templates",
         "Beyond salary: benefits negotiation"
-      ],
-      externalLinks: [
-        {
-          title: "PayScale Salary Tool",
-          url: "https://www.payscale.com/"
-        },
-        {
-          title: "Negotiation Masterclass",
-          url: "https://www.masterclass.com/classes/chris-voss-teaches-the-art-of-negotiation"
-        }
       ]
     },
     {
@@ -104,16 +64,6 @@ const resources = [
         "Building your personal brand",
         "Networking strategies that work",
         "Leadership development resources"
-      ],
-      externalLinks: [
-        {
-          title: "LinkedIn Learning Career Courses",
-          url: "https://www.linkedin.com/learning/topics/career-development"
-        },
-        {
-          title: "Harvard Business Review Career Guide",
-          url: "https://hbr.org/topic/managing-yourself"
-        }
       ]
     },
     {
@@ -126,16 +76,6 @@ const resources = [
         "Hidden job market strategies",
         "LinkedIn optimization guide",
         "Company research techniques"
-      ],
-      externalLinks: [
-        {
-          title: "Hidden Job Market Statistics",
-          url: "https://www.apollotechnical.com/hidden-job-market-statistics/"
-        },
-        {
-          title: "Job Search Strategies Guide",
-          url: "https://www.monster.com/career-advice/article/job-search-strategies"
-        }
       ]
     }
   ];
@@ -190,24 +130,6 @@ const resources = [
                   </ul>
                 </div>
 
-                {/* External Links */}
-                <div>
-                  <p className="text-sm font-medium mb-2">External Reading:</p>
-                  <div className="space-y-2">
-                    {resource.externalLinks.map((link, idx) => (
-                      <a 
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        <span>{link.title}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
 
                 <Link to={resource.link}>
                   <Button variant="outline" className="w-full">
