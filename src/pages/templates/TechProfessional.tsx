@@ -56,45 +56,63 @@ const TechProfessional = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b pb-4">
-                    <h2 className="text-xl font-bold text-gray-900">John Developer</h2>
-                    <p className="text-gray-600">Senior Software Engineer</p>
-                    <p className="text-sm text-gray-500">john.developer@email.com | (555) 123-4567 | LinkedIn</p>
+              <div className="bg-white p-8 rounded-xl shadow-lg min-h-[600px] border hover-lift animate-fade-in">
+                <div className="spacing-content">
+                  <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-xl p-8 -mx-8 -mt-8 mb-8">
+                    <h2 className="typography-heading text-3xl font-bold mb-3">John Developer</h2>
+                    <p className="typography-body text-blue-100 font-medium text-lg">Senior Software Engineer</p>
+                    <p className="typography-caption text-blue-200 mt-2">john.developer@email.com | (555) 123-4567 | LinkedIn</p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">PROFESSIONAL SUMMARY</h3>
-                    <p className="text-sm text-gray-700">
-                      Experienced software engineer with 5+ years developing scalable web applications...
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">PROFESSIONAL SUMMARY</h3>
+                    <p className="resume-content-text">
+                      Experienced software engineer with 5+ years developing scalable web applications using modern technologies and best practices...
                     </p>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">TECHNICAL SKILLS</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• JavaScript, TypeScript, Python</div>
-                      <div>• React, Node.js, Express</div>
-                      <div>• AWS, Docker, Kubernetes</div>
-                      <div>• PostgreSQL, MongoDB</div>
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">TECHNICAL SKILLS</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        JavaScript, TypeScript, Python
+                      </div>
+                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        React, Node.js, Express
+                      </div>
+                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        AWS, Docker, Kubernetes
+                      </div>
+                      <div className="text-blue-600 typography-body font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        PostgreSQL, MongoDB
+                      </div>
                     </div>
                   </div>
                   
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Senior Software Engineer</h4>
-                          <span className="text-sm text-gray-500">2021 - Present</span>
+                  <div className="hover-scale">
+                    <h3 className="resume-section-title border-l-4 border-blue-600 pl-4">EXPERIENCE</h3>
+                    <div className="bg-contrast-medium rounded-lg p-6">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="typography-heading font-semibold text-lg text-contrast-high">Senior Software Engineer</h4>
+                          <p className="typography-body text-contrast-medium font-medium">Tech Corp Inc.</p>
                         </div>
-                        <p className="text-sm text-gray-600">Tech Corp Inc.</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Led development of microservices architecture</li>
-                          <li>Improved application performance by 40%</li>
-                        </ul>
+                        <span className="resume-meta-text text-blue-600">2021 - Present</span>
                       </div>
+                      <ul className="space-y-2 resume-content-text">
+                        <li className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                          Led development of microservices architecture
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                          Improved application performance by 40%
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>
