@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
+import { Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const DataScientistElite = () => {
   return (
@@ -30,19 +31,7 @@ const DataScientistElite = () => {
         <div className="absolute bottom-1/4 right-1/5 w-4 h-20 bg-primary/10 ml-4"></div>
       </div>
       {/* Header */}
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Template Header */}
