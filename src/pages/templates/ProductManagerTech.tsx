@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
+import { Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const ProductManagerTech = () => {
   return (
@@ -26,19 +27,7 @@ const ProductManagerTech = () => {
         <div className="absolute top-1/3 left-1/6 w-3 h-3 bg-primary/12 rounded-full ml-24"></div>
         <div className="absolute top-1/3 left-1/6 w-4 h-4 bg-primary/18 rounded-full ml-32"></div>
       </div>
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">

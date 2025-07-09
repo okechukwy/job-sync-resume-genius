@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Eye, FileText } from "lucide-react";
+import { Download, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const MotionGraphics = () => {
   return (
@@ -20,19 +21,7 @@ const MotionGraphics = () => {
         <div className="absolute top-1/4 left-10 w-40 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent transform rotate-6"></div>
         <div className="absolute bottom-1/3 right-12 w-32 h-px bg-gradient-to-l from-accent/12 via-accent/6 to-transparent transform -rotate-12"></div>
       </div>
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="text-2xl font-bold gradient-text">ResumeAI</div>
-          </div>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
