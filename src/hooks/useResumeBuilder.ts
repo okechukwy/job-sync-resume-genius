@@ -16,18 +16,31 @@ export const useResumeBuilder = () => {
   // Check if a template was pre-selected from the templates page
   useEffect(() => {
     const templateParam = searchParams.get('template');
+    console.log('🔍 Template parameter from URL:', templateParam);
+    
     if (templateParam) {
       // Find the template by matching the route parameter with actual template routes
       const decodedParam = decodeURIComponent(templateParam);
-      const template = allTemplates.find(t => 
-        t.route.includes(decodedParam) || 
-        t.name.toLowerCase().replace(/\s+/g, '-') === decodedParam
-      );
+      console.log('🔍 Decoded parameter:', decodedParam);
+      console.log('🔍 Available templates:', allTemplates.map(t => ({ name: t.name, route: t.route })));
+      
+      const template = allTemplates.find(t => {
+        const routeMatch = t.route.includes(decodedParam);
+        const nameMatch = t.name.toLowerCase().replace(/\s+/g, '-') === decodedParam;
+        console.log(`🔍 Checking template "${t.name}":`, { routeMatch, nameMatch, route: t.route });
+        return routeMatch || nameMatch;
+      });
+      
+      console.log('🔍 Found template:', template);
       
       if (template) {
+        console.log('✅ Setting template:', template.name);
         setSelectedTemplate(template.name);
         setCurrentStep('build');
         toast.success(`${template.name} template selected! Let's build your resume.`);
+      } else {
+        console.log('❌ No template found for parameter:', decodedParam);
+        toast.error('Template not found. Please select a template.');
       }
     }
   }, [searchParams]);

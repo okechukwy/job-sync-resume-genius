@@ -8,6 +8,10 @@ interface TemplateActionsProps {
 }
 
 export const TemplateActions = ({ templateName }: TemplateActionsProps) => {
+  const handleTemplateClick = () => {
+    console.log('🚀 Template button clicked!', templateName);
+    toast.success(`Navigating to ${templateName} template...`);
+  };
   const handleDownloadSample = () => {
     toast.success("Sample resume download started!");
     // Create a simple text file with template information as a sample
@@ -45,7 +49,10 @@ Visit our resume builder to get started!
     <div className="text-center space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button asChild variant="hero" size="lg" className="min-w-48">
-          <Link to={`/get-started?template=${encodeURIComponent(templateName.toLowerCase().replace(/\s+/g, '-'))}`}>
+          <Link 
+            to={`/get-started?template=${encodeURIComponent(templateName.toLowerCase().replace(/\s+/g, '-'))}`}
+            onClick={handleTemplateClick}
+          >
             <FileText className="w-4 h-4 mr-2" />
             Use This Template
           </Link>
