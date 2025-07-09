@@ -2,70 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { allTemplates } from "@/data/templateData";
 
 const TemplatesSection = () => {
-  const templates = [
-    {
-      name: "Tech Professional",
-      description: "Optimized for software engineers, developers, and IT professionals",
-      image: "💻",
-      tags: ["ATS-Optimized", "Modern", "Clean"]
-    },
-    {
-      name: "Gradient Modern",
-      description: "Stunning gradient backgrounds with modern typography",
-      image: "🌈",
-      tags: ["Gradient Design", "Modern", "Eye-Catching"]
-    },
-    {
-      name: "Minimalist Pro",
-      description: "Clean, sophisticated design that lets your content shine",
-      image: "✨",
-      tags: ["Clean", "Minimalist", "Professional"]
-    },
-    {
-      name: "Colorful Fresh",
-      description: "Vibrant and energetic design for dynamic professionals",
-      image: "🎯",
-      tags: ["Vibrant", "Energetic", "Bold"]
-    },
-    {
-      name: "Elegant Professional",
-      description: "Sophisticated design with refined typography for executives",
-      image: "👑",
-      tags: ["Sophisticated", "Elegant", "Executive"]
-    },
-    {
-      name: "Healthcare Specialist",
-      description: "Perfect for doctors, nurses, and healthcare professionals",
-      image: "🏥",
-      tags: ["Professional", "Detailed", "Credible"]
-    },
-    {
-      name: "Finance Expert",
-      description: "Designed for banking, accounting, and finance professionals",
-      image: "💼",
-      tags: ["Corporate", "Analytical", "Precise"]
-    },
-    {
-      name: "Creative Professional",
-      description: "Ideal for designers, marketers, and creative roles",
-      image: "🎨",
-      tags: ["Creative", "Visual", "Unique"]
-    },
-    {
-      name: "Executive Leader",
-      description: "For senior management and C-level executives",
-      image: "📊",
-      tags: ["Executive", "Leadership", "Premium"]
-    },
-    {
-      name: "Recent Graduate",
-      description: "Perfect for new graduates and entry-level positions",
-      image: "🎓",
-      tags: ["Fresh", "Modern", "Entry-Level"]
-    }
-  ];
+  // Show a curated selection of featured templates
+  const featuredTemplates = allTemplates.slice(0, 10);
 
   return (
     <section id="templates" className="py-24 px-4 relative">
@@ -87,7 +28,7 @@ const TemplatesSection = () => {
 
         {/* Templates grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {templates.map((template, index) => (
+          {featuredTemplates.map((template, index) => (
             <Card key={index} className="glass-card hover:shadow-glow transition-all duration-300 group">
               <CardHeader className="text-center">
                 <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -106,7 +47,7 @@ const TemplatesSection = () => {
                     </Badge>
                   ))}
                 </div>
-                <Link to={`/get-started?template=${template.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Link to={template.route}>
                   <Button variant="outline" className="w-full">
                     Preview Template
                   </Button>
