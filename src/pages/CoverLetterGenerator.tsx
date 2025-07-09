@@ -93,9 +93,9 @@ ${toneContent.experience}
 
 What particularly draws me to ${formData.companyName} is your reputation for innovation and excellence in the industry. I am impressed by your recent initiatives and would be excited to contribute my skills and expertise to help drive your continued growth.
 
-${formData.keyPoints ? `Additionally, I would like to highlight: ${formData.keyPoints}` : ''}
+${formData.keyPoints ? `${formData.keyPoints}
 
-${toneContent.closing}
+` : ''}${toneContent.closing}
 
 ${toneContent.signature}`;
 
