@@ -1,8 +1,9 @@
 import { Progress } from "@/components/ui/progress";
+import { ResumeStep } from "@/types/resumeTypes";
 
 interface ProgressHeaderProps {
   currentStep: number;
-  steps: Array<{ number: number; title: string; description: string }>;
+  steps: ResumeStep[];
   progress: number;
 }
 

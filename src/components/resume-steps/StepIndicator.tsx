@@ -1,5 +1,7 @@
+import { ResumeStep } from "@/types/resumeTypes";
+
 interface StepIndicatorProps {
-  steps: Array<{ number: number; title: string; description: string }>;
+  steps: ResumeStep[];
   currentStep: number;
 }
 
