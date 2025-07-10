@@ -101,6 +101,14 @@ export const useResumeSteps = () => {
     experience: false,
     education: false,
     skills: false,
+    certificates: true, // Optional sections - always valid
+    projects: true,
+    languages: true,
+    volunteering: true,
+    awards: true,
+    publications: true,
+    interests: true,
+    additionalInfo: true,
   });
   const [resumeData, setResumeData] = useState<ResumeData>({
     personalInfo: {
@@ -136,12 +144,20 @@ export const useResumeSteps = () => {
   });
 
   const steps = [
-    { number: 1, title: "Personal Info", description: "Basic contact information" },
-    { number: 2, title: "Summary", description: "Professional summary" },
-    { number: 3, title: "Experience", description: "Work history and achievements" },
-    { number: 4, title: "Education", description: "Academic background" },
-    { number: 5, title: "Skills", description: "Technical and soft skills" },
-    { number: 6, title: "Preview", description: "Review and download" },
+    { number: 1, title: "Personal Info", description: "Basic contact information", category: "core", required: true },
+    { number: 2, title: "Summary", description: "Professional summary", category: "core", required: true },
+    { number: 3, title: "Experience", description: "Work history and achievements", category: "core", required: true },
+    { number: 4, title: "Education", description: "Academic background", category: "core", required: true },
+    { number: 5, title: "Skills", description: "Technical and soft skills", category: "core", required: true },
+    { number: 6, title: "Certificates", description: "Professional certifications", category: "additional", required: false },
+    { number: 7, title: "Projects", description: "Notable projects and work", category: "additional", required: false },
+    { number: 8, title: "Languages", description: "Language proficiencies", category: "additional", required: false },
+    { number: 9, title: "Volunteering", description: "Volunteer work and community service", category: "additional", required: false },
+    { number: 10, title: "Awards", description: "Awards and honors received", category: "additional", required: false },
+    { number: 11, title: "Publications", description: "Published works and research", category: "additional", required: false },
+    { number: 12, title: "Interests", description: "Personal interests and hobbies", category: "additional", required: false },
+    { number: 13, title: "Additional Info", description: "Other relevant information", category: "additional", required: false },
+    { number: 14, title: "Preview", description: "Review and download", category: "final", required: false },
   ];
 
   const handleNext = () => {
@@ -151,7 +167,15 @@ export const useResumeSteps = () => {
       3: formValidation.experience,
       4: formValidation.education,
       5: formValidation.skills,
-      6: true,
+      6: formValidation.certificates,
+      7: formValidation.projects,
+      8: formValidation.languages,
+      9: formValidation.volunteering,
+      10: formValidation.awards,
+      11: formValidation.publications,
+      12: formValidation.interests,
+      13: formValidation.additionalInfo,
+      14: true,
     };
 
     const isCurrentStepValid = stepValidationMap[currentStep as keyof typeof stepValidationMap];
@@ -161,9 +185,14 @@ export const useResumeSteps = () => {
       return;
     }
 
-    if (currentStep < 6) {
+    if (currentStep < 14) {
       setCurrentStep(currentStep + 1);
-      toast.success(`Step ${currentStep + 1} completed!`);
+      const currentStepData = steps.find(step => step.number === currentStep);
+      if (currentStepData?.required) {
+        toast.success(`${currentStepData.title} completed!`);
+      } else {
+        toast.success(`Moving to ${steps.find(step => step.number === currentStep + 1)?.title}`);
+      }
     }
   };
 
@@ -187,7 +216,7 @@ export const useResumeSteps = () => {
     }));
   };
 
-  const progress = (currentStep / 6) * 100;
+  const progress = (currentStep / 14) * 100;
 
   return {
     currentStep,

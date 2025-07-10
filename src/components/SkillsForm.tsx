@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,14 +24,17 @@ const SkillsForm = ({ data, onUpdate, onValidationChange, industry }: SkillsForm
   const [newTechnicalSkill, setNewTechnicalSkill] = useState('');
   const [newSoftSkill, setNewSoftSkill] = useState('');
 
-  const validateSkills = () => {
+  const validateSkills = useCallback(() => {
     return skills.technical.length > 0 && skills.soft.length > 0;
-  };
+  }, [skills.technical.length, skills.soft.length]);
 
   useEffect(() => {
     onUpdate(skills);
+  }, [skills, onUpdate]);
+
+  useEffect(() => {
     onValidationChange?.(validateSkills());
-  }, [skills, onUpdate, onValidationChange]);
+  }, [validateSkills, onValidationChange]);
 
   const addTechnicalSkill = () => {
     if (newTechnicalSkill.trim() && !skills.technical.includes(newTechnicalSkill.trim())) {

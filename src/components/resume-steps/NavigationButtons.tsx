@@ -21,7 +21,7 @@ const NavigationButtons = ({ currentStep, onPrevious, onNext }: NavigationButton
       <Button
         variant="hero"
         onClick={onNext}
-        disabled={currentStep === 6}
+        disabled={currentStep === 14}
       >
         Next
         <ArrowRight className="w-4 h-4 ml-2" />
