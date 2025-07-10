@@ -85,6 +85,11 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import GDPR from "./pages/GDPR";
 import LinkedInOptimization from "./pages/LinkedInOptimization";
+import AIInterviewPrep from "./pages/AIInterviewPrep";
+import PersonalBranding from "./pages/PersonalBranding";
+import WhiteLabelExports from "./pages/WhiteLabelExports";
+import CareerCoaching from "./pages/CareerCoaching";
+import PrioritySupport from "./pages/PrioritySupport";
 
 const queryClient = new QueryClient();
 
@@ -189,6 +194,11 @@ const App = () => (
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/gdpr" element={<GDPR />} />
           <Route path="/linkedin-optimization" element={<LinkedInOptimization />} />
+          <Route path="/ai-interview-prep" element={<AIInterviewPrep />} />
+          <Route path="/personal-branding" element={<PersonalBranding />} />
+          <Route path="/white-label-exports" element={<WhiteLabelExports />} />
+          <Route path="/career-coaching" element={<CareerCoaching />} />
+          <Route path="/priority-support" element={<PrioritySupport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
