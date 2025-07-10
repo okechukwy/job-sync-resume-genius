@@ -210,8 +210,9 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
                     <FormControl>
                       <Textarea 
                         placeholder="Enter your top skills separated by commas (e.g., React, Node.js, Leadership, Project Management)"
-                        value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                        onChange={(e) => {
+                        value={Array.isArray(field.value) ? field.value.join(', ') : field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={(e) => {
                           const skills = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
                           field.onChange(skills);
                         }}
