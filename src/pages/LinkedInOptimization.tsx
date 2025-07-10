@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Linkedin, Target, TrendingUp, Award, Users, Lightbulb } from "lucide-react";
+import { Linkedin, Target, TrendingUp, Award, Users, Lightbulb, Search } from "lucide-react";
 import { toast } from "sonner";
 import { LinkedInProfileForm } from "@/components/linkedin/LinkedInProfileForm";
 import { LinkedInAnalysis } from "@/components/linkedin/LinkedInAnalysis";
@@ -12,11 +12,13 @@ import { LinkedInHeadlineGenerator } from "@/components/linkedin/LinkedInHeadlin
 import { LinkedInSummaryOptimizer } from "@/components/linkedin/LinkedInSummaryOptimizer";
 import { LinkedInKeywordAnalyzer } from "@/components/linkedin/LinkedInKeywordAnalyzer";
 import { LinkedInContentSuggestions } from "@/components/linkedin/LinkedInContentSuggestions";
+import { LinkedInUrlScanner } from "@/components/linkedin/LinkedInUrlScanner";
 
 const LinkedInOptimization = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
   const [analysisScore, setAnalysisScore] = useState(0);
+  const [scannedProfiles, setScannedProfiles] = useState([]);
 
   const handleProfileUpdate = (data: any) => {
     setProfileData(data);
@@ -24,6 +26,11 @@ const LinkedInOptimization = () => {
     const score = calculateProfileScore(data);
     setAnalysisScore(score);
     toast.success("LinkedIn profile updated successfully!");
+  };
+
+  const handleScanComplete = (scannedProfile: any) => {
+    setScannedProfiles(prev => [...prev, scannedProfile]);
+    toast.success("Profile scanned successfully! View results in the Scanner tab.");
   };
 
   const calculateProfileScore = (data: any) => {
@@ -83,7 +90,7 @@ const LinkedInOptimization = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-6 glass-card">
+          <TabsList className="grid w-full grid-cols-7 glass-card">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Profile
@@ -107,6 +114,10 @@ const LinkedInOptimization = () => {
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Linkedin className="h-4 w-4" />
               Content
+            </TabsTrigger>
+            <TabsTrigger value="scanner" className="flex items-center gap-2">
+              <Search className="h-4 w-4" />
+              URL Scanner
             </TabsTrigger>
           </TabsList>
 
@@ -132,6 +143,10 @@ const LinkedInOptimization = () => {
 
           <TabsContent value="content">
             <LinkedInContentSuggestions profileData={profileData} />
+          </TabsContent>
+
+          <TabsContent value="scanner">
+            <LinkedInUrlScanner onScanComplete={handleScanComplete} />
           </TabsContent>
         </Tabs>
       </div>

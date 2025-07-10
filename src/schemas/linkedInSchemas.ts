@@ -72,6 +72,30 @@ export const linkedInContentSuggestionSchema = z.object({
   topics: z.array(z.string()).default([]),
 });
 
+export const linkedInUrlScanSchema = z.object({
+  profileUrl: z.string()
+    .url("Please enter a valid URL")
+    .refine((url) => url.includes("linkedin.com/in/"), "Please enter a valid LinkedIn profile URL"),
+  scanDepth: z.enum(["basic", "detailed", "comprehensive"]).default("detailed"),
+  analysisType: z.enum(["personal", "competitive", "industry"]).default("personal"),
+  compareWithCurrent: z.boolean().default(true),
+});
+
+export const scannedProfileSchema = z.object({
+  url: z.string(),
+  extractedData: linkedInProfileSchema.partial(),
+  profileStrength: z.number().min(0).max(100),
+  industryAlignment: z.number().min(0).max(100),
+  keywordDensity: z.record(z.number()),
+  competitiveMetrics: z.object({
+    headlineOptimization: z.number(),
+    summaryLength: z.number(),
+    skillsCount: z.number(),
+    experienceDetail: z.number(),
+  }),
+  scannedAt: z.date().default(() => new Date()),
+});
+
 export type LinkedInProfile = z.infer<typeof linkedInProfileSchema>;
 export type LinkedInExperience = z.infer<typeof linkedInExperienceSchema>;
 export type LinkedInEducation = z.infer<typeof linkedInEducationSchema>;
@@ -79,3 +103,5 @@ export type LinkedInHeadlineGenerator = z.infer<typeof linkedInHeadlineGenerator
 export type LinkedInSummaryOptimizer = z.infer<typeof linkedInSummaryOptimizerSchema>;
 export type LinkedInKeywordAnalysis = z.infer<typeof linkedInKeywordAnalysisSchema>;
 export type LinkedInContentSuggestion = z.infer<typeof linkedInContentSuggestionSchema>;
+export type LinkedInUrlScan = z.infer<typeof linkedInUrlScanSchema>;
+export type ScannedProfile = z.infer<typeof scannedProfileSchema>;
