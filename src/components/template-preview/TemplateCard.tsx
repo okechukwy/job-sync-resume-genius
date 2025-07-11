@@ -19,6 +19,33 @@ interface TemplateCardProps {
 }
 
 const TemplateCard = ({ template, isSelected, onSelect, onPreview }: TemplateCardProps) => {
+  const stylePreset = getStylePresetById(template.stylePreset);
+  
+  // Adjust scaling based on layout type
+  const getScaleConfig = () => {
+    if (stylePreset?.layout === 'creative') {
+      return {
+        scale: 'scale-[0.45]',
+        dimensions: 'w-[222%] h-[222%]',
+        padding: 'p-1'
+      };
+    } else if (stylePreset?.layout === 'technical') {
+      return {
+        scale: 'scale-[0.40]',
+        dimensions: 'w-[250%] h-[250%]',
+        padding: 'p-1'
+      };
+    }
+    // Default for professional
+    return {
+      scale: 'scale-[0.42]',
+      dimensions: 'w-[238%] h-[238%]',
+      padding: 'p-1'
+    };
+  };
+
+  const scaleConfig = getScaleConfig();
+
   return (
     <Card 
       className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 cursor-pointer ${
@@ -38,8 +65,8 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }: TemplateCar
       
       <div className="aspect-[3/4] relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 p-1">
-          <div className="scale-[0.42] origin-top-left transform w-[238%] h-[238%]">
+        <div className={`absolute inset-0 ${scaleConfig.padding}`}>
+          <div className={`${scaleConfig.scale} origin-top-left transform ${scaleConfig.dimensions}`}>
             <UnifiedLayout 
               data={marketingManagerSample} 
               stylePreset={getStylePresetById(template.stylePreset)!}
