@@ -14,11 +14,10 @@ import { getLayoutVariant, formatDate } from "./live-preview/utils/previewUtils"
 
 interface ResumePreviewProps {
   data: ResumeData;
-  industry: string;
   template: string;
 }
 
-const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
+const ResumePreview = ({ data, template }: ResumePreviewProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = async () => {
@@ -72,8 +71,8 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${data.personalInfo.fullName || 'My'} Resume - ${industry}`,
-      text: `Check out my ${industry} resume created with ResumeAI`,
+      title: `${data.personalInfo.fullName || 'My'} Resume`,
+      text: `Check out my professional resume created with ResumeAI`,
       url: window.location.href
     };
 
@@ -118,7 +117,7 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
   };
 
   // Calculate dynamic ATS score
-  const atsResult = useMemo(() => calculateATSScore(data, industry), [data, industry]);
+  const atsResult = useMemo(() => calculateATSScore(data, "Professional"), [data]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -143,7 +142,7 @@ const ResumePreview = ({ data, industry, template }: ResumePreviewProps) => {
           </p>
         </div>
         <Badge variant="secondary" className="glass-card">
-          {industry} Resume
+          Professional Resume
         </Badge>
       </div>
 

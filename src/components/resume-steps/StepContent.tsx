@@ -17,7 +17,6 @@ import { ResumeData } from "@/hooks/useResumeSteps";
 interface StepContentProps {
   currentStep: number;
   resumeData: ResumeData;
-  selectedIndustry: string;
   selectedTemplate: string;
   onDataUpdate: (section: keyof ResumeData, data: any) => void;
   onValidationChange: (step: string, isValid: boolean) => void;
@@ -26,7 +25,6 @@ interface StepContentProps {
 const StepContent = ({ 
   currentStep, 
   resumeData, 
-  selectedIndustry, 
   selectedTemplate,
   onDataUpdate, 
   onValidationChange 
@@ -46,7 +44,6 @@ const StepContent = ({
           data={resumeData.summary}
           onUpdate={(data) => onDataUpdate('summary', data)}
           onValidationChange={(isValid) => onValidationChange('summary', isValid)}
-          industry={selectedIndustry}
         />
       );
     case 3:
@@ -55,7 +52,6 @@ const StepContent = ({
           data={resumeData.experience}
           onUpdate={(data) => onDataUpdate('experience', data)}
           onValidationChange={(isValid) => onValidationChange('experience', isValid)}
-          industry={selectedIndustry}
         />
       );
     case 4:
@@ -72,7 +68,6 @@ const StepContent = ({
           data={resumeData.skills}
           onUpdate={(data) => onDataUpdate('skills', data)}
           onValidationChange={(isValid) => onValidationChange('skills', isValid)}
-          industry={selectedIndustry}
         />
       );
     case 6:
@@ -89,7 +84,6 @@ const StepContent = ({
           data={resumeData.projects}
           onUpdate={(data) => onDataUpdate('projects', data)}
           onValidationChange={(isValid) => onValidationChange('projects', isValid)}
-          industry={selectedIndustry}
         />
       );
     case 8:
@@ -141,7 +135,7 @@ const StepContent = ({
         />
       );
     case 14:
-      return <ResumePreview data={resumeData} industry={selectedIndustry} template={selectedTemplate} />;
+      return <ResumePreview data={resumeData} template={selectedTemplate} />;
     default:
       return null;
   }

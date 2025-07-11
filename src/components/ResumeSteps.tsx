@@ -10,12 +10,11 @@ import StepContent from "@/components/resume-steps/StepContent";
 import { LivePreview } from "@/components/live-preview";
 
 interface ResumeStepsProps {
-  selectedIndustry: string;
   selectedTemplate: string;
   onBack: () => void;
 }
 
-const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeStepsProps) => {
+const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
   const {
     currentStep,
     resumeData,
@@ -36,12 +35,12 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Industries
+                Back to Templates
               </Button>
               <div className="text-2xl font-bold gradient-text">ResumeAI</div>
             </div>
             <Badge variant="secondary" className="glass-card">
-              {selectedIndustry} Resume
+              Resume Builder
             </Badge>
           </div>
         </div>
@@ -69,7 +68,6 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
               <StepContent
                 currentStep={currentStep}
                 resumeData={resumeData}
-                selectedIndustry={selectedIndustry}
                 selectedTemplate={selectedTemplate}
                 onDataUpdate={handleDataUpdate}
                 onValidationChange={handleValidationChange}
@@ -82,7 +80,6 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
             <CardContent className="p-0 h-full">
               <LivePreview
                 data={resumeData}
-                industry={selectedIndustry}
                 template={selectedTemplate}
                 className="h-full min-h-[600px]"
               />
@@ -96,7 +93,6 @@ const ResumeSteps = ({ selectedIndustry, selectedTemplate, onBack }: ResumeSteps
             <CardContent className="p-4">
               <LivePreview
                 data={resumeData}
-                industry={selectedIndustry}
                 template={selectedTemplate}
                 className="h-96"
               />

@@ -2,7 +2,7 @@ import SkillsSection from "./skills/SkillsSection";
 import SkillsTips from "./skills/SkillsTips";
 import { SkillsFormProps } from "@/types/skillsTypes";
 
-const SkillsForm = ({ data, onUpdate, onValidationChange, industry }: SkillsFormProps) => {
+const SkillsForm = ({ data, onUpdate, onValidationChange }: SkillsFormProps) => {
   return (
     <div className="space-y-6">
       <div>
@@ -16,7 +16,6 @@ const SkillsForm = ({ data, onUpdate, onValidationChange, industry }: SkillsForm
         data={data}
         onUpdate={onUpdate}
         onValidationChange={onValidationChange}
-        industry={industry}
       />
 
       <SkillsTips />

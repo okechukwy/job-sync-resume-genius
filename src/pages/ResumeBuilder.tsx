@@ -1,20 +1,19 @@
 import ResumeSteps from "@/components/ResumeSteps";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
-import { IndustryStep, TemplateStep, AnalysisStep } from "@/components/resume-builder";
+import { AnalysisStep } from "@/components/resume-builder";
+import UnifiedTemplateStep from "@/components/resume-builder/UnifiedTemplateStep";
 
 const ResumeBuilder = () => {
   const {
     currentStep,
-    selectedIndustry,
     selectedTemplate,
     uploadedFile,
-    handleIndustrySelect,
     handleFileChange,
     handleStartFromScratch,
     handleContinueFromAnalysis,
     handleReupload,
     handleTemplateSelect,
-    handleBackToIndustries,
+    handleBackToTemplates,
     handleBackToStep
   } = useResumeBuilder();
 
@@ -22,9 +21,8 @@ const ResumeBuilder = () => {
   if (currentStep === 'build') {
     return (
       <ResumeSteps 
-        selectedIndustry={selectedIndustry} 
         selectedTemplate={selectedTemplate} 
-        onBack={() => handleBackToStep('industry')} 
+        onBack={() => handleBackToStep('templates')} 
       />
     );
   }
@@ -40,22 +38,11 @@ const ResumeBuilder = () => {
     );
   }
 
-  // Template selection step
-  if (currentStep === 'templates') {
-    return (
-      <TemplateStep
-        selectedTemplate={selectedTemplate}
-        selectedIndustry={selectedIndustry}
-        onTemplateSelect={handleTemplateSelect}
-        onBack={handleBackToIndustries}
-      />
-    );
-  }
-
-  // Industry selection step (default)
+  // Template selection step (default)
   return (
-    <IndustryStep
-      onIndustrySelect={handleIndustrySelect}
+    <UnifiedTemplateStep
+      selectedTemplate={selectedTemplate}
+      onTemplateSelect={handleTemplateSelect}
       uploadedFile={uploadedFile}
       onFileChange={handleFileChange}
       onStartFromScratch={handleStartFromScratch}

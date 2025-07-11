@@ -9,10 +9,9 @@ interface SkillsSectionProps {
   data: Skills;
   onUpdate: (data: Skills) => void;
   onValidationChange?: (isValid: boolean) => void;
-  industry: string;
 }
 
-const SkillsSection = ({ data, onUpdate, onValidationChange, industry }: SkillsSectionProps) => {
+const SkillsSection = ({ data, onUpdate, onValidationChange }: SkillsSectionProps) => {
   const {
     skills,
     newTechnicalSkill,
@@ -25,7 +24,7 @@ const SkillsSection = ({ data, onUpdate, onValidationChange, industry }: SkillsS
     addSuggestedSkill,
   } = useSkillsManagement(data, onUpdate, onValidationChange);
 
-  const suggestedSkills = getIndustrySkills(industry);
+  const suggestedSkills = getIndustrySkills("Professional");
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -48,7 +47,7 @@ const SkillsSection = ({ data, onUpdate, onValidationChange, industry }: SkillsS
           />
 
           <SuggestedSkills
-            industry={industry}
+            industry="Professional"
             skills={suggestedSkills.technical}
             type="technical"
             onAddSkill={(skill) => addSuggestedSkill(skill, 'technical')}
@@ -75,7 +74,7 @@ const SkillsSection = ({ data, onUpdate, onValidationChange, industry }: SkillsS
           />
 
           <SuggestedSkills
-            industry={industry}
+            industry="Professional"
             skills={suggestedSkills.soft}
             type="soft"
             onAddSkill={(skill) => addSuggestedSkill(skill, 'soft')}

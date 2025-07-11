@@ -7,7 +7,6 @@ export interface SkillsFormProps {
   data: Skills;
   onUpdate: (data: Skills) => void;
   onValidationChange?: (isValid: boolean) => void;
-  industry: string;
 }
 
 export interface IndustrySkills {

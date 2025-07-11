@@ -22,10 +22,9 @@ interface ExperienceFormProps {
   data: Experience[];
   onUpdate: (data: Experience[]) => void;
   onValidationChange?: (isValid: boolean) => void;
-  industry: string;
 }
 
-const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: ExperienceFormProps) => {
+const ExperienceForm = ({ data, onUpdate, onValidationChange }: ExperienceFormProps) => {
   const [experiences, setExperiences] = useState<Experience[]>(
     data.length > 0 ? data : [{
       id: crypto.randomUUID(),
@@ -132,7 +131,7 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: Experi
         "Highlight data analysis skills and research impact",
       ],
     };
-    return tips[industry as keyof typeof tips] || tips.Business;
+    return tips.Business;
   };
 
   return (
@@ -249,7 +248,7 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange, industry }: Experi
 
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg">💡 {industry} Industry Tips</CardTitle>
+          <CardTitle className="text-lg">💡 Professional Tips</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           {getIndustryTips().map((tip, index) => (

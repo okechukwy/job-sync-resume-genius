@@ -8,19 +8,17 @@ import { getTemplateById } from "@/config/templateConfig";
 
 interface LivePreviewProps {
   data: ResumeData;
-  industry: string;
   template: string;
   className?: string;
 }
 
-const LivePreview = ({ data, industry, template, className = "" }: LivePreviewProps) => {
+const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   
   // Debug logging
   console.log('LivePreview - Received template:', template);
-  console.log('LivePreview - Received industry:', industry);
   
   // Create template name to ID mapping for the unified system
   const getTemplateId = (templateName: string): string | undefined => {

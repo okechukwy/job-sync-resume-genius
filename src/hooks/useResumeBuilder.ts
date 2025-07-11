@@ -3,11 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { allTemplates } from "@/data/templateData";
 
-export type ResumeBuilderStep = 'industry' | 'templates' | 'analysis' | 'build';
+export type ResumeBuilderStep = 'templates' | 'analysis' | 'build';
 
 export const useResumeBuilder = () => {
-  const [currentStep, setCurrentStep] = useState<ResumeBuilderStep>('industry');
-  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<ResumeBuilderStep>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,25 +52,6 @@ export const useResumeBuilder = () => {
     }
   }, [searchParams]);
 
-  const handleContinueWithUpload = (industry: string) => {
-    if (uploadedFile) {
-      setSelectedIndustry(industry);
-      setCurrentStep('build');
-      toast.success(`${industry} industry selected! We'll help you optimize your uploaded resume.`);
-    }
-  };
-
-  const handleIndustrySelect = (industry: string) => {
-    if (uploadedFile) {
-      // If there's an uploaded file, use the optimization flow
-      handleContinueWithUpload(industry);
-    } else {
-      // If no uploaded file, use the standard flow - go to template selection first
-      setSelectedIndustry(industry);
-      setCurrentStep('templates');
-      toast.success(`${industry} industry selected! Choose your template.`);
-    }
-  };
 
   const handleFileChange = (file: File | null) => {
     if (file) {
@@ -92,27 +72,27 @@ export const useResumeBuilder = () => {
   };
 
   const handleContinueFromAnalysis = () => {
-    setCurrentStep('industry');
-    toast.success('Choose your industry to continue with optimization');
+    setCurrentStep('templates');
+    toast.success('Choose your template to continue with optimization');
   };
 
   const handleReupload = () => {
     setUploadedFile(null);
-    setCurrentStep('industry');
+    setCurrentStep('templates');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
     toast.info('Ready to upload a new resume');
   };
 
-  const handleTemplateSelect = (templateName: string) => {
-    setSelectedTemplate(templateName);
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
     setCurrentStep('build');
-    toast.success(`${templateName} template selected! Let's build your resume.`);
+    toast.success('Template selected! Let\'s build your resume.');
   };
 
-  const handleBackToIndustries = () => {
-    setCurrentStep('industry');
+  const handleBackToTemplates = () => {
+    setCurrentStep('templates');
     setSelectedTemplate('');
   };
 
@@ -123,19 +103,17 @@ export const useResumeBuilder = () => {
   return {
     // State
     currentStep,
-    selectedIndustry,
     selectedTemplate,
     uploadedFile,
     fileInputRef,
     
     // Actions
-    handleIndustrySelect,
     handleFileChange,
     handleStartFromScratch,
     handleContinueFromAnalysis,
     handleReupload,
     handleTemplateSelect,
-    handleBackToIndustries,
+    handleBackToTemplates,
     handleBackToStep,
     setCurrentStep
   };
