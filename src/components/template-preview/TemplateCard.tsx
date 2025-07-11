@@ -25,9 +25,9 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }: TemplateCar
   const getScaleConfig = () => {
     if (stylePreset?.layout === 'creative') {
       return {
-        scale: 'scale-[0.45]',
-        dimensions: 'w-[222%] h-[222%]',
-        padding: 'p-1'
+        scale: 'scale-[0.55]',
+        dimensions: 'w-[182%] h-[182%]',
+        padding: 'p-0.5'
       };
     } else if (stylePreset?.layout === 'technical') {
       return {
