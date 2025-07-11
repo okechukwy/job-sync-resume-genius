@@ -30,9 +30,7 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
       'Data Scientist Elite': 'data-scientist',
       'Graphic Designer': 'graphic-designer',
       'UX/UI Designer': 'ux-ui-designer',
-      'Copywriter': 'copywriter',
-      'Executive Leader': 'executive-leader',
-      'Business Professional': 'business-professional'
+      'Copywriter': 'copywriter'
     };
     return nameMapping[templateName];
   };

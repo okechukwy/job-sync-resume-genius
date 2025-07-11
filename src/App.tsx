@@ -27,7 +27,6 @@ import DevOpsEngineer from "./pages/templates/DevOpsEngineer";
 import MobileDeveloper from "./pages/templates/MobileDeveloper";
 import UxUiDesigner from "./pages/templates/UxUiDesigner";
 import Photographer from "./pages/templates/Photographer";
-import BusinessProfessional from "./pages/templates/BusinessProfessional";
 import CloudArchitect from "./pages/templates/CloudArchitect";
 import CybersecurityExpert from "./pages/templates/CybersecurityExpert";
 import AiMlEngineer from "./pages/templates/AiMlEngineer";
@@ -55,7 +54,6 @@ import CreativeProfessional from "./pages/templates/CreativeProfessional";
 import GraphicDesigner from "./pages/templates/GraphicDesigner";
 import MarketingManager from "./pages/templates/MarketingManager";
 import ContentCreator from "./pages/templates/ContentCreator";
-import ExecutiveLeader from "./pages/templates/ExecutiveLeader";
 import RecentGraduate from "./pages/templates/RecentGraduate";
 import VideoEditor from "./pages/templates/VideoEditor";
 import Copywriter from "./pages/templates/Copywriter";
@@ -163,8 +161,6 @@ const App = () => (
           <Route path="/templates/creative-director" element={<CreativeDirector />} />
           
           {/* Business Templates */}
-          <Route path="/templates/business-professional" element={<BusinessProfessional />} />
-          <Route path="/templates/executive-leader" element={<ExecutiveLeader />} />
           <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
           <Route path="/templates/operations-manager" element={<OperationsManager />} />
           <Route path="/templates/sales-manager" element={<SalesManager />} />

@@ -11,11 +11,9 @@ const TemplatesSection = () => {
     "Healthcare Specialist", 
     "Finance Expert",
     "Creative Professional",
-    "Business Professional",
     "Research Scientist",
     "Gradient Modern",
     "Minimalist Pro",
-    "Executive Leader",
     "Recent Graduate"
   ];
   

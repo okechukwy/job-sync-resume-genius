@@ -376,23 +376,7 @@ export const allTemplates: Template[] = [
     industries: ["Creative"]
   },
 
-  // Business Templates (11 total)
-  {
-    name: "Business Professional",
-    description: "Management, sales, and operations professionals",
-    image: "📊",
-    tags: ["Professional", "Leadership", "Results-Driven"],
-    route: "/templates/business-professional",
-    industries: ["Business"]
-  },
-  {
-    name: "Executive Leader",
-    description: "For senior management and C-level executives",
-    image: "👔",
-    tags: ["Executive", "Leadership", "Premium"],
-    route: "/templates/executive-leader",
-    industries: ["Business"]
-  },
+  // Business Templates (9 total)
   {
     name: "Sales Manager",
     description: "Sales leadership and business development",

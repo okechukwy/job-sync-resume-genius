@@ -72,7 +72,6 @@ export const templateOverrides = {
   'cybersecurity-expert': { accentColor: 'text-red-400', headerBg: 'bg-gradient-to-r from-gray-900 via-red-900 to-orange-900' },
   
   // Executive templates
-  'executive-leader': { accentColor: 'text-amber-400', sectionBorder: 'border-l-4 border-amber-500 pl-4' },
   'corporate-finance': { accentColor: 'text-gold-400', sectionBorder: 'border-l-4 border-yellow-600 pl-4' },
   'investment-banker': { accentColor: 'text-emerald-400', sectionBorder: 'border-l-4 border-emerald-600 pl-4' },
   
