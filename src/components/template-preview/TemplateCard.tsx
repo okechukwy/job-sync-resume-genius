@@ -38,8 +38,8 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }: TemplateCar
       
       <div className="aspect-[3/4] relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 p-2">
-          <div className="scale-[0.28] origin-top-left transform w-[357%] h-[357%]">
+        <div className="absolute inset-0 p-1">
+          <div className="scale-[0.42] origin-top-left transform w-[238%] h-[238%]">
             <UnifiedLayout 
               data={marketingManagerSample} 
               stylePreset={getStylePresetById(template.stylePreset)!}
