@@ -298,31 +298,6 @@ export const templateConfigs: TemplateConfig[] = [
     perfectFor: ['Copywriters', 'Content Writers', 'Marketing Writers']
   },
   
-  // Business Templates
-  {
-    id: 'executive-leader',
-    name: 'Executive Leader',
-    description: 'For senior management and C-level executives',
-    emoji: '👔',
-    category: 'professional',
-    stylePreset: 'executive-navy',
-    tags: ['Executive', 'Leadership', 'Premium'],
-    industries: ['Business'],
-    features: ['Leadership Experience', 'Strategic Vision', 'Board Experience'],
-    perfectFor: ['CEOs', 'Directors', 'VPs', 'Senior Managers']
-  },
-  {
-    id: 'business-professional',
-    name: 'Business Professional',
-    description: 'Management, sales, and operations professionals',
-    emoji: '📊',
-    category: 'professional',
-    stylePreset: 'classic-blue',
-    tags: ['Professional', 'Leadership', 'Results-Driven'],
-    industries: ['Business'],
-    features: ['Management Experience', 'Team Leadership', 'Business Results'],
-    perfectFor: ['Managers', 'Sales Professionals', 'Business Analysts']
-  }
 ];
 
 // Helper functions
