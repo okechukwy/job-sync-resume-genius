@@ -18,18 +18,18 @@ export const baseLayoutStyles = {
     spacing: 'spacious'
   },
   'creative-showcase': {
-    headerBg: 'bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50',
-    headerText: 'text-gray-900',
-    accentColor: 'text-purple-600',
+    headerBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500',
+    headerText: 'text-white',
+    accentColor: 'text-purple-300',
     borderColor: 'border-purple-200',
-    sectionBorder: 'border-l-6 border-gradient-to-b from-purple-400 to-pink-400 pl-4',
+    sectionBorder: 'border-l-6 border-purple-400 pl-4',
     layout: 'visual-hierarchy',
     spacing: 'dynamic'
   },
   'executive-premium': {
     headerBg: 'bg-gradient-to-r from-slate-900 to-gray-800',
     headerText: 'text-white',
-    accentColor: 'text-amber-600',
+    accentColor: 'text-amber-400',
     borderColor: 'border-amber-200',
     sectionBorder: 'border-l-4 border-amber-500 pl-4',
     layout: 'sophisticated',
@@ -43,14 +43,45 @@ export const baseLayoutStyles = {
     sectionBorder: 'border-l-4 border-blue-400 pl-4',
     layout: 'grid-based',
     spacing: 'compact'
+  },
+  'healthcare': {
+    headerBg: 'bg-gradient-to-r from-teal-50 to-blue-50',
+    headerText: 'text-gray-800',
+    accentColor: 'text-teal-600',
+    borderColor: 'border-teal-200',
+    sectionBorder: 'border-l-4 border-teal-500 pl-4',
+    layout: 'medical-professional',
+    spacing: 'clean'
   }
 } as const;
 
 export const templateOverrides = {
-  'tech-professional': { accentColor: 'text-blue-600', sectionBorder: 'border-l-4 border-blue-600 pl-4' },
-  'creative-professional': { accentColor: 'text-purple-600', sectionBorder: 'border-l-4 border-purple-400 pl-4' },
-  'healthcare-specialist': { accentColor: 'text-green-600', sectionBorder: 'border-l-4 border-green-500 pl-4' },
-  'finance-expert': { accentColor: 'text-slate-700', sectionBorder: 'border-l-4 border-slate-600 pl-4' },
-  'executive-leader': { accentColor: 'text-amber-700', sectionBorder: 'border-l-4 border-amber-600 pl-4' },
+  // Creative templates
+  'art-director': { headerBg: 'bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500' },
+  'brand-manager': { headerBg: 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-500' },
+  'content-creator': { headerBg: 'bg-gradient-to-br from-green-500 via-teal-500 to-blue-500' },
+  'graphic-designer': { headerBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-red-600' },
+  'marketing-manager': { headerBg: 'bg-gradient-to-br from-orange-600 via-yellow-500 to-red-500' },
+  'social-media-manager': { headerBg: 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500' },
+  
+  // Tech templates
+  'software-engineer-pro': { accentColor: 'text-blue-400', headerBg: 'bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900' },
+  'frontend-developer': { accentColor: 'text-green-400', headerBg: 'bg-gradient-to-r from-gray-900 via-green-900 to-teal-900' },
+  'ai-ml-engineer': { accentColor: 'text-purple-400', headerBg: 'bg-gradient-to-r from-gray-900 via-purple-900 to-pink-900' },
+  'cloud-architect': { accentColor: 'text-cyan-400', headerBg: 'bg-gradient-to-r from-gray-900 via-cyan-900 to-blue-900' },
+  'cybersecurity-expert': { accentColor: 'text-red-400', headerBg: 'bg-gradient-to-r from-gray-900 via-red-900 to-orange-900' },
+  
+  // Executive templates
+  'executive-leader': { accentColor: 'text-amber-400', sectionBorder: 'border-l-4 border-amber-500 pl-4' },
+  'corporate-finance': { accentColor: 'text-gold-400', sectionBorder: 'border-l-4 border-yellow-600 pl-4' },
+  'investment-banker': { accentColor: 'text-emerald-400', sectionBorder: 'border-l-4 border-emerald-600 pl-4' },
+  
+  // Healthcare templates
+  'healthcare-specialist': { accentColor: 'text-teal-600', sectionBorder: 'border-l-4 border-teal-500 pl-4' },
+  'medical-doctor': { accentColor: 'text-blue-600', sectionBorder: 'border-l-4 border-blue-500 pl-4' },
+  'registered-nurse': { accentColor: 'text-green-600', sectionBorder: 'border-l-4 border-green-500 pl-4' },
+  'pharmacist-pro': { accentColor: 'text-purple-600', sectionBorder: 'border-l-4 border-purple-500 pl-4' },
+  
+  // Other specialized templates
   'recent-graduate': { accentColor: 'text-teal-600', sectionBorder: 'border-l-4 border-teal-500 pl-4' }
 } as const;
