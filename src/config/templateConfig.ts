@@ -47,8 +47,8 @@ export const stylePresets: StylePreset[] = [
     name: 'Medical Teal',
     primary: '180 60% 45%', // Teal
     secondary: '180 20% 30%', // Dark teal
-    accent: '180 80% 70%', // Light teal
-    headerBg: '180 60% 45%',
+    accent: '180 80% 85%', // Light teal for badges
+    headerBg: 'linear-gradient(135deg, hsl(180 60% 45%), hsl(200 70% 50%))',
     headerText: '0 0% 100%',
     sectionBorder: '180 60% 45%',
     layout: 'professional',
@@ -210,6 +210,18 @@ export const templateConfigs: TemplateConfig[] = [
     industries: ['Creative', 'Technology'],
     features: ['Design Process', 'User Research', 'Prototyping'],
     perfectFor: ['UX Designers', 'UI Designers', 'Product Designers']
+  },
+  {
+    id: 'copywriter',
+    name: 'Copywriter',
+    description: 'Creative writing and copywriting specialists',
+    emoji: '✍️',
+    category: 'creative',
+    stylePreset: 'vibrant-purple',
+    tags: ['Writing', 'Creative', 'Persuasive'],
+    industries: ['Creative'],
+    features: ['Writing Portfolio', 'Campaign Results', 'Brand Voice'],
+    perfectFor: ['Copywriters', 'Content Writers', 'Marketing Writers']
   },
   
   // Business Templates

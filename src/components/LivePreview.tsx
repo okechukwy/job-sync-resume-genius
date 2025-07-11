@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { PreviewControls } from "./live-preview/PreviewControls";
 import { useTemplateStyles } from "./live-preview/hooks/useTemplateStyles";
 import { getLayoutVariant, formatDate } from "./live-preview/utils/previewUtils";
+import { getTemplateById } from "@/config/templateConfig";
 
 interface LivePreviewProps {
   data: ResumeData;
@@ -21,9 +22,32 @@ const LivePreview = ({ data, industry, template, className = "" }: LivePreviewPr
   console.log('LivePreview - Received template:', template);
   console.log('LivePreview - Received industry:', industry);
   
+  // Create template name to ID mapping for the unified system
+  const getTemplateId = (templateName: string): string | undefined => {
+    const nameMapping: Record<string, string> = {
+      'Medical Doctor': 'medical-doctor',
+      'Registered Nurse': 'registered-nurse',
+      'Mental Health Professional': 'mental-health-professional',
+      'Software Engineer Pro': 'software-engineer',
+      'Data Scientist Elite': 'data-scientist',
+      'Graphic Designer': 'graphic-designer',
+      'UX/UI Designer': 'ux-ui-designer',
+      'Copywriter': 'copywriter',
+      'Executive Leader': 'executive-leader',
+      'Business Professional': 'business-professional'
+    };
+    return nameMapping[templateName];
+  };
+
+  const templateId = getTemplateId(template);
+  const unifiedTemplate = templateId ? getTemplateById(templateId) : null;
+  
+  // Use unified system if template exists, fallback to legacy system
   const templateStyles = useTemplateStyles(template);
   const layoutVariant = getLayoutVariant(template);
   
+  console.log('LivePreview - Template ID:', templateId);
+  console.log('LivePreview - Unified template found:', !!unifiedTemplate);
   console.log('LivePreview - Layout variant:', layoutVariant);
   console.log('LivePreview - Template styles:', templateStyles);
 
@@ -97,6 +121,7 @@ const LivePreview = ({ data, industry, template, className = "" }: LivePreviewPr
             data={data}
             styles={templateStyles}
             layoutVariant={layoutVariant}
+            templateId={templateId}
             formatDate={formatDate}
           />
         </div>

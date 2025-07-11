@@ -36,12 +36,17 @@ export const getLayoutVariant = (template: string) => {
     return 'tech-forward';
   }
   
-  // Healthcare templates - specifically check for medical-doctor first
-  if (templateName.includes('medical-doctor') || templateName.includes('healthcare') || 
-      templateName.includes('medical') || templateName.includes('nurse') || 
-      templateName.includes('pharmacist') || templateName.includes('clinical') || 
-      templateName.includes('lab-technician') || templateName.includes('doctor')) {
-    console.log('Healthcare template detected, using healthcare layout');
+  // Healthcare templates - specifically check for exact matches first
+  if (template === 'Medical Doctor' || 
+      templateName.includes('medical-doctor') || 
+      templateName.includes('healthcare') || 
+      templateName.includes('medical') || 
+      templateName.includes('nurse') || 
+      templateName.includes('pharmacist') || 
+      templateName.includes('clinical') || 
+      templateName.includes('lab-technician') || 
+      templateName.includes('doctor')) {
+    console.log('Healthcare template detected, using healthcare layout for:', template);
     return 'healthcare';
   }
   

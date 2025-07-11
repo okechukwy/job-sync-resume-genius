@@ -41,11 +41,18 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
         </div>
       )}
       
+      {/* Professional layout with subtle gradient overlay */}
+      {layout === 'professional' && (
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-black/10"></div>
+      )}
+      
       <div className="relative z-10">
         <h1 className="text-4xl font-bold mb-2">
           {data.personalInfo.fullName}
         </h1>
-        <p className="text-xl opacity-90 mb-4">Professional Resume</p>
+        <p className="text-xl opacity-90 mb-4">
+          {layout === 'professional' ? 'Medical Professional' : 'Professional Resume'}
+        </p>
         <div className="flex flex-wrap gap-4 text-sm opacity-80">
           {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
           {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
@@ -93,8 +100,8 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
                 <h3 className="font-semibold text-gray-900">{exp.position}</h3>
                 <p className="text-gray-600">{exp.company}</p>
               </div>
-              <span 
-                className="text-sm font-medium px-2 py-1 rounded"
+            <span 
+                className="text-sm font-medium px-3 py-1 rounded-full"
                 style={{ 
                   backgroundColor: 'var(--template-accent)',
                   color: 'var(--template-secondary)'
@@ -153,9 +160,10 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
         {allSkills.map((skill, index) => (
           <span
             key={index}
-            className="px-3 py-1 text-sm rounded-full"
+            className="px-3 py-1 text-sm rounded-full border"
             style={{
               backgroundColor: 'var(--template-accent)',
+              borderColor: 'var(--template-primary)',
               color: 'var(--template-secondary)'
             }}
           >

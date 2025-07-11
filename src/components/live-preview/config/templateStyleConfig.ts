@@ -45,10 +45,10 @@ export const baseLayoutStyles = {
     spacing: 'compact'
   },
   'healthcare': {
-    headerBg: 'bg-gradient-to-r from-teal-50 to-blue-50',
-    headerText: 'text-gray-800',
+    headerBg: 'bg-gradient-to-r from-teal-500 to-blue-600',
+    headerText: 'text-white',
     accentColor: 'text-teal-600',
-    borderColor: 'border-teal-200',
+    borderColor: 'border-teal-300',
     sectionBorder: 'border-l-4 border-teal-500 pl-4',
     layout: 'medical-professional',
     spacing: 'clean'
@@ -80,13 +80,15 @@ export const templateOverrides = {
   'healthcare-specialist': { 
     accentColor: 'text-teal-600', 
     sectionBorder: 'border-l-4 border-teal-500 pl-4',
-    headerBg: 'bg-gradient-to-r from-teal-50 to-blue-50' 
+    headerBg: 'bg-gradient-to-r from-teal-500 to-blue-600',
+    headerText: 'text-white'
   },
   'medical-doctor': { 
-    accentColor: 'text-blue-600', 
-    sectionBorder: 'border-l-4 border-blue-500 pl-4',
-    headerBg: 'bg-gradient-to-r from-blue-50 to-teal-50',
-    borderColor: 'border-blue-200'
+    accentColor: 'text-teal-600', 
+    sectionBorder: 'border-l-4 border-teal-500 pl-4',
+    headerBg: 'bg-gradient-to-r from-teal-500 to-blue-600',
+    headerText: 'text-white',
+    borderColor: 'border-teal-200'
   },
   'registered-nurse': { 
     accentColor: 'text-green-600', 
