@@ -78,18 +78,6 @@ export const stylePresets: StylePreset[] = [
     layout: 'sidebar',
     spacing: 'standard'
   },
-  {
-    id: 'executive-premium',
-    name: 'Executive Premium',
-    primary: '45 80% 45%', // Gold/amber
-    secondary: '45 40% 25%', // Dark gold
-    accent: '45 90% 85%', // Light gold
-    headerBg: 'linear-gradient(135deg, hsl(220 25% 20%), hsl(220 30% 25%))',
-    headerText: 'hsl(45 80% 45%)',
-    sectionBorder: '45 80% 45%',
-    layout: 'professional',
-    spacing: 'spacious'
-  },
   
   // Creative Presets
   {
@@ -146,7 +134,7 @@ export const stylePresets: StylePreset[] = [
 
 // Template Configurations - All templates in one place
 export const templateConfigs: TemplateConfig[] = [
-  // Professional Templates - 5 distinct layouts with Word document options
+  // Professional Templates - 4 distinct layouts with Word document options
   {
     id: 'corporate-executive',
     name: 'Corporate Executive',
@@ -194,18 +182,6 @@ export const templateConfigs: TemplateConfig[] = [
     industries: ['Business', 'Operations', 'Project Management', 'Sales'],
     features: ['Two-Column Design', 'Business Focus', 'Results-Driven'],
     perfectFor: ['Project Managers', 'Operations Managers', 'Business Analysts', 'Sales Managers']
-  },
-  {
-    id: 'executive-leader',
-    name: 'Executive Leader',
-    description: 'Premium design for C-level executives',
-    emoji: '⭐',
-    category: 'professional',
-    stylePreset: 'executive-premium',
-    tags: ['Premium', 'Executive', 'Luxury'],
-    industries: ['Fortune 500', 'Investment Banking', 'Private Equity', 'Luxury'],
-    features: ['Premium Design', 'Gold Accents', 'Executive Focus'],
-    perfectFor: ['C-Suite Executives', 'Board Members', 'Investment Bankers', 'VPs']
   },
   
   // Word Document Templates
