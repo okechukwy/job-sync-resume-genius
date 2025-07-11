@@ -19,7 +19,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     '--template-header-bg': stylePreset.headerBg.startsWith('linear-gradient') 
       ? stylePreset.headerBg 
       : `hsl(${stylePreset.headerBg})`,
-    '--template-header-text': `hsl(${stylePreset.headerText})`,
+    '--template-header-text': stylePreset.headerText.startsWith('hsl') 
+      ? stylePreset.headerText 
+      : `hsl(${stylePreset.headerText})`,
     '--template-section-border': `hsl(${stylePreset.sectionBorder})`,
   } as React.CSSProperties;
 
@@ -29,38 +31,79 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     spacious: 'space-y-8'
   }[spacing];
 
-  const renderHeader = () => (
-    <header 
-      className="p-8 text-white relative overflow-hidden"
-      style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
-    >
-      {layout === 'creative' && (
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/15"></div>
-        </div>
-      )}
-      
-      {/* Professional layout with subtle gradient overlay */}
-      {layout === 'professional' && (
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-black/10"></div>
-      )}
-      
+  const renderHeader = () => {
+    // Different header styles based on layout
+    const getHeaderContent = () => (
       <div className="relative z-10">
-        <h1 className="text-4xl font-bold mb-2">
+        <h1 className={`font-bold mb-2 ${layout === 'traditional' ? 'text-3xl' : layout === 'academic' ? 'text-2xl' : 'text-4xl'}`}>
           {data.personalInfo.fullName}
         </h1>
-        <p className="text-xl opacity-90 mb-4">
-          {layout === 'professional' ? 'Medical Professional' : 'Professional Resume'}
-        </p>
-        <div className="flex flex-wrap gap-4 text-sm opacity-80">
+        {layout === 'academic' && (
+          <p className="text-lg opacity-90 mb-2">
+            Academic Professional
+          </p>
+        )}
+        {layout !== 'academic' && (
+          <p className="text-xl opacity-90 mb-4">
+            {layout === 'traditional' ? 'Executive Professional' : 
+             layout === 'sidebar' ? 'Modern Professional' : 'Professional'}
+          </p>
+        )}
+        <div className={`flex flex-wrap gap-4 text-sm opacity-80 ${layout === 'academic' ? 'text-xs' : ''}`}>
           {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
           {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
           {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
         </div>
       </div>
-    </header>
-  );
+    );
+
+    if (layout === 'traditional') {
+      return (
+        <header 
+          className="p-6 text-white relative border-b-4"
+          style={{ 
+            background: 'var(--template-header-bg)', 
+            color: 'var(--template-header-text)',
+            borderColor: 'var(--template-section-border)'
+          }}
+        >
+          {getHeaderContent()}
+        </header>
+      );
+    }
+
+    if (layout === 'academic') {
+      return (
+        <header 
+          className="p-8 text-white relative"
+          style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
+          {getHeaderContent()}
+        </header>
+      );
+    }
+
+    return (
+      <header 
+        className="p-8 text-white relative overflow-hidden"
+        style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+      >
+        {layout === 'creative' && (
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/15"></div>
+          </div>
+        )}
+        
+        {(layout === 'professional' || layout === 'sidebar') && (
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-black/10"></div>
+        )}
+        
+        {getHeaderContent()}
+      </header>
+    );
+  };
 
   const renderSection = (title: string, children: React.ReactNode, borderStyle?: string) => (
     <section className="mb-6">
@@ -199,6 +242,46 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
             {renderSummary()}
             {renderExperience()}
             {renderEducation()}
+          </div>
+        );
+
+      case 'sidebar':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1 space-y-6">
+              {renderSkills()}
+              {renderEducation()}
+            </div>
+            <div className="lg:col-span-3 space-y-6">
+              {renderSummary()}
+              {renderExperience()}
+            </div>
+          </div>
+        );
+
+      case 'traditional':
+        return (
+          <div className="space-y-8">
+            {renderSummary()}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                {renderExperience()}
+              </div>
+              <div className="space-y-6">
+                {renderEducation()}
+                {renderSkills()}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'academic':
+        return (
+          <div className="space-y-6">
+            {renderSummary()}
+            {renderEducation()}
+            {renderExperience()}
+            {renderSkills()}
           </div>
         );
       

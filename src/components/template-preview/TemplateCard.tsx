@@ -35,6 +35,18 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }: TemplateCar
         dimensions: 'w-[250%] h-[250%]',
         padding: 'p-1'
       };
+    } else if (stylePreset?.layout === 'sidebar' || stylePreset?.layout === 'traditional') {
+      return {
+        scale: 'scale-[0.42]',
+        dimensions: 'w-[238%] h-[238%]',
+        padding: 'p-1'
+      };
+    } else if (stylePreset?.layout === 'academic') {
+      return {
+        scale: 'scale-[0.45]',
+        dimensions: 'w-[222%] h-[222%]',
+        padding: 'p-1'
+      };
     }
     // Default for professional
     return {

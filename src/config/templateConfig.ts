@@ -10,7 +10,7 @@ export interface StylePreset {
   headerBg: string;
   headerText: string;
   sectionBorder: string;
-  layout: 'professional' | 'creative' | 'technical';
+  layout: 'professional' | 'creative' | 'technical' | 'traditional' | 'sidebar' | 'academic';
   spacing: 'compact' | 'standard' | 'spacious';
 }
 
@@ -29,40 +29,64 @@ export interface TemplateConfig {
 
 // Style Presets - Define visual themes that can be reused
 export const stylePresets: StylePreset[] = [
-  // Professional Presets
+  // Professional Presets - Enhanced with variety
   {
-    id: 'classic-blue',
-    name: 'Classic Blue',
-    primary: '220 60% 50%', // Blue
-    secondary: '220 15% 25%', // Dark blue-gray
-    accent: '220 100% 70%', // Light blue
-    headerBg: '220 60% 50%',
+    id: 'corporate-traditional',
+    name: 'Corporate Traditional',
+    primary: '220 80% 30%', // Navy blue
+    secondary: '220 20% 20%', // Dark gray
+    accent: '220 50% 85%', // Light blue
+    headerBg: '220 80% 30%',
     headerText: '0 0% 100%',
-    sectionBorder: '220 60% 50%',
-    layout: 'professional',
+    sectionBorder: '220 80% 30%',
+    layout: 'traditional',
     spacing: 'standard'
   },
   {
-    id: 'medical-teal',
-    name: 'Medical Teal',
-    primary: '180 60% 45%', // Teal
-    secondary: '180 20% 30%', // Dark teal
-    accent: '180 80% 85%', // Light teal for badges
-    headerBg: 'linear-gradient(135deg, hsl(180 60% 45%), hsl(200 70% 50%))',
+    id: 'modern-professional',
+    name: 'Modern Professional',
+    primary: '180 65% 45%', // Teal
+    secondary: '180 25% 25%', // Dark teal
+    accent: '180 60% 90%', // Light teal
+    headerBg: 'linear-gradient(135deg, hsl(180 65% 45%), hsl(200 65% 50%))',
     headerText: '0 0% 100%',
-    sectionBorder: '180 60% 45%',
-    layout: 'professional',
+    sectionBorder: '180 65% 45%',
+    layout: 'sidebar',
     spacing: 'spacious'
   },
   {
-    id: 'executive-navy',
-    name: 'Executive Navy',
-    primary: '220 80% 25%', // Navy
-    secondary: '220 40% 20%', // Dark navy
-    accent: '220 60% 60%', // Light navy
-    headerBg: '220 80% 25%',
+    id: 'academic-research',
+    name: 'Academic Research',
+    primary: '0 0% 25%', // Dark gray
+    secondary: '0 0% 15%', // Very dark gray
+    accent: '0 0% 85%', // Light gray
+    headerBg: '0 0% 25%',
     headerText: '0 0% 100%',
-    sectionBorder: '220 80% 25%',
+    sectionBorder: '0 0% 25%',
+    layout: 'academic',
+    spacing: 'spacious'
+  },
+  {
+    id: 'two-column-pro',
+    name: 'Two Column Professional',
+    primary: '210 100% 40%', // Blue
+    secondary: '210 30% 25%', // Dark blue
+    accent: '210 70% 90%', // Light blue
+    headerBg: 'linear-gradient(135deg, hsl(210 100% 40%), hsl(230 100% 45%))',
+    headerText: '0 0% 100%',
+    sectionBorder: '210 100% 40%',
+    layout: 'sidebar',
+    spacing: 'standard'
+  },
+  {
+    id: 'executive-premium',
+    name: 'Executive Premium',
+    primary: '45 80% 45%', // Gold/amber
+    secondary: '45 40% 25%', // Dark gold
+    accent: '45 90% 85%', // Light gold
+    headerBg: 'linear-gradient(135deg, hsl(220 25% 20%), hsl(220 30% 25%))',
+    headerText: 'hsl(45 80% 45%)',
+    sectionBorder: '45 80% 45%',
     layout: 'professional',
     spacing: 'spacious'
   },
@@ -122,42 +146,92 @@ export const stylePresets: StylePreset[] = [
 
 // Template Configurations - All templates in one place
 export const templateConfigs: TemplateConfig[] = [
-  // Healthcare Templates
+  // Professional Templates - 5 distinct layouts with Word document options
   {
-    id: 'medical-doctor',
-    name: 'Medical Doctor',
-    description: 'Sophisticated template for physicians and specialists',
-    emoji: '👨‍⚕️',
+    id: 'corporate-executive',
+    name: 'Corporate Executive',
+    description: 'Traditional corporate style for senior executives',
+    emoji: '👔',
     category: 'professional',
-    stylePreset: 'medical-teal',
-    tags: ['Medical', 'Professional', 'Prestigious'],
-    industries: ['Healthcare'],
-    features: ['Medical Credentials', 'Clinical Experience', 'Research & Publications'],
-    perfectFor: ['Medical Doctors', 'Specialists', 'Surgeons', 'Department Heads']
+    stylePreset: 'corporate-traditional',
+    tags: ['Executive', 'Traditional', 'Corporate'],
+    industries: ['Finance', 'Consulting', 'Legal', 'Insurance'],
+    features: ['Leadership Focus', 'Traditional Layout', 'Conservative Design'],
+    perfectFor: ['CEOs', 'CFOs', 'Partners', 'Senior Directors']
   },
   {
-    id: 'registered-nurse',
-    name: 'Registered Nurse',
-    description: 'Caring design for nursing professionals',
-    emoji: '👩‍⚕️',
+    id: 'modern-professional',
+    name: 'Modern Professional',
+    description: 'Clean, contemporary design with sidebar layout',
+    emoji: '💼',
     category: 'professional',
-    stylePreset: 'medical-teal',
-    tags: ['Compassionate', 'Professional', 'Detailed'],
-    industries: ['Healthcare'],
-    features: ['Clinical Skills', 'Patient Care', 'Certifications'],
-    perfectFor: ['Registered Nurses', 'Nurse Practitioners', 'Clinical Nurses']
+    stylePreset: 'modern-professional',
+    tags: ['Modern', 'Clean', 'Sidebar'],
+    industries: ['Technology', 'Startups', 'Consulting', 'Healthcare'],
+    features: ['Sidebar Layout', 'Modern Typography', 'Visual Hierarchy'],
+    perfectFor: ['Managers', 'Directors', 'Consultants', 'Team Leads']
   },
   {
-    id: 'mental-health-professional',
-    name: 'Mental Health Professional',
-    description: 'Psychologists, counselors, and therapists',
-    emoji: '🧠',
+    id: 'academic-researcher',
+    name: 'Academic Researcher',
+    description: 'Structured layout for academics and researchers',
+    emoji: '🎓',
     category: 'professional',
-    stylePreset: 'medical-teal',
-    tags: ['Empathetic', 'Professional', 'Trustworthy'],
-    industries: ['Healthcare'],
-    features: ['Therapeutic Approach', 'Specializations', 'Client Outcomes'],
-    perfectFor: ['Psychologists', 'Counselors', 'Therapists', 'Social Workers']
+    stylePreset: 'academic-research',
+    tags: ['Academic', 'Research', 'Publications'],
+    industries: ['Education', 'Research', 'Academia', 'Think Tanks'],
+    features: ['Publication Focus', 'Research Emphasis', 'Academic Structure'],
+    perfectFor: ['Professors', 'Researchers', 'PhD Holders', 'Scientists']
+  },
+  {
+    id: 'business-manager',
+    name: 'Business Manager',
+    description: 'Two-column layout for business professionals',
+    emoji: '📊',
+    category: 'professional',
+    stylePreset: 'two-column-pro',
+    tags: ['Business', 'Management', 'Two-Column'],
+    industries: ['Business', 'Operations', 'Project Management', 'Sales'],
+    features: ['Two-Column Design', 'Business Focus', 'Results-Driven'],
+    perfectFor: ['Project Managers', 'Operations Managers', 'Business Analysts', 'Sales Managers']
+  },
+  {
+    id: 'executive-leader',
+    name: 'Executive Leader',
+    description: 'Premium design for C-level executives',
+    emoji: '⭐',
+    category: 'professional',
+    stylePreset: 'executive-premium',
+    tags: ['Premium', 'Executive', 'Luxury'],
+    industries: ['Fortune 500', 'Investment Banking', 'Private Equity', 'Luxury'],
+    features: ['Premium Design', 'Gold Accents', 'Executive Focus'],
+    perfectFor: ['C-Suite Executives', 'Board Members', 'Investment Bankers', 'VPs']
+  },
+  
+  // Word Document Templates
+  {
+    id: 'corporate-word-template',
+    name: 'Corporate Word Template',
+    description: 'Traditional RTF format optimized for Microsoft Word',
+    emoji: '📄',
+    category: 'professional',
+    stylePreset: 'corporate-traditional',
+    tags: ['Word Compatible', 'RTF', 'Editable'],
+    industries: ['All Industries'],
+    features: ['Word Compatible', 'Easy Editing', 'Professional Format'],
+    perfectFor: ['Users who prefer Word', 'Corporate Environments', 'Easy Customization']
+  },
+  {
+    id: 'modern-word-template',
+    name: 'Modern Word Template',
+    description: 'Contemporary RTF design for Microsoft Word',
+    emoji: '📝',
+    category: 'professional',
+    stylePreset: 'modern-professional',
+    tags: ['Word Compatible', 'Modern', 'RTF'],
+    industries: ['All Industries'],
+    features: ['Word Compatible', 'Modern Design', 'Easy Formatting'],
+    perfectFor: ['Modern Professionals', 'Tech Workers', 'Consultants']
   },
   
   // Technology Templates
@@ -262,6 +336,14 @@ export const getStylePresetById = (id: string): StylePreset | undefined => {
 
 export const getTemplatesByCategory = (category: 'professional' | 'creative' | 'technical'): TemplateConfig[] => {
   return templateConfigs.filter(template => template.category === category);
+};
+
+export const getWordTemplates = (): TemplateConfig[] => {
+  return templateConfigs.filter(template => 
+    template.id.includes('word-template') || 
+    template.tags.includes('RTF') || 
+    template.tags.includes('Word Compatible')
+  );
 };
 
 export const getAllCategories = (): Array<{ id: string; name: string; templates: TemplateConfig[] }> => {
