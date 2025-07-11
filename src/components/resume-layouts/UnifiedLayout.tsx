@@ -9,6 +9,17 @@ interface UnifiedLayoutProps {
 }
 
 export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutProps) => {
+  // Add safety check for undefined stylePreset
+  if (!stylePreset) {
+    return (
+      <div className="bg-white shadow-lg max-w-4xl mx-auto font-sans p-8">
+        <div className="text-center text-gray-500">
+          <p>Template configuration not found</p>
+        </div>
+      </div>
+    );
+  }
+
   const { layout, spacing } = stylePreset;
   
   // Apply dynamic CSS custom properties for theming
