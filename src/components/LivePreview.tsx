@@ -17,8 +17,15 @@ const LivePreview = ({ data, industry, template, className = "" }: LivePreviewPr
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   
+  // Debug logging
+  console.log('LivePreview - Received template:', template);
+  console.log('LivePreview - Received industry:', industry);
+  
   const templateStyles = useTemplateStyles(template);
   const layoutVariant = getLayoutVariant(template);
+  
+  console.log('LivePreview - Layout variant:', layoutVariant);
+  console.log('LivePreview - Template styles:', templateStyles);
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.1, 1.2));

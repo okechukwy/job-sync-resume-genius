@@ -1,6 +1,10 @@
 export const getLayoutVariant = (template: string) => {
   const templateName = template.toLowerCase().replace(/\s+/g, '-');
   
+  // Debug logging to track template selection
+  console.log('Template received:', template);
+  console.log('Normalized template name:', templateName);
+  
   // Creative and colorful templates
   if (templateName.includes('creative') || templateName.includes('colorful') || 
       templateName.includes('fresh') || templateName.includes('gradient') ||
@@ -32,10 +36,12 @@ export const getLayoutVariant = (template: string) => {
     return 'tech-forward';
   }
   
-  // Healthcare templates
-  if (templateName.includes('healthcare') || templateName.includes('medical') ||
-      templateName.includes('nurse') || templateName.includes('pharmacist') ||
-      templateName.includes('clinical') || templateName.includes('lab-technician')) {
+  // Healthcare templates - specifically check for medical-doctor first
+  if (templateName.includes('medical-doctor') || templateName.includes('healthcare') || 
+      templateName.includes('medical') || templateName.includes('nurse') || 
+      templateName.includes('pharmacist') || templateName.includes('clinical') || 
+      templateName.includes('lab-technician') || templateName.includes('doctor')) {
+    console.log('Healthcare template detected, using healthcare layout');
     return 'healthcare';
   }
   
@@ -45,6 +51,7 @@ export const getLayoutVariant = (template: string) => {
   }
   
   // Default to classic professional
+  console.log('Using default classic-professional layout for template:', templateName);
   return 'classic-professional';
 };
 

@@ -7,13 +7,21 @@ export const useTemplateStyles = (template: string) => {
     const templateName = template.toLowerCase().replace(/\s+/g, '-');
     const layoutVariant = getLayoutVariant(template);
     
+    // Debug logging
+    console.log('useTemplateStyles - Template:', template);
+    console.log('useTemplateStyles - Layout variant:', layoutVariant);
+    console.log('useTemplateStyles - Template name:', templateName);
+    
     const variant = baseLayoutStyles[layoutVariant];
     const overrides = templateOverrides[templateName as keyof typeof templateOverrides] || {};
     
-    return {
+    const finalStyles = {
       ...variant,
       ...overrides,
       skillsGrid: layoutVariant !== 'modern-minimalist' && layoutVariant !== 'executive-premium'
     };
+    
+    console.log('useTemplateStyles - Final styles:', finalStyles);
+    return finalStyles;
   }, [template]);
 };

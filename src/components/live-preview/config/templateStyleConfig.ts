@@ -76,11 +76,28 @@ export const templateOverrides = {
   'corporate-finance': { accentColor: 'text-gold-400', sectionBorder: 'border-l-4 border-yellow-600 pl-4' },
   'investment-banker': { accentColor: 'text-emerald-400', sectionBorder: 'border-l-4 border-emerald-600 pl-4' },
   
-  // Healthcare templates
-  'healthcare-specialist': { accentColor: 'text-teal-600', sectionBorder: 'border-l-4 border-teal-500 pl-4' },
-  'medical-doctor': { accentColor: 'text-blue-600', sectionBorder: 'border-l-4 border-blue-500 pl-4' },
-  'registered-nurse': { accentColor: 'text-green-600', sectionBorder: 'border-l-4 border-green-500 pl-4' },
-  'pharmacist-pro': { accentColor: 'text-purple-600', sectionBorder: 'border-l-4 border-purple-500 pl-4' },
+  // Healthcare templates - Enhanced styling for medical templates
+  'healthcare-specialist': { 
+    accentColor: 'text-teal-600', 
+    sectionBorder: 'border-l-4 border-teal-500 pl-4',
+    headerBg: 'bg-gradient-to-r from-teal-50 to-blue-50' 
+  },
+  'medical-doctor': { 
+    accentColor: 'text-blue-600', 
+    sectionBorder: 'border-l-4 border-blue-500 pl-4',
+    headerBg: 'bg-gradient-to-r from-blue-50 to-teal-50',
+    borderColor: 'border-blue-200'
+  },
+  'registered-nurse': { 
+    accentColor: 'text-green-600', 
+    sectionBorder: 'border-l-4 border-green-500 pl-4',
+    headerBg: 'bg-gradient-to-r from-green-50 to-teal-50' 
+  },
+  'pharmacist-pro': { 
+    accentColor: 'text-purple-600', 
+    sectionBorder: 'border-l-4 border-purple-500 pl-4',
+    headerBg: 'bg-gradient-to-r from-purple-50 to-blue-50' 
+  },
   
   // Other specialized templates
   'recent-graduate': { accentColor: 'text-teal-600', sectionBorder: 'border-l-4 border-teal-500 pl-4' }
