@@ -758,9 +758,136 @@ const AIInterviewPrep = () => {
                     </div>
                   )}
 
-                </CardContent>
+                 </CardContent>
               </Card>
             </div>
+
+            {/* Assessment Results Section */}
+            {assessmentResults && !isRecording && !isAnalyzing && (
+              <Card className="mt-6 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-primary" />
+                    Assessment Results
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Overall Score */}
+                  <div className="text-center space-y-2">
+                    <div className="text-3xl font-bold text-primary">
+                      {assessmentResults.overallScore}/100
+                    </div>
+                    <Progress 
+                      value={assessmentResults.overallScore} 
+                      className="h-3 w-full max-w-md mx-auto"
+                    />
+                    <p className="text-sm text-muted-foreground">Overall Performance</p>
+                  </div>
+
+                  {/* Score Breakdown */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Communication</span>
+                        <span className="text-sm font-bold">{assessmentResults.breakdown.communication}</span>
+                      </div>
+                      <Progress value={assessmentResults.breakdown.communication} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Content</span>
+                        <span className="text-sm font-bold">{assessmentResults.breakdown.content}</span>
+                      </div>
+                      <Progress value={assessmentResults.breakdown.content} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Structure</span>
+                        <span className="text-sm font-bold">{assessmentResults.breakdown.structure}</span>
+                      </div>
+                      <Progress value={assessmentResults.breakdown.structure} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Impact</span>
+                        <span className="text-sm font-bold">{assessmentResults.breakdown.impact}</span>
+                      </div>
+                      <Progress value={assessmentResults.breakdown.impact} className="h-2" />
+                    </div>
+                  </div>
+
+                  {/* Strengths and Improvements */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-green-600 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Strengths
+                      </h4>
+                      <ul className="space-y-2">
+                        {assessmentResults.strengths.filter(s => s.trim()).map((strength, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span>{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-amber-600 flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4" />
+                        Areas for Improvement
+                      </h4>
+                      <ul className="space-y-2">
+                        {assessmentResults.improvements.filter(i => i.trim()).map((improvement, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                            <span>{improvement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Transcript Section */}
+                  {assessmentResults.transcript && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Your Response
+                      </h4>
+                      <div className="bg-muted/50 rounded-lg p-4 max-h-32 overflow-y-auto">
+                        <p className="text-sm leading-relaxed">
+                          {assessmentResults.transcript}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                    <Button 
+                      onClick={() => {
+                        setAssessmentResults(null);
+                        setTranscript("");
+                      }}
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Try Again
+                    </Button>
+                    <Button 
+                      onClick={getNextQuestion}
+                      className="flex items-center gap-2"
+                    >
+                      <Play className="h-4 w-4" />
+                      Next Question
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="mock">
