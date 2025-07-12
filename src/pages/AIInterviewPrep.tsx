@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { 
   Brain, 
   MessageSquare, 
@@ -23,7 +25,10 @@ import {
   Award,
   BookOpen,
   Lightbulb,
-  Volume2
+  Volume2,
+  Search,
+  X,
+  Copy
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,6 +70,11 @@ const AIInterviewPrep = () => {
   const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  
+  // Question browser modal states
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [selectedBrowseCategory, setSelectedBrowseCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -567,6 +577,36 @@ const AIInterviewPrep = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Question Bank handlers
+  const handlePracticeClick = (categoryId: string) => {
+    setActiveTab("practice");
+    handleCategorySelection(categoryId);
+    toast.success("Switched to practice session");
+  };
+
+  const handleBrowseAllClick = (categoryId: string) => {
+    setSelectedBrowseCategory(categoryId);
+    setShowQuestionModal(true);
+    setSearchTerm("");
+  };
+
+  const copyQuestionToClipboard = (question: string) => {
+    navigator.clipboard.writeText(question);
+    toast.success("Question copied to clipboard");
+  };
+
+  const getFilteredQuestions = () => {
+    if (!selectedBrowseCategory) return [];
+    const category = practiceCategories.find(cat => cat.id === selectedBrowseCategory);
+    if (!category) return [];
+    
+    if (!searchTerm) return category.sampleQuestions;
+    
+    return category.sampleQuestions.filter(question =>
+      question.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
   const handleStartRecording = startRecording;
   const handleStopRecording = stopRecording;
   const handlePauseRecording = pauseRecording;
@@ -1033,8 +1073,19 @@ const AIInterviewPrep = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" className="flex-1">Browse All</Button>
-                        <Button size="sm">Practice</Button>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => handleBrowseAllClick(category.id)}
+                        >
+                          Browse All
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handlePracticeClick(category.id)}
+                        >
+                          Practice
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1125,6 +1176,104 @@ const AIInterviewPrep = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Question Browser Modal */}
+      <Dialog open={showQuestionModal} onOpenChange={setShowQuestionModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              {selectedBrowseCategory && practiceCategories.find(cat => cat.id === selectedBrowseCategory)?.title} Questions
+              <Badge variant="outline" className="ml-2">
+                {getFilteredQuestions().length} questions
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+            {/* Search bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search questions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Questions list */}
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {getFilteredQuestions().map((question, index) => (
+                <Card key={index} className="p-4 hover:shadow-md transition-all cursor-pointer group">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm leading-relaxed">{question}</p>
+                    </div>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyQuestionToClipboard(question)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedBrowseCategory) {
+                            setCurrentQuestion(question);
+                            setSelectedCategory(selectedBrowseCategory);
+                            setActiveTab("practice");
+                            setShowQuestionModal(false);
+                            toast.success("Started practice with selected question");
+                          }
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              
+              {getFilteredQuestions().length === 0 && searchTerm && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No questions found matching "{searchTerm}"</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal footer with actions */}
+            <div className="flex justify-between items-center pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                {selectedBrowseCategory && practiceCategories.find(cat => cat.id === selectedBrowseCategory)?.description}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (selectedBrowseCategory) {
+                      handlePracticeClick(selectedBrowseCategory);
+                      setShowQuestionModal(false);
+                    }
+                  }}
+                >
+                  Start Practice Session
+                </Button>
+                <Button variant="ghost" onClick={() => setShowQuestionModal(false)}>
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
