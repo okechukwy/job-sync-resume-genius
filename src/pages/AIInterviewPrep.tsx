@@ -785,34 +785,36 @@ const AIInterviewPrep = () => {
                   </div>
 
                   {/* Score Breakdown */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Communication</span>
-                        <span className="text-sm font-bold">{assessmentResults.breakdown.communication}</span>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Communication</span>
+                          <span className="text-sm font-bold">{assessmentResults.breakdown.communication}</span>
+                        </div>
+                        <Progress value={assessmentResults.breakdown.communication} className="h-2" />
                       </div>
-                      <Progress value={assessmentResults.breakdown.communication} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Content</span>
-                        <span className="text-sm font-bold">{assessmentResults.breakdown.content}</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Content</span>
+                          <span className="text-sm font-bold">{assessmentResults.breakdown.content}</span>
+                        </div>
+                        <Progress value={assessmentResults.breakdown.content} className="h-2" />
                       </div>
-                      <Progress value={assessmentResults.breakdown.content} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Structure</span>
-                        <span className="text-sm font-bold">{assessmentResults.breakdown.structure}</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Structure</span>
+                          <span className="text-sm font-bold">{assessmentResults.breakdown.structure}</span>
+                        </div>
+                        <Progress value={assessmentResults.breakdown.structure} className="h-2" />
                       </div>
-                      <Progress value={assessmentResults.breakdown.structure} className="h-2" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Impact</span>
-                        <span className="text-sm font-bold">{assessmentResults.breakdown.impact}</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Impact</span>
+                          <span className="text-sm font-bold">{assessmentResults.breakdown.impact}</span>
+                        </div>
+                        <Progress value={assessmentResults.breakdown.impact} className="h-2" />
                       </div>
-                      <Progress value={assessmentResults.breakdown.impact} className="h-2" />
                     </div>
                   </div>
 
