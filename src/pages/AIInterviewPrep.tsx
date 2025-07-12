@@ -37,69 +37,139 @@ const AIInterviewPrep = () => {
     {
       id: "behavioral",
       title: "Behavioral Questions",
-      description: "Practice STAR method responses",
-      questions: 25,
+      description: "STAR method responses for behavioral interviews",
+      questions: 50,
       difficulty: "Medium",
-      color: "bg-blue-500"
+      color: "bg-blue-500",
+      sampleQuestions: [
+        "Tell me about a time when you had to overcome a significant challenge at work.",
+        "Describe a situation where you had to work with a difficult team member.",
+        "Give me an example of when you had to make a decision with limited information.",
+        "Tell me about a time when you failed and how you handled it.",
+        "Describe a situation where you had to influence others without formal authority."
+      ]
     },
     {
       id: "technical",
       title: "Technical Skills",
-      description: "Role-specific technical questions",
-      questions: 40,
+      description: "Role-specific technical assessment questions",
+      questions: 75,
       difficulty: "Hard",
-      color: "bg-purple-500"
+      color: "bg-purple-500",
+      sampleQuestions: [
+        "Explain the difference between REST and GraphQL APIs.",
+        "How would you optimize a slow-performing database query?",
+        "Describe your approach to designing a scalable system architecture.",
+        "Walk me through your debugging process for production issues.",
+        "What security measures would you implement for a web application?"
+      ]
     },
     {
       id: "leadership",
       title: "Leadership & Management",
-      description: "Management scenario questions",
-      questions: 18,
+      description: "Management scenarios and leadership challenges",
+      questions: 35,
       difficulty: "Medium",
-      color: "bg-green-500"
+      color: "bg-green-500",
+      sampleQuestions: [
+        "How do you handle underperforming team members?",
+        "Describe your approach to managing competing priorities.",
+        "Tell me about a time you had to deliver difficult feedback.",
+        "How do you motivate team members during challenging projects?",
+        "Describe your experience with change management initiatives."
+      ]
     },
     {
       id: "situational",
       title: "Situational Judgment",
-      description: "Problem-solving scenarios",
-      questions: 30,
-      difficulty: "Medium",
-      color: "bg-orange-500"
+      description: "Critical thinking and problem-solving scenarios",
+      questions: 40,
+      difficulty: "Medium", 
+      color: "bg-orange-500",
+      sampleQuestions: [
+        "A key client is threatening to leave due to service issues. What's your approach?",
+        "You discover a critical bug in production right before a major release. What do you do?",
+        "Your team is missing deadlines consistently. How do you address this?",
+        "A colleague takes credit for your work in a meeting. How do you handle it?",
+        "You're asked to implement a feature you believe is ethically questionable. What's your response?"
+      ]
     }
   ];
 
   const mockInterviewTypes = [
     {
-      type: "Phone Screen",
-      duration: "30 min",
-      description: "Initial screening interview simulation",
-      icon: <MessageSquare className="h-6 w-6" />
+      type: "Phone/Video Screen",
+      duration: "30-45 min",
+      description: "Initial screening with HR and hiring manager focusing on culture fit and basic qualifications",
+      icon: <MessageSquare className="h-6 w-6" />,
+      topics: ["Background Review", "Culture Fit", "Salary Expectations", "Availability"]
     },
     {
-      type: "Technical Interview",
-      duration: "60 min", 
-      description: "Role-specific technical assessment",
-      icon: <Brain className="h-6 w-6" />
+      type: "Technical Deep Dive",
+      duration: "60-90 min", 
+      description: "Comprehensive technical assessment with coding challenges and system design",
+      icon: <Brain className="h-6 w-6" />,
+      topics: ["Live Coding", "System Design", "Technical Problem Solving", "Code Review"]
     },
     {
-      type: "Panel Interview",
-      duration: "45 min",
-      description: "Multiple interviewer simulation",
-      icon: <Users className="h-6 w-6" />
+      type: "Behavioral & Leadership",
+      duration: "45-60 min",
+      description: "Behavioral questions using STAR method and leadership scenarios",
+      icon: <Users className="h-6 w-6" />,
+      topics: ["STAR Method", "Leadership Experience", "Conflict Resolution", "Team Collaboration"]
     },
     {
-      type: "Final Round",
+      type: "Executive Final Round",
+      duration: "60-120 min",
+      description: "Senior leadership interview focusing on strategic thinking and cultural alignment",
+      icon: <Target className="h-6 w-6" />,
+      topics: ["Strategic Vision", "Executive Presence", "Business Acumen", "Long-term Goals"]
+    },
+    {
+      type: "Case Study Interview",
       duration: "90 min",
-      description: "Executive-level interview prep",
-      icon: <Target className="h-6 w-6" />
+      description: "Business case analysis and presentation for consulting and strategy roles",
+      icon: <Lightbulb className="h-6 w-6" />,
+      topics: ["Problem Analysis", "Framework Thinking", "Data Interpretation", "Recommendation"]
     }
   ];
 
-  const strengths = [
-    { area: "Communication", score: 85, improvement: "+12%" },
-    { area: "Technical Knowledge", score: 92, improvement: "+8%" },
-    { area: "Problem Solving", score: 78, improvement: "+15%" },
-    { area: "Cultural Fit", score: 88, improvement: "+5%" }
+  const performanceAreas = [
+    { 
+      area: "Communication Skills", 
+      score: 87, 
+      improvement: "+12%", 
+      feedback: "Clear articulation and active listening. Work on reducing filler words.",
+      trend: "improving"
+    },
+    { 
+      area: "Technical Expertise", 
+      score: 92, 
+      improvement: "+8%", 
+      feedback: "Strong technical knowledge. Consider practicing system design problems.",
+      trend: "stable"
+    },
+    { 
+      area: "Problem-Solving Approach", 
+      score: 84, 
+      improvement: "+18%", 
+      feedback: "Structured thinking process. Focus on edge case consideration.",
+      trend: "improving"
+    },
+    { 
+      area: "Cultural Alignment", 
+      score: 89, 
+      improvement: "+5%", 
+      feedback: "Good value alignment. Share more specific examples of cultural fit.",
+      trend: "stable"
+    },
+    {
+      area: "Leadership Potential",
+      score: 78,
+      improvement: "+22%",
+      feedback: "Growing leadership awareness. Practice conflict resolution scenarios.",
+      trend: "improving"
+    }
   ];
 
   const handleStartRecording = () => {
@@ -229,12 +299,19 @@ const AIInterviewPrep = () => {
                   <CardTitle>Practice Session</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Current Question:</h4>
-                    <p className="text-muted-foreground">
-                      "Tell me about a time when you had to overcome a significant challenge at work. 
-                      How did you approach it and what was the outcome?"
+                  <div className="bg-muted/50 p-4 rounded-lg border-l-4 border-primary">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium">Current Question:</h4>
+                      <Badge variant="secondary">Behavioral</Badge>
+                    </div>
+                    <p className="text-foreground leading-relaxed">
+                      "Describe a situation where you had to make a critical decision with incomplete information. 
+                      Walk me through your thought process, the actions you took, and the outcome. What would you 
+                      do differently if faced with a similar situation?"
                     </p>
+                    <div className="mt-3 text-xs text-muted-foreground">
+                      💡 <strong>Tip:</strong> Use the STAR method (Situation, Task, Action, Result) for structured responses
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-center gap-4">
@@ -277,12 +354,32 @@ const AIInterviewPrep = () => {
                   )}
 
                   {practiceScore > 0 && (
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>
-                        Great response! Score: {practiceScore}/100. Key strengths: Clear structure, specific examples, quantified results.
-                      </AlertDescription>
-                    </Alert>
+                    <div className="space-y-3">
+                      <Alert className="border-green-200 bg-green-50">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <AlertDescription className="text-green-800">
+                          <strong>Excellent Response! Score: {practiceScore}/100</strong>
+                        </AlertDescription>
+                      </Alert>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="font-medium text-green-800 mb-1">✅ Strengths</div>
+                          <ul className="text-green-700 space-y-1 list-disc list-inside">
+                            <li>Clear STAR structure</li>
+                            <li>Specific examples with context</li>
+                            <li>Quantified results and impact</li>
+                          </ul>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="font-medium text-blue-800 mb-1">💡 Improvements</div>
+                          <ul className="text-blue-700 space-y-1 list-disc list-inside">
+                            <li>Include lessons learned</li>
+                            <li>Mention stakeholder impact</li>
+                            <li>Add emotional intelligence aspects</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -311,7 +408,22 @@ const AIInterviewPrep = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground mb-4">{mock.description}</p>
-                      <Button className="w-full">Start Mock Interview</Button>
+                      <div className="space-y-3 mb-4">
+                        <div>
+                          <div className="text-sm font-medium mb-2">Interview Topics:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {mock.topics.map((topic, topicIndex) => (
+                              <Badge key={topicIndex} variant="secondary" className="text-xs">
+                                {topic}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button className="flex-1">Start Interview</Button>
+                        <Button variant="outline" size="sm">Preview</Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -328,19 +440,25 @@ const AIInterviewPrep = () => {
                   <CardTitle>Strength Areas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {strengths.map((strength, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{strength.area}</span>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-green-600">
-                              {strength.improvement}
-                            </Badge>
-                            <span className="font-bold">{strength.score}/100</span>
+                  <div className="space-y-6">
+                    {performanceAreas.map((area, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium">{area.area}</span>
+                              <Badge 
+                                variant="outline" 
+                                className={area.trend === 'improving' ? 'text-green-600 border-green-200' : 'text-blue-600 border-blue-200'}
+                              >
+                                {area.improvement}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{area.feedback}</p>
                           </div>
+                          <span className="font-bold text-lg ml-4">{area.score}/100</span>
                         </div>
-                        <Progress value={strength.score} className="h-2" />
+                        <Progress value={area.score} className="h-2" />
                       </div>
                     ))}
                   </div>
@@ -353,16 +471,25 @@ const AIInterviewPrep = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Excellent:</strong> Your responses show strong problem-solving skills and clear communication.
+                    <Alert className="border-green-200 bg-green-50">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800">
+                        <strong>Strengths Identified:</strong> Excellent use of the STAR method in behavioral responses. 
+                        Your technical explanations are clear and well-structured. Strong examples of leadership impact.
                       </AlertDescription>
                     </Alert>
-                    <Alert>
-                      <Lightbulb className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Improvement:</strong> Consider adding more specific metrics and quantifiable results to your examples.
+                    <Alert className="border-blue-200 bg-blue-50">
+                      <Lightbulb className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-blue-800">
+                        <strong>Growth Opportunities:</strong> Include more quantified business impact in your examples. 
+                        Practice articulating failures and lessons learned. Work on asking strategic questions at interview end.
+                      </AlertDescription>
+                    </Alert>
+                    <Alert className="border-orange-200 bg-orange-50">
+                      <TrendingUp className="h-4 w-4 text-orange-600" />
+                      <AlertDescription className="text-orange-800">
+                        <strong>AI Insight:</strong> Your confidence has improved 23% over the last month. 
+                        Focus on technical system design questions for continued growth.
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -383,13 +510,26 @@ const AIInterviewPrep = () => {
                         <CardTitle className="text-lg">{category.title}</CardTitle>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground mb-4">{category.description}</p>
-                      <div className="flex justify-between items-center mb-4">
+                    <CardContent className="space-y-4">
+                      <p className="text-muted-foreground">{category.description}</p>
+                      <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">{category.questions} questions</span>
                         <Badge variant="outline">{category.difficulty}</Badge>
                       </div>
-                      <Button variant="outline" className="w-full">Browse Questions</Button>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Sample Questions:</div>
+                        <div className="space-y-1">
+                          {category.sampleQuestions.slice(0, 2).map((question, qIndex) => (
+                            <div key={qIndex} className="text-xs text-muted-foreground p-2 bg-muted/30 rounded">
+                              "{question}"
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="flex-1">Browse All</Button>
+                        <Button size="sm">Practice</Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -435,14 +575,41 @@ const AIInterviewPrep = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">Focus on providing more specific examples in your behavioral responses.</p>
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Badge variant="secondary" className="mt-0.5">Priority</Badge>
+                          <p className="text-sm text-blue-800">
+                            <strong>Enhance STAR Responses:</strong> Include specific metrics and quantified outcomes. 
+                            Practice with "So what?" follow-ups to demonstrate business impact.
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">Practice technical questions for your industry more frequently.</p>
+                      <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Badge variant="secondary" className="mt-0.5">Technical</Badge>
+                          <p className="text-sm text-purple-800">
+                            <strong>System Design Practice:</strong> Focus on scalability discussions and trade-off analysis. 
+                            Practice drawing diagrams while explaining your thought process.
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">Your communication style is excellent - maintain this confidence.</p>
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Badge variant="secondary" className="mt-0.5">Strength</Badge>
+                          <p className="text-sm text-green-800">
+                            <strong>Communication Excellence:</strong> Your clear articulation and active listening skills 
+                            are standout strengths. Continue leveraging this in complex technical discussions.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Badge variant="secondary" className="mt-0.5">Strategy</Badge>
+                          <p className="text-sm text-orange-800">
+                            <strong>Question Preparation:</strong> Develop 3-5 thoughtful questions about company culture, 
+                            team dynamics, and growth opportunities to ask at interview end.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
