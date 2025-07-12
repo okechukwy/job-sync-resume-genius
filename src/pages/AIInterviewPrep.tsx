@@ -32,6 +32,10 @@ const AIInterviewPrep = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [practiceScore, setPracticeScore] = useState(0);
   const [completedSessions, setCompletedSessions] = useState(3);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<string>("");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questionHistory, setQuestionHistory] = useState<string[]>([]);
 
   const practiceCategories = [
     {
@@ -172,6 +176,55 @@ const AIInterviewPrep = () => {
     }
   ];
 
+  // Question selection functions
+  const selectRandomQuestion = (categoryId: string) => {
+    const category = practiceCategories.find(cat => cat.id === categoryId);
+    if (!category) return "";
+    
+    // Get available questions (excluding recently used ones)
+    const availableQuestions = category.sampleQuestions.filter(
+      question => !questionHistory.includes(question)
+    );
+    
+    // If all questions have been used, reset history
+    const questionsToUse = availableQuestions.length > 0 ? availableQuestions : category.sampleQuestions;
+    
+    // Select random question
+    const randomIndex = Math.floor(Math.random() * questionsToUse.length);
+    return questionsToUse[randomIndex];
+  };
+
+  const handleCategorySelection = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    const newQuestion = selectRandomQuestion(categoryId);
+    setCurrentQuestion(newQuestion);
+    setCurrentQuestionIndex(0);
+    setQuestionHistory([newQuestion]);
+    setPracticeScore(0); // Reset score when changing category
+    toast.success(`Started practicing ${practiceCategories.find(cat => cat.id === categoryId)?.title}`);
+  };
+
+  const getNextQuestion = () => {
+    if (!selectedCategory) return;
+    
+    const newQuestion = selectRandomQuestion(selectedCategory);
+    setCurrentQuestion(newQuestion);
+    setCurrentQuestionIndex(prev => prev + 1);
+    setQuestionHistory(prev => [...prev.slice(-3), newQuestion]); // Keep last 4 questions in history
+    setPracticeScore(0); // Reset score for new question
+    toast.info("New question generated!");
+  };
+
+  const getCategoryTip = (categoryId: string) => {
+    const tips = {
+      behavioral: "Use the STAR method (Situation, Task, Action, Result) for structured responses",
+      technical: "Break down the problem, explain your approach, and discuss trade-offs",
+      leadership: "Focus on specific examples of influence, team building, and decision-making",
+      situational: "Think through the scenario step-by-step and explain your reasoning"
+    };
+    return tips[categoryId as keyof typeof tips] || "Take your time and provide specific examples";
+  };
+
   const handleStartRecording = () => {
     setIsRecording(true);
     setIsPaused(false);
@@ -272,7 +325,13 @@ const AIInterviewPrep = () => {
                 <h3 className="text-xl font-semibold mb-4">Choose Practice Category</h3>
                 <div className="space-y-4">
                   {practiceCategories.map((category) => (
-                    <Card key={category.id} className="glass-card hover:shadow-lg transition-all cursor-pointer">
+                    <Card 
+                      key={category.id} 
+                      className={`glass-card hover:shadow-lg transition-all cursor-pointer ${
+                        selectedCategory === category.id ? 'ring-2 ring-primary bg-primary/5' : ''
+                      }`}
+                      onClick={() => handleCategorySelection(category.id)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -299,22 +358,52 @@ const AIInterviewPrep = () => {
                   <CardTitle>Practice Session</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-muted/50 p-4 rounded-lg border-l-4 border-primary">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Current Question:</h4>
-                      <Badge variant="secondary">Behavioral</Badge>
+                  {selectedCategory && currentQuestion ? (
+                    <div className="bg-muted/50 p-4 rounded-lg border-l-4 border-primary">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">Current Question:</h4>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">
+                            {practiceCategories.find(cat => cat.id === selectedCategory)?.title}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Question {currentQuestionIndex + 1}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-foreground leading-relaxed">
+                        "{currentQuestion}"
+                      </p>
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        💡 <strong>Tip:</strong> {getCategoryTip(selectedCategory)}
+                      </div>
                     </div>
-                    <p className="text-foreground leading-relaxed">
-                      "Describe a situation where you had to make a critical decision with incomplete information. 
-                      Walk me through your thought process, the actions you took, and the outcome. What would you 
-                      do differently if faced with a similar situation?"
-                    </p>
-                    <div className="mt-3 text-xs text-muted-foreground">
-                      💡 <strong>Tip:</strong> Use the STAR method (Situation, Task, Action, Result) for structured responses
+                  ) : (
+                    <div className="bg-muted/30 p-8 rounded-lg border-2 border-dashed border-muted text-center">
+                      <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h4 className="font-medium text-muted-foreground mb-2">Select a Category to Start</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Choose a practice category from the left to begin your interview preparation session.
+                      </p>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-center justify-center gap-4">
+                  {selectedCategory && currentQuestion && (
+                    <div className="flex items-center justify-center gap-4 flex-wrap">
+                      <Button 
+                        onClick={getNextQuestion} 
+                        variant="outline" 
+                        size="lg"
+                        className="flex items-center gap-2"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Next Question
+                      </Button>
+                    </div>
+                  )}
+
+                  {selectedCategory && currentQuestion && (
+                    <div className="flex items-center justify-center gap-4">
                     {!isRecording ? (
                       <Button onClick={handleStartRecording} size="lg" className="flex items-center gap-2">
                         <Mic className="h-4 w-4" />
@@ -341,10 +430,11 @@ const AIInterviewPrep = () => {
                           Stop & Analyze
                         </Button>
                       </div>
-                    )}
-                  </div>
+                     )}
+                    </div>
+                  )}
 
-                  {isRecording && (
+                  {selectedCategory && currentQuestion && isRecording && (
                     <div className="text-center">
                       <div className="animate-pulse text-red-500 font-medium">Recording in progress...</div>
                       <div className="text-sm text-muted-foreground mt-2">
