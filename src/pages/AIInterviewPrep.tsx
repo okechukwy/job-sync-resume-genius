@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,9 +22,31 @@ import {
   TrendingUp,
   Award,
   BookOpen,
-  Lightbulb
+  Lightbulb,
+  Volume2
 } from "lucide-react";
 import { toast } from "sonner";
+
+// Extend window interface for Speech Recognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
+interface AssessmentResult {
+  overallScore: number;
+  breakdown: {
+    communication: number;
+    content: number;
+    structure: number;
+    impact: number;
+  };
+  strengths: string[];
+  improvements: string[];
+  transcript: string;
+}
 
 const AIInterviewPrep = () => {
   const [activeTab, setActiveTab] = useState("practice");
@@ -36,6 +58,18 @@ const AIInterviewPrep = () => {
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questionHistory, setQuestionHistory] = useState<string[]>([]);
+  
+  // Audio recording states
+  const [transcript, setTranscript] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [audioLevel, setAudioLevel] = useState(0);
+  
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const practiceCategories = [
     {
@@ -225,27 +259,317 @@ const AIInterviewPrep = () => {
     return tips[categoryId as keyof typeof tips] || "Take your time and provide specific examples";
   };
 
-  const handleStartRecording = () => {
-    setIsRecording(true);
-    setIsPaused(false);
-    toast.success("Recording started - answer the question naturally");
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          }
+        }
+        if (finalTranscript) {
+          setTranscript(prev => prev + finalTranscript + ' ');
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        toast.error('Speech recognition error occurred');
+      };
+    }
+  }, []);
+
+  // Timer for recording
+  useEffect(() => {
+    if (isRecording && !isPaused) {
+      intervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isRecording, isPaused]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Setup audio level monitoring
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const updateAudioLevel = () => {
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        setAudioLevel(average);
+        if (isRecording) {
+          requestAnimationFrame(updateAudioLevel);
+        }
+      };
+      updateAudioLevel();
+
+      // Setup MediaRecorder
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorderRef.current.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        audioContext.close();
+      };
+
+      mediaRecorderRef.current.start();
+      
+      // Start speech recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+      }
+
+      setIsRecording(true);
+      setIsPaused(false);
+      setRecordingTime(0);
+      setTranscript("");
+      setAssessmentResults(null);
+      toast.success("Recording started - answer the question naturally");
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error('Failed to start recording. Please check your microphone permissions.');
+    }
   };
 
-  const handleStopRecording = () => {
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
     setIsRecording(false);
     setIsPaused(false);
-    // Simulate AI analysis
+    setAudioLevel(0);
+    
+    // Start analysis
+    setIsAnalyzing(true);
+    toast.info("Analyzing your response...");
+    
+    // Simulate analysis delay and then analyze
     setTimeout(() => {
-      const score = Math.floor(Math.random() * 30) + 70;
-      setPracticeScore(score);
-      toast.success(`Analysis complete! Score: ${score}/100`);
+      const results = analyzeResponse(transcript, selectedCategory);
+      setAssessmentResults(results);
+      setPracticeScore(results.overallScore);
+      setIsAnalyzing(false);
+      toast.success(`Analysis complete! Score: ${results.overallScore}/100`);
     }, 2000);
   };
 
-  const handlePauseRecording = () => {
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current) {
+      if (isPaused) {
+        mediaRecorderRef.current.resume();
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        }
+      } else {
+        mediaRecorderRef.current.pause();
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+      }
+    }
+    
     setIsPaused(!isPaused);
     toast.info(isPaused ? "Recording resumed" : "Recording paused");
   };
+
+  const analyzeResponse = (transcript: string, category: string | null): AssessmentResult => {
+    if (!transcript.trim() || !category) {
+      return {
+        overallScore: 0,
+        breakdown: { communication: 0, content: 0, structure: 0, impact: 0 },
+        strengths: ["Recording detected"],
+        improvements: ["Please provide a verbal response to analyze"],
+        transcript: transcript || "No transcript available"
+      };
+    }
+
+    const words = transcript.trim().split(/\s+/);
+    const wordCount = words.length;
+    const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    
+    // Category-specific analysis
+    const categoryAnalysis = getCategorySpecificAnalysis(transcript, category, wordCount);
+    
+    // Communication score (based on length, clarity, flow)
+    let communicationScore = Math.min(100, Math.max(20, (wordCount / 150) * 100));
+    if (transcript.includes("um") || transcript.includes("uh")) {
+      communicationScore -= 10;
+    }
+    
+    // Content score (based on category-specific criteria)
+    const contentScore = categoryAnalysis.contentScore;
+    
+    // Structure score (introduction, body, conclusion)
+    let structureScore = 60; // Base score
+    if (sentences.length >= 3) structureScore += 20;
+    if (categoryAnalysis.hasStructure) structureScore += 20;
+    
+    // Impact score (based on specific examples, quantifiable results)
+    let impactScore = categoryAnalysis.impactScore;
+    
+    const breakdown = {
+      communication: Math.round(communicationScore),
+      content: Math.round(contentScore),
+      structure: Math.round(structureScore),
+      impact: Math.round(impactScore)
+    };
+    
+    const overallScore = Math.round(
+      (breakdown.communication + breakdown.content + breakdown.structure + breakdown.impact) / 4
+    );
+
+    return {
+      overallScore,
+      breakdown,
+      strengths: categoryAnalysis.strengths,
+      improvements: categoryAnalysis.improvements,
+      transcript: transcript.trim()
+    };
+  };
+
+  const getCategorySpecificAnalysis = (transcript: string, category: string, wordCount: number) => {
+    const lowerTranscript = transcript.toLowerCase();
+    
+    switch (category) {
+      case 'behavioral':
+        const hasSTAR = {
+          situation: lowerTranscript.includes('situation') || lowerTranscript.includes('when') || lowerTranscript.includes('at'),
+          task: lowerTranscript.includes('task') || lowerTranscript.includes('needed') || lowerTranscript.includes('responsible'),
+          action: lowerTranscript.includes('action') || lowerTranscript.includes('did') || lowerTranscript.includes('decided'),
+          result: lowerTranscript.includes('result') || lowerTranscript.includes('outcome') || lowerTranscript.includes('achieved')
+        };
+        const starCount = Object.values(hasSTAR).filter(Boolean).length;
+        
+        return {
+          contentScore: Math.min(100, starCount * 25 + (wordCount > 100 ? 20 : 0)),
+          hasStructure: starCount >= 3,
+          impactScore: lowerTranscript.includes('result') || lowerTranscript.includes('achieved') ? 80 : 50,
+          strengths: [
+            starCount >= 3 ? "Good STAR method structure" : "",
+            wordCount > 100 ? "Comprehensive response" : "",
+            lowerTranscript.includes('learn') ? "Shows growth mindset" : ""
+          ].filter(Boolean),
+          improvements: [
+            starCount < 3 ? "Try using the complete STAR method (Situation, Task, Action, Result)" : "",
+            wordCount < 80 ? "Provide more detailed examples" : "",
+            !lowerTranscript.includes('result') ? "Include specific outcomes and results" : ""
+          ].filter(Boolean)
+        };
+
+      case 'technical':
+        const technicalKeywords = ['architecture', 'design', 'implement', 'optimize', 'scale', 'security', 'performance', 'database', 'api'];
+        const keywordCount = technicalKeywords.filter(keyword => lowerTranscript.includes(keyword)).length;
+        
+        return {
+          contentScore: Math.min(100, keywordCount * 12 + (wordCount > 120 ? 30 : 0)),
+          hasStructure: lowerTranscript.includes('first') || lowerTranscript.includes('approach') || lowerTranscript.includes('consider'),
+          impactScore: lowerTranscript.includes('trade-off') || lowerTranscript.includes('pros and cons') ? 85 : 60,
+          strengths: [
+            keywordCount >= 3 ? "Strong technical vocabulary" : "",
+            lowerTranscript.includes('trade-off') ? "Considers trade-offs" : "",
+            lowerTranscript.includes('scale') ? "Thinks about scalability" : ""
+          ].filter(Boolean),
+          improvements: [
+            keywordCount < 2 ? "Use more specific technical terminology" : "",
+            !lowerTranscript.includes('trade-off') ? "Discuss trade-offs and alternatives" : "",
+            wordCount < 100 ? "Provide more technical depth" : ""
+          ].filter(Boolean)
+        };
+
+      case 'leadership':
+        const leadershipKeywords = ['team', 'lead', 'motivate', 'decision', 'feedback', 'influence', 'delegate', 'vision'];
+        const leaderKeywordCount = leadershipKeywords.filter(keyword => lowerTranscript.includes(keyword)).length;
+        
+        return {
+          contentScore: Math.min(100, leaderKeywordCount * 15 + (wordCount > 100 ? 25 : 0)),
+          hasStructure: lowerTranscript.includes('challenge') && lowerTranscript.includes('approach'),
+          impactScore: lowerTranscript.includes('team') && lowerTranscript.includes('result') ? 80 : 55,
+          strengths: [
+            leaderKeywordCount >= 3 ? "Demonstrates leadership awareness" : "",
+            lowerTranscript.includes('feedback') ? "Values communication" : "",
+            lowerTranscript.includes('team') ? "Team-focused approach" : ""
+          ].filter(Boolean),
+          improvements: [
+            leaderKeywordCount < 2 ? "Include more leadership-specific examples" : "",
+            !lowerTranscript.includes('team') ? "Emphasize team impact and collaboration" : "",
+            !lowerTranscript.includes('decision') ? "Describe your decision-making process" : ""
+          ].filter(Boolean)
+        };
+
+      case 'situational':
+        const problemSolvingKeywords = ['analyze', 'consider', 'option', 'priority', 'stakeholder', 'impact', 'solution'];
+        const problemKeywordCount = problemSolvingKeywords.filter(keyword => lowerTranscript.includes(keyword)).length;
+        
+        return {
+          contentScore: Math.min(100, problemKeywordCount * 14 + (wordCount > 100 ? 30 : 0)),
+          hasStructure: lowerTranscript.includes('first') && (lowerTranscript.includes('then') || lowerTranscript.includes('next')),
+          impactScore: lowerTranscript.includes('stakeholder') || lowerTranscript.includes('priority') ? 85 : 60,
+          strengths: [
+            problemKeywordCount >= 3 ? "Structured problem-solving approach" : "",
+            lowerTranscript.includes('stakeholder') ? "Considers stakeholder impact" : "",
+            lowerTranscript.includes('priority') ? "Understands prioritization" : ""
+          ].filter(Boolean),
+          improvements: [
+            problemKeywordCount < 2 ? "Explain your reasoning and thought process more clearly" : "",
+            !lowerTranscript.includes('stakeholder') ? "Consider stakeholder impact in your analysis" : "",
+            !lowerTranscript.includes('option') ? "Discuss alternative solutions or options" : ""
+          ].filter(Boolean)
+        };
+
+      default:
+        return {
+          contentScore: Math.min(100, wordCount * 0.8),
+          hasStructure: false,
+          impactScore: 60,
+          strengths: ["Response recorded successfully"],
+          improvements: ["Provide more specific examples"]
+        };
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleStartRecording = startRecording;
+  const handleStopRecording = stopRecording;
+  const handlePauseRecording = pauseRecording;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
@@ -434,43 +758,6 @@ const AIInterviewPrep = () => {
                     </div>
                   )}
 
-                  {selectedCategory && currentQuestion && isRecording && (
-                    <div className="text-center">
-                      <div className="animate-pulse text-red-500 font-medium">Recording in progress...</div>
-                      <div className="text-sm text-muted-foreground mt-2">
-                        {isPaused ? "Recording paused" : "Speak naturally and take your time"}
-                      </div>
-                    </div>
-                  )}
-
-                  {practiceScore > 0 && (
-                    <div className="space-y-3">
-                      <Alert className="border-green-200 bg-green-50">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <AlertDescription className="text-green-800">
-                          <strong>Excellent Response! Score: {practiceScore}/100</strong>
-                        </AlertDescription>
-                      </Alert>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="font-medium text-green-800 mb-1">✅ Strengths</div>
-                          <ul className="text-green-700 space-y-1 list-disc list-inside">
-                            <li>Clear STAR structure</li>
-                            <li>Specific examples with context</li>
-                            <li>Quantified results and impact</li>
-                          </ul>
-                        </div>
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="font-medium text-blue-800 mb-1">💡 Improvements</div>
-                          <ul className="text-blue-700 space-y-1 list-disc list-inside">
-                            <li>Include lessons learned</li>
-                            <li>Mention stakeholder impact</li>
-                            <li>Add emotional intelligence aspects</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
