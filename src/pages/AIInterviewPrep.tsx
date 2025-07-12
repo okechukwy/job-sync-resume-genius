@@ -94,7 +94,22 @@ const AIInterviewPrep = () => {
         "Describe a situation where you had to work with a difficult team member.",
         "Give me an example of when you had to make a decision with limited information.",
         "Tell me about a time when you failed and how you handled it.",
-        "Describe a situation where you had to influence others without formal authority."
+        "Describe a situation where you had to influence others without formal authority.",
+        "Tell me about a time when you had to meet a tight deadline.",
+        "Describe a situation where you had to work with limited resources.",
+        "Give me an example of when you had to resolve a conflict between team members.",
+        "Tell me about a time when you had to adapt to a significant change at work.",
+        "Describe a situation where you had to take initiative without being asked.",
+        "Give me an example of when you had to learn something new quickly.",
+        "Tell me about a time when you had to give constructive feedback to a colleague.",
+        "Describe a situation where you had to handle multiple priorities simultaneously.",
+        "Give me an example of when you had to persuade someone to change their mind.",
+        "Tell me about a time when you had to deal with an angry customer or stakeholder.",
+        "Describe a situation where you had to work under pressure.",
+        "Give me an example of when you had to be creative to solve a problem.",
+        "Tell me about a time when you had to collaborate with people from different departments.",
+        "Describe a situation where you had to improve a process or system.",
+        "Give me an example of when you had to manage expectations effectively."
       ]
     },
     {
@@ -109,7 +124,22 @@ const AIInterviewPrep = () => {
         "How would you optimize a slow-performing database query?",
         "Describe your approach to designing a scalable system architecture.",
         "Walk me through your debugging process for production issues.",
-        "What security measures would you implement for a web application?"
+        "What security measures would you implement for a web application?",
+        "Explain the concept of microservices and their advantages.",
+        "How do you handle version control in a team environment?",
+        "Describe the differences between SQL and NoSQL databases.",
+        "What is containerization and how does Docker work?",
+        "Explain the principles of test-driven development (TDD).",
+        "How would you implement caching to improve application performance?",
+        "Describe your experience with cloud platforms (AWS, Azure, GCP).",
+        "What are design patterns and can you give examples?",
+        "How do you ensure code quality in your projects?",
+        "Explain the concept of CI/CD and its benefits.",
+        "How would you handle database migrations in production?",
+        "Describe your approach to API design and documentation.",
+        "What monitoring and logging strategies do you use?",
+        "How do you handle error handling and exception management?",
+        "Explain the principles of responsive web design."
       ]
     },
     {
@@ -124,7 +154,17 @@ const AIInterviewPrep = () => {
         "Describe your approach to managing competing priorities.",
         "Tell me about a time you had to deliver difficult feedback.",
         "How do you motivate team members during challenging projects?",
-        "Describe your experience with change management initiatives."
+        "Describe your experience with change management initiatives.",
+        "How do you build trust within your team?",
+        "Describe your leadership style and when you adapt it.",
+        "How do you handle conflicts between team members?",
+        "What strategies do you use for effective delegation?",
+        "How do you ensure team members feel valued and heard?",
+        "Describe your approach to setting team goals and KPIs.",
+        "How do you handle budget constraints while maintaining team morale?",
+        "What's your strategy for onboarding new team members?",
+        "How do you handle remote or distributed team management?",
+        "Describe your approach to performance reviews and career development."
       ]
     },
     {
@@ -139,7 +179,17 @@ const AIInterviewPrep = () => {
         "You discover a critical bug in production right before a major release. What do you do?",
         "Your team is missing deadlines consistently. How do you address this?",
         "A colleague takes credit for your work in a meeting. How do you handle it?",
-        "You're asked to implement a feature you believe is ethically questionable. What's your response?"
+        "You're asked to implement a feature you believe is ethically questionable. What's your response?",
+        "Your manager asks you to work on a project outside your expertise. How do you proceed?",
+        "A stakeholder keeps changing requirements mid-project. How do you handle this?",
+        "You notice a security vulnerability in your company's system. What do you do?",
+        "Your team is split on two different technical approaches. How do you resolve this?",
+        "A vendor delivers subpar work that affects your project timeline. How do you respond?",
+        "You're assigned to lead a project with team members more experienced than you. How do you approach this?",
+        "A customer requests a feature that would compromise system performance. How do you handle this?",
+        "You discover that a previous decision you made was incorrect and caused issues. What do you do?",
+        "Your company is considering layoffs and team morale is low. How do you manage this situation?",
+        "You're asked to estimate a project but lack sufficient information. How do you proceed?"
       ]
     }
   ];
