@@ -27,7 +27,9 @@ import {
   CheckCircle2,
   Copy,
   Download,
-  ExternalLink
+  ExternalLink,
+  Plus,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,6 +52,8 @@ const PersonalBranding = () => {
   const [activeTab, setActiveTab] = useState("brand-builder");
   const [brandScore, setBrandScore] = useState(0);
   const [generatedContent, setGeneratedContent] = useState<any>(null);
+  const [newSkill, setNewSkill] = useState("");
+  const [newAchievement, setNewAchievement] = useState("");
 
   const form = useForm<PersonalBrandData>({
     resolver: zodResolver(personalBrandSchema),
@@ -164,6 +168,32 @@ const PersonalBranding = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard!");
+  };
+
+  const addSkill = () => {
+    if (newSkill.trim()) {
+      const currentSkills = form.getValues("keySkills");
+      form.setValue("keySkills", [...currentSkills, newSkill.trim()]);
+      setNewSkill("");
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    const currentSkills = form.getValues("keySkills");
+    form.setValue("keySkills", currentSkills.filter(skill => skill !== skillToRemove));
+  };
+
+  const addAchievement = () => {
+    if (newAchievement.trim()) {
+      const currentAchievements = form.getValues("achievements");
+      form.setValue("achievements", [...currentAchievements, newAchievement.trim()]);
+      setNewAchievement("");
+    }
+  };
+
+  const removeAchievement = (achievementToRemove: string) => {
+    const currentAchievements = form.getValues("achievements");
+    form.setValue("achievements", currentAchievements.filter(achievement => achievement !== achievementToRemove));
   };
 
   return (
@@ -329,6 +359,105 @@ const PersonalBranding = () => {
                                 {...field} 
                               />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Key Skills Field */}
+                      <FormField
+                        control={form.control}
+                        name="keySkills"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Key Skills * (minimum 3)</FormLabel>
+                            <div className="space-y-3">
+                              <div className="flex gap-2">
+                                <Input
+                                  value={newSkill}
+                                  onChange={(e) => setNewSkill(e.target.value)}
+                                  placeholder="Add a key skill..."
+                                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                                />
+                                <Button type="button" onClick={addSkill} size="sm">
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {field.value.map((skill, index) => (
+                                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                                    {skill}
+                                    <X 
+                                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                                      onClick={() => removeSkill(skill)}
+                                    />
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Achievements Field */}
+                      <FormField
+                        control={form.control}
+                        name="achievements"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Key Achievements * (minimum 1)</FormLabel>
+                            <div className="space-y-3">
+                              <div className="flex gap-2">
+                                <Input
+                                  value={newAchievement}
+                                  onChange={(e) => setNewAchievement(e.target.value)}
+                                  placeholder="Add a key achievement..."
+                                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAchievement())}
+                                />
+                                <Button type="button" onClick={addAchievement} size="sm">
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="space-y-2">
+                                {field.value.map((achievement, index) => (
+                                  <div key={index} className="flex items-start gap-2 p-2 bg-muted rounded-lg">
+                                    <span className="text-sm flex-1">{achievement}</span>
+                                    <X 
+                                      className="h-4 w-4 cursor-pointer hover:text-destructive mt-0.5" 
+                                      onClick={() => removeAchievement(achievement)}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Target Audience Field */}
+                      <FormField
+                        control={form.control}
+                        name="targetAudience"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Target Audience *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select your target audience" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="hiring-managers">Hiring Managers</SelectItem>
+                                <SelectItem value="industry-peers">Industry Peers</SelectItem>
+                                <SelectItem value="potential-clients">Potential Clients</SelectItem>
+                                <SelectItem value="investors">Investors</SelectItem>
+                                <SelectItem value="team-members">Team Members</SelectItem>
+                                <SelectItem value="general-public">General Public</SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
