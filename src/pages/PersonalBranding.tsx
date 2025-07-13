@@ -160,47 +160,29 @@ const PersonalBranding = () => {
 
   const contentTemplates = generateContentTemplates();
 
-  const generateBrandingStrategies = () => {
-    const formData = form.getValues();
-    
-    return [
-      {
-        strategy: "Thought Leadership",
-        description: formData.industry 
-          ? `Position yourself as a ${formData.industry} expert through content creation`
-          : "Position yourself as an industry expert through content creation",
-        tactics: formData.keySkills.length > 0 
-          ? [`Write ${formData.keySkills[0]} insights`, "Share case studies", "Comment on trends"]
-          : ["Write industry insights", "Share case studies", "Comment on trends"],
-        timeline: formData.communicationStyle === "thought-leader" ? "2-4 months" : "3-6 months",
-        difficulty: formData.keySkills.length >= 3 ? "Medium" : "Hard"
-      },
-      {
-        strategy: "Network Building",
-        description: formData.targetAudience 
-          ? `Expand your network within ${formData.targetAudience} circles`
-          : "Expand your professional network strategically",
-        tactics: formData.industry 
-          ? [`Engage with ${formData.industry} leaders`, "Join professional groups", "Attend events"]
-          : ["Engage with industry leaders", "Join professional groups", "Attend events"],
-        timeline: "Ongoing",
-        difficulty: formData.communicationStyle === "conversational" ? "Easy" : "Medium"
-      },
-      {
-        strategy: "Content Creator",
-        description: formData.targetRole 
-          ? `Build audience as an aspiring ${formData.targetRole} through valuable content`
-          : "Build audience through valuable content sharing",
-        tactics: formData.achievements.length > 0 
-          ? ["Regular posting schedule", `Share ${formData.achievements[0]} stories`, "Industry newsletters"]
-          : ["Regular posting schedule", "Video content", "Industry newsletters"],
-        timeline: formData.personalStory.length > 100 ? "4-8 months" : "6-12 months",
-        difficulty: formData.keySkills.length >= 5 ? "Medium" : "Hard"
-      }
-    ];
-  };
-
-  const brandingStrategies = generateBrandingStrategies();
+  const brandingStrategies = [
+    {
+      strategy: "Thought Leadership",
+      description: "Position yourself as an industry expert through content creation",
+      tactics: ["Write industry insights", "Share case studies", "Comment on trends"],
+      timeline: "3-6 months",
+      difficulty: "Medium"
+    },
+    {
+      strategy: "Network Building",
+      description: "Expand your professional network strategically",
+      tactics: ["Engage with industry leaders", "Join professional groups", "Attend events"],
+      timeline: "Ongoing",
+      difficulty: "Easy"
+    },
+    {
+      strategy: "Content Creator",
+      description: "Build audience through valuable content sharing",
+      tactics: ["Regular posting schedule", "Video content", "Industry newsletters"],
+      timeline: "6-12 months",
+      difficulty: "Hard"
+    }
+  ];
 
   const onSubmit = (data: PersonalBrandData) => {
     // Simulate brand analysis
