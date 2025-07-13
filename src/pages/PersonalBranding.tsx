@@ -129,6 +129,27 @@ const PersonalBranding = () => {
         preview: formData.achievements.length > 0 
           ? `🚀 Just completed a challenging project that taught me ${formData.achievements[0].toLowerCase()}...`
           : "🚀 Just completed a challenging project that taught me...",
+        fullContent: formData.achievements.length > 0 && formData.keySkills.length > 0
+          ? `🚀 Just completed a challenging project that taught me the importance of ${formData.achievements[0].toLowerCase()}.
+
+Key takeaways:
+• ${formData.keySkills[0]} is crucial for success
+• Collaboration drives innovation
+• Continuous learning pays off
+
+What's one lesson you've learned recently that changed your perspective?
+
+#${formData.industry?.replace(/\s+/g, '') || 'ProfessionalGrowth'} #ThoughtLeadership #Learning`
+          : `🚀 Just completed a challenging project that taught me [key lesson].
+
+Key takeaways:
+• [Skill/insight 1] is crucial for success
+• Collaboration drives innovation
+• Continuous learning pays off
+
+What's one lesson you've learned recently that changed your perspective?
+
+#ProfessionalGrowth #ThoughtLeadership #Learning`,
         engagement: formData.keySkills.length >= 3 ? "High" : "Medium"
       },
       {
@@ -137,6 +158,21 @@ const PersonalBranding = () => {
         preview: formData.currentRole && formData.keySkills.length > 0
           ? `Award-winning ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 2).join(' and ')}...`
           : "Award-winning [role] with [X] years of experience in...",
+        fullContent: formData.fullName && formData.currentRole && formData.keySkills.length > 0
+          ? `${formData.fullName} is an award-winning ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 3).join(', ')}.
+
+${formData.personalStory || `With a passion for driving innovation and delivering exceptional results, ${formData.fullName.split(' ')[0]} has helped organizations achieve their strategic objectives through creative problem-solving and strategic thinking.`}
+
+${formData.achievements.length > 0 ? `Notable achievements include ${formData.achievements.slice(0, 2).join(' and ')}.` : 'Notable achievements include leading cross-functional teams and delivering high-impact projects.'}
+
+${formData.fullName.split(' ')[0]} is currently focused on ${formData.targetRole || 'advancing their career'} and is passionate about ${formData.uniqueValue || 'creating meaningful impact through their work'}.`
+          : `[Your Name] is an award-winning [Current Role] with expertise in [skill 1], [skill 2], and [skill 3].
+
+[Personal story - 2-3 sentences about your journey, passion, and what drives you professionally.]
+
+Notable achievements include [achievement 1] and [achievement 2].
+
+[Your Name] is currently focused on [target role/goal] and is passionate about [unique value proposition].`,
         engagement: formData.personalStory.length > 50 ? "High" : "Medium"
       },
       {
@@ -145,6 +181,25 @@ const PersonalBranding = () => {
         preview: formData.fullName && formData.currentRole && formData.industry
           ? `${formData.fullName} | ${formData.currentRole} | Driving innovation in ${formData.industry}`
           : "[Name] | [Title] | Driving innovation in [industry]",
+        fullContent: formData.fullName && formData.currentRole && formData.industry
+          ? `${formData.fullName}
+${formData.currentRole}
+${formData.uniqueValue || `Driving innovation in ${formData.industry}`}
+
+📧 ${formData.fullName.toLowerCase().replace(/\s+/g, '.')}@company.com
+🔗 linkedin.com/in/${formData.fullName.toLowerCase().replace(/\s+/g, '-')}
+📱 +1 (555) 123-4567
+
+"${formData.personalStory?.slice(0, 100) || 'Transforming challenges into opportunities'}"`
+          : `[Your Name]
+[Your Title]
+[Your unique value proposition]
+
+📧 your.email@company.com
+🔗 linkedin.com/in/your-profile
+📱 +1 (555) 123-4567
+
+"[Brief personal motto or value statement]"`,
         engagement: formData.communicationStyle === "professional" ? "Medium" : "Low"
       },
       {
@@ -153,6 +208,31 @@ const PersonalBranding = () => {
         preview: formData.uniqueValue 
           ? formData.uniqueValue
           : "Transforming ideas into impactful solutions",
+        fullContent: formData.fullName && formData.uniqueValue
+          ? `${formData.fullName}
+${formData.currentRole || '[Your Role]'}
+
+${formData.uniqueValue}
+
+${formData.personalStory || 'Passionate about creating innovative solutions that drive meaningful impact and deliver exceptional results for clients and organizations.'}
+
+Core Expertise:
+${formData.keySkills.length > 0 ? formData.keySkills.map(skill => `• ${skill}`).join('\n') : '• [Skill 1]\n• [Skill 2]\n• [Skill 3]'}
+
+Let's connect: ${formData.fullName.toLowerCase().replace(/\s+/g, '.')}@email.com`
+          : `[Your Name]
+[Your Role]
+
+Transforming ideas into impactful solutions
+
+[Brief description of your passion and approach to your work - 2-3 sentences about what drives you and the value you create.]
+
+Core Expertise:
+• [Skill 1]
+• [Skill 2] 
+• [Skill 3]
+
+Let's connect: your.email@email.com`,
         engagement: formData.uniqueValue.length > 30 ? "High" : "Medium"
       }
     ];
@@ -663,11 +743,20 @@ const PersonalBranding = () => {
                         <p className="text-sm italic">"{template.preview}"</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => copyToClipboard(template.fullContent)}
+                        >
                           <Copy className="h-3 w-3 mr-1" />
                           Copy Template
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => toast.info("External resources coming soon!")}
+                        >
                           <ExternalLink className="h-3 w-3" />
                         </Button>
                       </div>
