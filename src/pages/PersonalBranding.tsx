@@ -71,32 +71,53 @@ const PersonalBranding = () => {
     },
   });
 
-  const brandElements = [
-    {
-      title: "Brand Foundation",
-      description: "Core values, mission, and unique value proposition",
-      score: 85,
-      status: "complete"
-    },
-    {
-      title: "Visual Identity",
-      description: "Professional headshots, color palette, and design elements",
-      score: 70,
-      status: "in-progress"
-    },
-    {
-      title: "Content Strategy",
-      description: "Thought leadership topics and content calendar",
-      score: 60,
-      status: "needs-work"
-    },
-    {
-      title: "Online Presence",
-      description: "LinkedIn optimization and professional website",
-      score: 90,
-      status: "complete"
-    }
-  ];
+  const calculateBrandElements = () => {
+    const formData = form.getValues();
+    
+    // Brand Foundation Score (based on core fields completion)
+    const foundationFields = [formData.fullName, formData.currentRole, formData.uniqueValue, formData.personalStory];
+    const foundationScore = Math.round((foundationFields.filter(field => field && field.length > 0).length / foundationFields.length) * 100);
+    
+    // Visual Identity Score (based on role and industry selection)
+    const visualScore = (formData.currentRole && formData.industry) ? 75 : 30;
+    
+    // Content Strategy Score (based on skills, achievements, and communication style)
+    const contentScore = Math.round(((formData.keySkills.length >= 3 ? 50 : 0) + 
+                                    (formData.achievements.length >= 1 ? 30 : 0) + 
+                                    (formData.communicationStyle ? 20 : 0)) * 1);
+    
+    // Online Presence Score (based on target role and audience)
+    const onlineScore = (formData.targetRole && formData.targetAudience) ? 85 : 40;
+    
+    return [
+      {
+        title: "Brand Foundation",
+        description: "Core values, mission, and unique value proposition",
+        score: foundationScore,
+        status: foundationScore >= 80 ? "complete" : foundationScore >= 50 ? "in-progress" : "needs-work"
+      },
+      {
+        title: "Visual Identity", 
+        description: "Professional headshots, color palette, and design elements",
+        score: visualScore,
+        status: visualScore >= 80 ? "complete" : visualScore >= 50 ? "in-progress" : "needs-work"
+      },
+      {
+        title: "Content Strategy",
+        description: "Thought leadership topics and content calendar", 
+        score: contentScore,
+        status: contentScore >= 80 ? "complete" : contentScore >= 50 ? "in-progress" : "needs-work"
+      },
+      {
+        title: "Online Presence",
+        description: "LinkedIn optimization and professional website",
+        score: onlineScore,
+        status: onlineScore >= 80 ? "complete" : onlineScore >= 50 ? "in-progress" : "needs-work"
+      }
+    ];
+  };
+
+  const brandElements = calculateBrandElements();
 
   const contentTemplates = [
     {
