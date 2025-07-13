@@ -119,32 +119,46 @@ const PersonalBranding = () => {
 
   const brandElements = calculateBrandElements();
 
-  const contentTemplates = [
-    {
-      type: "LinkedIn Post",
-      template: "Thought Leadership",
-      preview: "🚀 Just completed a challenging project that taught me...",
-      engagement: "High"
-    },
-    {
-      type: "Bio Template",
-      template: "Professional Bio",
-      preview: "Award-winning [role] with [X] years of experience in...",
-      engagement: "Medium"
-    },
-    {
-      type: "Email Signature",
-      template: "Executive Style",
-      preview: "[Name] | [Title] | Driving innovation in [industry]",
-      engagement: "Low"
-    },
-    {
-      type: "Portfolio Header",
-      template: "Creative Brief",
-      preview: "Transforming ideas into impactful solutions",
-      engagement: "High"
-    }
-  ];
+  const generateContentTemplates = () => {
+    const formData = form.getValues();
+    
+    return [
+      {
+        type: "LinkedIn Post",
+        template: "Thought Leadership",
+        preview: formData.achievements.length > 0 
+          ? `🚀 Just completed a challenging project that taught me ${formData.achievements[0].toLowerCase()}...`
+          : "🚀 Just completed a challenging project that taught me...",
+        engagement: formData.keySkills.length >= 3 ? "High" : "Medium"
+      },
+      {
+        type: "Bio Template", 
+        template: "Professional Bio",
+        preview: formData.currentRole && formData.keySkills.length > 0
+          ? `Award-winning ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 2).join(' and ')}...`
+          : "Award-winning [role] with [X] years of experience in...",
+        engagement: formData.personalStory.length > 50 ? "High" : "Medium"
+      },
+      {
+        type: "Email Signature",
+        template: "Executive Style", 
+        preview: formData.fullName && formData.currentRole && formData.industry
+          ? `${formData.fullName} | ${formData.currentRole} | Driving innovation in ${formData.industry}`
+          : "[Name] | [Title] | Driving innovation in [industry]",
+        engagement: formData.communicationStyle === "professional" ? "Medium" : "Low"
+      },
+      {
+        type: "Portfolio Header",
+        template: "Creative Brief",
+        preview: formData.uniqueValue 
+          ? formData.uniqueValue
+          : "Transforming ideas into impactful solutions",
+        engagement: formData.uniqueValue.length > 30 ? "High" : "Medium"
+      }
+    ];
+  };
+
+  const contentTemplates = generateContentTemplates();
 
   const brandingStrategies = [
     {
