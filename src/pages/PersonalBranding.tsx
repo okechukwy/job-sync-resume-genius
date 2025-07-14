@@ -44,7 +44,7 @@ const personalBrandSchema = z.object({
   achievements: z.array(z.string()).min(1, "At least 1 achievement is required"),
   personalStory: z.string().min(50, "Personal story should be at least 50 characters"),
   targetAudience: z.string().min(1, "Target audience is required"),
-  communicationStyle: z.enum(["professional", "conversational", "thought-leader", "technical", "creative"]),
+  communicationStyle: z.enum(["professional", "conversational", "thought-leader", "technical", "creative"]).optional(),
 });
 
 type PersonalBrandData = z.infer<typeof personalBrandSchema>;
@@ -68,7 +68,7 @@ const PersonalBranding = () => {
       achievements: [],
       personalStory: "",
       targetAudience: "",
-      communicationStyle: "professional",
+      communicationStyle: undefined,
     },
   });
 
@@ -79,16 +79,32 @@ const PersonalBranding = () => {
     const foundationFields = [formData.fullName, formData.currentRole, formData.uniqueValue, formData.personalStory];
     const foundationScore = Math.round((foundationFields.filter(field => field && field.length > 0).length / foundationFields.length) * 100);
     
-    // Visual Identity Score (based on role and industry selection)
-    const visualScore = (formData.currentRole && formData.industry) ? 75 : 30;
+    // Visual Identity Score (progressive based on multiple factors)
+    let visualScore = 0;
+    if (formData.industry) visualScore += 25;
+    if (formData.currentRole && formData.currentRole.length > 0) visualScore += 25;
+    if (formData.targetRole && formData.targetRole.length > 0) visualScore += 25;
+    if (formData.uniqueValue && formData.uniqueValue.length > 0) visualScore += 25;
     
-    // Content Strategy Score (based on skills, achievements, and communication style)
-    const contentScore = Math.round(((formData.keySkills.length >= 3 ? 50 : 0) + 
-                                    (formData.achievements.length >= 1 ? 30 : 0) + 
-                                    (formData.communicationStyle ? 20 : 0)) * 1);
+    // Content Strategy Score (progressive based on skills, achievements, and communication style)
+    let contentScore = 0;
+    // Skills scoring: 0-2 skills = 0%, 3-4 skills = 30%, 5+ skills = 40%
+    if (formData.keySkills.length >= 5) contentScore += 40;
+    else if (formData.keySkills.length >= 3) contentScore += 30;
     
-    // Online Presence Score (based on target role and audience)
-    const onlineScore = (formData.targetRole && formData.targetAudience) ? 85 : 40;
+    // Achievements scoring: 0 = 0%, 1-2 = 25%, 3+ = 35%
+    if (formData.achievements.length >= 3) contentScore += 35;
+    else if (formData.achievements.length >= 1) contentScore += 25;
+    
+    // Communication style: 0 = 0%, selected = 25%
+    if (formData.communicationStyle) contentScore += 25;
+    
+    // Online Presence Score (progressive based on multiple factors)
+    let onlineScore = 0;
+    if (formData.targetRole && formData.targetRole.length > 0) onlineScore += 30;
+    if (formData.targetAudience && formData.targetAudience.length > 0) onlineScore += 30;
+    if (formData.personalStory && formData.personalStory.length >= 50) onlineScore += 30;
+    if (formData.fullName && formData.fullName.length > 0) onlineScore += 10;
     
     return [
       {
