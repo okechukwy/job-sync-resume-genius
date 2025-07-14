@@ -32,6 +32,7 @@ import {
   X
 } from "lucide-react";
 import { toast } from "sonner";
+import { downloadFile } from "@/utils/downloadUtils";
 
 const personalBrandSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -283,6 +284,325 @@ Let's connect: your.email@email.com`,
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard!");
+  };
+
+  const generateExecutiveBio = () => {
+    const formData = form.getValues();
+    
+    if (!formData.fullName || !formData.currentRole || !formData.keySkills.length) {
+      toast.error("Please fill out your basic information first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `${formData.fullName}
+${formData.currentRole}
+
+${formData.uniqueValue || "Executive leader with proven track record of driving organizational growth and innovation."}
+
+Professional Background:
+${formData.personalStory || "Seasoned professional with extensive experience leading high-performing teams and delivering strategic initiatives that drive business transformation."}
+
+Core Competencies:
+${formData.keySkills.slice(0, 6).map(skill => `• ${skill}`).join('\n')}
+
+Notable Achievements:
+${formData.achievements.length > 0 ? formData.achievements.map(achievement => `• ${achievement}`).join('\n') : '• Led strategic initiatives resulting in measurable organizational growth\n• Built and mentored high-performing teams across multiple departments'}
+
+${formData.fullName.split(' ')[0]} is currently focused on ${formData.targetRole || 'advancing strategic leadership opportunities'} and is passionate about ${formData.uniqueValue?.toLowerCase() || 'driving innovation and organizational excellence'}.
+
+Contact: ${formData.fullName.toLowerCase().replace(/\s+/g, '.')}@company.com
+LinkedIn: linkedin.com/in/${formData.fullName.toLowerCase().replace(/\s+/g, '-')}`;
+  };
+
+  const generateCreativeBio = () => {
+    const formData = form.getValues();
+    
+    if (!formData.fullName || !formData.currentRole || !formData.keySkills.length) {
+      toast.error("Please fill out your basic information first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `Hi, I'm ${formData.fullName} ✨
+
+${formData.currentRole} | ${formData.industry || 'Creative Professional'}
+
+${formData.personalStory || "I'm passionate about turning creative ideas into impactful solutions that make a difference. My journey has been driven by curiosity, innovation, and a desire to push boundaries."}
+
+What I bring to the table:
+${formData.keySkills.slice(0, 5).map(skill => `🎯 ${skill}`).join('\n')}
+
+Some things I'm proud of:
+${formData.achievements.length > 0 ? formData.achievements.map(achievement => `🏆 ${achievement}`).join('\n') : '🏆 Delivered creative solutions that exceeded client expectations\n🏆 Led innovative projects from concept to completion'}
+
+Currently exploring opportunities in ${formData.targetRole || 'creative leadership'} where I can ${formData.uniqueValue?.toLowerCase() || 'combine creativity with strategic thinking to drive meaningful impact'}.
+
+Let's create something amazing together!
+📧 ${formData.fullName.toLowerCase().replace(/\s+/g, '.')}@email.com
+🔗 linkedin.com/in/${formData.fullName.toLowerCase().replace(/\s+/g, '-')}`;
+  };
+
+  const generateTechnicalBio = () => {
+    const formData = form.getValues();
+    
+    if (!formData.fullName || !formData.currentRole || !formData.keySkills.length) {
+      toast.error("Please fill out your basic information first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `${formData.fullName}
+${formData.currentRole} | ${formData.industry || 'Technology Professional'}
+
+Technical Expertise & Specializations:
+${formData.keySkills.slice(0, 8).map(skill => `• ${skill}`).join('\n')}
+
+Professional Summary:
+${formData.personalStory || "Experienced technical professional with a strong foundation in system architecture, development, and innovation. Proven ability to solve complex technical challenges and deliver scalable solutions."}
+
+${formData.uniqueValue || "Specialized in architecting robust, scalable solutions that drive business value through technical excellence."}
+
+Key Accomplishments:
+${formData.achievements.length > 0 ? formData.achievements.map(achievement => `• ${achievement}`).join('\n') : '• Architected and implemented scalable systems serving thousands of users\n• Led technical teams in delivering complex projects on time and within budget\n• Contributed to open-source projects and technical communities'}
+
+Career Focus:
+Currently pursuing ${formData.targetRole || 'senior technical leadership roles'} where I can leverage my expertise to drive technical innovation and mentor engineering teams.
+
+Technical Stack & Methodologies:
+[Specific technologies and frameworks based on role]
+
+Contact & Professional Profiles:
+Email: ${formData.fullName.toLowerCase().replace(/\s+/g, '.')}@email.com
+LinkedIn: linkedin.com/in/${formData.fullName.toLowerCase().replace(/\s+/g, '-')}
+GitHub: github.com/${formData.fullName.toLowerCase().replace(/\s+/g, '-')}`;
+  };
+
+  const generateLinkedInPosts = () => {
+    const formData = form.getValues();
+    
+    if (!formData.keySkills.length || !formData.industry) {
+      toast.error("Please fill out your skills and industry information first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `LinkedIn Post Templates - ${formData.fullName || 'Your Name'}
+
+Template 1: Thought Leadership
+🚀 ${formData.industry} is evolving rapidly, and ${formData.keySkills[0]?.toLowerCase() || '[key skill]'} is becoming increasingly crucial.
+
+Here's what I've learned:
+• ${formData.achievements[0] || 'Innovation happens when we combine technical expertise with creative problem-solving'}
+• The future belongs to professionals who can adapt and learn continuously
+• ${formData.uniqueValue || 'Success comes from delivering value, not just completing tasks'}
+
+What trends are you seeing in ${formData.industry?.toLowerCase() || '[your industry]'}?
+
+#${formData.industry?.replace(/\s+/g, '') || 'ProfessionalGrowth'} #ThoughtLeadership #${formData.keySkills[0]?.replace(/\s+/g, '') || 'Innovation'}
+
+---
+
+Template 2: Behind the Scenes
+📊 Just wrapped up an incredible project where we ${formData.achievements[0]?.toLowerCase() || 'delivered exceptional results for our team'}.
+
+The secret sauce? ${formData.keySkills.slice(0, 2).join(' + ') || 'Collaboration + Innovation'}.
+
+Key takeaways:
+• Planning is everything, but adaptability is just as important
+• The best solutions often come from diverse perspectives
+• ${formData.personalStory?.slice(0, 100) || 'Every challenge is an opportunity to grow and learn'} ⚡
+
+What's one lesson you've learned from a recent project?
+
+#ProjectManagement #${formData.industry?.replace(/\s+/g, '') || 'Professional'} #TeamWork
+
+---
+
+Template 3: Industry Insights
+💡 ${formData.industry} professionals - are you prepared for what's next?
+
+Based on my experience with ${formData.keySkills.slice(0, 3).join(', ')}, here are 3 trends to watch:
+
+1️⃣ [Trend 1 based on your expertise]
+2️⃣ [Trend 2 relevant to your industry] 
+3️⃣ [Trend 3 from your experience]
+
+The professionals who thrive will be those who ${formData.uniqueValue?.toLowerCase() || 'embrace change and continue learning'}.
+
+What trends are you most excited about?
+
+#FutureOfWork #${formData.industry?.replace(/\s+/g, '') || 'Industry'} #Innovation`;
+  };
+
+  const generateTwitterThreads = () => {
+    const formData = form.getValues();
+    
+    if (!formData.keySkills.length || !formData.targetRole) {
+      toast.error("Please fill out your skills and target role information first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `Twitter Thread Templates - ${formData.fullName || 'Your Name'}
+
+Thread 1: Expertise Sharing
+🧵 THREAD: ${formData.keySkills[0]} tips that changed my career (1/7)
+
+After ${formData.achievements.length > 0 ? 'achieving' : 'working on'} ${formData.achievements[0] || 'significant professional milestones'}, here's what I wish I knew earlier:
+
+1/ ${formData.uniqueValue || 'The most important skill is learning how to learn continuously'}
+
+2/ Master the fundamentals before chasing the latest trends
+
+3/ ${formData.personalStory?.slice(0, 120) || 'Build relationships - your network is your net worth'}
+
+4/ Focus on delivering value, not just completing tasks
+
+5/ Ask questions. Good questions lead to great solutions.
+
+6/ Share your knowledge - teaching others solidifies your own understanding
+
+7/ ${formData.targetRole ? `As I work toward becoming a ${formData.targetRole}, these principles guide everything I do.` : 'These principles have shaped my professional journey.'}
+
+What would you add to this list? 👇
+
+---
+
+Thread 2: Industry Insights
+🧵 THREAD: The future of ${formData.industry || 'our industry'} - what I'm seeing (1/6)
+
+Working as a ${formData.currentRole || 'professional'} has given me unique insights into where we're heading:
+
+1/ ${formData.keySkills[0] || 'Innovation'} is no longer optional - it's essential
+
+2/ The skills gap is real. ${formData.keySkills.slice(0, 3).join(', ')} are in high demand
+
+3/ ${formData.uniqueValue || 'Professionals who combine technical skills with strategic thinking will lead the future'}
+
+4/ Remote work has changed everything - adaptation is key
+
+5/ The most successful people are those who ${formData.personalStory?.includes('learn') ? 'never stop learning' : 'embrace change and continuous growth'}
+
+6/ What got you here won't get you there. Evolution is essential.
+
+Agree? What trends are you seeing? 💭
+
+---
+
+Thread 3: Career Advice
+🧵 THREAD: Career lessons from my journey to ${formData.targetRole || 'leadership'} (1/8)
+
+${formData.personalStory?.slice(0, 100) || 'My career journey has been full of lessons, pivots, and growth opportunities.'}
+
+Here's what I've learned:
+
+1/ Your unique value proposition matters: ${formData.uniqueValue || 'Find what makes you different and lean into it'}
+
+2/ Skills that transformed my career: ${formData.keySkills.slice(0, 4).join(', ')}
+
+3/ ${formData.achievements[0] || 'Every achievement started with taking one small step forward'}
+
+4/ Network authentically - relationships matter more than transactions
+
+5/ Share your journey - vulnerability builds trust
+
+6/ Stay curious - the learning never stops
+
+7/ ${formData.industry ? `The ${formData.industry} space is evolving rapidly` : 'Industries are changing fast'} - adaptation is survival
+
+8/ Your next role: ${formData.targetRole || 'Think about where you want to be, not just where you are'}
+
+What's one career lesson you'd share? 👇`;
+  };
+
+  const generateProfessionalHeadlines = () => {
+    const formData = form.getValues();
+    
+    if (!formData.currentRole || !formData.keySkills.length) {
+      toast.error("Please fill out your current role and skills first in the Brand Builder tab.");
+      return "";
+    }
+
+    return `Professional Headlines Collection - ${formData.fullName || 'Your Name'}
+
+LinkedIn Headlines:
+1. ${formData.currentRole} → ${formData.targetRole || 'Next Level'} | ${formData.keySkills.slice(0, 3).join(' • ')} | ${formData.uniqueValue?.slice(0, 50) || 'Driving Innovation'}
+
+2. ${formData.uniqueValue || 'Transforming Ideas into Impact'} | ${formData.currentRole} | ${formData.industry || 'Industry'} Expert
+
+3. ${formData.keySkills[0] || 'Expert'} | ${formData.achievements[0]?.slice(0, 60) || 'Proven Track Record of Success'} | ${formData.targetRole || 'Future Leader'}
+
+4. 🚀 ${formData.currentRole} passionate about ${formData.uniqueValue?.toLowerCase() || 'innovation'} | ${formData.keySkills.slice(0, 2).join(' & ')} | Let's connect!
+
+5. ${formData.industry || 'Professional'} Leader | ${formData.personalStory?.slice(0, 80) || 'Helping organizations achieve their goals through strategic thinking and execution'}
+
+Twitter Bio Options:
+1. ${formData.currentRole} | ${formData.keySkills.slice(0, 2).join(' & ')} | ${formData.uniqueValue?.slice(0, 60) || 'Building the future one project at a time'} 📧 ${formData.fullName?.toLowerCase().replace(/\s+/g, '.')}@email.com
+
+2. 👋 ${formData.fullName?.split(' ')[0] || 'Hi'} here! ${formData.currentRole} → ${formData.targetRole || 'Growth'} | Sharing insights about ${formData.industry?.toLowerCase() || 'professional development'} | DMs open
+
+3. ${formData.personalStory?.slice(0, 100) || 'Passionate about innovation and continuous learning'} | ${formData.currentRole} | ${formData.keySkills[0] || 'Expert'}
+
+Website/Portfolio Headers:
+1. ${formData.fullName || 'Your Name'} - ${formData.currentRole}
+   ${formData.uniqueValue || 'Transforming challenges into opportunities through innovative solutions'}
+
+2. ${formData.uniqueValue || 'Driving Innovation'} | ${formData.currentRole}
+   Specializing in ${formData.keySkills.slice(0, 3).join(', ')}
+
+3. ${formData.fullName || 'Professional Name'}
+   ${formData.targetRole || 'Future-Focused'} ${formData.currentRole} | ${formData.industry || 'Industry'} Expert
+
+Email Signature Headlines:
+1. ${formData.fullName || 'Your Name'} | ${formData.currentRole}
+   ${formData.uniqueValue || 'Delivering exceptional results through innovation and collaboration'}
+
+2. ${formData.fullName || 'Your Name'} - ${formData.currentRole} 
+   "${formData.personalStory?.slice(0, 80) || 'Passionate about creating meaningful impact through strategic thinking'}"
+
+Resume/CV Headlines:
+1. ${formData.currentRole} | ${formData.keySkills.slice(0, 4).join(', ')} | ${formData.achievements.length > 0 ? formData.achievements[0].slice(0, 60) : 'Proven Track Record'}
+
+2. ${formData.uniqueValue || 'Results-Driven Professional'} | ${formData.currentRole} with ${formData.keySkills.slice(0, 3).join(', ')} Expertise
+
+3. ${formData.targetRole || 'Leadership-Focused'} ${formData.currentRole} | ${formData.industry || 'Industry'} Innovation | ${formData.keySkills[0] || 'Strategic Thinking'}`;
+  };
+
+  const handleTemplateDownload = async (templateType: string, format: 'txt' | 'pdf' | 'docx' = 'txt') => {
+    let content = "";
+    let fileName = "";
+
+    switch (templateType) {
+      case 'executive-bio':
+        content = generateExecutiveBio();
+        fileName = "executive-bio";
+        break;
+      case 'creative-bio':
+        content = generateCreativeBio();
+        fileName = "creative-professional-bio";
+        break;
+      case 'technical-bio':
+        content = generateTechnicalBio();
+        fileName = "technical-expert-bio";
+        break;
+      case 'linkedin-posts':
+        content = generateLinkedInPosts();
+        fileName = "linkedin-post-templates";
+        break;
+      case 'twitter-threads':
+        content = generateTwitterThreads();
+        fileName = "twitter-thread-templates";
+        break;
+      case 'professional-headlines':
+        content = generateProfessionalHeadlines();
+        fileName = "professional-headlines";
+        break;
+      default:
+        toast.error("Unknown template type");
+        return;
+    }
+
+    if (!content) {
+      return; // Error already shown in generation function
+    }
+
+    await downloadFile(content, fileName, format);
   };
 
   const addSkill = () => {
@@ -891,15 +1211,15 @@ Let's connect: your.email@email.com`,
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('executive-bio')}>
                         <Download className="h-4 w-4 mr-2" />
                         Executive Bio Template
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('creative-bio')}>
                         <Download className="h-4 w-4 mr-2" />
                         Creative Professional Bio
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('technical-bio')}>
                         <Download className="h-4 w-4 mr-2" />
                         Technical Expert Bio
                       </Button>
@@ -913,15 +1233,15 @@ Let's connect: your.email@email.com`,
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('linkedin-posts')}>
                         <Download className="h-4 w-4 mr-2" />
                         LinkedIn Post Templates
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('twitter-threads')}>
                         <Download className="h-4 w-4 mr-2" />
                         Twitter Thread Templates
                       </Button>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button variant="outline" className="w-full justify-start" onClick={() => handleTemplateDownload('professional-headlines')}>
                         <Download className="h-4 w-4 mr-2" />
                         Professional Headlines
                       </Button>
