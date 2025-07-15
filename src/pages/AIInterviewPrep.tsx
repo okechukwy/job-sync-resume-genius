@@ -53,12 +53,21 @@ interface AssessmentResult {
   transcript: string;
 }
 
+interface SessionData {
+  id: string;
+  category: string;
+  question: string;
+  score: number;
+  duration: number; // in seconds
+  timestamp: number;
+  transcript: string;
+}
+
 const AIInterviewPrep = () => {
   const [activeTab, setActiveTab] = useState("practice");
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [practiceScore, setPracticeScore] = useState(0);
-  const [completedSessions, setCompletedSessions] = useState(3);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -76,10 +85,67 @@ const AIInterviewPrep = () => {
   const [selectedBrowseCategory, setSelectedBrowseCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   
+  // Dynamic progress states
+  const [completedSessions, setCompletedSessions] = useState(0);
+  const [averageScore, setAverageScore] = useState(0);
+  const [totalHours, setTotalHours] = useState(0);
+  const [improvementPercentage, setImprovementPercentage] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Progress tracking functions
+  const saveSessionData = (sessionData: SessionData) => {
+    const existingSessions = JSON.parse(localStorage.getItem('interviewSessions') || '[]');
+    const updatedSessions = [...existingSessions, sessionData];
+    localStorage.setItem('interviewSessions', JSON.stringify(updatedSessions));
+    updateProgressMetrics(updatedSessions);
+  };
+
+  const updateProgressMetrics = (sessions: SessionData[]) => {
+    if (sessions.length === 0) {
+      setCompletedSessions(0);
+      setAverageScore(0);
+      setTotalHours(0);
+      setImprovementPercentage(0);
+      return;
+    }
+
+    // Calculate sessions completed
+    setCompletedSessions(sessions.length);
+
+    // Calculate average score
+    const totalScore = sessions.reduce((sum, session) => sum + session.score, 0);
+    const avgScore = Math.round(totalScore / sessions.length);
+    setAverageScore(avgScore);
+
+    // Calculate total hours practiced
+    const totalSeconds = sessions.reduce((sum, session) => sum + session.duration, 0);
+    const hours = Math.round(totalSeconds / 3600 * 10) / 10; // Round to 1 decimal place
+    setTotalHours(hours);
+
+    // Calculate improvement percentage
+    if (sessions.length >= 6) {
+      const recentSessions = sessions.slice(-3);
+      const earlierSessions = sessions.slice(-6, -3);
+      
+      const recentAvg = recentSessions.reduce((sum, session) => sum + session.score, 0) / recentSessions.length;
+      const earlierAvg = earlierSessions.reduce((sum, session) => sum + session.score, 0) / earlierSessions.length;
+      
+      const improvement = Math.round(((recentAvg - earlierAvg) / earlierAvg) * 100);
+      setImprovementPercentage(improvement);
+    } else {
+      setImprovementPercentage(0);
+    }
+  };
+
+  const loadProgressData = () => {
+    const existingSessions = JSON.parse(localStorage.getItem('interviewSessions') || '[]');
+    updateProgressMetrics(existingSessions);
+  };
 
   const practiceCategories = [
     {
@@ -449,6 +515,11 @@ const AIInterviewPrep = () => {
     return tips[categoryId as keyof typeof tips] || "Take your time and provide specific examples";
   };
 
+  // Load progress data on component mount
+  useEffect(() => {
+    loadProgressData();
+  }, []);
+
   // Initialize speech recognition
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -541,6 +612,7 @@ const AIInterviewPrep = () => {
       setIsRecording(true);
       setIsPaused(false);
       setRecordingTime(0);
+      setSessionStartTime(Date.now());
       setTranscript("");
       setAssessmentResults(null);
       toast.success("Recording started - answer the question naturally");
@@ -573,6 +645,21 @@ const AIInterviewPrep = () => {
       setAssessmentResults(results);
       setPracticeScore(results.overallScore);
       setIsAnalyzing(false);
+      
+      // Save session data if we have valid results
+      if (results.overallScore > 0 && selectedCategory && currentQuestion && sessionStartTime) {
+        const sessionData: SessionData = {
+          id: Date.now().toString(),
+          category: selectedCategory,
+          question: currentQuestion,
+          score: results.overallScore,
+          duration: recordingTime,
+          timestamp: Date.now(),
+          transcript: results.transcript
+        };
+        saveSessionData(sessionData);
+      }
+      
       toast.success(`Analysis complete! Score: ${results.overallScore}/100`);
     }, 2000);
   };
@@ -822,15 +909,22 @@ const AIInterviewPrep = () => {
                 <div className="text-sm text-muted-foreground">Sessions Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">87%</div>
+                <div className="text-3xl font-bold text-primary">
+                  {completedSessions > 0 ? `${averageScore}%` : '0%'}
+                </div>
                 <div className="text-sm text-muted-foreground">Average Score</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">24</div>
+                <div className="text-3xl font-bold text-primary">
+                  {totalHours > 0 ? totalHours : '0'}
+                </div>
                 <div className="text-sm text-muted-foreground">Hours Practiced</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">+15%</div>
+                <div className="text-3xl font-bold text-primary">
+                  {improvementPercentage > 0 ? `+${improvementPercentage}%` : 
+                   improvementPercentage < 0 ? `${improvementPercentage}%` : '0%'}
+                </div>
                 <div className="text-sm text-muted-foreground">Improvement</div>
               </div>
             </div>
