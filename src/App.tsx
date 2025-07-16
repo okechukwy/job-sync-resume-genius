@@ -3,7 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import Resources from "./pages/Resources";
 import Templates from "./pages/Templates";
@@ -97,107 +100,113 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/get-started" element={<ResumeBuilder />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/resources/resume-writing-guide" element={<ResumeWritingGuide />} />
-          <Route path="/resources/ats-optimization" element={<ATSOptimization />} />
-          <Route path="/resources/interview-preparation" element={<InterviewPreparation />} />
-          <Route path="/resources/salary-negotiation" element={<SalaryNegotiation />} />
-          <Route path="/resources/career-development" element={<CareerDevelopment />} />
-          <Route path="/resources/job-search-strategy" element={<JobSearchStrategy />} />
-          <Route path="/job-matching" element={<JobMatching />} />
-          <Route path="/ats-analysis" element={<ATSAnalysis />} />
-          <Route path="/cover-letter" element={<CoverLetterGenerator />} />
-          <Route path="/performance" element={<PerformanceTracking />} />
-          <Route path="/versions" element={<VersionManagement />} />
-          <Route path="/checkout" element={<Checkout />} />
-          {/* Technology Templates */}
-          <Route path="/templates/tech-professional" element={<TechProfessional />} />
-          <Route path="/templates/software-engineer-pro" element={<SoftwareEngineerPro />} />
-          <Route path="/templates/data-scientist-elite" element={<DataScientistElite />} />
-          <Route path="/templates/devops-engineer" element={<DevOpsEngineer />} />
-          <Route path="/templates/mobile-developer" element={<MobileDeveloper />} />
-          <Route path="/templates/cloud-architect" element={<CloudArchitect />} />
-          <Route path="/templates/cybersecurity-expert" element={<CybersecurityExpert />} />
-          <Route path="/templates/ai-ml-engineer" element={<AiMlEngineer />} />
-          <Route path="/templates/frontend-developer" element={<FrontendDeveloper />} />
-          <Route path="/templates/product-manager-tech" element={<ProductManagerTech />} />
-          <Route path="/templates/qa-engineer" element={<QaEngineer />} />
-          <Route path="/templates/it-support-specialist" element={<ItSupportSpecialist />} />
-          
-          {/* Healthcare Templates */}
-          <Route path="/templates/healthcare-specialist" element={<HealthcareSpecialist />} />
-          <Route path="/templates/medical-doctor" element={<MedicalDoctor />} />
-          <Route path="/templates/registered-nurse" element={<RegisteredNurse />} />
-          <Route path="/templates/pharmacist-pro" element={<PharmacistPro />} />
-          
-          {/* Finance Templates */}
-          <Route path="/templates/finance-expert" element={<FinanceExpert />} />
-          <Route path="/templates/investment-banker" element={<InvestmentBanker />} />
-          <Route path="/templates/financial-analyst" element={<FinancialAnalyst />} />
-          <Route path="/templates/accountant-pro" element={<AccountantPro />} />
-          <Route path="/templates/risk-manager" element={<RiskManager />} />
-          <Route path="/templates/portfolio-manager" element={<PortfolioManager />} />
-          <Route path="/templates/corporate-finance" element={<CorporateFinance />} />
-          
-          {/* Creative Templates */}
-          <Route path="/templates/creative-professional" element={<CreativeProfessional />} />
-          <Route path="/templates/graphic-designer" element={<GraphicDesigner />} />
-          <Route path="/templates/marketing-manager" element={<MarketingManager />} />
-          <Route path="/templates/content-creator" element={<ContentCreator />} />
-          <Route path="/templates/ux-ui-designer" element={<UxUiDesigner />} />
-          <Route path="/templates/photographer" element={<Photographer />} />
-          <Route path="/templates/video-editor" element={<VideoEditor />} />
-          <Route path="/templates/copywriter" element={<Copywriter />} />
-          <Route path="/templates/brand-manager" element={<BrandManager />} />
-          <Route path="/templates/art-director" element={<ArtDirector />} />
-          <Route path="/templates/digital-marketer" element={<DigitalMarketer />} />
-          <Route path="/templates/social-media-manager" element={<SocialMediaManager />} />
-          <Route path="/templates/web-designer" element={<WebDesigner />} />
-          <Route path="/templates/motion-graphics" element={<MotionGraphics />} />
-          <Route path="/templates/creative-director" element={<CreativeDirector />} />
-          
-          {/* Business Templates */}
-          <Route path="/templates/elegant-professional" element={<ElegantProfessional />} />
-          <Route path="/templates/operations-manager" element={<OperationsManager />} />
-          <Route path="/templates/sales-manager" element={<SalesManager />} />
-          <Route path="/templates/project-manager" element={<ProjectManager />} />
-          <Route path="/templates/business-analyst" element={<BusinessAnalyst />} />
-          <Route path="/templates/hr-manager" element={<HrManager />} />
-          
-          {/* Research Templates */}
-          <Route path="/templates/research-scientist" element={<ResearchScientist />} />
-          <Route path="/templates/academic-researcher" element={<AcademicResearcher />} />
-          <Route path="/templates/lab-technician" element={<LabTechnician />} />
-          <Route path="/templates/clinical-researcher" element={<ClinicalResearcher />} />
-          <Route path="/templates/data-researcher" element={<DataResearcher />} />
-          <Route path="/templates/environmental-scientist" element={<EnvironmentalScientist />} />
-          <Route path="/templates/recent-graduate" element={<RecentGraduate />} />
-          
-          {/* Multi-industry Templates */}
-          <Route path="/templates/gradient-modern" element={<GradientModern />} />
-          <Route path="/templates/minimalist-pro" element={<MinimalistPro />} />
-          <Route path="/templates/colorful-fresh" element={<ColorfulFresh />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/help-center" element={<HelpCenter />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/gdpr" element={<GDPR />} />
-          <Route path="/linkedin-optimization" element={<LinkedInOptimization />} />
-          <Route path="/ai-interview-prep" element={<AIInterviewPrep />} />
-          <Route path="/personal-branding" element={<PersonalBranding />} />
-          <Route path="/white-label-exports" element={<WhiteLabelExports />} />
-          <Route path="/career-coaching" element={<CareerCoaching />} />
-          <Route path="/priority-support" element={<PrioritySupport />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/gdpr" element={<GDPR />} />
+            
+            {/* Protected routes */}
+            <Route path="/get-started" element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>} />
+            <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+            <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
+            <Route path="/resources/resume-writing-guide" element={<ProtectedRoute><ResumeWritingGuide /></ProtectedRoute>} />
+            <Route path="/resources/ats-optimization" element={<ProtectedRoute><ATSOptimization /></ProtectedRoute>} />
+            <Route path="/resources/interview-preparation" element={<ProtectedRoute><InterviewPreparation /></ProtectedRoute>} />
+            <Route path="/resources/salary-negotiation" element={<ProtectedRoute><SalaryNegotiation /></ProtectedRoute>} />
+            <Route path="/resources/career-development" element={<ProtectedRoute><CareerDevelopment /></ProtectedRoute>} />
+            <Route path="/resources/job-search-strategy" element={<ProtectedRoute><JobSearchStrategy /></ProtectedRoute>} />
+            <Route path="/job-matching" element={<ProtectedRoute><JobMatching /></ProtectedRoute>} />
+            <Route path="/ats-analysis" element={<ProtectedRoute><ATSAnalysis /></ProtectedRoute>} />
+            <Route path="/cover-letter" element={<ProtectedRoute><CoverLetterGenerator /></ProtectedRoute>} />
+            <Route path="/performance" element={<ProtectedRoute><PerformanceTracking /></ProtectedRoute>} />
+            <Route path="/versions" element={<ProtectedRoute><VersionManagement /></ProtectedRoute>} />
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/linkedin-optimization" element={<ProtectedRoute><LinkedInOptimization /></ProtectedRoute>} />
+            <Route path="/ai-interview-prep" element={<ProtectedRoute><AIInterviewPrep /></ProtectedRoute>} />
+            <Route path="/personal-branding" element={<ProtectedRoute><PersonalBranding /></ProtectedRoute>} />
+            <Route path="/white-label-exports" element={<ProtectedRoute><WhiteLabelExports /></ProtectedRoute>} />
+            <Route path="/career-coaching" element={<ProtectedRoute><CareerCoaching /></ProtectedRoute>} />
+            <Route path="/priority-support" element={<ProtectedRoute><PrioritySupport /></ProtectedRoute>} />
+            {/* Protected Technology Templates */}
+            <Route path="/templates/tech-professional" element={<ProtectedRoute><TechProfessional /></ProtectedRoute>} />
+            <Route path="/templates/software-engineer-pro" element={<ProtectedRoute><SoftwareEngineerPro /></ProtectedRoute>} />
+            <Route path="/templates/data-scientist-elite" element={<ProtectedRoute><DataScientistElite /></ProtectedRoute>} />
+            <Route path="/templates/devops-engineer" element={<ProtectedRoute><DevOpsEngineer /></ProtectedRoute>} />
+            <Route path="/templates/mobile-developer" element={<ProtectedRoute><MobileDeveloper /></ProtectedRoute>} />
+            <Route path="/templates/cloud-architect" element={<ProtectedRoute><CloudArchitect /></ProtectedRoute>} />
+            <Route path="/templates/cybersecurity-expert" element={<ProtectedRoute><CybersecurityExpert /></ProtectedRoute>} />
+            <Route path="/templates/ai-ml-engineer" element={<ProtectedRoute><AiMlEngineer /></ProtectedRoute>} />
+            <Route path="/templates/frontend-developer" element={<ProtectedRoute><FrontendDeveloper /></ProtectedRoute>} />
+            <Route path="/templates/product-manager-tech" element={<ProtectedRoute><ProductManagerTech /></ProtectedRoute>} />
+            <Route path="/templates/qa-engineer" element={<ProtectedRoute><QaEngineer /></ProtectedRoute>} />
+            <Route path="/templates/it-support-specialist" element={<ProtectedRoute><ItSupportSpecialist /></ProtectedRoute>} />
+            
+            {/* Protected Healthcare Templates */}
+            <Route path="/templates/healthcare-specialist" element={<ProtectedRoute><HealthcareSpecialist /></ProtectedRoute>} />
+            <Route path="/templates/medical-doctor" element={<ProtectedRoute><MedicalDoctor /></ProtectedRoute>} />
+            <Route path="/templates/registered-nurse" element={<ProtectedRoute><RegisteredNurse /></ProtectedRoute>} />
+            <Route path="/templates/pharmacist-pro" element={<ProtectedRoute><PharmacistPro /></ProtectedRoute>} />
+            
+            {/* Protected Finance Templates */}
+            <Route path="/templates/finance-expert" element={<ProtectedRoute><FinanceExpert /></ProtectedRoute>} />
+            <Route path="/templates/investment-banker" element={<ProtectedRoute><InvestmentBanker /></ProtectedRoute>} />
+            <Route path="/templates/financial-analyst" element={<ProtectedRoute><FinancialAnalyst /></ProtectedRoute>} />
+            <Route path="/templates/accountant-pro" element={<ProtectedRoute><AccountantPro /></ProtectedRoute>} />
+            <Route path="/templates/risk-manager" element={<ProtectedRoute><RiskManager /></ProtectedRoute>} />
+            <Route path="/templates/portfolio-manager" element={<ProtectedRoute><PortfolioManager /></ProtectedRoute>} />
+            <Route path="/templates/corporate-finance" element={<ProtectedRoute><CorporateFinance /></ProtectedRoute>} />
+            
+            {/* Protected Creative Templates */}
+            <Route path="/templates/creative-professional" element={<ProtectedRoute><CreativeProfessional /></ProtectedRoute>} />
+            <Route path="/templates/graphic-designer" element={<ProtectedRoute><GraphicDesigner /></ProtectedRoute>} />
+            <Route path="/templates/marketing-manager" element={<ProtectedRoute><MarketingManager /></ProtectedRoute>} />
+            <Route path="/templates/content-creator" element={<ProtectedRoute><ContentCreator /></ProtectedRoute>} />
+            <Route path="/templates/ux-ui-designer" element={<ProtectedRoute><UxUiDesigner /></ProtectedRoute>} />
+            <Route path="/templates/photographer" element={<ProtectedRoute><Photographer /></ProtectedRoute>} />
+            <Route path="/templates/video-editor" element={<ProtectedRoute><VideoEditor /></ProtectedRoute>} />
+            <Route path="/templates/copywriter" element={<ProtectedRoute><Copywriter /></ProtectedRoute>} />
+            <Route path="/templates/brand-manager" element={<ProtectedRoute><BrandManager /></ProtectedRoute>} />
+            <Route path="/templates/art-director" element={<ProtectedRoute><ArtDirector /></ProtectedRoute>} />
+            <Route path="/templates/digital-marketer" element={<ProtectedRoute><DigitalMarketer /></ProtectedRoute>} />
+            <Route path="/templates/social-media-manager" element={<ProtectedRoute><SocialMediaManager /></ProtectedRoute>} />
+            <Route path="/templates/web-designer" element={<ProtectedRoute><WebDesigner /></ProtectedRoute>} />
+            <Route path="/templates/motion-graphics" element={<ProtectedRoute><MotionGraphics /></ProtectedRoute>} />
+            <Route path="/templates/creative-director" element={<ProtectedRoute><CreativeDirector /></ProtectedRoute>} />
+            
+            {/* Protected Business Templates */}
+            <Route path="/templates/elegant-professional" element={<ProtectedRoute><ElegantProfessional /></ProtectedRoute>} />
+            <Route path="/templates/operations-manager" element={<ProtectedRoute><OperationsManager /></ProtectedRoute>} />
+            <Route path="/templates/sales-manager" element={<ProtectedRoute><SalesManager /></ProtectedRoute>} />
+            <Route path="/templates/project-manager" element={<ProtectedRoute><ProjectManager /></ProtectedRoute>} />
+            <Route path="/templates/business-analyst" element={<ProtectedRoute><BusinessAnalyst /></ProtectedRoute>} />
+            <Route path="/templates/hr-manager" element={<ProtectedRoute><HrManager /></ProtectedRoute>} />
+            
+            {/* Protected Research Templates */}
+            <Route path="/templates/research-scientist" element={<ProtectedRoute><ResearchScientist /></ProtectedRoute>} />
+            <Route path="/templates/academic-researcher" element={<ProtectedRoute><AcademicResearcher /></ProtectedRoute>} />
+            <Route path="/templates/lab-technician" element={<ProtectedRoute><LabTechnician /></ProtectedRoute>} />
+            <Route path="/templates/clinical-researcher" element={<ProtectedRoute><ClinicalResearcher /></ProtectedRoute>} />
+            <Route path="/templates/data-researcher" element={<ProtectedRoute><DataResearcher /></ProtectedRoute>} />
+            <Route path="/templates/environmental-scientist" element={<ProtectedRoute><EnvironmentalScientist /></ProtectedRoute>} />
+            <Route path="/templates/recent-graduate" element={<ProtectedRoute><RecentGraduate /></ProtectedRoute>} />
+            
+            {/* Protected Multi-industry Templates */}
+            <Route path="/templates/gradient-modern" element={<ProtectedRoute><GradientModern /></ProtectedRoute>} />
+            <Route path="/templates/minimalist-pro" element={<ProtectedRoute><MinimalistPro /></ProtectedRoute>} />
+            <Route path="/templates/colorful-fresh" element={<ProtectedRoute><ColorfulFresh /></ProtectedRoute>} />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
