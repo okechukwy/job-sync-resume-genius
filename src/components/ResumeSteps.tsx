@@ -8,6 +8,7 @@ import StepIndicator from "@/components/resume-steps/StepIndicator";
 import NavigationButtons from "@/components/resume-steps/NavigationButtons";
 import StepContent from "@/components/resume-steps/StepContent";
 import { LivePreview } from "@/components/live-preview";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 interface ResumeStepsProps {
   selectedTemplate: string;
@@ -20,11 +21,20 @@ const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
     resumeData,
     steps,
     progress,
+    isLoading,
     handleNext,
     handlePrevious,
     handleDataUpdate,
     handleValidationChange,
   } = useResumeSteps();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading your resume..." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-hero">

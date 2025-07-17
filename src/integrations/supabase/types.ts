@@ -14,6 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_generations: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          generation_type: string
+          id: string
+          input_data: Json
+          model_used: string | null
+          output_data: Json
+          success: boolean | null
+          tokens_used: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          generation_type: string
+          id?: string
+          input_data: Json
+          model_used?: string | null
+          output_data: Json
+          success?: boolean | null
+          tokens_used?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          generation_type?: string
+          id?: string
+          input_data?: Json
+          model_used?: string | null
+          output_data?: Json
+          success?: boolean | null
+          tokens_used?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cv_analyses: {
+        Row: {
+          analysis_type: string | null
+          ats_score: number
+          created_at: string | null
+          file_name: string
+          file_size: number
+          id: string
+          improvements: Json
+          keywords: Json
+          overall_score: number
+          sections: Json
+          user_id: string
+        }
+        Insert: {
+          analysis_type?: string | null
+          ats_score: number
+          created_at?: string | null
+          file_name: string
+          file_size: number
+          id?: string
+          improvements?: Json
+          keywords?: Json
+          overall_score: number
+          sections?: Json
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string | null
+          ats_score?: number
+          created_at?: string | null
+          file_name?: string
+          file_size?: number
+          id?: string
+          improvements?: Json
+          keywords?: Json
+          overall_score?: number
+          sections?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      interview_sessions: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          duration_minutes: number | null
+          feedback: Json
+          id: string
+          questions: Json
+          responses: Json
+          role_focus: string | null
+          scores: Json
+          session_type: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          feedback?: Json
+          id?: string
+          questions?: Json
+          responses?: Json
+          role_focus?: string | null
+          scores?: Json
+          session_type: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          feedback?: Json
+          id?: string
+          questions?: Json
+          responses?: Json
+          role_focus?: string | null
+          scores?: Json
+          session_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      linkedin_profiles: {
+        Row: {
+          background_uploaded: boolean | null
+          contact_info: Json
+          created_at: string | null
+          custom_url: string | null
+          education: Json
+          experience: Json
+          headline: string | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          location: string | null
+          photo_uploaded: boolean | null
+          skills: Json
+          summary: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          background_uploaded?: boolean | null
+          contact_info?: Json
+          created_at?: string | null
+          custom_url?: string | null
+          education?: Json
+          experience?: Json
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          photo_uploaded?: boolean | null
+          skills?: Json
+          summary?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          background_uploaded?: boolean | null
+          contact_info?: Json
+          created_at?: string | null
+          custom_url?: string | null
+          education?: Json
+          experience?: Json
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          photo_uploaded?: boolean | null
+          skills?: Json
+          summary?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -35,6 +215,111 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_files: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          id: string
+          metadata: Json | null
+          purpose: string
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          id?: string
+          metadata?: Json | null
+          purpose: string
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          metadata?: Json | null
+          purpose?: string
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_resumes: {
+        Row: {
+          additional_info: Json
+          awards: Json
+          certificates: Json
+          created_at: string | null
+          education: Json
+          experience: Json
+          id: string
+          interests: Json
+          is_active: boolean | null
+          languages: Json
+          personal_info: Json
+          projects: Json
+          publications: Json
+          skills: Json
+          summary: Json
+          template_id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+          volunteering: Json
+        }
+        Insert: {
+          additional_info?: Json
+          awards?: Json
+          certificates?: Json
+          created_at?: string | null
+          education?: Json
+          experience?: Json
+          id?: string
+          interests?: Json
+          is_active?: boolean | null
+          languages?: Json
+          personal_info?: Json
+          projects?: Json
+          publications?: Json
+          skills?: Json
+          summary?: Json
+          template_id: string
+          title?: string
+          updated_at?: string | null
+          user_id: string
+          volunteering?: Json
+        }
+        Update: {
+          additional_info?: Json
+          awards?: Json
+          certificates?: Json
+          created_at?: string | null
+          education?: Json
+          experience?: Json
+          id?: string
+          interests?: Json
+          is_active?: boolean | null
+          languages?: Json
+          personal_info?: Json
+          projects?: Json
+          publications?: Json
+          skills?: Json
+          summary?: Json
+          template_id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          volunteering?: Json
         }
         Relationships: []
       }

@@ -6,6 +6,7 @@ import { CVAnalysisProps, AnalysisData } from "./types/analysisTypes";
 import { analyzeCVWithAI } from "@/services/openaiServices";
 import { readFileContent } from "@/utils/fileReader";
 import { useState, useEffect } from "react";
+import { cvAnalysisService } from "@/services/cvAnalysisService";
 import OverallScores from "./components/OverallScores";
 import SectionBreakdown from "./components/SectionBreakdown";
 import KeywordAnalysis from "./components/KeywordAnalysis";
@@ -26,7 +27,15 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         const analysis = await analyzeCVWithAI(fileContent);
         
         setAnalysisData(analysis);
-        toast.success("CV analysis completed!");
+        
+        // Save analysis to database
+        await cvAnalysisService.saveCVAnalysis(
+          uploadedFile.name,
+          uploadedFile.size,
+          analysis
+        );
+        
+        toast.success("CV analysis completed and saved!");
       } catch (error) {
         console.error("Analysis failed:", error);
         toast.error("Failed to analyze CV. Using fallback data.");
