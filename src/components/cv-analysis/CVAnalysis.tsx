@@ -2,11 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
-import { CVAnalysisProps } from "./types/analysisTypes";
+import { CVAnalysisProps, AnalysisData } from "./types/analysisTypes";
 import { analyzeCVWithAI } from "@/services/openaiServices";
 import { readFileContent } from "@/utils/fileReader";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import OverallScores from "./components/OverallScores";
 import SectionBreakdown from "./components/SectionBreakdown";
 import KeywordAnalysis from "./components/KeywordAnalysis";
@@ -14,10 +13,50 @@ import ImprovementSuggestions from "./components/ImprovementSuggestions";
 import ApplyRecommendations from "./components/ApplyRecommendations";
 
 const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) => {
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+
+  useEffect(() => {
+    const performAnalysis = async () => {
+      try {
+        setIsAnalyzing(true);
+        toast.info("Analyzing your CV with AI...");
+        
+        const fileContent = await readFileContent(uploadedFile);
+        const analysis = await analyzeCVWithAI(fileContent);
+        
+        setAnalysisData(analysis);
+        toast.success("CV analysis completed!");
+      } catch (error) {
+        console.error("Analysis failed:", error);
+        toast.error("Failed to analyze CV. Using fallback data.");
+        // Fallback to mock data if analysis fails
+        const { mockAnalysisData } = await import("./data/mockAnalysisData");
+        setAnalysisData(mockAnalysisData);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    performAnalysis();
+  }, [uploadedFile]);
+
   const handleContinueOptimization = () => {
-    toast.success("Let's optimize your resume for better ATS performance!");
+    toast.success("Continuing to manual editing...");
     onContinue();
   };
+
+  if (isAnalyzing || !analysisData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-lg font-medium">Analyzing your CV with AI...</p>
+          <p className="text-muted-foreground">This may take a few moments</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -38,18 +77,18 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
 
       {/* Overall Scores */}
       <OverallScores 
-        overallScore={mockAnalysisData.overallScore}
-        atsScore={mockAnalysisData.atsScore}
+        overallScore={analysisData.overallScore}
+        atsScore={analysisData.atsScore}
       />
 
       {/* Section Breakdown */}
-      <SectionBreakdown sections={mockAnalysisData.sections} />
+      <SectionBreakdown sections={analysisData.sections} />
 
       {/* Keywords Analysis */}
-      <KeywordAnalysis keywords={mockAnalysisData.keywords} />
+      <KeywordAnalysis keywords={analysisData.keywords} />
 
       {/* Improvement Suggestions */}
-      <ImprovementSuggestions improvements={mockAnalysisData.improvements} />
+      <ImprovementSuggestions improvements={analysisData.improvements} />
 
       {/* Apply Recommendations */}
       <ApplyRecommendations 
