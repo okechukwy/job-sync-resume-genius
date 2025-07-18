@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Mic, 
   MicOff, 
@@ -15,7 +15,11 @@ import {
   Brain,
   MessageSquare,
   Target,
-  Zap
+  Zap,
+  RefreshCw,
+  AlertCircle,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
@@ -26,10 +30,12 @@ const AIInterviewPrep = () => {
     loading,
     analyzing,
     currentSession,
+    retryCount,
     startSession,
     addResponse,
     completeSession,
-    getSessionHistory
+    getSessionHistory,
+    retryLastAction
   } = useAIInterview();
 
   const [selectedType, setSelectedType] = useState("behavioral");
@@ -39,6 +45,7 @@ const AIInterviewPrep = () => {
   const [transcript, setTranscript] = useState("");
   const [sessionHistory, setSessionHistory] = useState([]);
   const [lastAnalysis, setLastAnalysis] = useState<InterviewAnalysis | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
 
   // Speech recognition setup
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
@@ -84,6 +91,20 @@ const AIInterviewPrep = () => {
 
     // Load session history
     loadSessionHistory();
+
+    // Check connection status periodically
+    const checkConnection = () => {
+      setConnectionStatus(navigator.onLine ? 'online' : 'offline');
+    };
+    
+    checkConnection();
+    window.addEventListener('online', checkConnection);
+    window.addEventListener('offline', checkConnection);
+    
+    return () => {
+      window.removeEventListener('online', checkConnection);
+      window.removeEventListener('offline', checkConnection);
+    };
   }, [toast]);
 
   const loadSessionHistory = async () => {
@@ -109,6 +130,7 @@ const AIInterviewPrep = () => {
       setCurrentQuestionIndex(0);
       setTranscript("");
       setLastAnalysis(null);
+      setConnectionStatus('online'); // Reset connection status on successful start
       
       toast({
         title: "Interview Started",
@@ -116,7 +138,13 @@ const AIInterviewPrep = () => {
       });
     } catch (error) {
       console.error('Error starting session:', error);
+      setConnectionStatus('limited');
     }
+  };
+
+  const handleRetrySession = async () => {
+    retryLastAction();
+    await handleStartSession();
   };
 
   const startRecording = () => {
@@ -143,6 +171,11 @@ const AIInterviewPrep = () => {
           
           setLastAnalysis(result.response.analysis);
           
+          // Check if analysis indicates limited service
+          if (result.response.analysis.summary.includes('temporarily unavailable')) {
+            setConnectionStatus('limited');
+          }
+          
           toast({
             title: "Response Analyzed",
             description: `Score: ${result.response.analysis.overallScore}%. Great job!`,
@@ -158,6 +191,7 @@ const AIInterviewPrep = () => {
           }
         } catch (error) {
           console.error('Error processing response:', error);
+          setConnectionStatus('limited');
         }
       } else {
         toast({
@@ -181,6 +215,28 @@ const AIInterviewPrep = () => {
 
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
 
+  const getConnectionIcon = () => {
+    switch (connectionStatus) {
+      case 'online':
+        return <Wifi className="w-4 h-4 text-green-500" />;
+      case 'limited':
+        return <AlertCircle className="w-4 h-4 text-orange-500" />;
+      case 'offline':
+        return <WifiOff className="w-4 h-4 text-red-500" />;
+    }
+  };
+
+  const getConnectionMessage = () => {
+    switch (connectionStatus) {
+      case 'online':
+        return "AI services online";
+      case 'limited':
+        return "Limited AI services - using fallback mode";
+      case 'offline':
+        return "Offline mode - using cached questions";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero">
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -189,6 +245,12 @@ const AIInterviewPrep = () => {
           <p className="text-xl text-muted-foreground">
             Practice with AI-powered interview questions and get real-time feedback
           </p>
+          
+          {/* Connection Status Indicator */}
+          <div className="flex items-center justify-center gap-2 mt-4">
+            {getConnectionIcon()}
+            <span className="text-sm text-muted-foreground">{getConnectionMessage()}</span>
+          </div>
         </div>
 
         <Tabs defaultValue="practice" className="space-y-8">
@@ -202,6 +264,19 @@ const AIInterviewPrep = () => {
             {!currentSession ? (
               // Session Setup
               <div className="grid gap-6">
+                {/* Connection Warning */}
+                {connectionStatus !== 'online' && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {connectionStatus === 'limited' 
+                        ? "AI services are experiencing issues. You can still practice with our curated question bank."
+                        : "You're offline. Using cached questions for practice."
+                      }
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <Card className="glass-card">
                   <CardHeader>
                     <CardTitle>Choose Your Interview Type</CardTitle>
@@ -257,15 +332,36 @@ const AIInterviewPrep = () => {
                   </CardContent>
                 </Card>
 
-                <div className="text-center">
+                <div className="text-center space-y-4">
                   <Button
                     onClick={handleStartSession}
                     disabled={loading}
                     size="lg"
                     className="px-8"
                   >
-                    {loading ? "Generating Questions..." : "Start Interview Session"}
+                    {loading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Generating Questions...
+                      </>
+                    ) : (
+                      "Start Interview Session"
+                    )}
                   </Button>
+                  
+                  {retryCount > 0 && (
+                    <div className="text-center">
+                      <Button
+                        onClick={handleRetrySession}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Retry ({retryCount})
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -322,7 +418,10 @@ const AIInterviewPrep = () => {
                                 Stop Recording
                               </>
                             ) : analyzing ? (
-                              "Analyzing Response..."
+                              <>
+                                <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                                Analyzing Response...
+                              </>
                             ) : (
                               <>
                                 <Mic className="w-5 h-5 mr-2" />
@@ -361,6 +460,11 @@ const AIInterviewPrep = () => {
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5" />
                         Assessment Results
+                        {lastAnalysis.summary.includes('temporarily unavailable') && (
+                          <Badge variant="outline" className="text-orange-600">
+                            Limited Analysis
+                          </Badge>
+                        )}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
