@@ -31,6 +31,42 @@ export interface ATSOptimizationResult {
   overallRecommendations: string[];
 }
 
+export interface InterviewAnalysisResult {
+  overallScore: number;
+  scores: {
+    communication: number;
+    content: number;
+    structure: number;
+    impact: number;
+  };
+  strengths: string[];
+  improvements: Array<{
+    area: string;
+    suggestion: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+  industryFeedback: string;
+  summary: string;
+}
+
+export interface InterviewQuestion {
+  id: string;
+  text: string;
+  category: string;
+  difficulty: string;
+  tips: string;
+  expectedElements: string[];
+}
+
+export interface QuestionGenerationResult {
+  questions: InterviewQuestion[];
+  sessionInfo: {
+    totalQuestions: number;
+    estimatedDuration: string;
+    focus: string;
+  };
+}
+
 export const analyzeCVWithAI = async (
   resumeText: string, 
   industry: string = 'Business'
@@ -91,6 +127,52 @@ export const optimizeForATS = async (
     return data as ATSOptimizationResult;
   } catch (error) {
     console.error('Error calling ATS optimization service:', error);
+    throw error;
+  }
+};
+
+export const analyzeInterviewResponse = async (
+  transcript: string,
+  question: string,
+  sessionType: string = 'behavioral',
+  roleFocus: string = 'General Business'
+): Promise<InterviewAnalysisResult> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('interview-analysis', {
+      body: { transcript, question, sessionType, roleFocus }
+    });
+
+    if (error) {
+      console.error('Interview analysis error:', error);
+      throw new Error(error.message || 'Failed to analyze interview response');
+    }
+
+    return data as InterviewAnalysisResult;
+  } catch (error) {
+    console.error('Error calling interview analysis service:', error);
+    throw error;
+  }
+};
+
+export const generateInterviewQuestions = async (
+  sessionType: string = 'behavioral',
+  roleFocus: string = 'General Business',
+  difficulty: string = 'medium',
+  previousQuestions: string[] = []
+): Promise<QuestionGenerationResult> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('question-generator', {
+      body: { sessionType, roleFocus, difficulty, previousQuestions }
+    });
+
+    if (error) {
+      console.error('Question generation error:', error);
+      throw new Error(error.message || 'Failed to generate interview questions');
+    }
+
+    return data as QuestionGenerationResult;
+  } catch (error) {
+    console.error('Error calling question generator service:', error);
     throw error;
   }
 };

@@ -1,3 +1,4 @@
+
 project_id = "zvngmdqdwaznpsqvwcod"
 
 [api]
@@ -24,4 +25,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.ats-optimization]
+verify_jwt = true
+
+[functions.interview-analysis]
+verify_jwt = true
+
+[functions.question-generator]
 verify_jwt = true
