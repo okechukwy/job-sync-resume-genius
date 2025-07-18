@@ -24,7 +24,8 @@ import {
   WifiOff,
   Settings,
   Timer,
-  Plus
+  Plus,
+  ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
@@ -233,6 +234,19 @@ const AIInterviewPrep = () => {
     }
   };
 
+  const goBackToConfiguration = () => {
+    // Reset current session and go back to configuration
+    if (recognition && isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    }
+    setCurrentQuestionIndex(0);
+    setTranscript("");
+    setLastAnalysis(null);
+    // This will make currentSession null and show the configuration screen
+    completeSession();
+  };
+
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
 
   const getConnectionIcon = () => {
@@ -435,9 +449,20 @@ const AIInterviewPrep = () => {
                 <Card className="glass-card">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {currentSession.questions.length}</h3>
-                        <p className="text-sm text-muted-foreground">{currentSession.sessionType} • {currentSession.roleFocus}</p>
+                      <div className="flex items-center gap-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={goBackToConfiguration}
+                          className="flex items-center gap-2"
+                        >
+                          <ArrowLeft className="w-4 h-4" />
+                          Back
+                        </Button>
+                        <div>
+                          <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {currentSession.questions.length}</h3>
+                          <p className="text-sm text-muted-foreground">{currentSession.sessionType} • {currentSession.roleFocus}</p>
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Badge variant="secondary">
