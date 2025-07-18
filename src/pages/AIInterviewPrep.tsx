@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,8 @@ const AIInterviewPrep = () => {
     addResponse,
     completeSession,
     getSessionHistory,
-    retryLastAction
+    retryLastAction,
+    setCurrentSession
   } = useAIInterview();
 
   const [selectedType, setSelectedType] = useState("behavioral");
@@ -243,8 +243,8 @@ const AIInterviewPrep = () => {
     setCurrentQuestionIndex(0);
     setTranscript("");
     setLastAnalysis(null);
-    // This will make currentSession null and show the configuration screen
-    completeSession();
+    // Reset the session to null to show configuration screen instead of completing it
+    setCurrentSession(null);
   };
 
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
