@@ -24,7 +24,8 @@ import {
   Settings,
   Timer,
   Plus,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
@@ -273,6 +274,18 @@ const AIInterviewPrep = () => {
   };
 
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
+
+  // Calculate progress based on completed responses
+  const completedResponses = currentSession?.responses?.length || 0;
+  const totalQuestions = currentSession?.questions?.length || 0;
+  const progressPercentage = totalQuestions > 0 ? Math.round((completedResponses / totalQuestions) * 100) : 0;
+  
+  // Calculate remaining time based on unanswered questions
+  const remainingQuestions = Math.max(0, totalQuestions - completedResponses);
+  const estimatedTimeRemaining = Math.round(remainingQuestions * 3.5);
+  
+  // Check if session is complete
+  const isSessionComplete = completedResponses === totalQuestions && totalQuestions > 0;
 
   const getConnectionIcon = () => {
     switch (connectionStatus) {
@@ -544,13 +557,29 @@ const AIInterviewPrep = () => {
                           Back
                         </Button>
                         <div>
-                          <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {currentSession.questions.length}</h3>
-                          <p className="text-sm text-muted-foreground">{currentSession.sessionType} • {currentSession.roleFocus}</p>
+                          {isSessionComplete ? (
+                            <>
+                              <h3 className="font-semibold flex items-center gap-2">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                Session Complete!
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                All {totalQuestions} questions answered • {currentSession.sessionType} • {currentSession.roleFocus}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {totalQuestions}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {completedResponses} answered • {currentSession.sessionType} • {currentSession.roleFocus}
+                              </p>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Badge variant="secondary">
-                          {Math.round((currentQuestionIndex / currentSession.questions.length) * 100)}% Complete
+                        <Badge variant={isSessionComplete ? "default" : "secondary"}>
+                          {progressPercentage}% Complete
                         </Badge>
                         <Button variant="outline" size="sm" onClick={resetSession}>
                           <RotateCcw className="w-4 h-4 mr-2" />
@@ -558,15 +587,18 @@ const AIInterviewPrep = () => {
                         </Button>
                       </div>
                     </div>
-                    <Progress value={(currentQuestionIndex / currentSession.questions.length) * 100} className="mb-2" />
+                    <Progress value={progressPercentage} className="mb-2" />
                     <p className="text-xs text-muted-foreground">
-                      Estimated time remaining: {Math.round((currentSession.questions.length - currentQuestionIndex - 1) * 3.5)} minutes
+                      {isSessionComplete 
+                        ? "Session completed successfully!" 
+                        : `Estimated time remaining: ${estimatedTimeRemaining} minutes`
+                      }
                     </p>
                   </CardContent>
                 </Card>
 
                 {/* Current Question */}
-                {currentQuestion && (
+                {currentQuestion && !isSessionComplete && (
                   <Card className="glass-card">
                     <CardHeader>
                       <div className="flex justify-between items-start">
@@ -629,6 +661,33 @@ const AIInterviewPrep = () => {
                             </CardContent>
                           </Card>
                         )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Session Complete Message */}
+                {isSessionComplete && (
+                  <Card className="glass-card border-green-200">
+                    <CardContent className="p-6 text-center">
+                      <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">Congratulations!</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You've completed all {totalQuestions} questions in this interview session.
+                      </p>
+                      <div className="flex justify-center gap-4">
+                        <Button onClick={goBackToConfiguration} variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Start New Session
+                        </Button>
+                        <Button onClick={() => {
+                          // Switch to analytics tab to view results
+                          const analyticsTab = document.querySelector('[data-state="inactive"][value="analytics"]') as HTMLElement;
+                          if (analyticsTab) analyticsTab.click();
+                        }}>
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          View Results
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
