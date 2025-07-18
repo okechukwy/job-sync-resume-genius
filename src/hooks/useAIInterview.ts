@@ -44,6 +44,7 @@ export interface InterviewSession {
   completed: boolean;
   totalScore: number;
   createdAt: string;
+  questionCount: number;
 }
 
 export const useAIInterview = () => {
@@ -57,16 +58,17 @@ export const useAIInterview = () => {
     sessionType: string = 'behavioral',
     roleFocus: string = 'General Business',
     difficulty: string = 'medium',
-    previousQuestions: string[] = []
+    previousQuestions: string[] = [],
+    questionCount: number = 5
   ) => {
     setLoading(true);
     setRetryCount(0);
     
     try {
-      console.log('Generating questions...', { sessionType, roleFocus, difficulty });
+      console.log('Generating questions...', { sessionType, roleFocus, difficulty, questionCount });
       
       const { data, error } = await supabase.functions.invoke('question-generator', {
-        body: { sessionType, roleFocus, difficulty, previousQuestions }
+        body: { sessionType, roleFocus, difficulty, previousQuestions, questionCount }
       });
 
       if (error) {
@@ -80,7 +82,13 @@ export const useAIInterview = () => {
       if (data?.sessionInfo?.focus?.includes('offline mode')) {
         toast({
           title: "Using Offline Questions",
-          description: "AI service temporarily unavailable. Using curated question bank.",
+          description: `AI service temporarily unavailable. Using curated question bank (${data.questions?.length || questionCount} questions).`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Questions Generated Successfully",
+          description: `Generated ${data.questions?.length || questionCount} AI-powered questions for your ${sessionType} interview.`,
           variant: "default",
         });
       }
@@ -170,10 +178,11 @@ export const useAIInterview = () => {
   const startSession = useCallback(async (
     sessionType: string,
     roleFocus: string,
-    difficulty: string = 'medium'
+    difficulty: string = 'medium',
+    questionCount: number = 5
   ) => {
     try {
-      const questionsData = await generateQuestions(sessionType, roleFocus, difficulty);
+      const questionsData = await generateQuestions(sessionType, roleFocus, difficulty, [], questionCount);
       
       if (!questionsData?.questions?.length) {
         throw new Error('No questions generated');
@@ -188,6 +197,7 @@ export const useAIInterview = () => {
         completed: false,
         totalScore: 0,
         createdAt: new Date().toISOString(),
+        questionCount: questionsData.questions.length,
       };
 
       setCurrentSession(newSession);

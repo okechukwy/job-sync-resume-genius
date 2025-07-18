@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Mic, 
   MicOff, 
@@ -19,7 +21,10 @@ import {
   RefreshCw,
   AlertCircle,
   Wifi,
-  WifiOff
+  WifiOff,
+  Settings,
+  Timer,
+  Plus
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
@@ -40,6 +45,7 @@ const AIInterviewPrep = () => {
 
   const [selectedType, setSelectedType] = useState("behavioral");
   const [selectedRole, setSelectedRole] = useState("Business");
+  const [selectedLength, setSelectedLength] = useState("medium");
   const [isRecording, setIsRecording] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -124,9 +130,23 @@ const AIInterviewPrep = () => {
     "Sales", "Engineering", "Design", "Management", "Operations"
   ];
 
+  const sessionLengths = [
+    { id: "quick", name: "Quick Practice", count: 3, description: "3 questions • 10-15 min", icon: Zap },
+    { id: "short", name: "Short Session", count: 5, description: "5 questions • 15-20 min", icon: Clock },
+    { id: "medium", name: "Medium Session", count: 8, description: "8 questions • 25-35 min", icon: Timer },
+    { id: "long", name: "Long Session", count: 12, description: "12 questions • 35-50 min", icon: Target },
+    { id: "comprehensive", name: "Comprehensive", count: 15, description: "15 questions • 45-60 min", icon: Brain }
+  ];
+
+  const getQuestionCount = () => {
+    const length = sessionLengths.find(l => l.id === selectedLength);
+    return length?.count || 5;
+  };
+
   const handleStartSession = async () => {
     try {
-      await startSession(selectedType, selectedRole, "medium");
+      const questionCount = getQuestionCount();
+      await startSession(selectedType, selectedRole, "medium", questionCount);
       setCurrentQuestionIndex(0);
       setTranscript("");
       setLastAnalysis(null);
@@ -134,7 +154,7 @@ const AIInterviewPrep = () => {
       
       toast({
         title: "Interview Started",
-        description: "Your AI interview session has begun. Good luck!",
+        description: `Your AI interview session has begun with ${questionCount} questions. Good luck!`,
       });
     } catch (error) {
       console.error('Error starting session:', error);
@@ -279,60 +299,101 @@ const AIInterviewPrep = () => {
 
                 <Card className="glass-card">
                   <CardHeader>
-                    <CardTitle>Choose Your Interview Type</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Interview Configuration
+                    </CardTitle>
                     <CardDescription>
-                      Select the type of interview you'd like to practice
+                      Customize your interview session settings
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {interviewTypes.map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <Card
-                            key={type.id}
-                            className={`cursor-pointer transition-all hover:shadow-lg ${
-                              selectedType === type.id ? 'ring-2 ring-primary' : ''
-                            }`}
-                            onClick={() => setSelectedType(type.id)}
-                          >
-                            <CardContent className="p-4 text-center">
-                              <IconComponent className="w-8 h-8 mx-auto mb-2 text-primary" />
-                              <h3 className="font-semibold">{type.name}</h3>
-                              <p className="text-sm text-muted-foreground">{type.description}</p>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+                  <CardContent className="space-y-6">
+                    {/* Interview Type Selection */}
+                    <div>
+                      <h3 className="font-semibold mb-3">Interview Type</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {interviewTypes.map((type) => {
+                          const IconComponent = type.icon;
+                          return (
+                            <Card
+                              key={type.id}
+                              className={`cursor-pointer transition-all hover:shadow-lg ${
+                                selectedType === type.id ? 'ring-2 ring-primary' : ''
+                              }`}
+                              onClick={() => setSelectedType(type.id)}
+                            >
+                              <CardContent className="p-4 text-center">
+                                <IconComponent className="w-8 h-8 mx-auto mb-2 text-primary" />
+                                <h4 className="font-semibold">{type.name}</h4>
+                                <p className="text-sm text-muted-foreground">{type.description}</p>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Select Your Role Focus</CardTitle>
-                    <CardDescription>
-                      Choose your industry or role for targeted questions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                      {roleOptions.map((role) => (
-                        <Button
-                          key={role}
-                          variant={selectedRole === role ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedRole(role)}
-                          className="justify-start"
-                        >
-                          {role}
-                        </Button>
-                      ))}
+                    {/* Session Length Selection */}
+                    <div>
+                      <h3 className="font-semibold mb-3">Session Length</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {sessionLengths.map((length) => {
+                          const IconComponent = length.icon;
+                          return (
+                            <Card
+                              key={length.id}
+                              className={`cursor-pointer transition-all hover:shadow-lg ${
+                                selectedLength === length.id ? 'ring-2 ring-primary' : ''
+                              }`}
+                              onClick={() => setSelectedLength(length.id)}
+                            >
+                              <CardContent className="p-3 text-center">
+                                <IconComponent className="w-6 h-6 mx-auto mb-2 text-primary" />
+                                <h4 className="font-medium text-sm">{length.name}</h4>
+                                <p className="text-xs text-muted-foreground">{length.description}</p>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Role Focus Selection */}
+                    <div>
+                      <h3 className="font-semibold mb-3">Role Focus</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                        {roleOptions.map((role) => (
+                          <Button
+                            key={role}
+                            variant={selectedRole === role ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setSelectedRole(role)}
+                            className="justify-start"
+                          >
+                            {role}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 <div className="text-center space-y-4">
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2">Session Preview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <strong>Type:</strong> {interviewTypes.find(t => t.id === selectedType)?.name}
+                      </div>
+                      <div>
+                        <strong>Questions:</strong> {getQuestionCount()}
+                      </div>
+                      <div>
+                        <strong>Duration:</strong> {Math.round(getQuestionCount() * 3.5)} minutes
+                      </div>
+                    </div>
+                  </div>
+                  
                   <Button
                     onClick={handleStartSession}
                     disabled={loading}
@@ -345,7 +406,10 @@ const AIInterviewPrep = () => {
                         Generating Questions...
                       </>
                     ) : (
-                      "Start Interview Session"
+                      <>
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Start Interview Session
+                      </>
                     )}
                   </Button>
                   
@@ -375,12 +439,20 @@ const AIInterviewPrep = () => {
                         <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {currentSession.questions.length}</h3>
                         <p className="text-sm text-muted-foreground">{currentSession.sessionType} • {currentSession.roleFocus}</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={resetSession}>
-                        <RotateCcw className="w-4 h-4 mr-2" />
-                        Reset
-                      </Button>
+                      <div className="flex gap-2">
+                        <Badge variant="secondary">
+                          {Math.round((currentQuestionIndex / currentSession.questions.length) * 100)}% Complete
+                        </Badge>
+                        <Button variant="outline" size="sm" onClick={resetSession}>
+                          <RotateCcw className="w-4 h-4 mr-2" />
+                          Reset
+                        </Button>
+                      </div>
                     </div>
                     <Progress value={(currentQuestionIndex / currentSession.questions.length) * 100} className="mb-2" />
+                    <p className="text-xs text-muted-foreground">
+                      Estimated time remaining: {Math.round((currentSession.questions.length - currentQuestionIndex - 1) * 3.5)} minutes
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -389,7 +461,7 @@ const AIInterviewPrep = () => {
                   <Card className="glass-card">
                     <CardHeader>
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="flex-1">
                           <CardTitle className="text-xl mb-2">{currentQuestion.text}</CardTitle>
                           <div className="flex gap-2 mb-4">
                             <Badge variant="secondary">{currentQuestion.category}</Badge>
@@ -551,7 +623,7 @@ const AIInterviewPrep = () => {
               <CardContent>
                 {sessionHistory.length > 0 ? (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-primary">
                           {sessionHistory.length}
@@ -569,6 +641,12 @@ const AIInterviewPrep = () => {
                           {sessionHistory.filter(s => s.completed).length}
                         </div>
                         <p className="text-sm text-muted-foreground">Completed</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">
+                          {sessionHistory.reduce((sum, session) => sum + (session.questions?.length || 0), 0)}
+                        </div>
+                        <p className="text-sm text-muted-foreground">Questions Practiced</p>
                       </div>
                     </div>
                   </div>
@@ -600,7 +678,7 @@ const AIInterviewPrep = () => {
                             <div>
                               <h4 className="font-semibold">{session.session_type} Interview</h4>
                               <p className="text-sm text-muted-foreground">
-                                {session.role_focus} • {new Date(session.created_at).toLocaleDateString()}
+                                {session.role_focus} • {session.questions?.length || 0} questions • {new Date(session.created_at).toLocaleDateString()}
                               </p>
                             </div>
                             <div className="text-right">
