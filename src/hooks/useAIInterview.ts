@@ -78,7 +78,6 @@ export const useAIInterview = () => {
 
       console.log('Generated questions data:', data);
       
-      // Check if we got fallback questions (offline mode)
       if (data?.sessionInfo?.focus?.includes('offline mode')) {
         toast({
           title: "Using Offline Questions",
@@ -97,7 +96,6 @@ export const useAIInterview = () => {
     } catch (error) {
       console.error('Error generating questions:', error);
       
-      // Provide user-friendly error messages
       let errorMessage = "Failed to generate questions. Please try again.";
       if (error instanceof Error) {
         if (error.message.includes('429')) {
@@ -157,9 +155,8 @@ export const useAIInterview = () => {
         variant: "destructive",
       });
       
-      // Return fallback analysis with basic feedback
       return {
-        overallScore: 75, // Neutral score when analysis fails
+        overallScore: 75,
         scores: { communication: 75, content: 75, structure: 75, impact: 75 },
         strengths: ["Response recorded successfully"],
         improvements: [{
@@ -249,7 +246,6 @@ export const useAIInterview = () => {
       responses: [...currentSession.responses, newResponse]
     };
 
-    // Calculate total score
     const totalScore = updatedSession.responses.reduce(
       (sum, response) => sum + response.analysis.overallScore,
       0
@@ -267,11 +263,28 @@ export const useAIInterview = () => {
       throw new Error('No active session to complete');
     }
 
+    // Only complete sessions that have actual responses
+    if (currentSession.responses.length === 0) {
+      console.log('Session has no responses, not saving to database');
+      toast({
+        title: "Session Not Saved",
+        description: "Session had no responses and was not saved.",
+        variant: "default",
+      });
+      
+      const completedSession = { ...currentSession, completed: true };
+      setCurrentSession(completedSession);
+      return completedSession;
+    }
+
     try {
-      // Save session to database
       const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        throw new Error('User not authenticated');
+      }
+
       const sessionData = {
-        user_id: userData.user?.id || '',
+        user_id: userData.user.id,
         session_type: currentSession.sessionType,
         role_focus: currentSession.roleFocus,
         questions: currentSession.questions,
@@ -303,6 +316,8 @@ export const useAIInterview = () => {
         }
       } as any;
 
+      console.log('Saving session to database:', sessionData);
+
       const { error } = await supabase.from('interview_sessions').insert(sessionData);
 
       if (error) {
@@ -321,10 +336,9 @@ export const useAIInterview = () => {
       return completedSession;
     } catch (error) {
       console.error('Error completing session:', error);
-      // Don't throw error - allow session to complete locally even if save fails
       toast({
-        title: "Session Complete",
-        description: "Session completed locally. Database save may have failed.",
+        title: "Session Save Failed",
+        description: "Session completed locally but failed to save to database. Please check your connection.",
         variant: "destructive",
       });
       
@@ -336,21 +350,44 @@ export const useAIInterview = () => {
 
   const getSessionHistory = useCallback(async () => {
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        console.log('No authenticated user found');
+        return [];
+      }
+
+      console.log('Fetching session history for user:', userData.user.id);
+
       const { data, error } = await supabase
         .from('interview_sessions')
         .select('*')
+        .eq('user_id', userData.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching session history:', error);
         throw error;
       }
 
-      return data || [];
+      console.log('Fetched session history:', data);
+
+      // Filter out invalid sessions (those marked complete but with no responses)
+      const validSessions = (data || []).filter(session => {
+        if (!session.completed) return true; // Keep incomplete sessions
+        return session.responses && Array.isArray(session.responses) && session.responses.length > 0;
+      });
+
+      return validSessions;
     } catch (error) {
       console.error('Error fetching session history:', error);
+      toast({
+        title: "Failed to Load History",
+        description: "Could not load your session history. Please check your connection and try again.",
+        variant: "destructive",
+      });
       return [];
     }
-  }, []);
+  }, [toast]);
 
   const retryLastAction = useCallback(() => {
     setRetryCount(prev => prev + 1);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -115,10 +115,12 @@ const AIInterviewPrep = () => {
     };
   }, [toast]);
 
-  const loadSessionHistory = async () => {
+  const loadSessionHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
+      console.log('Loading session history...');
       const history = await getSessionHistory();
+      console.log('Loaded session history:', history);
       setSessionHistory(history);
     } catch (error) {
       console.error('Error loading session history:', error);
@@ -130,7 +132,16 @@ const AIInterviewPrep = () => {
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, [getSessionHistory, toast]);
+
+  // Refresh session history manually
+  const refreshSessionHistory = useCallback(async () => {
+    await loadSessionHistory();
+    toast({
+      title: "History Refreshed",
+      description: "Session history has been updated.",
+    });
+  }, [loadSessionHistory, toast]);
 
   const interviewTypes = [
     { id: "behavioral", name: "Behavioral", icon: MessageSquare, description: "STAR method questions" },
@@ -221,6 +232,7 @@ const AIInterviewPrep = () => {
             setTranscript("");
           } else {
             await completeSession();
+            // Refresh session history after completing a session
             await loadSessionHistory();
           }
         } catch (error) {
@@ -295,36 +307,52 @@ const AIInterviewPrep = () => {
       };
     }
 
-    // Filter sessions with valid scores (completed sessions with actual responses)
-    const sessionsWithScores = sessionHistory.filter(session => 
-      session.completed && 
+    console.log('Calculating analytics from session history:', sessionHistory);
+
+    // Filter completed sessions with valid scores
+    const completedSessions = sessionHistory.filter(session => 
+      session.completed === true && 
+      session.responses && 
+      Array.isArray(session.responses) && 
+      session.responses.length > 0
+    );
+
+    console.log('Completed sessions with responses:', completedSessions);
+
+    // Calculate average score from sessions with valid overall scores
+    const sessionsWithValidScores = completedSessions.filter(session => 
       session.scores?.overall && 
+      typeof session.scores.overall === 'number' && 
       session.scores.overall > 0
     );
 
-    // Calculate average score from sessions with valid scores
-    const averageScore = sessionsWithScores.length > 0 
+    console.log('Sessions with valid scores:', sessionsWithValidScores);
+
+    const averageScore = sessionsWithValidScores.length > 0 
       ? Math.round(
-          sessionsWithScores.reduce((sum, session) => sum + (session.scores?.overall || 0), 0) / 
-          sessionsWithScores.length
+          sessionsWithValidScores.reduce((sum, session) => sum + session.scores.overall, 0) / 
+          sessionsWithValidScores.length
         )
       : 0;
 
-    // Count completed sessions
-    const completedSessions = sessionHistory.filter(session => session.completed).length;
-
-    // Count questions actually practiced (from responses, not total questions)
+    // Count questions actually practiced (from responses)
     const questionsPracticed = sessionHistory.reduce((total, session) => {
-      return total + (session.responses?.length || 0);
+      const responseCount = session.responses && Array.isArray(session.responses) 
+        ? session.responses.length 
+        : 0;
+      return total + responseCount;
     }, 0);
 
-    return {
+    const result = {
       totalSessions: sessionHistory.length,
       averageScore,
-      completedSessions,
+      completedSessions: completedSessions.length,
       questionsPracticed,
       hasData: true
     };
+
+    console.log('Calculated analytics:', result);
+    return result;
   }, [sessionHistory]);
 
   return (
@@ -780,11 +808,22 @@ const AIInterviewPrep = () => {
 
           <TabsContent value="history" className="space-y-6">
             <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Session History</CardTitle>
-                <CardDescription>
-                  Review your past interview sessions and progress
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Session History</CardTitle>
+                  <CardDescription>
+                    Review your past interview sessions and progress
+                  </CardDescription>
+                </div>
+                <Button 
+                  onClick={refreshSessionHistory} 
+                  variant="outline" 
+                  size="sm"
+                  disabled={historyLoading}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${historyLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </CardHeader>
               <CardContent>
                 {historyLoading ? (
