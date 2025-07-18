@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,7 @@ const AIInterviewPrep = () => {
   const [sessionHistory, setSessionHistory] = useState([]);
   const [lastAnalysis, setLastAnalysis] = useState<InterviewAnalysis | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Speech recognition setup
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
@@ -115,8 +116,20 @@ const AIInterviewPrep = () => {
   }, [toast]);
 
   const loadSessionHistory = async () => {
-    const history = await getSessionHistory();
-    setSessionHistory(history);
+    setHistoryLoading(true);
+    try {
+      const history = await getSessionHistory();
+      setSessionHistory(history);
+    } catch (error) {
+      console.error('Error loading session history:', error);
+      toast({
+        title: "Error Loading History",
+        description: "Could not load your session history. Please try refreshing.",
+        variant: "destructive",
+      });
+    } finally {
+      setHistoryLoading(false);
+    }
   };
 
   const interviewTypes = [
@@ -270,6 +283,49 @@ const AIInterviewPrep = () => {
         return "Offline mode - using cached questions";
     }
   };
+
+  const analyticsData = useMemo(() => {
+    if (!sessionHistory || sessionHistory.length === 0) {
+      return {
+        totalSessions: 0,
+        averageScore: 0,
+        completedSessions: 0,
+        questionsPracticed: 0,
+        hasData: false
+      };
+    }
+
+    // Filter sessions with valid scores (completed sessions with actual responses)
+    const sessionsWithScores = sessionHistory.filter(session => 
+      session.completed && 
+      session.scores?.overall && 
+      session.scores.overall > 0
+    );
+
+    // Calculate average score from sessions with valid scores
+    const averageScore = sessionsWithScores.length > 0 
+      ? Math.round(
+          sessionsWithScores.reduce((sum, session) => sum + (session.scores?.overall || 0), 0) / 
+          sessionsWithScores.length
+        )
+      : 0;
+
+    // Count completed sessions
+    const completedSessions = sessionHistory.filter(session => session.completed).length;
+
+    // Count questions actually practiced (from responses, not total questions)
+    const questionsPracticed = sessionHistory.reduce((total, session) => {
+      return total + (session.responses?.length || 0);
+    }, 0);
+
+    return {
+      totalSessions: sessionHistory.length,
+      averageScore,
+      completedSessions,
+      questionsPracticed,
+      hasData: true
+    };
+  }, [sessionHistory]);
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -646,39 +702,76 @@ const AIInterviewPrep = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {sessionHistory.length > 0 ? (
+                {historyLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin mr-2" />
+                    <span>Loading analytics...</span>
+                  </div>
+                ) : analyticsData.hasData ? (
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {sessionHistory.length}
+                      <div className="text-center p-4 bg-muted/30 rounded-lg">
+                        <div className="text-3xl font-bold text-primary mb-2">
+                          {analyticsData.totalSessions}
                         </div>
                         <p className="text-sm text-muted-foreground">Total Sessions</p>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {Math.round(sessionHistory.reduce((sum, session) => sum + (session.scores?.overall || 0), 0) / sessionHistory.length)}%
+                      <div className="text-center p-4 bg-muted/30 rounded-lg">
+                        <div className="text-3xl font-bold text-primary mb-2">
+                          {analyticsData.averageScore}%
                         </div>
                         <p className="text-sm text-muted-foreground">Average Score</p>
+                        {analyticsData.averageScore === 0 && (
+                          <p className="text-xs text-orange-500 mt-1">Complete sessions to see score</p>
+                        )}
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {sessionHistory.filter(s => s.completed).length}
+                      <div className="text-center p-4 bg-muted/30 rounded-lg">
+                        <div className="text-3xl font-bold text-primary mb-2">
+                          {analyticsData.completedSessions}
                         </div>
-                        <p className="text-sm text-muted-foreground">Completed</p>
+                        <p className="text-sm text-muted-foreground">Completed Sessions</p>
+                        {analyticsData.totalSessions > analyticsData.completedSessions && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {analyticsData.totalSessions - analyticsData.completedSessions} in progress
+                          </p>
+                        )}
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {sessionHistory.reduce((sum, session) => sum + (session.questions?.length || 0), 0)}
+                      <div className="text-center p-4 bg-muted/30 rounded-lg">
+                        <div className="text-3xl font-bold text-primary mb-2">
+                          {analyticsData.questionsPracticed}
                         </div>
                         <p className="text-sm text-muted-foreground">Questions Practiced</p>
                       </div>
                     </div>
+
+                    {/* Additional insights */}
+                    {analyticsData.completedSessions > 1 && (
+                      <div className="bg-muted/20 p-4 rounded-lg">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Insights
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Completion Rate:</span>{" "}
+                            {Math.round((analyticsData.completedSessions / analyticsData.totalSessions) * 100)}%
+                          </div>
+                          <div>
+                            <span className="font-medium">Avg Questions per Session:</span>{" "}
+                            {analyticsData.completedSessions > 0 
+                              ? Math.round(analyticsData.questionsPracticed / analyticsData.completedSessions)
+                              : 0
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8">
                     <PlayCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">Complete some interview sessions to see your analytics</p>
+                    <p className="text-muted-foreground mb-2">No analytics data available yet</p>
+                    <p className="text-sm text-muted-foreground">Complete some interview sessions to see your performance analytics</p>
                   </div>
                 )}
               </CardContent>
@@ -694,16 +787,23 @@ const AIInterviewPrep = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {sessionHistory.length > 0 ? (
+                {historyLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin mr-2" />
+                    <span>Loading session history...</span>
+                  </div>
+                ) : sessionHistory.length > 0 ? (
                   <div className="space-y-4">
-                    {sessionHistory.map((session, index) => (
+                    {sessionHistory.map((session) => (
                       <Card key={session.id} className="border">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-semibold">{session.session_type} Interview</h4>
+                              <h4 className="font-semibold">
+                                {session.session_type?.charAt(0).toUpperCase() + session.session_type?.slice(1) || 'Unknown'} Interview
+                              </h4>
                               <p className="text-sm text-muted-foreground">
-                                {session.role_focus} • {session.questions?.length || 0} questions • {new Date(session.created_at).toLocaleDateString()}
+                                {session.role_focus} • {session.responses?.length || 0} questions answered • {new Date(session.created_at).toLocaleDateString()}
                               </p>
                             </div>
                             <div className="text-right">
@@ -715,6 +815,11 @@ const AIInterviewPrep = () => {
                               </Badge>
                             </div>
                           </div>
+                          {session.responses?.length > 0 && (
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Questions practiced: {session.responses.length}
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
@@ -722,7 +827,8 @@ const AIInterviewPrep = () => {
                 ) : (
                   <div className="text-center py-8">
                     <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No interview sessions yet. Start your first practice session!</p>
+                    <p className="text-muted-foreground mb-2">No interview sessions yet</p>
+                    <p className="text-sm text-muted-foreground">Start your first practice session to begin tracking your progress!</p>
                   </div>
                 )}
               </CardContent>
