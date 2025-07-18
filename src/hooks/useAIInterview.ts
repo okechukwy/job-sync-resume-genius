@@ -223,7 +223,9 @@ export const useAIInterview = () => {
 
     try {
       // Save session to database
-      const { error } = await supabase.from('interview_sessions').insert({
+      const { data: userData } = await supabase.auth.getUser();
+      const sessionData = {
+        user_id: userData.user?.id || '',
         session_type: currentSession.sessionType,
         role_focus: currentSession.roleFocus,
         questions: currentSession.questions,
@@ -253,7 +255,9 @@ export const useAIInterview = () => {
           improvements: currentSession.responses.flatMap(r => r.analysis.improvements),
           summary: currentSession.responses[currentSession.responses.length - 1]?.analysis.summary || ''
         }
-      });
+      } as any;
+
+      const { error } = await supabase.from('interview_sessions').insert(sessionData);
 
       if (error) {
         console.error('Error saving session:', error);
