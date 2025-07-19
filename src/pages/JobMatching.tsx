@@ -643,11 +643,11 @@ const JobMatching = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Immediate Actions */}
+                  {/* Use recommendations from the main analysis result */}
                   <div>
-                    <h4 className="font-medium text-primary mb-3">🚀 Immediate Actions (This Week)</h4>
+                    <h4 className="font-medium text-primary mb-3">🚀 Key Recommendations</h4>
                     <div className="space-y-3">
-                      {analysis.enhancedAnalysis.careerGuidance.immediateActions.map((action, index) => (
+                      {analysis.recommendations.map((action, index) => (
                         <div key={index} className="glass-card p-4 rounded-lg border border-primary/20 bg-primary/5">
                           <div className="flex items-start gap-3">
                             <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
@@ -660,46 +660,36 @@ const JobMatching = () => {
                     </div>
                   </div>
 
-                  {/* Short-term Goals */}
-                  <div>
-                    <h4 className="font-medium text-blue-600 dark:text-blue-400 mb-3">📈 Short-term Goals (3-6 months)</h4>
-                    <div className="space-y-2">
-                      {analysis.enhancedAnalysis.careerGuidance.shortTermGoals.map((goal, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-blue-500/20 bg-blue-500/5">
-                          <span className="text-blue-500 font-bold mt-0.5">•</span>
-                          <span className="text-sm">{goal}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Long-term Growth */}
-                  <div>
-                    <h4 className="font-medium text-purple-600 dark:text-purple-400 mb-3">🎯 Long-term Growth (6+ months)</h4>
-                    <div className="space-y-2">
-                      {analysis.enhancedAnalysis.careerGuidance.longTermGrowth.map((growth, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-purple-500/20 bg-purple-500/5">
-                          <span className="text-purple-500 font-bold mt-0.5">•</span>
-                          <span className="text-sm">{growth}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Alternative Roles */}
-                  {analysis.enhancedAnalysis.careerGuidance.alternativeRoles.length > 0 && (
+                  {/* Pro Tips */}
+                  {analysis.proTips && analysis.proTips.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-green-600 dark:text-green-400 mb-3">🔄 Alternative Roles to Consider</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {analysis.enhancedAnalysis.careerGuidance.alternativeRoles.map((role, index) => (
-                          <Badge key={index} variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                            {role}
-                          </Badge>
+                      <h4 className="font-medium text-blue-600 dark:text-blue-400 mb-3">💡 Pro Tips</h4>
+                      <div className="space-y-2">
+                        {analysis.proTips.map((tip, index) => (
+                          <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-blue-500/20 bg-blue-500/5">
+                            <span className="text-blue-500 font-bold mt-0.5">•</span>
+                            <span className="text-sm">{tip}</span>
+                          </div>
                         ))}
                       </div>
                     </div>
                   )}
-                </CardContent>
+
+                  {/* Competitive Strengths */}
+                  {analysis.enhancedAnalysis?.competitivePosition?.strengthsVsMarket && (
+                    <div>
+                      <h4 className="font-medium text-green-600 dark:text-green-400 mb-3">💪 Your Competitive Strengths</h4>
+                      <div className="space-y-2">
+                        {analysis.enhancedAnalysis.competitivePosition.strengthsVsMarket.map((strength, index) => (
+                          <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-green-500/20 bg-green-500/5">
+                            <span className="text-green-500 font-bold mt-0.5">•</span>
+                            <span className="text-sm">{strength}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                 </CardContent>
               </Card>
             )}
 
