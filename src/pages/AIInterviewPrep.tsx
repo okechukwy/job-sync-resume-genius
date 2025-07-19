@@ -55,6 +55,7 @@ const AIInterviewPrep = () => {
   const [lastAnalysis, setLastAnalysis] = useState<InterviewAnalysis | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [isProcessingResponse, setIsProcessingResponse] = useState(false);
 
   // Speech recognition setup
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
@@ -206,6 +207,7 @@ const AIInterviewPrep = () => {
     if (recognition && isRecording && currentSession) {
       recognition.stop();
       setIsRecording(false);
+      setIsProcessingResponse(true);
       
       const duration = recordingStartTime ? Math.round((Date.now() - recordingStartTime) / 1000) : 0;
       setRecordingStartTime(null);
@@ -213,7 +215,13 @@ const AIInterviewPrep = () => {
       if (transcript.trim()) {
         try {
           const currentQuestion = currentSession.questions[currentQuestionIndex];
+          console.log('Processing response for question:', currentQuestionIndex + 1, 'of', currentSession.questions.length);
+          console.log('Current session responses before adding:', currentSession.responses.length);
+          
           const result = await addResponse(currentQuestion.id, transcript.trim(), duration);
+          
+          console.log('Response added successfully, updated session:', result.session);
+          console.log('New response count:', result.session.responses.length);
           
           setLastAnalysis(result.response.analysis);
           
@@ -227,18 +235,40 @@ const AIInterviewPrep = () => {
             description: `Score: ${result.response.analysis.overallScore}%. Great job!`,
           });
 
-          // Move to next question or complete session
-          if (currentQuestionIndex < currentSession.questions.length - 1) {
+          // Use the updated session from the result to determine next action
+          const updatedSession = result.session;
+          const isLastQuestion = currentQuestionIndex >= updatedSession.questions.length - 1;
+          const allQuestionsAnswered = updatedSession.responses.length >= updatedSession.questions.length;
+          
+          console.log('Session completion check:', {
+            currentQuestionIndex,
+            totalQuestions: updatedSession.questions.length,
+            responsesCount: updatedSession.responses.length,
+            isLastQuestion,
+            allQuestionsAnswered
+          });
+
+          if (allQuestionsAnswered) {
+            console.log('All questions answered, completing session...');
+            // Small delay to ensure UI updates with 100% progress
+            setTimeout(async () => {
+              await completeSession();
+              await loadSessionHistory();
+            }, 1000);
+          } else {
+            // Move to next question
+            console.log('Moving to next question...');
             setCurrentQuestionIndex(prev => prev + 1);
             setTranscript("");
-          } else {
-            await completeSession();
-            // Refresh session history after completing a session
-            await loadSessionHistory();
           }
         } catch (error) {
           console.error('Error processing response:', error);
           setConnectionStatus('limited');
+          toast({
+            title: "Response Processing Failed",
+            description: "Your response could not be processed. Please try again.",
+            variant: "destructive",
+          });
         }
       } else {
         toast({
@@ -247,6 +277,8 @@ const AIInterviewPrep = () => {
           variant: "destructive",
         });
       }
+      
+      setIsProcessingResponse(false);
     }
   };
 
@@ -275,18 +307,35 @@ const AIInterviewPrep = () => {
 
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
 
-  // Calculate progress based on completed responses
+  // Enhanced progress calculation that accounts for processing state
   const completedResponses = currentSession?.responses?.length || 0;
   const totalQuestions = currentSession?.questions?.length || 0;
-  const progressPercentage = totalQuestions > 0 ? Math.round((completedResponses / totalQuestions) * 100) : 0;
+  const isCurrentlyProcessing = isProcessingResponse && transcript.trim();
   
-  // Calculate remaining time based on unanswered questions
-  const remainingQuestions = Math.max(0, totalQuestions - completedResponses);
+  // Calculate progress including current processing response
+  let effectiveCompletedResponses = completedResponses;
+  if (isCurrentlyProcessing && completedResponses < totalQuestions) {
+    effectiveCompletedResponses = completedResponses + 1;
+  }
+  
+  const progressPercentage = totalQuestions > 0 ? Math.round((effectiveCompletedResponses / totalQuestions) * 100) : 0;
+  
+  // Calculate remaining time based on actual remaining questions
+  const remainingQuestions = Math.max(0, totalQuestions - effectiveCompletedResponses);
   const estimatedTimeRemaining = Math.round(remainingQuestions * 3.5);
   
-  // Check if session is complete
-  const isSessionComplete = completedResponses === totalQuestions && totalQuestions > 0;
+  // Session is complete when all responses are recorded
+  const isSessionComplete = completedResponses >= totalQuestions && totalQuestions > 0;
 
+  console.log('Progress calculation:', {
+    completedResponses,
+    totalQuestions,
+    isCurrentlyProcessing,
+    effectiveCompletedResponses,
+    progressPercentage,
+    isSessionComplete
+  });
+  
   const getConnectionIcon = () => {
     switch (connectionStatus) {
       case 'online':
@@ -542,7 +591,7 @@ const AIInterviewPrep = () => {
             ) : (
               // Active Session
               <div className="grid gap-6">
-                {/* Progress */}
+                {/* Enhanced Progress Display */}
                 <Card className="glass-card">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-4">
@@ -569,7 +618,10 @@ const AIInterviewPrep = () => {
                             </>
                           ) : (
                             <>
-                              <h3 className="font-semibold">Question {currentQuestionIndex + 1} of {totalQuestions}</h3>
+                              <h3 className="font-semibold">
+                                Question {currentQuestionIndex + 1} of {totalQuestions}
+                                {isProcessingResponse && <span className="text-blue-600 ml-2">(Processing...)</span>}
+                              </h3>
                               <p className="text-sm text-muted-foreground">
                                 {completedResponses} answered • {currentSession.sessionType} • {currentSession.roleFocus}
                               </p>
@@ -581,7 +633,7 @@ const AIInterviewPrep = () => {
                         <Badge variant={isSessionComplete ? "default" : "secondary"}>
                           {progressPercentage}% Complete
                         </Badge>
-                        <Button variant="outline" size="sm" onClick={resetSession}>
+                        <Button variant="outline" size="sm" onClick={resetSession} disabled={isProcessingResponse}>
                           <RotateCcw className="w-4 h-4 mr-2" />
                           Reset
                         </Button>
@@ -591,7 +643,9 @@ const AIInterviewPrep = () => {
                     <p className="text-xs text-muted-foreground">
                       {isSessionComplete 
                         ? "Session completed successfully!" 
-                        : `Estimated time remaining: ${estimatedTimeRemaining} minutes`
+                        : isProcessingResponse 
+                          ? "Processing your response..."
+                          : `Estimated time remaining: ${estimatedTimeRemaining} minutes`
                       }
                     </p>
                   </CardContent>
@@ -620,7 +674,7 @@ const AIInterviewPrep = () => {
                         <div className="flex justify-center items-center gap-4">
                           <Button
                             onClick={isRecording ? stopRecording : startRecording}
-                            disabled={analyzing}
+                            disabled={analyzing || isProcessingResponse}
                             size="lg"
                             variant={isRecording ? "destructive" : "default"}
                             className="px-8"
@@ -629,6 +683,11 @@ const AIInterviewPrep = () => {
                               <>
                                 <MicOff className="w-5 h-5 mr-2" />
                                 Stop Recording
+                              </>
+                            ) : isProcessingResponse ? (
+                              <>
+                                <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                                Processing Response...
                               </>
                             ) : analyzing ? (
                               <>
