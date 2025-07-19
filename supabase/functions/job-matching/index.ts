@@ -22,6 +22,8 @@ serve(async (req) => {
       throw new Error('Job description and resume content are required');
     }
 
+    console.log('Starting job matching analysis...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -120,7 +122,7 @@ Return your analysis as a JSON object with this exact structure:
   "analysisWarnings": string[]
 }
 
-Provide specific, actionable insights based on the actual content provided.`
+Provide specific, actionable insights based on the actual content provided. Return ONLY the JSON object, no additional text or formatting.`
           },
           {
             role: 'user',
@@ -141,23 +143,49 @@ Analyze the specific skills, experience, and background mentioned in the resume.
     });
 
     if (!response.ok) {
-      throw new Error('OpenAI API request failed');
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API request failed: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
     const analysisText = data.choices[0].message.content;
 
+    console.log('Raw OpenAI response:', analysisText);
+
+    // Strip markdown formatting if present
+    const cleanedText = analysisText.replace(/```json\n?|\n?```/g, '').trim();
+    
+    console.log('Cleaned text for parsing:', cleanedText);
+
     // Parse the JSON response from OpenAI
     let analysisResult;
     try {
-      analysisResult = JSON.parse(analysisText);
+      analysisResult = JSON.parse(cleanedText);
+      console.log('Successfully parsed analysis result');
     } catch (parseError) {
       console.error('Failed to parse OpenAI response as JSON:', parseError);
+      console.error('Raw response was:', analysisText);
+      console.error('Cleaned text was:', cleanedText);
       throw new Error('Failed to parse AI analysis response');
     }
 
+    // Ensure we have the required structure and add defaults if missing
+    const result = {
+      matchScore: analysisResult.overallScore || 0,
+      matchedKeywords: analysisResult.matchedKeywords || [],
+      missingKeywords: analysisResult.missingKeywords || [],
+      skillsGap: analysisResult.skillsGap || [],
+      recommendations: analysisResult.recommendations || [],
+      proTips: analysisResult.proTips || [],
+      enhancedAnalysis: analysisResult.enhancedAnalysis || null,
+      personalizedInsights: analysisResult.personalizedInsights || null,
+      analysisConfidence: analysisResult.analysisConfidence || 'medium',
+      analysisWarnings: analysisResult.analysisWarnings || []
+    };
+
     // Add processing metadata
-    analysisResult.processingResult = {
+    result.processingResult = {
       content: resumeContent,
       confidence: 'high',
       extractedWords: resumeContent.trim().split(/\s+/).length,
@@ -165,7 +193,9 @@ Analyze the specific skills, experience, and background mentioned in the resume.
       processingMethod: 'AI Analysis via OpenAI'
     };
 
-    return new Response(JSON.stringify(analysisResult), {
+    console.log('Analysis completed successfully');
+
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
