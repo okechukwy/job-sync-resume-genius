@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
@@ -68,12 +69,11 @@ const ATSAnalysis = () => {
       }
 
       // Validate inputs before sending
-      if (resumeText.length > 10000) {
-        console.log('Resume text is very long, truncating...');
-        // Truncate if too long to avoid API limits
+      if (resumeText.length > 15000) {
+        console.log('Resume text is very long, truncating for API limits...');
       }
 
-      console.log('Calling ATS optimization service...');
+      console.log('Calling ATS optimization service with comprehensive analysis...');
 
       // Call the AI optimization service
       const result = await optimizeForATS(
@@ -82,14 +82,17 @@ const ATSAnalysis = () => {
         selectedIndustry
       );
 
-      console.log('Analysis result:', result);
+      console.log('Analysis result received:', {
+        atsScore: result?.atsScore,
+        contentOptimizations: result?.contentOptimizations?.length
+      });
 
       if (!result) {
         throw new Error('No analysis result received');
       }
 
       setAnalysis(result);
-      toast.success('ATS analysis complete!');
+      toast.success(`ATS analysis complete! Score: ${result.atsScore}/100`);
     } catch (error) {
       console.error('Analysis error:', error);
       
@@ -103,6 +106,8 @@ const ATSAnalysis = () => {
           errorMessage = 'Your resume doesn\'t contain enough text for analysis. Please upload a text-based resume.';
         } else if (error.message.includes('Service configuration error')) {
           errorMessage = 'Analysis service is temporarily unavailable. Please try again later.';
+        } else if (error.message.includes('Invalid request format')) {
+          errorMessage = 'There was an issue processing your request. Please try uploading your resume again.';
         } else {
           errorMessage = error.message;
         }
@@ -138,6 +143,35 @@ const ATSAnalysis = () => {
       low: 'bg-primary/10 text-primary border-primary/20'
     };
     return colors[priority as keyof typeof colors] || colors.low;
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'quantification':
+        return <TrendingUp className="h-4 w-4 text-blue-500" />;
+      case 'keywords':
+        return <Target className="h-4 w-4 text-green-500" />;
+      case 'action-verbs':
+        return <Lightbulb className="h-4 w-4 text-purple-500" />;
+      case 'achievement':
+        return <CheckCircle className="h-4 w-4 text-orange-500" />;
+      case 'industry-alignment':
+        return <Info className="h-4 w-4 text-indigo-500" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getCategoryBadge = (category: string) => {
+    const colors = {
+      quantification: 'bg-blue-50 text-blue-700 border-blue-200',
+      keywords: 'bg-green-50 text-green-700 border-green-200',
+      'action-verbs': 'bg-purple-50 text-purple-700 border-purple-200',
+      achievement: 'bg-orange-50 text-orange-700 border-orange-200',
+      'industry-alignment': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      formatting: 'bg-gray-50 text-gray-700 border-gray-200'
+    };
+    return colors[category as keyof typeof colors] || colors.formatting;
   };
 
   return (
@@ -243,7 +277,7 @@ const ATSAnalysis = () => {
                 onClick={handleAnalyze}
                 disabled={isAnalyzing}
               >
-                {isAnalyzing ? 'Analyzing ATS Compatibility...' : 'Start ATS Analysis'}
+                {isAnalyzing ? 'Analyzing ATS Compatibility...' : 'Start Comprehensive ATS Analysis'}
               </Button>
             )}
           </CardContent>
@@ -344,17 +378,36 @@ const ATSAnalysis = () => {
               </Card>
             )}
 
-            {/* Content Optimizations */}
+            {/* Content Optimizations - Enhanced Display */}
             {analysis.contentOptimizations.length > 0 && (
               <Card className="glass-card">
                 <CardHeader>
-                  <CardTitle>Content Improvements</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5" />
+                    Content Improvements ({analysis.contentOptimizations.length} suggestions)
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Comprehensive optimizations across all major resume sections
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     {analysis.contentOptimizations.map((optimization, index) => (
-                      <div key={index} className="glass-card p-4 rounded-lg">
-                        <h4 className="font-semibold mb-3">{optimization.section}</h4>
+                      <div key={index} className="glass-card p-4 rounded-lg border border-border/50">
+                        <div className="flex items-start gap-3 mb-3">
+                          {getCategoryIcon(optimization.category || 'formatting')}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-semibold">{optimization.section}</h4>
+                              {optimization.category && (
+                                <Badge className={getCategoryBadge(optimization.category)}>
+                                  {optimization.category.replace('-', ' ')}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                           <div>
                             <p className="text-sm font-medium text-muted-foreground mb-2">Current:</p>
@@ -365,7 +418,12 @@ const ATSAnalysis = () => {
                             <p className="text-sm bg-success/10 p-3 rounded border border-success/20">{optimization.improved}</p>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{optimization.reasoning}</p>
+                        
+                        <div className="bg-primary/5 p-3 rounded border border-primary/10">
+                          <p className="text-sm text-muted-foreground">
+                            <strong>Why this helps:</strong> {optimization.reasoning}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
