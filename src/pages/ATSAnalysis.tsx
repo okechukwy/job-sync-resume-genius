@@ -6,11 +6,12 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
+import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
 
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
@@ -18,6 +19,7 @@ const ATSAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("Business");
+  const [showTesting, setShowTesting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const industries = [
@@ -54,7 +56,7 @@ const ATSAnalysis = () => {
     setIsAnalyzing(true);
     
     try {
-      console.log('Starting resume analysis...');
+      console.log('Starting comprehensive resume analysis...');
       
       // Extract text from uploaded resume
       const resumeText = await readFileContent(uploadedResume);
@@ -83,7 +85,8 @@ const ATSAnalysis = () => {
 
       console.log('Analysis result received:', {
         atsScore: result?.atsScore,
-        contentOptimizations: result?.contentOptimizations?.length
+        contentOptimizations: result?.contentOptimizations?.length,
+        formatOptimizations: result?.formatOptimizations?.length
       });
 
       if (!result) {
@@ -91,7 +94,7 @@ const ATSAnalysis = () => {
       }
 
       setAnalysis(result);
-      toast.success(`ATS analysis complete! Score: ${result.atsScore}/100`);
+      toast.success(`Comprehensive ATS analysis complete! Score: ${result.atsScore}/100 with ${result.contentOptimizations.length} content optimizations`);
     } catch (error) {
       console.error('Analysis error:', error);
       
@@ -197,7 +200,7 @@ const ATSAnalysis = () => {
             <span className="gradient-text">ATS Systems</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Get detailed insights and actionable suggestions to improve your resume's ATS compatibility score.
+            Get comprehensive insights and actionable suggestions to improve your resume's ATS compatibility score.
           </p>
         </div>
 
@@ -230,15 +233,26 @@ const ATSAnalysis = () => {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    Change File
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTesting(!showTesting)}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="h-4 w-4" />
+                      {showTesting ? 'Hide Testing' : 'Show Testing'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      Change File
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
                 <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium mb-2">Upload your resume for ATS analysis</p>
+                <p className="text-lg font-medium mb-2">Upload your resume for comprehensive ATS analysis</p>
                 <p className="text-muted-foreground mb-6">
                   Supported formats: PDF, DOC, DOCX (max 5MB)
                 </p>
@@ -295,13 +309,29 @@ const ATSAnalysis = () => {
           </CardContent>
         </Card>
 
+        {/* Testing Component */}
+        {showTesting && uploadedResume && (
+          <div className="mb-8">
+            <OptimizationTesting 
+              resumeText=""
+              jobDescription={jobDescription}
+              industry={selectedIndustry}
+            />
+          </div>
+        )}
+
         {/* Analysis Results */}
         {analysis && (
           <div className="space-y-8">
             {/* Overall Score */}
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="text-2xl">ATS Compatibility Score</CardTitle>
+                <CardTitle className="text-2xl flex items-center justify-between">
+                  ATS Compatibility Score
+                  <Badge variant="outline" className="text-sm">
+                    {analysis.contentOptimizations.length} Content Optimizations
+                  </Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center mb-6">
@@ -396,7 +426,7 @@ const ATSAnalysis = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
-                    Content Improvements ({analysis.contentOptimizations.length} suggestions)
+                    Content Improvements ({analysis.contentOptimizations.length} comprehensive suggestions)
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Comprehensive optimizations across all major resume sections
