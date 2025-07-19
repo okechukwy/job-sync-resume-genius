@@ -21,6 +21,7 @@ const CoverLetterGenerator = () => {
     location: "",
     jobTitle: "",
     companyName: "",
+    companyAddress: "",
     hiringManager: "",
     jobDescription: "",
     tone: "",
@@ -60,6 +61,7 @@ const CoverLetterGenerator = () => {
         location: formData.location,
         jobTitle: formData.jobTitle,
         companyName: formData.companyName,
+        companyAddress: formData.companyAddress,
         hiringManager: formData.hiringManager,
         jobDescription: formData.jobDescription,
         tone: formData.tone,
@@ -213,6 +215,16 @@ const CoverLetterGenerator = () => {
                       onChange={e => handleInputChange('companyName', e.target.value)} 
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="companyAddress">Company Address</Label>
+                  <Input 
+                    id="companyAddress" 
+                    placeholder="e.g., 123 Main St, San Francisco, CA 94105 (optional)" 
+                    value={formData.companyAddress} 
+                    onChange={e => handleInputChange('companyAddress', e.target.value)} 
+                  />
                 </div>
 
                 <div className="space-y-2">

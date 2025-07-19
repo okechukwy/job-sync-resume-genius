@@ -75,6 +75,7 @@ export interface CoverLetterRequest {
   location?: string;
   jobTitle: string;
   companyName: string;
+  companyAddress?: string;
   hiringManager?: string;
   jobDescription: string;
   tone: string;
