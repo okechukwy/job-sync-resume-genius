@@ -84,7 +84,7 @@ export const coverLetterTemplates: CoverLetterTemplate[] = [
     name: 'Skills Showcase',
     description: 'Skills-focused format perfect for technical and specialized roles',
     category: 'modern',
-    headerStyle: 'modern',
+    headerStyle: 'left-aligned',
     bodyFormat: 'skills-focused',
     features: ['Skills integration', 'Technical focus', 'Competency highlight', 'Modern layout'],
     preview: '⚡',
