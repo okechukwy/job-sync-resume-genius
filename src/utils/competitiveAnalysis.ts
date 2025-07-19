@@ -1,4 +1,3 @@
-
 import { ParsedResumeContent } from './resumeContentParser';
 import { ExtractedKeyword } from './enhancedKeywordExtractor';
 
@@ -82,6 +81,11 @@ const getSalaryIntelligence = (
   experienceLevel: string
 ): { min: number; max: number; median: number } => {
   
+  // Add null safety checks
+  const safeRole = role || 'software engineer';
+  const safeIndustry = industry || 'technology';
+  const safeExperienceLevel = experienceLevel || 'mid';
+  
   // Base salary ranges by role and experience (simplified - real data would be much more comprehensive)
   const baseSalaries = {
     'software engineer': {
@@ -118,9 +122,9 @@ const getSalaryIntelligence = (
     'enterprise': 1.1
   };
   
-  const roleKey = Object.keys(baseSalaries).find(key => role.toLowerCase().includes(key)) || 'software engineer';
-  const baseSalary = baseSalaries[roleKey][experienceLevel] || baseSalaries[roleKey]['mid'];
-  const multiplier = industryMultipliers[industry] || 1.0;
+  const roleKey = Object.keys(baseSalaries).find(key => safeRole.toLowerCase().includes(key)) || 'software engineer';
+  const baseSalary = baseSalaries[roleKey][safeExperienceLevel] || baseSalaries[roleKey]['mid'];
+  const multiplier = industryMultipliers[safeIndustry] || 1.0;
   
   return {
     min: Math.round(baseSalary.min * multiplier),
@@ -130,6 +134,9 @@ const getSalaryIntelligence = (
 };
 
 const getDemandIntelligence = (role: string, industry: string): { level: MarketIntelligence['demandLevel']; competition: MarketIntelligence['competitionLevel'] } => {
+  // Add null safety
+  const safeRole = role || 'software engineer';
+  
   // Simplified demand analysis
   const demandMap = {
     'software engineer': { level: 'high' as const, competition: 'high' as const },
@@ -139,11 +146,13 @@ const getDemandIntelligence = (role: string, industry: string): { level: MarketI
     'machine learning engineer': { level: 'very-high' as const, competition: 'low' as const }
   };
   
-  const roleKey = Object.keys(demandMap).find(key => role.toLowerCase().includes(key));
+  const roleKey = Object.keys(demandMap).find(key => safeRole.toLowerCase().includes(key));
   return demandMap[roleKey] || { level: 'medium', competition: 'medium' };
 };
 
 const getTrendIntelligence = (industry: string): { emerging: string[]; declining: string[] } => {
+  const safeIndustry = industry || 'technology';
+  
   const trendMap = {
     'technology': {
       emerging: ['AI/ML', 'Cloud Native', 'Kubernetes', 'Rust', 'WebAssembly', 'Edge Computing'],
@@ -159,7 +168,7 @@ const getTrendIntelligence = (industry: string): { emerging: string[]; declining
     }
   };
   
-  return trendMap[industry] || {
+  return trendMap[safeIndustry] || {
     emerging: ['Cloud Computing', 'AI/ML', 'Automation', 'Data Analytics'],
     declining: ['Legacy Systems', 'Manual Processes', 'Outdated Frameworks']
   };

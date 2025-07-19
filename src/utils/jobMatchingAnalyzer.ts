@@ -155,16 +155,19 @@ const generatePersonalizedInsights = async (
     generatePersonalizedLearningPath(
       skill.keyword,
       resumeProfile,
-      jobContext.roleTitle,
+      jobContext.roleLevel, // Use roleLevel instead of roleTitle
       'high' // High urgency for critical skills
     )
   );
+  
+  // Create a role title from job context for competitive analysis
+  const roleTitle = `${jobContext.roleLevel} ${jobContext.industry} professional`;
   
   // Analyze competitive position with market intelligence
   const { marketIntelligence, positioning: competitivePosition } = analyzeCompetitivePosition(
     resumeProfile,
     jobKeywords,
-    jobContext.roleTitle,
+    roleTitle, // Pass constructed role title
     jobContext.industry
   );
   
