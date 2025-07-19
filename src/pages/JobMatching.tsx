@@ -470,8 +470,171 @@ const JobMatching = () => {
               </div>
             </div>
 
-            {/* Enhanced Career Guidance */}
-            {analysis.enhancedAnalysis && (
+            {/* Enhanced Career Guidance with Personalized Insights */}
+            {analysis.personalizedInsights && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Personalized Career Action Plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Resume Profile Summary */}
+                  <div>
+                    <h4 className="font-medium text-blue-600 dark:text-blue-400 mb-3">📊 Your Profile Analysis</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.personalizedInsights.resumeProfile.totalYearsExperience}</div>
+                        <div className="text-sm text-muted-foreground">Years Experience</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary capitalize">{analysis.personalizedInsights.resumeProfile.experienceLevel}</div>
+                        <div className="text-sm text-muted-foreground">Experience Level</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.personalizedInsights.resumeProfile.skills.length}</div>
+                        <div className="text-sm text-muted-foreground">Skills Identified</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary capitalize">{analysis.personalizedInsights.competitivePosition.marketPosition.replace('-', ' ')}</div>
+                        <div className="text-sm text-muted-foreground">Market Position</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Salary Intelligence */}
+                  <div>
+                    <h4 className="font-medium text-green-600 dark:text-green-400 mb-3">💰 Salary Intelligence</h4>
+                    <div className="glass-card p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+                      <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600">${analysis.personalizedInsights.marketIntelligence.averageSalary.min.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">Market Min</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600">${analysis.personalizedInsights.marketIntelligence.averageSalary.median.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">Market Median</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600">${analysis.personalizedInsights.marketIntelligence.averageSalary.max.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">Market Max</div>
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <p><strong>Your Expected Range:</strong> ${analysis.personalizedInsights.competitivePosition.recommendedStrategy.salaryNegotiation.expectedRange.min.toLocaleString()} - ${analysis.personalizedInsights.competitivePosition.recommendedStrategy.salaryNegotiation.expectedRange.max.toLocaleString()}</p>
+                        <p><strong>Negotiation Position:</strong> <span className="capitalize">{analysis.personalizedInsights.competitivePosition.recommendedStrategy.salaryNegotiation.negotiationPosition}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Personalized Learning Paths */}
+                  {analysis.personalizedInsights.learningPaths.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-purple-600 dark:text-purple-400 mb-3">📚 Personalized Learning Paths</h4>
+                      <div className="space-y-4">
+                        {analysis.personalizedInsights.learningPaths.map((path, index) => (
+                          <div key={index} className="glass-card p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
+                            <div className="flex items-center justify-between mb-3">
+                              <h5 className="font-medium text-purple-700 dark:text-purple-300">{path.skill}</h5>
+                              <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+                                {path.estimatedTimeWeeks} weeks
+                              </Badge>
+                            </div>
+                            <div className="text-sm space-y-2">
+                              <p><strong>Current Level:</strong> {path.currentLevel} → <strong>Target:</strong> {path.targetLevel}</p>
+                              <p><strong>Priority Score:</strong> {path.priorityScore}/100</p>
+                              <div>
+                                <strong>Learning Steps:</strong>
+                                <ul className="list-disc list-inside mt-1 ml-4">
+                                  {path.learningSteps.slice(0, 2).map((step, stepIndex) => (
+                                    <li key={stepIndex} className="text-muted-foreground">{step.title}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div>
+                                <strong>Cost Range:</strong> ${path.costEstimate.totalCostRange.min} - ${path.costEstimate.totalCostRange.max}
+                                {path.costEstimate.free.length > 0 && (
+                                  <span className="text-green-600 ml-2">({path.costEstimate.free.length} free resources available)</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contextual Recommendations */}
+                  <div>
+                    <h4 className="font-medium text-orange-600 dark:text-orange-400 mb-3">🎯 Contextual Action Plan</h4>
+                    <div className="space-y-3">
+                      {analysis.personalizedInsights.contextualRecommendations.slice(0, 6).map((rec, index) => (
+                        <div key={index} className={`glass-card p-4 rounded-lg border ${
+                          rec.priority === 'critical' ? 'border-red-500/20 bg-red-500/5' :
+                          rec.priority === 'high' ? 'border-orange-500/20 bg-orange-500/5' :
+                          'border-blue-500/20 bg-blue-500/5'
+                        }`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                rec.priority === 'critical' ? 'destructive' :
+                                rec.priority === 'high' ? 'secondary' : 'secondary'
+                              }>
+                                {rec.priority}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {rec.timeframe}
+                              </Badge>
+                            </div>
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {rec.category}
+                            </Badge>
+                          </div>
+                          <h5 className="font-medium mb-1">{rec.action}</h5>
+                          <p className="text-sm text-muted-foreground mb-2">{rec.rationale}</p>
+                          {rec.resources.length > 0 && (
+                            <div className="text-xs">
+                              <strong>Resources:</strong> {rec.resources.slice(0, 3).join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Market Trends */}
+                  <div>
+                    <h4 className="font-medium text-teal-600 dark:text-teal-400 mb-3">📈 Market Intelligence</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="glass-card p-4 rounded-lg border border-teal-500/20 bg-teal-500/5">
+                        <h5 className="font-medium text-teal-700 dark:text-teal-300 mb-2">🚀 Emerging Trends</h5>
+                        <div className="flex flex-wrap gap-1">
+                          {analysis.personalizedInsights.marketIntelligence.emergingTrends.map((trend, index) => (
+                            <Badge key={index} variant="secondary" className="bg-teal-100 text-teal-700 dark:bg-teal-900/20 dark:text-teal-300 text-xs">
+                              {trend}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg border border-red-500/20 bg-red-500/5">
+                        <h5 className="font-medium text-red-700 dark:text-red-300 mb-2">📉 Declining Skills</h5>
+                        <div className="flex flex-wrap gap-1">
+                          {analysis.personalizedInsights.marketIntelligence.decliningSkills.map((skill, index) => (
+                            <Badge key={index} variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300 text-xs">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Enhanced Career Guidance - keep existing implementation but move after personalized insights */}
+            {analysis.enhancedAnalysis && !analysis.personalizedInsights && (
               <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
