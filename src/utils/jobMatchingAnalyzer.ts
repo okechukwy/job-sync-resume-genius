@@ -328,7 +328,7 @@ const performEnhancedAnalysis = (
         const learningPathData = generatePersonalizedLearningPath(
           jobKeyword.keyword,
           resumeProfile,
-          jobContext.roleTitle
+          jobContext.roleLevel
         );
         
         timeToAcquire = `${learningPathData.estimatedTimeWeeks} weeks`;
@@ -388,7 +388,7 @@ const performEnhancedAnalysis = (
     industryFit: calculateIndustryFit(skillAnalysis, jobContext.industry, resumeProfile?.industryExperience),
     roleLevelMatch: calculateRoleLevelMatch(skillAnalysis, jobContext.roleLevel, resumeProfile?.experienceLevel),
     experienceAlignment: calculateExperienceAlignment(resumeContent, jobContext, resumeProfile?.totalYearsExperience),
-    cultureMatch: calculateCultureMatch(resumeContent, jobContext.cultureIndicators)
+    cultureMatch: calculateCultureMatchScore(resumeContent, jobContext.cultureIndicators)
   };
 
   const competitivePosition = generateCompetitiveAnalysis(skillAnalysis, jobContext, resumeProfile);
@@ -637,6 +637,23 @@ const generateEnhancedProTips = (
   }
   
   return tips.slice(0, 6);
+};
+
+const calculateCultureMatchScore = (resumeContent: string, cultureIndicators: string[]): number => {
+  if (!cultureIndicators || cultureIndicators.length === 0) return 75;
+  
+  const resumeLower = resumeContent.toLowerCase();
+  const matchedIndicators = cultureIndicators.filter(indicator => 
+    resumeLower.includes(indicator.toLowerCase())
+  );
+  
+  const baseScore = Math.round((matchedIndicators.length / cultureIndicators.length) * 100);
+  
+  // Bonus for leadership/collaboration mentions
+  const collaborationKeywords = ['teamwork', 'collaboration', 'leadership', 'cross-functional', 'mentoring'];
+  const hasCollaboration = collaborationKeywords.some(keyword => resumeLower.includes(keyword));
+  
+  return hasCollaboration ? Math.min(100, baseScore + 10) : baseScore;
 };
 
 const calculateCategoryScore = (skillAnalysis: SkillAnalysis[], category: string): number => {
