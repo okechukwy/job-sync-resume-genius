@@ -56,6 +56,7 @@ const AIInterviewPrep = () => {
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
   const [historyLoading, setHistoryLoading] = useState(false);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
+  const [activeTab, setActiveTab] = useState("practice");
 
   // Speech recognition setup
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
@@ -433,7 +434,7 @@ const AIInterviewPrep = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="practice" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="practice">Practice Session</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -739,11 +740,7 @@ const AIInterviewPrep = () => {
                           <Plus className="w-4 h-4 mr-2" />
                           Start New Session
                         </Button>
-                        <Button onClick={() => {
-                          // Switch to analytics tab to view results
-                          const analyticsTab = document.querySelector('[data-state="inactive"][value="analytics"]') as HTMLElement;
-                          if (analyticsTab) analyticsTab.click();
-                        }}>
+                        <Button onClick={() => setActiveTab("analytics")}>
                           <TrendingUp className="w-4 h-4 mr-2" />
                           View Results
                         </Button>
