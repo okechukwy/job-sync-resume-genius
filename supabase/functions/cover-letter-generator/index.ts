@@ -33,12 +33,12 @@ const getTemplateInstructions = (templateId: string) => {
     'classic-professional': {
       headerStyle: 'centered',
       bodyFormat: 'paragraph',
-      instructions: 'Use centered header format with formal business letter structure. Center the sender information using appropriate spacing. Focus on traditional paragraph format with professional tone.'
+      instructions: 'Use centered header format ONLY for applicant information (name and contact details). All other content including recipient information, date, body, and closing should be left-aligned following standard business letter format.'
     },
     'modern-minimalist': {
       headerStyle: 'left-aligned',
       bodyFormat: 'paragraph',
-      instructions: 'Use left-aligned header with clean, modern formatting. Employ contemporary language while maintaining professionalism.'
+      instructions: 'Use left-aligned header with clean, modern formatting. All content should be left-aligned including applicant information.'
     },
     'creative-professional': {
       headerStyle: 'creative',
@@ -63,7 +63,7 @@ const getTemplateInstructions = (templateId: string) => {
     'healthcare-formal': {
       headerStyle: 'centered',
       bodyFormat: 'paragraph',
-      instructions: 'Use formal centered header with appropriate spacing. Emphasize credentials, certifications, and healthcare-specific experience.'
+      instructions: 'Use formal centered header ONLY for applicant information. Emphasize credentials, certifications, and healthcare-specific experience. All other content left-aligned.'
     },
     'startup-dynamic': {
       headerStyle: 'creative',
@@ -159,18 +159,36 @@ CRITICAL OUTPUT REQUIREMENTS:
 - Format using spacing, line breaks, and text alignment only
 - The output must be ready for plain text display and PDF generation
 
+PROPER CAPITALIZATION RULES:
+- Use proper sentence case for all text (first letter capitalized, rest lowercase unless proper nouns)
+- Names should be in Title Case (John Smith, not JOHN SMITH)
+- Company names should match their official capitalization
+- Do NOT use ALL CAPS for any text except maybe section headers if specifically requested
+- Job titles should be in Title Case (Software Engineer, not SOFTWARE ENGINEER)
+- Avoid excessive capitalization that looks unprofessional
+
 TEMPLATE-SPECIFIC INSTRUCTIONS:
 ${template.instructions}
+
+BUSINESS LETTER STRUCTURE:
+1. Applicant Information (name and contact) - formatting depends on template
+2. Date (right-aligned)
+3. Recipient Information (hiring manager, company, address) - ALWAYS left-aligned
+4. Salutation (Dear [Name]) - left-aligned
+5. Body paragraphs - left-aligned
+6. Closing phrase (${closingType}) - left-aligned
+7. Signature line (applicant name) - left-aligned
 
 HEADER STYLE: ${template.headerStyle}
 BODY FORMAT: ${template.bodyFormat}
 
 PLAIN TEXT FORMATTING GUIDELINES:
-1. ${template.headerStyle} header: ${template.headerStyle === 'centered' ? 'Center text using appropriate spacing (about 20-25 spaces before text)' : 'Align text to the left margin'}
+1. ${template.headerStyle} header: ${template.headerStyle === 'centered' ? 'Center ONLY the applicant name and contact information using appropriate spacing' : 'Align all text to the left margin'}
 2. Use proper paragraph spacing with double line breaks between sections
 3. For bullet points, use "• " or "- " at the beginning of lines
 4. Use standard business letter spacing and structure
 5. No HTML tags or markup language of any kind
+6. NEVER center recipient information, date, body text, or closing - these should be left-aligned
 
 CONTENT REQUIREMENTS:
 - Opening: Express interest and connection to the role/company
@@ -193,16 +211,19 @@ FINAL OUTPUT VALIDATION:
 - Ensure NO HTML tags appear anywhere in the letter
 - Use only plain text formatting with spaces and line breaks
 - Verify professional business letter structure using plain text only
+- Use proper sentence case throughout (avoid ALL CAPS except where appropriate)
+- Only center applicant information for centered header templates
+- All recipient information, body text, and closing should be left-aligned
 - The letter should be ready for direct display without any HTML processing
 
 Return ONLY the complete cover letter in plain text format, ready for printing or PDF conversion.`;
 
     const userPrompt = `Create a ${letterLength} cover letter using the "${templateId}" template with these details:
 
-SENDER INFORMATION:
+SENDER INFORMATION (format according to template style):
 ${senderInfo}
 
-RECIPIENT INFORMATION:
+RECIPIENT INFORMATION (ALWAYS left-aligned):
 ${recipientInfo}
 
 POSITION DETAILS:
@@ -222,15 +243,22 @@ ${userBackground}` : ''}
 
 CRITICAL FORMATTING REQUIREMENTS:
 1. Use PLAIN TEXT ONLY - absolutely no HTML tags or markup
-2. Format the header according to ${template.headerStyle} style using text spacing only
-3. Use ${template.bodyFormat} body format with plain text techniques
-4. Address the hiring manager appropriately (${recipientName})
-5. Use "${closingType}" closing with proper signature block
-6. Ensure ${letterLength} length appropriate content
-7. NO HTML tags like <center>, <b>, <p>, or any other markup
-8. Use only spaces, line breaks, and standard punctuation for formatting
+2. Use proper sentence case - avoid ALL CAPS (John Smith, not JOHN SMITH)
+3. Format the applicant header according to ${template.headerStyle} style using text spacing only
+4. ALWAYS left-align recipient information, regardless of template
+5. ALWAYS left-align body paragraphs and closing
+6. Use ${template.bodyFormat} body format with plain text techniques
+7. Address the hiring manager appropriately (${recipientName})
+8. Use "${closingType}" closing with proper signature block - left-aligned
+9. Ensure ${letterLength} length appropriate content
+10. NO HTML tags like <center>, <b>, <p>, or any other markup
+11. Use only spaces, line breaks, and standard punctuation for formatting
 
-REMEMBER: The output must be clean plain text that displays perfectly without any HTML processing.`;
+REMEMBER: 
+- The output must be clean plain text that displays perfectly without any HTML processing
+- Use proper capitalization throughout (sentence case, not ALL CAPS)
+- Only the applicant's information should be centered for centered templates
+- Everything else (recipient, body, closing) should be left-aligned`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

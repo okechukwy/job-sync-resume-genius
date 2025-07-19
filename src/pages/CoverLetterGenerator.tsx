@@ -14,7 +14,7 @@ import { downloadFile } from "@/utils/downloadUtils";
 import TemplateSelector from "@/components/cover-letter/TemplateSelector";
 import { getTemplateById, getRecommendedTemplate } from "@/config/coverLetterTemplates";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getLineFormatting } from "@/utils/coverLetterFormatting";
+import { processLetterLines } from "@/utils/coverLetterFormatting";
 
 const CoverLetterGenerator = () => {
   const [formData, setFormData] = useState({
@@ -147,29 +147,33 @@ const CoverLetterGenerator = () => {
   const selectedTemplate = getTemplateById(formData.templateId);
 
   const renderFormattedCoverLetter = (content: string, templateId: string) => {
-    const lines = content.split('\n');
+    if (!content) return null;
     
-    return lines.map((line, index) => {
-      const trimmedLine = line.trim();
-      
-      if (!trimmedLine) {
-        return <div key={index} className="h-2" />;
+    const processedLines = processLetterLines(content, templateId);
+    
+    return processedLines.map((processedLine, index) => {
+      if (processedLine.isEmpty) {
+        return <div key={index} className="h-3" />;
       }
       
-      const formatting = getLineFormatting(trimmedLine, templateId);
+      const { line, formatting } = processedLine;
+      
+      if (!formatting) {
+        return <div key={index} className="mb-3">{line}</div>;
+      }
       
       const style: React.CSSProperties = {
         fontSize: formatting.fontSize,
         fontWeight: formatting.fontWeight as any,
         textAlign: formatting.textAlign,
         marginBottom: formatting.marginBottom,
-        lineHeight: '1.4',
+        lineHeight: '1.5',
         color: '#1f2937'
       };
       
       return (
         <div key={index} style={style}>
-          {trimmedLine}
+          {line}
         </div>
       );
     });
@@ -551,7 +555,7 @@ const CoverLetterGenerator = () => {
               <CardContent>
                 {generatedLetter ? (
                   <div className="bg-background/50 rounded-lg p-8 min-h-96 max-w-4xl mx-auto">
-                    <div className="font-serif">
+                    <div className="font-serif text-sm leading-relaxed">
                       {renderFormattedCoverLetter(generatedLetter, formData.templateId)}
                     </div>
                   </div>
@@ -569,7 +573,6 @@ const CoverLetterGenerator = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Features */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="glass-card text-center">
             <CardContent className="pt-6">

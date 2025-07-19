@@ -1,7 +1,7 @@
 
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
-import { getLineFormatting } from '../coverLetterFormatting';
+import { processLetterLines } from '../coverLetterFormatting';
 
 export const downloadCoverLetterAsPdf = async (
   content: string,
@@ -18,16 +18,23 @@ export const downloadCoverLetterAsPdf = async (
     const maxWidth = pageWidth - 2 * margin;
     let currentY = margin;
     
-    // Split content into lines
-    const lines = content.split('\n');
+    // Process the letter lines with enhanced formatting
+    const processedLines = processLetterLines(content, templateId);
     
     // Process each line with proper business letter formatting
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    for (let i = 0; i < processedLines.length; i++) {
+      const processedLine = processedLines[i];
       
       // Skip empty lines but add appropriate spacing
-      if (!line) {
+      if (processedLine.isEmpty) {
         currentY += 6;
+        continue;
+      }
+      
+      const { line, formatting } = processedLine;
+      
+      if (!formatting) {
+        currentY += 12;
         continue;
       }
       
@@ -36,9 +43,6 @@ export const downloadCoverLetterAsPdf = async (
         pdf.addPage();
         currentY = margin;
       }
-      
-      // Get formatting for this line
-      const formatting = getLineFormatting(line, templateId);
       
       // Convert CSS-style values to jsPDF values
       const fontSize = parseInt(formatting.fontSize);
