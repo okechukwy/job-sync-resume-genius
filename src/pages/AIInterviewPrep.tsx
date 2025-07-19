@@ -7,6 +7,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { 
   Mic, 
   MicOff, 
   RotateCcw, 
@@ -25,10 +41,16 @@ import {
   Timer,
   Plus,
   ArrowLeft,
-  CheckCircle
+  CheckCircle,
+  Grid3X3,
+  List,
+  ArrowUpDown
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
+import { useSessionHistory } from "@/hooks/useSessionHistory";
+import { SessionHistoryFilters } from "@/components/interview/SessionHistoryFilters";
+import { SessionHistoryItem } from "@/components/interview/SessionHistoryItem";
 
 const AIInterviewPrep = () => {
   const { toast } = useToast();
@@ -40,10 +62,31 @@ const AIInterviewPrep = () => {
     startSession,
     addResponse,
     completeSession,
-    getSessionHistory,
     retryLastAction,
     setCurrentSession
   } = useAIInterview();
+
+  // Session history management
+  const {
+    sessions,
+    loading: historyLoading,
+    totalCount,
+    totalPages,
+    filters,
+    pagination,
+    sort,
+    viewMode,
+    expandedSessions,
+    activeFiltersCount,
+    setFilters,
+    setPagination,
+    setSort,
+    setViewMode,
+    fetchSessions,
+    deleteSession,
+    toggleSessionExpanded,
+    clearFilters
+  } = useSessionHistory();
 
   const [selectedType, setSelectedType] = useState("behavioral");
   const [selectedRole, setSelectedRole] = useState("Business");
@@ -51,10 +94,8 @@ const AIInterviewPrep = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [transcript, setTranscript] = useState("");
-  const [sessionHistory, setSessionHistory] = useState([]);
   const [lastAnalysis, setLastAnalysis] = useState<InterviewAnalysis | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
-  const [historyLoading, setHistoryLoading] = useState(false);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [activeTab, setActiveTab] = useState("practice");
 
@@ -100,8 +141,10 @@ const AIInterviewPrep = () => {
       setRecognition(recognitionInstance);
     }
 
-    // Load session history
-    loadSessionHistory();
+    // Load session history when component mounts or when tab changes to history
+    if (activeTab === 'history') {
+      fetchSessions();
+    }
 
     // Check connection status periodically
     const checkConnection = () => {
@@ -116,35 +159,14 @@ const AIInterviewPrep = () => {
       window.removeEventListener('online', checkConnection);
       window.removeEventListener('offline', checkConnection);
     };
-  }, [toast]);
+  }, [toast, activeTab, fetchSessions]);
 
-  const loadSessionHistory = useCallback(async () => {
-    setHistoryLoading(true);
-    try {
-      console.log('Loading session history...');
-      const history = await getSessionHistory();
-      console.log('Loaded session history:', history);
-      setSessionHistory(history);
-    } catch (error) {
-      console.error('Error loading session history:', error);
-      toast({
-        title: "Error Loading History",
-        description: "Could not load your session history. Please try refreshing.",
-        variant: "destructive",
-      });
-    } finally {
-      setHistoryLoading(false);
+  // Refresh session history when filters or pagination change
+  useEffect(() => {
+    if (activeTab === 'history') {
+      fetchSessions();
     }
-  }, [getSessionHistory, toast]);
-
-  // Refresh session history manually
-  const refreshSessionHistory = useCallback(async () => {
-    await loadSessionHistory();
-    toast({
-      title: "History Refreshed",
-      description: "Session history has been updated.",
-    });
-  }, [loadSessionHistory, toast]);
+  }, [filters, pagination, sort, activeTab, fetchSessions]);
 
   const interviewTypes = [
     { id: "behavioral", name: "Behavioral", icon: MessageSquare, description: "STAR method questions" },
@@ -254,7 +276,10 @@ const AIInterviewPrep = () => {
             // Pass the updated session directly to avoid stale closure issues
             setTimeout(async () => {
               await completeSession(updatedSession);
-              await loadSessionHistory();
+              // Refresh session history if on history tab
+              if (activeTab === 'history') {
+                fetchSessions();
+              }
             }, 1000);
           } else {
             // Move to next question
@@ -360,7 +385,7 @@ const AIInterviewPrep = () => {
   };
 
   const analyticsData = useMemo(() => {
-    if (!sessionHistory || sessionHistory.length === 0) {
+    if (!sessions || sessions.length === 0) {
       return {
         totalSessions: 0,
         averageScore: 0,
@@ -370,10 +395,10 @@ const AIInterviewPrep = () => {
       };
     }
 
-    console.log('Calculating analytics from session history:', sessionHistory);
+    console.log('Calculating analytics from session history:', sessions);
 
     // Filter completed sessions with valid scores
-    const completedSessions = sessionHistory.filter(session => 
+    const completedSessions = sessions.filter(session => 
       session.completed === true && 
       session.responses && 
       Array.isArray(session.responses) && 
@@ -399,7 +424,7 @@ const AIInterviewPrep = () => {
       : 0;
 
     // Count questions actually practiced (from responses)
-    const questionsPracticed = sessionHistory.reduce((total, session) => {
+    const questionsPracticed = sessions.reduce((total, session) => {
       const responseCount = session.responses && Array.isArray(session.responses) 
         ? session.responses.length 
         : 0;
@@ -407,7 +432,7 @@ const AIInterviewPrep = () => {
     }, 0);
 
     const result = {
-      totalSessions: sessionHistory.length,
+      totalSessions: sessions.length,
       averageScore,
       completedSessions: completedSessions.length,
       questionsPracticed,
@@ -416,7 +441,7 @@ const AIInterviewPrep = () => {
 
     console.log('Calculated analytics:', result);
     return result;
-  }, [sessionHistory]);
+  }, [sessions]);
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -930,59 +955,150 @@ const AIInterviewPrep = () => {
                     Review your past interview sessions and progress
                   </CardDescription>
                 </div>
-                <Button 
-                  onClick={refreshSessionHistory} 
-                  variant="outline" 
-                  size="sm"
-                  disabled={historyLoading}
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${historyLoading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewMode(viewMode === 'detailed' ? 'compact' : 'detailed')}
+                  >
+                    {viewMode === 'detailed' ? (
+                      <>
+                        <List className="w-4 h-4 mr-2" />
+                        Compact
+                      </>
+                    ) : (
+                      <>
+                        <Grid3X3 className="w-4 h-4 mr-2" />
+                        Detailed
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={fetchSessions} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={historyLoading}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${historyLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {/* Filters */}
+                <SessionHistoryFilters
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  onClearFilters={clearFilters}
+                  activeFiltersCount={activeFiltersCount}
+                />
+
+                {/* Sort Controls */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Sort by:</span>
+                    <Select
+                      value={`${sort.field}-${sort.order}`}
+                      onValueChange={(value) => {
+                        const [field, order] = value.split('-') as [any, 'asc' | 'desc'];
+                        setSort({ field, order });
+                      }}
+                    >
+                      <SelectTrigger className="w-48">
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="created_at-desc">Date (Newest)</SelectItem>
+                        <SelectItem value="created_at-asc">Date (Oldest)</SelectItem>
+                        <SelectItem value="scores-desc">Score (Highest)</SelectItem>
+                        <SelectItem value="scores-asc">Score (Lowest)</SelectItem>
+                        <SelectItem value="session_type-asc">Type (A-Z)</SelectItem>
+                        <SelectItem value="completed-desc">Status (Completed First)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {totalCount > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      Showing {((pagination.page - 1) * pagination.pageSize) + 1}-{Math.min(pagination.page * pagination.pageSize, totalCount)} of {totalCount} sessions
+                    </div>
+                  )}
+                </div>
+
                 {historyLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="w-6 h-6 animate-spin mr-2" />
                     <span>Loading session history...</span>
                   </div>
-                ) : sessionHistory.length > 0 ? (
-                  <div className="space-y-4">
-                    {sessionHistory.map((session) => (
-                      <Card key={session.id} className="border">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold">
-                                {session.session_type?.charAt(0).toUpperCase() + session.session_type?.slice(1) || 'Unknown'} Interview
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                {session.role_focus} • {session.responses?.length || 0} questions answered • {new Date(session.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-xl font-bold text-primary">
-                                {session.scores?.overall || 0}%
-                              </div>
-                              <Badge variant={session.completed ? "default" : "secondary"}>
-                                {session.completed ? "Completed" : "In Progress"}
-                              </Badge>
-                            </div>
-                          </div>
-                          {session.responses?.length > 0 && (
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Questions practiced: {session.responses.length}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                ) : sessions.length > 0 ? (
+                  <>
+                    <div className="space-y-4">
+                      {sessions.map((session) => (
+                        <SessionHistoryItem
+                          key={session.id}
+                          session={session}
+                          isExpanded={expandedSessions.has(session.id)}
+                          onToggleExpand={() => toggleSessionExpanded(session.id)}
+                          onDelete={() => deleteSession(session.id)}
+                          compact={viewMode === 'compact'}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                              className={pagination.page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            const page = i + 1;
+                            return (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={() => setPagination(prev => ({ ...prev, page }))}
+                                  isActive={pagination.page === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={() => setPagination(prev => ({ ...prev, page: Math.min(totalPages, prev.page + 1) }))}
+                              className={pagination.page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8">
                     <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-2">No interview sessions yet</p>
-                    <p className="text-sm text-muted-foreground">Start your first practice session to begin tracking your progress!</p>
+                    <p className="text-muted-foreground mb-2">
+                      {activeFiltersCount > 0 ? "No sessions match your filters" : "No interview sessions yet"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {activeFiltersCount > 0 
+                        ? "Try adjusting your filters or clear them to see all sessions"
+                        : "Start your first practice session to begin tracking your progress!"
+                      }
+                    </p>
+                    {activeFiltersCount > 0 && (
+                      <Button onClick={clearFilters} variant="outline" size="sm" className="mt-2">
+                        Clear Filters
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
