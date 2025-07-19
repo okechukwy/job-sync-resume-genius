@@ -27,8 +27,8 @@ const FileProcessingResults = ({
 
   const getConfidenceColor = (confidence: FileReadResult['confidence']) => {
     switch (confidence) {
-      case 'high': return 'success';
-      case 'medium': return 'warning';
+      case 'high': return 'default';
+      case 'medium': return 'secondary';
       case 'low': return 'destructive';
       default: return 'secondary';
     }
