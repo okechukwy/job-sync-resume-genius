@@ -250,11 +250,13 @@ const AIInterviewPrep = () => {
 
           if (allQuestionsAnswered) {
             console.log('All questions answered, completing session...');
+            // Update current session immediately to ensure 100% progress
+            setCurrentSession(updatedSession);
             // Small delay to ensure UI updates with 100% progress
             setTimeout(async () => {
               await completeSession();
               await loadSessionHistory();
-            }, 1000);
+            }, 1500);
           } else {
             // Move to next question
             console.log('Moving to next question...');
