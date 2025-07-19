@@ -27,6 +27,7 @@ export interface ATSOptimizationResult {
     current: string;
     improved: string;
     reasoning: string;
+    category?: string;
   }>;
   overallRecommendations: string[];
 }
