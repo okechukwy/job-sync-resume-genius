@@ -68,6 +68,22 @@ export interface QuestionGenerationResult {
   };
 }
 
+export interface CoverLetterRequest {
+  fullName: string;
+  jobTitle: string;
+  companyName: string;
+  hiringManager?: string;
+  jobDescription: string;
+  tone: string;
+  keyPoints?: string;
+  userBackground?: string;
+}
+
+export interface CoverLetterResult {
+  coverLetter: string;
+  success: boolean;
+}
+
 export const analyzeCVWithAI = async (
   resumeText: string, 
   industry: string = 'Business'
@@ -174,6 +190,26 @@ export const generateInterviewQuestions = async (
     return data as QuestionGenerationResult;
   } catch (error) {
     console.error('Error calling question generator service:', error);
+    throw error;
+  }
+};
+
+export const generateCoverLetter = async (
+  request: CoverLetterRequest
+): Promise<CoverLetterResult> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('cover-letter-generator', {
+      body: request
+    });
+
+    if (error) {
+      console.error('Cover letter generation error:', error);
+      throw new Error(error.message || 'Failed to generate cover letter');
+    }
+
+    return data as CoverLetterResult;
+  } catch (error) {
+    console.error('Error calling cover letter generator service:', error);
     throw error;
   }
 };
