@@ -194,6 +194,107 @@ const CoverLetterGenerator = () => {
           </p>
         </div>
 
+        {/* How to Write a Cover Letter Guide */}
+        <Card className="glass-card mb-12">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              How to Write a Cover Letter: Complete Guide
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Structure Section */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">1. Structure & Format</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <h4 className="font-medium text-foreground mb-2">Header</h4>
+                      <p>Your name, address, phone, email, and date</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <h4 className="font-medium text-foreground mb-2">Employer Contact</h4>
+                      <p>Hiring manager's name, title, company, and address</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <h4 className="font-medium text-foreground mb-2">Professional Greeting</h4>
+                      <p>"Dear [Hiring Manager's Name]" or "Dear Hiring Manager"</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">2. Opening Paragraph</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• State the position you're applying for</p>
+                    <p>• Mention where you found the job posting</p>
+                    <p>• Include a compelling hook about your qualifications</p>
+                    <p>• Show enthusiasm for the role and company</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">3. Body Paragraphs</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Highlight relevant skills and experiences</p>
+                    <p>• Use specific examples and quantifiable achievements</p>
+                    <p>• Connect your background to job requirements</p>
+                    <p>• Demonstrate knowledge of the company</p>
+                    <p>• Show how you can add value to their team</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tips Section */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">4. Closing Paragraph</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Reiterate your interest and fit for the role</p>
+                    <p>• Mention your resume is attached</p>
+                    <p>• Request an interview or next steps</p>
+                    <p>• Thank them for their time and consideration</p>
+                    <p>• Use professional closing: "Sincerely" or "Best regards"</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">5. Best Practices</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Keep it to one page (3-4 paragraphs)</p>
+                    <p>• Use a professional, readable font</p>
+                    <p>• Maintain consistent formatting and spacing</p>
+                    <p>• Tailor each letter to the specific job</p>
+                    <p>• Use keywords from the job description</p>
+                    <p>• Proofread carefully for errors</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-primary">6. Common Mistakes to Avoid</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Using a generic, one-size-fits-all letter</p>
+                    <p>• Repeating your entire resume</p>
+                    <p>• Being too informal or overly casual</p>
+                    <p>• Focusing only on what you want</p>
+                    <p>• Including irrelevant personal information</p>
+                    <p>• Exceeding one page in length</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <h4 className="font-semibold text-primary mb-2">💡 Pro Tip</h4>
+              <p className="text-sm text-muted-foreground">
+                Research the company culture and values before writing. Use the company's own language and terminology 
+                from their website to show you understand their mission and would be a cultural fit.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {error && (
           <Alert className="mb-6 max-w-7xl mx-auto">
             <AlertCircle className="h-4 w-4" />
