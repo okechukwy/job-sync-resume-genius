@@ -1,13 +1,17 @@
+
 import { toast } from 'sonner';
 import { downloadAsTxt } from './downloadHandlers/txtDownloadHandler';
 import { downloadAsPdf } from './downloadHandlers/pdfDownloadHandler';
+import { downloadCoverLetterAsPdf } from './downloadHandlers/coverLetterPdfHandler';
 import { downloadAsRtf } from './downloadHandlers/rtfDownloadHandler';
 
 export const downloadFile = async (
   content: string,
   fileName: string,
   format: 'txt' | 'pdf' | 'docx',
-  isHtmlContent: boolean = false
+  isHtmlContent: boolean = false,
+  documentType: 'resume' | 'cover-letter' = 'resume',
+  templateId?: string
 ) => {
   try {
     switch (format) {
@@ -15,7 +19,11 @@ export const downloadFile = async (
         await downloadAsTxt(content, fileName, isHtmlContent);
         break;
       case 'pdf':
-        await downloadAsPdf(content, fileName, isHtmlContent);
+        if (documentType === 'cover-letter') {
+          await downloadCoverLetterAsPdf(content, fileName, templateId);
+        } else {
+          await downloadAsPdf(content, fileName, isHtmlContent);
+        }
         break;
       case 'docx':
         await downloadAsRtf(content, fileName, isHtmlContent);

@@ -124,7 +124,14 @@ const CoverLetterGenerator = () => {
     const fileName = `cover_letter_${formData.jobTitle.replace(/\s+/g, '_')}_${formData.companyName.replace(/\s+/g, '_')}`;
     
     try {
-      await downloadFile(generatedLetter, fileName, downloadFormat, false);
+      await downloadFile(
+        generatedLetter, 
+        fileName, 
+        downloadFormat, 
+        false, 
+        'cover-letter', 
+        formData.templateId
+      );
     } catch (error) {
       console.error('Download failed:', error);
       toast.error('Download failed. Please try again.');
@@ -514,8 +521,18 @@ const CoverLetterGenerator = () => {
               </CardHeader>
               <CardContent>
                 {generatedLetter ? (
-                  <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap text-sm leading-relaxed font-mono">
-                    {generatedLetter}
+                  <div className="bg-background/50 rounded-lg p-8 min-h-96 max-w-4xl mx-auto">
+                    <div 
+                      className="whitespace-pre-wrap text-sm leading-relaxed"
+                      style={{
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        fontSize: '11pt',
+                        lineHeight: '1.4',
+                        color: '#1f2937'
+                      }}
+                    >
+                      {generatedLetter}
+                    </div>
                   </div>
                 ) : (
                   <div className="bg-background/50 rounded-lg p-12 min-h-96 flex items-center justify-center text-center">

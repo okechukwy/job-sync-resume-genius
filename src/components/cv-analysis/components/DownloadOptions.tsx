@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText } from "lucide-react";
@@ -8,14 +9,22 @@ interface DownloadOptionsProps {
   enhancedResult: EnhancedCVResult;
   originalContent: string;
   uploadedFile: File;
+  documentType?: 'resume' | 'cover-letter';
+  templateId?: string;
 }
 
-const DownloadOptions = ({ enhancedResult, originalContent, uploadedFile }: DownloadOptionsProps) => {
+const DownloadOptions = ({ 
+  enhancedResult, 
+  originalContent, 
+  uploadedFile, 
+  documentType = 'resume',
+  templateId 
+}: DownloadOptionsProps) => {
   const handleDownload = async (format: 'txt' | 'pdf' | 'docx') => {
     const content = enhancedResult?.resumeContent || originalContent;
     const fileName = uploadedFile.name.replace(/\.[^/.]+$/, '');
     const isHtml = enhancedResult?.isHtmlContent || false;
-    await downloadFile(content, fileName, format, isHtml);
+    await downloadFile(content, fileName, format, isHtml, documentType, templateId);
   };
 
   return (
@@ -23,12 +32,12 @@ const DownloadOptions = ({ enhancedResult, originalContent, uploadedFile }: Down
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Download className="w-5 h-5" />
-          Download Your Optimized Resume
+          Download Your Optimized {documentType === 'cover-letter' ? 'Cover Letter' : 'Resume'}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          Choose your preferred format to download the optimized resume.
+          Choose your preferred format to download the optimized {documentType === 'cover-letter' ? 'cover letter' : 'resume'}.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Button 
