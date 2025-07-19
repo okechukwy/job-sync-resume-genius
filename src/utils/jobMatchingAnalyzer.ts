@@ -1,4 +1,4 @@
-import { readFileContent } from './fileReader';
+import { readFileContentWithMetadata, FileReadResult } from './fileReader';
 import { analyzeJobContext, generateCareerGuidance, EnhancedMatchAnalysis, SkillAnalysis } from './contextualAnalyzer';
 import { extractEnhancedKeywords, ExtractedKeyword } from './enhancedKeywordExtractor';
 import { SKILL_TAXONOMY, INDUSTRY_MATRICES } from './skillTaxonomy';
@@ -15,6 +15,9 @@ export interface JobMatchingResult {
   recommendations: string[];
   proTips: string[];
   enhancedAnalysis?: EnhancedMatchAnalysis;
+  processingResult?: FileReadResult;
+  analysisConfidence: 'high' | 'medium' | 'low';
+  analysisWarnings: string[];
 }
 
 // Common tech keywords and skills
@@ -290,16 +293,34 @@ const generateRecommendations = (
   return recommendations.slice(0, 4); // Limit to 4 recommendations
 };
 
-// Enhanced analysis function
+// Enhanced analysis function with confidence tracking
 const performEnhancedAnalysis = (
   jobDescription: string,
   resumeContent: string,
   extractedJobKeywords: ExtractedKeyword[],
-  extractedResumeKeywords: ExtractedKeyword[]
-): EnhancedMatchAnalysis => {
+  extractedResumeKeywords: ExtractedKeyword[],
+  processingResult: FileReadResult
+): { analysis: EnhancedMatchAnalysis; confidence: JobMatchingResult['analysisConfidence']; warnings: string[] } => {
   const jobContext = analyzeJobContext(jobDescription);
+  const warnings: string[] = [];
   
-  // Create detailed skill analysis
+  // Determine analysis confidence based on content quality
+  let analysisConfidence: JobMatchingResult['analysisConfidence'] = 'high';
+  
+  if (processingResult.confidence === 'low' || processingResult.extractedWords < 100) {
+    analysisConfidence = 'low';
+    warnings.push('Analysis confidence is low due to limited resume content extraction');
+  } else if (processingResult.confidence === 'medium' || processingResult.extractedWords < 200) {
+    analysisConfidence = 'medium';
+    warnings.push('Analysis confidence is moderate - consider providing more detailed resume content');
+  }
+  
+  // Add warnings for insufficient skill detection
+  if (extractedResumeKeywords.length < 5) {
+    warnings.push('Few skills were detected in your resume - this may impact match accuracy');
+  }
+  
+  // Create detailed skill analysis with confidence weighting
   const skillAnalysis: SkillAnalysis[] = extractedJobKeywords.map(jobKeyword => {
     const hasSkill = extractedResumeKeywords.some(resumeKeyword => 
       resumeKeyword.keyword.toLowerCase() === jobKeyword.keyword.toLowerCase() ||
@@ -338,19 +359,20 @@ const performEnhancedAnalysis = (
     };
   });
 
-  // Calculate category scores
+  // Adjust scoring based on confidence
+  const confidenceMultiplier = analysisConfidence === 'high' ? 1.0 : 
+                              analysisConfidence === 'medium' ? 0.9 : 0.8;
+
   const categoryScores = {
-    technical: calculateCategoryScore(skillAnalysis, 'technical'),
+    technical: Math.round(calculateCategoryScore(skillAnalysis, 'technical') * confidenceMultiplier),
     soft: calculateCategoryScore(skillAnalysis, 'soft'),
     tools: calculateCategoryScore(skillAnalysis, 'tool'),
     methodologies: calculateCategoryScore(skillAnalysis, 'methodology'),
     domain: calculateCategoryScore(skillAnalysis, 'domain')
   };
 
-  // Calculate overall score with enhanced algorithm
-  const overallScore = calculateEnhancedMatchScore(skillAnalysis, jobContext);
+  const overallScore = Math.round(calculateEnhancedMatchScore(skillAnalysis, jobContext) * confidenceMultiplier);
 
-  // Generate contextual insights
   const contextualInsights = {
     industryFit: calculateIndustryFit(skillAnalysis, jobContext.industry),
     roleLevelMatch: calculateRoleLevelMatch(skillAnalysis, jobContext.roleLevel),
@@ -358,13 +380,10 @@ const performEnhancedAnalysis = (
     cultureMatch: calculateCultureMatch(resumeContent, jobContext.cultureIndicators)
   };
 
-  // Generate competitive analysis
   const competitivePosition = generateCompetitiveAnalysis(skillAnalysis, jobContext);
-
-  // Generate career guidance
   const careerGuidance = generateCareerGuidance(jobContext, skillAnalysis, overallScore);
 
-  return {
+  const analysis: EnhancedMatchAnalysis = {
     overallScore,
     categoryScores,
     skillAnalysis,
@@ -372,6 +391,8 @@ const performEnhancedAnalysis = (
     competitivePosition,
     careerGuidance
   };
+
+  return { analysis, confidence: analysisConfidence, warnings };
 };
 
 const calculateCategoryScore = (skillAnalysis: SkillAnalysis[], category: string): number => {
@@ -525,18 +546,40 @@ const estimateTimeToAcquire = (skill: string, category: string): string => {
   return timeMap[category] || '2-4 months';
 };
 
-// Enhanced main analysis function
+// Enhanced main analysis function with detailed processing feedback
 export const analyzeJobMatch = async (
   jobDescription: string,
-  resumeFile: File
+  resumeFile: File,
+  manualResumeContent?: string
 ): Promise<JobMatchingResult> => {
   try {
-    const resumeContent = await readFileContent(resumeFile);
+    let resumeContent: string;
+    let processingResult: FileReadResult;
     
-    // Detect industry for context
+    if (manualResumeContent) {
+      // Use manual input with high confidence
+      resumeContent = manualResumeContent;
+      processingResult = {
+        content: manualResumeContent,
+        confidence: 'high',
+        extractedWords: manualResumeContent.trim().split(/\s+/).length,
+        warnings: [],
+        processingMethod: 'Manual text input'
+      };
+    } else {
+      // Use file processing
+      processingResult = await readFileContentWithMetadata(resumeFile);
+      resumeContent = processingResult.content;
+    }
+    
+    // Validate minimum content for analysis
+    if (resumeContent.trim().length < 50) {
+      throw new Error('Insufficient resume content for analysis. Please provide a more detailed resume or use manual input.');
+    }
+    
     const jobContext = analyzeJobContext(jobDescription);
     
-    // Extract enhanced keywords
+    // Extract enhanced keywords with better context
     const jobKeywords = extractEnhancedKeywords(jobDescription, jobContext.industry);
     const resumeKeywords = extractEnhancedKeywords(resumeContent, jobContext.industry);
     
@@ -565,19 +608,13 @@ export const analyzeJobMatch = async (
       hasSkill: matchedKeywords.includes(keyword.keyword)
     }));
     
-    // Generate enhanced analysis
-    const enhancedAnalysis = performEnhancedAnalysis(
-      jobDescription, 
-      resumeContent, 
-      jobKeywords, 
-      resumeKeywords
-    );
+    // Generate enhanced analysis with confidence tracking
+    const { analysis: enhancedAnalysis, confidence: analysisConfidence, warnings: analysisWarnings } = 
+      performEnhancedAnalysis(jobDescription, resumeContent, jobKeywords, resumeKeywords, processingResult);
     
-    // Generate enhanced recommendations
-    const recommendations = generateEnhancedRecommendations(enhancedAnalysis, jobContext);
-    
-    // Generate enhanced pro tips  
-    const proTips = generateEnhancedProTips(enhancedAnalysis, jobContext);
+    // Generate context-aware recommendations
+    const recommendations = generateEnhancedRecommendations(enhancedAnalysis, jobContext, analysisConfidence);
+    const proTips = generateEnhancedProTips(enhancedAnalysis, jobContext, analysisConfidence);
     
     return {
       matchScore: enhancedAnalysis.overallScore,
@@ -586,19 +623,31 @@ export const analyzeJobMatch = async (
       skillsGap: skillsGap.slice(0, 8),
       recommendations,
       proTips,
-      enhancedAnalysis
+      enhancedAnalysis,
+      processingResult,
+      analysisConfidence,
+      analysisWarnings: [...processingResult.warnings, ...analysisWarnings]
     };
   } catch (error) {
     console.error('Error analyzing job match:', error);
-    throw new Error('Failed to analyze job match. Please try again.');
+    throw new Error(`Failed to analyze job match: ${error.message}`);
   }
 };
 
-const generateEnhancedRecommendations = (analysis: EnhancedMatchAnalysis, jobContext: any): string[] => {
+const generateEnhancedRecommendations = (
+  analysis: EnhancedMatchAnalysis, 
+  jobContext: any, 
+  confidence: JobMatchingResult['analysisConfidence']
+): string[] => {
   const recommendations: string[] = [];
   
+  // Add confidence-specific recommendations
+  if (confidence === 'low') {
+    recommendations.push('Consider uploading a more detailed resume or using manual text input for better analysis accuracy');
+  }
+  
   // Add career guidance as recommendations
-  recommendations.push(...analysis.careerGuidance.immediateActions);
+  recommendations.push(...analysis.careerGuidance.immediateActions.slice(0, 2));
   
   // Add competitive positioning advice
   if (analysis.competitivePosition.gapsVsMarket.length > 0) {
@@ -613,17 +662,29 @@ const generateEnhancedRecommendations = (analysis: EnhancedMatchAnalysis, jobCon
   return recommendations.slice(0, 4);
 };
 
-const generateEnhancedProTips = (analysis: EnhancedMatchAnalysis, jobContext: any): string[] => {
+const generateEnhancedProTips = (
+  analysis: EnhancedMatchAnalysis, 
+  jobContext: any, 
+  confidence: JobMatchingResult['analysisConfidence']
+): string[] => {
   const tips: string[] = [];
   
-  // Score-based tips
-  if (analysis.overallScore < 50) {
+  // Confidence-based tips
+  if (confidence === 'low') {
+    tips.push('For more accurate analysis, ensure your resume contains detailed descriptions of your experience and skills');
+  } else if (confidence === 'medium') {
+    tips.push('Your analysis could be more precise with additional resume details in key sections');
+  }
+  
+  // Score-based tips with confidence adjustment
+  const adjustedScore = analysis.overallScore;
+  if (adjustedScore < 50) {
     tips.push('Consider applying to similar roles with lower requirements to build experience');
     tips.push('Focus on obtaining the top 3 critical missing skills before applying');
-  } else if (analysis.overallScore < 70) {
+  } else if (adjustedScore < 70) {
     tips.push('You have a solid foundation - emphasize your transferable skills in your application');
     tips.push('Consider mentioning your learning plan for missing skills in your cover letter');
-  } else if (analysis.overallScore < 85) {
+  } else if (adjustedScore < 85) {
     tips.push('Strong candidate profile - highlight specific achievements that demonstrate your matching skills');
     tips.push('Prepare concrete examples of how you\'ve used your key skills to drive results');
   } else {
@@ -637,20 +698,11 @@ const generateEnhancedProTips = (analysis: EnhancedMatchAnalysis, jobContext: an
     if (analysis.categoryScores.technical < 80) {
       tips.push('Consider contributing to open source projects to strengthen your technical profile');
     }
-  } else if (jobContext.industry === 'healthcare') {
-    tips.push('Emphasize any patient care experience and regulatory compliance knowledge');
-  } else if (jobContext.industry === 'finance') {
-    tips.push('Highlight your analytical skills and any financial modeling experience');
   }
   
   // Competitive positioning tips
   if (analysis.competitivePosition.uniqueDifferentiators.length > 0) {
     tips.push(`Leverage your unique strengths: ${analysis.competitivePosition.uniqueDifferentiators[0]}`);
-  }
-  
-  // Role-level specific tips
-  if (jobContext.roleLevel === 'senior' && analysis.contextualInsights.roleLevelMatch < 80) {
-    tips.push('Emphasize your leadership experience and strategic thinking capabilities');
   }
   
   return tips.slice(0, 6);

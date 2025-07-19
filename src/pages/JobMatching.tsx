@@ -8,12 +8,16 @@ import { Upload, FileText, Target, CheckCircle, AlertCircle, X, TrendingUp, User
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { analyzeJobMatch, JobMatchingResult } from "@/utils/jobMatchingAnalyzer";
+import { FileReadResult } from "@/utils/fileReader";
+import FileProcessingResults from "@/components/FileProcessingResults";
 
 const JobMatching = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<JobMatchingResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [processingResult, setProcessingResult] = useState<FileReadResult | null>(null);
+  const [manualResumeContent, setManualResumeContent] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,34 +31,69 @@ const JobMatching = () => {
     }
 
     setUploadedResume(file);
+    setProcessingResult(null);
+    setAnalysis(null);
+    setManualResumeContent("");
     toast.success('Resume uploaded successfully!');
   };
 
   const handleRemoveResume = () => {
     setUploadedResume(null);
+    setProcessingResult(null);
+    setManualResumeContent("");
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setAnalysis(null); // Clear any existing analysis
+    setAnalysis(null);
     toast.info('Resume removed. You can upload a new one.');
   };
 
   const handleAnalyze = async () => {
-    if (!jobDescription.trim() || !uploadedResume) {
-      toast.error('Please provide both job description and resume');
+    if (!jobDescription.trim()) {
+      toast.error('Please provide a job description');
+      return;
+    }
+
+    if (!uploadedResume && !manualResumeContent.trim()) {
+      toast.error('Please upload a resume or provide manual content');
       return;
     }
 
     setIsAnalyzing(true);
     try {
-      const result = await analyzeJobMatch(jobDescription, uploadedResume);
+      const result = await analyzeJobMatch(
+        jobDescription, 
+        uploadedResume!, 
+        manualResumeContent || undefined
+      );
+      
       setAnalysis(result);
-      toast.success('Analysis complete!');
+      setProcessingResult(result.processingResult || null);
+      
+      // Show appropriate success message based on confidence
+      if (result.analysisConfidence === 'high') {
+        toast.success('Analysis complete with high confidence!');
+      } else if (result.analysisConfidence === 'medium') {
+        toast.success('Analysis complete! Consider the confidence notes for best results.');
+      } else {
+        toast.success('Analysis complete, but confidence is low. See suggestions below.');
+      }
     } catch (error) {
       console.error('Analysis failed:', error);
-      toast.error('Failed to analyze job match. Please try again.');
+      toast.error(error.message || 'Failed to analyze job match. Please try again.');
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleManualInput = (content: string) => {
+    setManualResumeContent(content);
+    toast.success('Manual content added successfully!');
+  };
+
+  const handleRetryAnalysis = async () => {
+    if (uploadedResume && jobDescription.trim()) {
+      await handleAnalyze();
     }
   };
 
@@ -147,7 +186,7 @@ const JobMatching = () => {
                 variant="hero" 
                 className="w-full mt-4" 
                 onClick={handleAnalyze}
-                disabled={!jobDescription.trim() || !uploadedResume || isAnalyzing}
+                disabled={!jobDescription.trim() || (!uploadedResume && !manualResumeContent.trim()) || isAnalyzing}
               >
                 {isAnalyzing ? 'Analyzing...' : 'Analyze Match'}
               </Button>
@@ -155,9 +194,34 @@ const JobMatching = () => {
           </Card>
         </div>
 
+        {/* File Processing Results */}
+        {processingResult && uploadedResume && (
+          <FileProcessingResults
+            fileName={uploadedResume.name}
+            processingResult={processingResult}
+            onManualInput={handleManualInput}
+            onRetryAnalysis={handleRetryAnalysis}
+          />
+        )}
+
         {/* Analysis Results */}
         {analysis && (
           <div className="space-y-8">
+            {/* Analysis Confidence Indicator */}
+            {analysis.analysisConfidence !== 'high' && (
+              <Card className="glass-card border-warning/20 bg-warning/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertCircle className="h-5 w-5 text-warning" />
+                    <h3 className="font-semibold">Analysis Confidence: {analysis.analysisConfidence.toUpperCase()}</h3>
+                  </div>
+                  {analysis.analysisWarnings.map((warning, index) => (
+                    <p key={index} className="text-sm text-muted-foreground mb-2">• {warning}</p>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Enhanced Match Score with Category Breakdown */}
             <Card className="glass-card">
               <CardHeader>
