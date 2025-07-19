@@ -1,17 +1,30 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
+import { readFileContent } from "@/utils/fileReader";
+import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
 
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<ATSOptimizationResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
+  const [selectedIndustry, setSelectedIndustry] = useState("Business");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const industries = [
+    "Technology", "Healthcare", "Finance", "Creative", "Business", "Research",
+    "Marketing", "Sales", "Education", "Manufacturing", "Retail"
+  ];
 
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -34,47 +47,32 @@ const ATSAnalysis = () => {
     }
 
     setIsAnalyzing(true);
-    // Simulate analysis
-    setTimeout(() => {
-      const mockAnalysis = {
-        overallScore: 82,
-        categories: [
-          { name: 'Format & Structure', score: 90, status: 'excellent' },
-          { name: 'Content Quality', score: 85, status: 'good' },
-          { name: 'Keyword Optimization', score: 75, status: 'needs-improvement' },
-          { name: 'ATS Compatibility', score: 88, status: 'excellent' },
-          { name: 'Contact Information', score: 95, status: 'excellent' },
-          { name: 'Section Organization', score: 70, status: 'needs-improvement' }
-        ],
-        issues: [
-          { type: 'critical', message: 'Missing professional email address format' },
-          { type: 'warning', message: 'Some sections lack proper headings' },
-          { type: 'info', message: 'Consider adding more industry-specific keywords' }
-        ],
-        recommendations: [
-          'Add more action verbs to your experience descriptions',
-          'Include quantifiable achievements with numbers and percentages',
-          'Optimize section headings for better ATS parsing',
-          'Add relevant technical skills section',
-          'Use consistent formatting throughout the document'
-        ],
-        beforeAfter: {
-          before: {
-            atsScore: 65,
-            keywordDensity: 3.2,
-            readabilityScore: 70
-          },
-          after: {
-            atsScore: 88,
-            keywordDensity: 5.8,
-            readabilityScore: 85
-          }
-        }
-      };
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
+    
+    try {
+      // Extract text from uploaded resume
+      const resumeText = await readFileContent(uploadedResume);
+      
+      if (!resumeText || resumeText.trim().length < 100) {
+        toast.error('Unable to extract sufficient text from your resume. Please ensure it\'s not an image-based PDF.');
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // Call the AI optimization service
+      const result = await optimizeForATS(
+        resumeText,
+        jobDescription.trim() || undefined,
+        selectedIndustry
+      );
+
+      setAnalysis(result);
       toast.success('ATS analysis complete!');
-    }, 3000);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast.error('Failed to analyze resume. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -83,28 +81,24 @@ const ATSAnalysis = () => {
     return 'text-destructive';
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'excellent':
-        return <CheckCircle className="h-5 w-5 text-success" />;
-      case 'good':
-        return <Info className="h-5 w-5 text-primary" />;
-      case 'needs-improvement':
-        return <AlertCircle className="h-5 w-5 text-warning" />;
-      default:
-        return <XCircle className="h-5 w-5 text-destructive" />;
-    }
-  };
-
-  const getIssueIcon = (type: string) => {
-    switch (type) {
-      case 'critical':
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high':
         return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'warning':
+      case 'medium':
         return <AlertCircle className="h-4 w-4 text-warning" />;
       default:
         return <Info className="h-4 w-4 text-primary" />;
     }
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const colors = {
+      high: 'bg-destructive/10 text-destructive border-destructive/20',
+      medium: 'bg-warning/10 text-warning border-warning/20',
+      low: 'bg-primary/10 text-primary border-primary/20'
+    };
+    return colors[priority as keyof typeof colors] || colors.low;
   };
 
   return (
@@ -130,7 +124,7 @@ const ATSAnalysis = () => {
               Upload Your Resume
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <input
               ref={fileInputRef}
               type="file"
@@ -168,6 +162,40 @@ const ATSAnalysis = () => {
                 </Button>
               </div>
             )}
+
+            {/* Industry Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="industry">Target Industry</Label>
+                <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Job Description (Optional) */}
+            <div className="space-y-2">
+              <Label htmlFor="jobDescription">Job Description (Optional)</Label>
+              <Textarea
+                id="jobDescription"
+                placeholder="Paste the job description for more targeted optimization..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                className="min-h-[100px]"
+              />
+              <p className="text-sm text-muted-foreground">
+                Adding a job description will provide more targeted keyword analysis and recommendations.
+              </p>
+            </div>
             
             {uploadedResume && (
               <Button 
@@ -193,118 +221,133 @@ const ATSAnalysis = () => {
               <CardContent>
                 <div className="flex items-center justify-center mb-6">
                   <div className="text-center">
-                    <div className={`text-6xl font-bold ${getScoreColor(analysis.overallScore)}`}>
-                      {analysis.overallScore}
+                    <div className={`text-6xl font-bold ${getScoreColor(analysis.atsScore)}`}>
+                      {analysis.atsScore}
                     </div>
                     <div className="text-muted-foreground">out of 100</div>
                   </div>
                 </div>
-                <Progress value={analysis.overallScore} className="h-4" />
+                <Progress value={analysis.atsScore} className="h-4" />
               </CardContent>
             </Card>
 
-            {/* Category Breakdown */}
+            {/* Keyword Analysis */}
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>Detailed Score Breakdown</CardTitle>
+                <CardTitle>Keyword Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {analysis.categories.map((category: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 glass-card rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {getStatusIcon(category.status)}
-                        <span className="font-medium">{category.name}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`font-bold ${getScoreColor(category.score)}`}>
-                          {category.score}%
-                        </span>
-                        <Progress value={category.score} className="w-24 h-2" />
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-semibold mb-3 text-success">Found Keywords</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {analysis.keywordMatches.found.map((keyword, index) => (
+                        <Badge key={index} variant="secondary" className="bg-success/10 text-success border-success/20">
+                          {keyword}
+                        </Badge>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-3 text-warning">Missing Keywords</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {analysis.keywordMatches.missing.map((keyword, index) => (
+                        <Badge key={index} variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+                
+                {analysis.keywordMatches.suggestions.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="font-semibold mb-3">Keyword Suggestions</h3>
+                    <ul className="space-y-2">
+                      {analysis.keywordMatches.suggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Issues Found */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Issues Found</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analysis.issues.map((issue: any, index: number) => (
-                    <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg">
-                      {getIssueIcon(issue.type)}
-                      <span>{issue.message}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Format Optimizations */}
+            {analysis.formatOptimizations.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>Format Issues</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {analysis.formatOptimizations.map((optimization, index) => (
+                      <div key={index} className="glass-card p-4 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          {getPriorityIcon(optimization.priority)}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-medium">{optimization.issue}</h4>
+                              <Badge className={getPriorityBadge(optimization.priority)}>
+                                {optimization.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-muted-foreground">{optimization.recommendation}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Optimization Tips */}
+            {/* Content Optimizations */}
+            {analysis.contentOptimizations.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>Content Improvements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {analysis.contentOptimizations.map((optimization, index) => (
+                      <div key={index} className="glass-card p-4 rounded-lg">
+                        <h4 className="font-semibold mb-3">{optimization.section}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground mb-2">Current:</p>
+                            <p className="text-sm bg-muted/50 p-3 rounded border">{optimization.current}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-success mb-2">Improved:</p>
+                            <p className="text-sm bg-success/10 p-3 rounded border border-success/20">{optimization.improved}</p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{optimization.reasoning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Overall Recommendations */}
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>Optimization Tips</CardTitle>
+                <CardTitle>Optimization Recommendations</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {analysis.recommendations.map((rec: string, index: number) => (
+                  {analysis.overallRecommendations.map((rec, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                       {rec}
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
-
-            {/* Before/After Comparison */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Before/After Comparison</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="text-center">
-                    <h3 className="font-semibold mb-4 text-muted-foreground">Before Optimization</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-2xl font-bold text-destructive">{analysis.beforeAfter.before.atsScore}%</div>
-                        <div className="text-sm text-muted-foreground">ATS Score</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">{analysis.beforeAfter.before.keywordDensity}%</div>
-                        <div className="text-sm text-muted-foreground">Keyword Density</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">{analysis.beforeAfter.before.readabilityScore}</div>
-                        <div className="text-sm text-muted-foreground">Readability Score</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <h3 className="font-semibold mb-4 text-success">After Optimization</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-2xl font-bold text-success">{analysis.beforeAfter.after.atsScore}%</div>
-                        <div className="text-sm text-muted-foreground">ATS Score</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">{analysis.beforeAfter.after.keywordDensity}%</div>
-                        <div className="text-sm text-muted-foreground">Keyword Density</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">{analysis.beforeAfter.after.readabilityScore}</div>
-                        <div className="text-sm text-muted-foreground">Readability Score</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
