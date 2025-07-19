@@ -16,6 +16,7 @@ interface CoverLetterRequest {
   location?: string;
   jobTitle: string;
   companyName: string;
+  companyAddress?: string;
   hiringManager?: string;
   jobDescription: string;
   tone: string;
@@ -48,6 +49,7 @@ serve(async (req) => {
       location,
       jobTitle,
       companyName,
+      companyAddress,
       hiringManager,
       jobDescription,
       tone,
@@ -63,17 +65,28 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Create comprehensive AI prompt for professional business letter format
-    const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter that follows standard business letter conventions:
+    // Build contact information
+    const contactInfo = [email, phone, location].filter(Boolean).join(' | ');
+    const senderInfo = contactInfo ? `${fullName}\n${contactInfo}` : fullName;
+    
+    // Build recipient information
+    const recipientName = hiringManager || 'Hiring Manager';
+    const recipientInfo = companyAddress 
+      ? `${recipientName}\n${companyName}\n${companyAddress}`
+      : `${recipientName}\n${companyName}`;
 
-FORMATTING REQUIREMENTS:
-1. Start with the current date
-2. Include recipient address block (if hiring manager provided)
-3. Use professional salutation
-4. Write ${letterLength} content (brief: 2-3 paragraphs, standard: 3-4 paragraphs, detailed: 4-5 paragraphs)
-5. End with professional closing ("${closingType}")
-6. Include signature line with sender's name
-7. Use proper paragraph spacing and business letter structure
+    // Create comprehensive AI prompt for professional business letter format
+    const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter that follows standard business letter conventions.
+
+CRITICAL FORMATTING REQUIREMENTS:
+1. Start with sender's information (name and contact details) aligned to the left
+2. Add current date below sender info
+3. Add recipient information (hiring manager name, company name, and address if provided)
+4. Use professional salutation addressing the hiring manager by name if provided
+5. Write ${letterLength} content (brief: 2-3 paragraphs, standard: 3-4 paragraphs, detailed: 4-5 paragraphs)
+6. End with professional closing ("${closingType}")
+7. Include signature line with sender's name
+8. Use proper paragraph spacing and business letter structure
 
 CONTENT REQUIREMENTS:
 - Opening paragraph: Express interest and briefly mention how you learned about the position
@@ -90,20 +103,21 @@ TONE GUIDELINES:
 - Creative: Innovative language, unique approach, storytelling elements
 - Formal: Traditional, conservative, very respectful language
 
-Return ONLY the complete cover letter in proper business format, ready for printing or PDF conversion.`;
+CRITICAL: Do NOT use placeholders like [Company Address] or [City, State ZIP Code]. Use the actual information provided or omit if not available.
 
-    const contactInfo = [email, phone, location].filter(Boolean).join(' | ');
-    const senderInfo = contactInfo ? `${fullName}\n${contactInfo}` : fullName;
+Return ONLY the complete cover letter in proper business format, ready for printing or PDF conversion.`;
 
     const userPrompt = `Create a ${letterLength} cover letter with these details:
 
 SENDER INFORMATION:
 ${senderInfo}
 
+RECIPIENT INFORMATION:
+${recipientInfo}
+
 POSITION DETAILS:
 - Job Title: ${jobTitle}
 - Company: ${companyName}
-${hiringManager ? `- Hiring Manager: ${hiringManager}` : '- Hiring Manager: Hiring Manager'}
 
 TONE: ${tone}
 
@@ -117,13 +131,16 @@ ${userBackground ? `CANDIDATE BACKGROUND:
 ${userBackground}` : ''}
 
 Please write a complete, professional business letter that:
-1. Uses proper business letter format with date and addresses
-2. Addresses the hiring manager appropriately
+1. Uses proper business letter format with sender info, date, and recipient details
+2. Addresses the hiring manager appropriately (${recipientName})
 3. Demonstrates clear understanding of the role and company
 4. Highlights relevant qualifications and achievements
 5. Uses ${tone} tone throughout
 6. Ends with "${closingType}" and proper signature block
-7. Is ${letterLength} in length (${letterLength === 'brief' ? '2-3 paragraphs' : letterLength === 'standard' ? '3-4 paragraphs' : '4-5 paragraphs'})`;
+7. Is ${letterLength} in length
+8. Uses ACTUAL information provided, NO PLACEHOLDERS
+
+IMPORTANT: Use the actual company information provided. Do not include placeholder text like "[Company Address]" or "[City, State ZIP Code]". If company address is not provided, simply use the company name in the recipient block.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
