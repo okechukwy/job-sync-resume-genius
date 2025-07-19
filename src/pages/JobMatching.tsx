@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, Target, CheckCircle, AlertCircle, X } from "lucide-react";
+import { Upload, FileText, Target, CheckCircle, AlertCircle, X, TrendingUp, Users, Lightbulb } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { analyzeJobMatch, JobMatchingResult } from "@/utils/jobMatchingAnalyzer";
@@ -157,177 +157,360 @@ const JobMatching = () => {
 
         {/* Analysis Results */}
         {analysis && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="text-2xl">Analysis Results</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Match Score */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Overall Match Score</h3>
-                  <span className="text-2xl font-bold text-primary">{analysis.matchScore}%</span>
+          <div className="space-y-8">
+            {/* Enhanced Match Score with Category Breakdown */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-2xl">Enhanced Analysis Results</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Overall Score */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Overall Match Score</h3>
+                    <span className="text-2xl font-bold text-primary">{analysis.matchScore}%</span>
+                  </div>
+                  <Progress value={analysis.matchScore} className="h-3" />
                 </div>
-                <Progress value={analysis.matchScore} className="h-3" />
-              </div>
 
-              {/* Matched Keywords */}
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-success" />
-                  Matched Keywords
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {analysis.matchedKeywords.map((keyword: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="bg-success/10 text-success">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Missing Keywords */}
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-destructive" />
-                  Missing Keywords ({analysis.missingKeywords.length})
-                </h3>
-                {analysis.missingKeywords.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.missingKeywords.map((keyword: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
-                          {keyword}
-                        </Badge>
+                {/* Enhanced Category Scores */}
+                {analysis.enhancedAnalysis && (
+                  <div>
+                    <h3 className="font-semibold mb-3">Skills Category Breakdown</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {Object.entries(analysis.enhancedAnalysis.categoryScores).map(([category, score]) => (
+                        <div key={category} className="glass-card p-4 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium capitalize">{category}</span>
+                            <span className="font-bold text-primary">{score}%</span>
+                          </div>
+                          <Progress value={score} className="h-2" />
+                        </div>
                       ))}
                     </div>
-                    <div className="glass-card p-4 rounded-lg border-destructive/20 bg-destructive/5">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Action Required:</strong> Consider adding these keywords to your resume. Include them in your skills section, work experience descriptions, or project summaries where relevant and truthful.
-                      </p>
+                  </div>
+                )}
+
+                {/* Contextual Insights */}
+                {analysis.enhancedAnalysis && (
+                  <div>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      Contextual Insights
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.enhancedAnalysis.contextualInsights.industryFit}%</div>
+                        <div className="text-sm text-muted-foreground">Industry Fit</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.enhancedAnalysis.contextualInsights.roleLevelMatch}%</div>
+                        <div className="text-sm text-muted-foreground">Role Level Match</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.enhancedAnalysis.contextualInsights.experienceAlignment}%</div>
+                        <div className="text-sm text-muted-foreground">Experience Alignment</div>
+                      </div>
+                      <div className="glass-card p-4 rounded-lg text-center">
+                        <div className="text-lg font-bold text-primary">{analysis.enhancedAnalysis.contextualInsights.cultureMatch}%</div>
+                        <div className="text-sm text-muted-foreground">Culture Match</div>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="glass-card p-4 rounded-lg border-success/20 bg-success/5">
-                    <p className="text-sm text-success">Excellent! Your resume contains all the key terms from the job description.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Competitive Analysis */}
+            {analysis.enhancedAnalysis && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Competitive Position Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Strengths */}
+                  <div>
+                    <h4 className="font-medium text-success mb-2 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Your Competitive Strengths
+                    </h4>
+                    <div className="space-y-2">
+                      {analysis.enhancedAnalysis.competitivePosition.strengthsVsMarket.map((strength, index) => (
+                        <div key={index} className="glass-card p-3 rounded-lg border-success/20 bg-success/5">
+                          <span className="text-sm">{strength}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Unique Differentiators */}
+                  {analysis.enhancedAnalysis.competitivePosition.uniqueDifferentiators.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-primary mb-2 flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4" />
+                        Your Unique Differentiators
+                      </h4>
+                      <div className="space-y-2">
+                        {analysis.enhancedAnalysis.competitivePosition.uniqueDifferentiators.map((diff, index) => (
+                          <div key={index} className="glass-card p-3 rounded-lg border-primary/20 bg-primary/5">
+                            <span className="text-sm">{diff}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Market Gaps */}
+                  {analysis.enhancedAnalysis.competitivePosition.gapsVsMarket.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-warning mb-2 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        Areas for Improvement
+                      </h4>
+                      <div className="space-y-2">
+                        {analysis.enhancedAnalysis.competitivePosition.gapsVsMarket.map((gap, index) => (
+                          <div key={index} className="glass-card p-3 rounded-lg border-warning/20 bg-warning/5">
+                            <span className="text-sm">{gap}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Matched Keywords */}
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-success" />
+                Matched Keywords
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {analysis.matchedKeywords.map((keyword: string, index: number) => (
+                  <Badge key={index} variant="secondary" className="bg-success/10 text-success">
+                    {keyword}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Missing Keywords */}
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                Missing Keywords ({analysis.missingKeywords.length})
+              </h3>
+              {analysis.missingKeywords.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {analysis.missingKeywords.map((keyword: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="glass-card p-4 rounded-lg border-destructive/20 bg-destructive/5">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Action Required:</strong> Consider adding these keywords to your resume. Include them in your skills section, work experience descriptions, or project summaries where relevant and truthful.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="glass-card p-4 rounded-lg border-success/20 bg-success/5">
+                  <p className="text-sm text-success">Excellent! Your resume contains all the key terms from the job description.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Skills Gap Analysis */}
+            <div>
+              <h3 className="font-semibold mb-3">Skills Gap Analysis</h3>
+              <div className="space-y-4">
+                {/* Missing High Priority Skills */}
+                {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance === 'High').length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      Critical Skills Missing
+                    </h4>
+                    <div className="space-y-2">
+                      {analysis.skillsGap
+                        .filter(skill => !skill.hasSkill && skill.importance === 'High')
+                        .map((skill: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-destructive/20 bg-destructive/5">
+                            <div className="flex items-center gap-3">
+                              <AlertCircle className="h-5 w-5 text-destructive" />
+                              <span className="font-medium">{skill.skill}</span>
+                            </div>
+                            <Badge variant="destructive">
+                              {skill.importance} Priority
+                            </Badge>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Skills You Have */}
+                {analysis.skillsGap.filter(skill => skill.hasSkill).length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-success mb-2 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Skills You Have
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {analysis.skillsGap
+                        .filter(skill => skill.hasSkill)
+                        .map((skill: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-success/20 bg-success/5">
+                            <div className="flex items-center gap-3">
+                              <CheckCircle className="h-5 w-5 text-success" />
+                              <span>{skill.skill}</span>
+                            </div>
+                            <Badge variant={skill.importance === 'High' ? 'destructive' : 'secondary'} className="bg-success/20 text-success">
+                              ✓ Match
+                            </Badge>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Medium/Low Priority Missing Skills */}
+                {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance !== 'High').length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                      Additional Skills to Consider
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {analysis.skillsGap
+                        .filter(skill => !skill.hasSkill && skill.importance !== 'High')
+                        .map((skill: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                              <span>{skill.skill}</span>
+                            </div>
+                            <Badge variant="secondary">
+                              {skill.importance} Priority
+                            </Badge>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Skills Gap Analysis */}
-              <div>
-                <h3 className="font-semibold mb-3">Skills Gap Analysis</h3>
-                <div className="space-y-4">
-                  {/* Missing High Priority Skills */}
-                  {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance === 'High').length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        Critical Skills Missing
-                      </h4>
-                      <div className="space-y-2">
-                        {analysis.skillsGap
-                          .filter(skill => !skill.hasSkill && skill.importance === 'High')
-                          .map((skill: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-destructive/20 bg-destructive/5">
-                              <div className="flex items-center gap-3">
-                                <AlertCircle className="h-5 w-5 text-destructive" />
-                                <span className="font-medium">{skill.skill}</span>
-                              </div>
-                              <Badge variant="destructive">
-                                {skill.importance} Priority
-                              </Badge>
+            {/* Enhanced Career Guidance */}
+            {analysis.enhancedAnalysis && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Personalized Career Action Plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Immediate Actions */}
+                  <div>
+                    <h4 className="font-medium text-primary mb-3">🚀 Immediate Actions (This Week)</h4>
+                    <div className="space-y-3">
+                      {analysis.enhancedAnalysis.careerGuidance.immediateActions.map((action, index) => (
+                        <div key={index} className="glass-card p-4 rounded-lg border border-primary/20 bg-primary/5">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
+                              {index + 1}
                             </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Skills You Have */}
-                  {analysis.skillsGap.filter(skill => skill.hasSkill).length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-success mb-2 flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" />
-                        Skills You Have
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {analysis.skillsGap
-                          .filter(skill => skill.hasSkill)
-                          .map((skill: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg border-success/20 bg-success/5">
-                              <div className="flex items-center gap-3">
-                                <CheckCircle className="h-5 w-5 text-success" />
-                                <span>{skill.skill}</span>
-                              </div>
-                              <Badge variant={skill.importance === 'High' ? 'destructive' : 'secondary'} className="bg-success/20 text-success">
-                                ✓ Match
-                              </Badge>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Medium/Low Priority Missing Skills */}
-                  {analysis.skillsGap.filter(skill => !skill.hasSkill && skill.importance !== 'High').length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                        Additional Skills to Consider
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {analysis.skillsGap
-                          .filter(skill => !skill.hasSkill && skill.importance !== 'High')
-                          .map((skill: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-3 glass-card rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                                <span>{skill.skill}</span>
-                              </div>
-                              <Badge variant="secondary">
-                                {skill.importance} Priority
-                              </Badge>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Recommendations */}
-              <div>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  Action Plan for CV Optimization
-                </h3>
-                <div className="space-y-3">
-                  {analysis.recommendations.map((rec: string, index: number) => (
-                    <div key={index} className="glass-card p-4 rounded-lg border border-primary/20 bg-primary/5">
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
-                          {index + 1}
+                            <p className="text-sm">{action}</p>
+                          </div>
                         </div>
-                        <p className="text-sm">{rec}</p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Short-term Goals */}
+                  <div>
+                    <h4 className="font-medium text-blue-600 dark:text-blue-400 mb-3">📈 Short-term Goals (3-6 months)</h4>
+                    <div className="space-y-2">
+                      {analysis.enhancedAnalysis.careerGuidance.shortTermGoals.map((goal, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-blue-500/20 bg-blue-500/5">
+                          <span className="text-blue-500 font-bold mt-0.5">•</span>
+                          <span className="text-sm">{goal}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Long-term Growth */}
+                  <div>
+                    <h4 className="font-medium text-purple-600 dark:text-purple-400 mb-3">🎯 Long-term Growth (6+ months)</h4>
+                    <div className="space-y-2">
+                      {analysis.enhancedAnalysis.careerGuidance.longTermGrowth.map((growth, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 glass-card rounded-lg border-purple-500/20 bg-purple-500/5">
+                          <span className="text-purple-500 font-bold mt-0.5">•</span>
+                          <span className="text-sm">{growth}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Alternative Roles */}
+                  {analysis.enhancedAnalysis.careerGuidance.alternativeRoles.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-green-600 dark:text-green-400 mb-3">🔄 Alternative Roles to Consider</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {analysis.enhancedAnalysis.careerGuidance.alternativeRoles.map((role, index) => (
+                          <Badge key={index} variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                            {role}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                  
-                  {/* Dynamic Pro Tips */}
-                  <div className="mt-6 p-4 glass-card rounded-lg border border-blue-500/20 bg-blue-500/5">
-                    <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">💡 Personalized Pro Tips</h4>
-                    <ul className="text-sm text-muted-foreground space-y-2">
-                      {analysis.proTips.map((tip: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-blue-500 font-bold mt-0.5">•</span>
-                          <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Enhanced Recommendations */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Smart Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {analysis.recommendations.map((rec: string, index: number) => (
+                  <div key={index} className="glass-card p-4 rounded-lg border border-primary/20 bg-primary/5">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
+                        {index + 1}
+                      </div>
+                      <p className="text-sm">{rec}</p>
+                    </div>
                   </div>
+                ))}
+                
+                {/* Dynamic Pro Tips */}
+                <div className="mt-6 p-4 glass-card rounded-lg border border-blue-500/20 bg-blue-500/5">
+                  <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">💡 Personalized Pro Tips</h4>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    {analysis.proTips.map((tip: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-blue-500 font-bold mt-0.5">•</span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

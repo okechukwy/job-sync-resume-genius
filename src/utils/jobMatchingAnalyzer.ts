@@ -1,4 +1,7 @@
 import { readFileContent } from './fileReader';
+import { analyzeJobContext, generateCareerGuidance, EnhancedMatchAnalysis, SkillAnalysis } from './contextualAnalyzer';
+import { extractEnhancedKeywords, ExtractedKeyword } from './enhancedKeywordExtractor';
+import { SKILL_TAXONOMY, INDUSTRY_MATRICES } from './skillTaxonomy';
 
 export interface JobMatchingResult {
   matchScore: number;
@@ -11,6 +14,7 @@ export interface JobMatchingResult {
   }>;
   recommendations: string[];
   proTips: string[];
+  enhancedAnalysis?: EnhancedMatchAnalysis;
 }
 
 // Common tech keywords and skills
@@ -286,69 +290,368 @@ const generateRecommendations = (
   return recommendations.slice(0, 4); // Limit to 4 recommendations
 };
 
+// Enhanced analysis function
+const performEnhancedAnalysis = (
+  jobDescription: string,
+  resumeContent: string,
+  extractedJobKeywords: ExtractedKeyword[],
+  extractedResumeKeywords: ExtractedKeyword[]
+): EnhancedMatchAnalysis => {
+  const jobContext = analyzeJobContext(jobDescription);
+  
+  // Create detailed skill analysis
+  const skillAnalysis: SkillAnalysis[] = extractedJobKeywords.map(jobKeyword => {
+    const hasSkill = extractedResumeKeywords.some(resumeKeyword => 
+      resumeKeyword.keyword.toLowerCase() === jobKeyword.keyword.toLowerCase() ||
+      jobKeyword.variants.some(variant => 
+        resumeKeyword.keyword.toLowerCase().includes(variant.toLowerCase())
+      )
+    );
+
+    const skillTaxonomy = SKILL_TAXONOMY[jobKeyword.keyword];
+    const industryMatrix = INDUSTRY_MATRICES[jobContext.industry];
+    
+    let marketDemand: SkillAnalysis['marketDemand'] = 'medium';
+    let salaryImpact = 10;
+    
+    if (industryMatrix) {
+      if (industryMatrix.criticalSkills.includes(jobKeyword.keyword)) {
+        marketDemand = 'very-high';
+      } else if (industryMatrix.emergingSkills.includes(jobKeyword.keyword)) {
+        marketDemand = 'high';
+      }
+      
+      salaryImpact = industryMatrix.salaryImpact[jobKeyword.keyword] || 10;
+    }
+
+    return {
+      skill: jobKeyword.keyword,
+      category: jobKeyword.category,
+      importance: jobKeyword.importance,
+      marketDemand,
+      hasSkill,
+      proficiencyRequired: skillTaxonomy?.proficiencyLevels[2] || 'Intermediate',
+      alternativeSkills: skillTaxonomy?.relatedSkills.slice(0, 3) || [],
+      learningPath: generateLearningPath(jobKeyword.keyword, jobKeyword.category),
+      timeToAcquire: estimateTimeToAcquire(jobKeyword.keyword, jobKeyword.category),
+      salaryImpact
+    };
+  });
+
+  // Calculate category scores
+  const categoryScores = {
+    technical: calculateCategoryScore(skillAnalysis, 'technical'),
+    soft: calculateCategoryScore(skillAnalysis, 'soft'),
+    tools: calculateCategoryScore(skillAnalysis, 'tool'),
+    methodologies: calculateCategoryScore(skillAnalysis, 'methodology'),
+    domain: calculateCategoryScore(skillAnalysis, 'domain')
+  };
+
+  // Calculate overall score with enhanced algorithm
+  const overallScore = calculateEnhancedMatchScore(skillAnalysis, jobContext);
+
+  // Generate contextual insights
+  const contextualInsights = {
+    industryFit: calculateIndustryFit(skillAnalysis, jobContext.industry),
+    roleLevelMatch: calculateRoleLevelMatch(skillAnalysis, jobContext.roleLevel),
+    experienceAlignment: calculateExperienceAlignment(resumeContent, jobContext),
+    cultureMatch: calculateCultureMatch(resumeContent, jobContext.cultureIndicators)
+  };
+
+  // Generate competitive analysis
+  const competitivePosition = generateCompetitiveAnalysis(skillAnalysis, jobContext);
+
+  // Generate career guidance
+  const careerGuidance = generateCareerGuidance(jobContext, skillAnalysis, overallScore);
+
+  return {
+    overallScore,
+    categoryScores,
+    skillAnalysis,
+    contextualInsights,
+    competitivePosition,
+    careerGuidance
+  };
+};
+
+const calculateCategoryScore = (skillAnalysis: SkillAnalysis[], category: string): number => {
+  const categorySkills = skillAnalysis.filter(skill => skill.category === category);
+  if (categorySkills.length === 0) return 100;
+  
+  const matchedSkills = categorySkills.filter(skill => skill.hasSkill);
+  return Math.round((matchedSkills.length / categorySkills.length) * 100);
+};
+
+const calculateEnhancedMatchScore = (skillAnalysis: SkillAnalysis[], jobContext: any): number => {
+  let totalWeight = 0;
+  let achievedWeight = 0;
+  
+  skillAnalysis.forEach(skill => {
+    let weight = 1;
+    
+    // Weight by importance
+    if (skill.importance === 'critical') weight *= 3;
+    else if (skill.importance === 'high') weight *= 2;
+    else if (skill.importance === 'medium') weight *= 1.5;
+    
+    // Adjust for market demand
+    if (skill.marketDemand === 'very-high') weight *= 1.3;
+    else if (skill.marketDemand === 'high') weight *= 1.15;
+    
+    totalWeight += weight;
+    if (skill.hasSkill) achievedWeight += weight;
+  });
+  
+  return totalWeight === 0 ? 0 : Math.round((achievedWeight / totalWeight) * 100);
+};
+
+const calculateIndustryFit = (skillAnalysis: SkillAnalysis[], industry: string): number => {
+  const industryMatrix = INDUSTRY_MATRICES[industry];
+  if (!industryMatrix) return 75;
+  
+  const industrySkills = [...industryMatrix.criticalSkills, ...industryMatrix.preferredSkills];
+  const matchedIndustrySkills = skillAnalysis.filter(skill => 
+    skill.hasSkill && industrySkills.includes(skill.skill)
+  );
+  
+  return Math.round((matchedIndustrySkills.length / industrySkills.length) * 100);
+};
+
+const calculateRoleLevelMatch = (skillAnalysis: SkillAnalysis[], roleLevel: string): number => {
+  // Logic to assess if skills align with role level
+  const seniorSkills = skillAnalysis.filter(skill => 
+    skill.skill.toLowerCase().includes('lead') || 
+    skill.skill.toLowerCase().includes('architect') ||
+    skill.skill.toLowerCase().includes('senior')
+  );
+  
+  if (roleLevel === 'senior' || roleLevel === 'lead') {
+    return seniorSkills.length > 0 ? 85 : 60;
+  } else if (roleLevel === 'entry') {
+    return seniorSkills.length === 0 ? 90 : 75;
+  }
+  
+  return 80;
+};
+
+const calculateExperienceAlignment = (resumeContent: string, jobContext: any): number => {
+  // Simple heuristic based on years of experience mentions
+  const experienceMatches = resumeContent.match(/(\d+)\+?\s*years?\s*(?:of\s*)?experience/gi);
+  if (!experienceMatches) return 70;
+  
+  const years = Math.max(...experienceMatches.map(match => parseInt(match.match(/\d+/)?.[0] || '0')));
+  
+  const expectedYears = {
+    'entry': 2,
+    'mid': 5,
+    'senior': 8,
+    'lead': 10,
+    'executive': 15
+  };
+  
+  const expected = expectedYears[jobContext.roleLevel] || 5;
+  const ratio = years / expected;
+  
+  if (ratio >= 0.8 && ratio <= 1.5) return 90;
+  if (ratio >= 0.5 && ratio <= 2) return 75;
+  return 60;
+};
+
+const calculateCultureMatch = (resumeContent: string, cultureIndicators: string[]): number => {
+  if (cultureIndicators.length === 0) return 80;
+  
+  let matches = 0;
+  const lowerResume = resumeContent.toLowerCase();
+  
+  cultureIndicators.forEach(indicator => {
+    const keywords = {
+      'collaborative': ['team', 'collaboration', 'cross-functional'],
+      'innovative': ['innovation', 'creative', 'new solutions'],
+      'fast-paced': ['fast-paced', 'dynamic', 'agile'],
+      'growth-focused': ['growth', 'learning', 'development'],
+      'data-driven': ['data', 'analytics', 'metrics'],
+      'customer-centric': ['customer', 'user', 'client']
+    };
+    
+    const indicatorKeywords = keywords[indicator] || [];
+    if (indicatorKeywords.some(keyword => lowerResume.includes(keyword))) {
+      matches++;
+    }
+  });
+  
+  return Math.round((matches / cultureIndicators.length) * 100);
+};
+
+const generateCompetitiveAnalysis = (skillAnalysis: SkillAnalysis[], jobContext: any) => {
+  const strongSkills = skillAnalysis.filter(skill => skill.hasSkill && skill.importance !== 'low');
+  const weakAreas = skillAnalysis.filter(skill => !skill.hasSkill && skill.importance === 'critical');
+  const rareSkills = skillAnalysis.filter(skill => skill.hasSkill && skill.marketDemand === 'very-high');
+  
+  return {
+    strengthsVsMarket: strongSkills.slice(0, 4).map(skill => 
+      `Strong ${skill.category} skills in ${skill.skill}`
+    ),
+    gapsVsMarket: weakAreas.slice(0, 3).map(skill => 
+      `Missing critical ${skill.skill} experience`
+    ),
+    uniqueDifferentiators: rareSkills.slice(0, 3).map(skill => 
+      `Valuable expertise in ${skill.skill} (high market demand)`
+    )
+  };
+};
+
+const generateLearningPath = (skill: string, category: string): string[] => {
+  const pathMap: { [key: string]: string[] } = {
+    'JavaScript': ['Complete JavaScript fundamentals course', 'Build 3 projects with vanilla JS', 'Learn ES6+ features'],
+    'React': ['Complete React basics tutorial', 'Build a todo app', 'Learn React hooks and context'],
+    'Python': ['Complete Python for beginners', 'Build a web scraper', 'Learn Python frameworks'],
+    'AWS': ['Get AWS Cloud Practitioner cert', 'Complete hands-on labs', 'Build a cloud project'],
+    'Leadership': ['Take leadership workshop', 'Lead a small project', 'Get mentoring experience']
+  };
+  
+  return pathMap[skill] || [`Learn ${skill} fundamentals`, `Practice ${skill} in projects`, `Get ${skill} certification`];
+};
+
+const estimateTimeToAcquire = (skill: string, category: string): string => {
+  const timeMap: { [key: string]: string } = {
+    'technical': '2-4 months',
+    'tool': '1-2 months',
+    'soft': '3-6 months',
+    'methodology': '1-3 months',
+    'certification': '2-6 months',
+    'domain': '6-12 months'
+  };
+  
+  return timeMap[category] || '2-4 months';
+};
+
+// Enhanced main analysis function
 export const analyzeJobMatch = async (
   jobDescription: string,
   resumeFile: File
 ): Promise<JobMatchingResult> => {
   try {
-    // Read resume content
     const resumeContent = await readFileContent(resumeFile);
     
-    // Extract keywords from both job description and resume
-    const jobKeywords = extractKeywords(jobDescription);
-    const resumeKeywords = extractKeywords(resumeContent);
+    // Detect industry for context
+    const jobContext = analyzeJobContext(jobDescription);
     
-    // Find matched and missing keywords
-    const matchedKeywords = jobKeywords.filter(keyword =>
-      resumeKeywords.some(resumeKeyword =>
-        resumeKeyword.toLowerCase().includes(keyword.toLowerCase()) ||
-        keyword.toLowerCase().includes(resumeKeyword.toLowerCase())
-      )
-    );
+    // Extract enhanced keywords
+    const jobKeywords = extractEnhancedKeywords(jobDescription, jobContext.industry);
+    const resumeKeywords = extractEnhancedKeywords(resumeContent, jobContext.industry);
     
-    const missingKeywords = jobKeywords.filter(keyword =>
-      !matchedKeywords.some(matched =>
-        matched.toLowerCase().includes(keyword.toLowerCase())
+    // Find matches using enhanced logic
+    const matchedKeywords = jobKeywords
+      .filter(jobKeyword => 
+        resumeKeywords.some(resumeKeyword => 
+          resumeKeyword.keyword.toLowerCase() === jobKeyword.keyword.toLowerCase() ||
+          jobKeyword.variants.some(variant => 
+            resumeKeyword.keyword.toLowerCase().includes(variant.toLowerCase())
+          )
+        )
       )
-    );
+      .map(k => k.keyword);
     
-    // Create skills gap analysis
-    const allSkills = [...new Set([...jobKeywords, ...resumeKeywords])];
-    const skillsGap = allSkills.map(skill => ({
-      skill,
-      importance: determineImportance(skill, jobDescription),
-      hasSkill: resumeKeywords.some(resumeSkill =>
-        resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
-        skill.toLowerCase().includes(resumeSkill.toLowerCase())
-      )
+    const missingKeywords = jobKeywords
+      .filter(jobKeyword => !matchedKeywords.includes(jobKeyword.keyword))
+      .map(k => k.keyword);
+    
+    // Create enhanced skills gap analysis
+    const skillsGap = jobKeywords.map(keyword => ({
+      skill: keyword.keyword,
+      importance: keyword.importance === 'critical' ? 'High' as const : 
+                 keyword.importance === 'high' ? 'High' as const :
+                 keyword.importance === 'medium' ? 'Medium' as const : 'Low' as const,
+      hasSkill: matchedKeywords.includes(keyword.keyword)
     }));
     
-    // Calculate overall match score
-    const matchScore = calculateMatchScore(
-      jobKeywords,
-      resumeKeywords,
-      matchedKeywords,
-      missingKeywords
+    // Generate enhanced analysis
+    const enhancedAnalysis = performEnhancedAnalysis(
+      jobDescription, 
+      resumeContent, 
+      jobKeywords, 
+      resumeKeywords
     );
     
-    // Generate recommendations
-    const recommendations = generateRecommendations(missingKeywords, skillsGap);
+    // Generate enhanced recommendations
+    const recommendations = generateEnhancedRecommendations(enhancedAnalysis, jobContext);
     
-    // Generate dynamic pro tips
-    const proTips = generateProTips(jobDescription, matchScore, missingKeywords, skillsGap);
+    // Generate enhanced pro tips  
+    const proTips = generateEnhancedProTips(enhancedAnalysis, jobContext);
     
     return {
-      matchScore,
-      matchedKeywords: matchedKeywords.slice(0, 10), // Limit display
-      missingKeywords: missingKeywords.slice(0, 10), // Limit display
-      skillsGap: skillsGap
-        .filter(skill => skill.importance === 'High' || !skill.hasSkill)
-        .slice(0, 8), // Show most relevant skills
+      matchScore: enhancedAnalysis.overallScore,
+      matchedKeywords: matchedKeywords.slice(0, 10),
+      missingKeywords: missingKeywords.slice(0, 10),
+      skillsGap: skillsGap.slice(0, 8),
       recommendations,
-      proTips
+      proTips,
+      enhancedAnalysis
     };
   } catch (error) {
     console.error('Error analyzing job match:', error);
     throw new Error('Failed to analyze job match. Please try again.');
   }
+};
+
+const generateEnhancedRecommendations = (analysis: EnhancedMatchAnalysis, jobContext: any): string[] => {
+  const recommendations: string[] = [];
+  
+  // Add career guidance as recommendations
+  recommendations.push(...analysis.careerGuidance.immediateActions);
+  
+  // Add competitive positioning advice
+  if (analysis.competitivePosition.gapsVsMarket.length > 0) {
+    recommendations.push(`Address critical gaps: ${analysis.competitivePosition.gapsVsMarket[0]}`);
+  }
+  
+  // Add industry-specific advice
+  if (analysis.contextualInsights.industryFit < 70) {
+    recommendations.push(`Strengthen your ${jobContext.industry} industry knowledge and terminology`);
+  }
+  
+  return recommendations.slice(0, 4);
+};
+
+const generateEnhancedProTips = (analysis: EnhancedMatchAnalysis, jobContext: any): string[] => {
+  const tips: string[] = [];
+  
+  // Score-based tips
+  if (analysis.overallScore < 50) {
+    tips.push('Consider applying to similar roles with lower requirements to build experience');
+    tips.push('Focus on obtaining the top 3 critical missing skills before applying');
+  } else if (analysis.overallScore < 70) {
+    tips.push('You have a solid foundation - emphasize your transferable skills in your application');
+    tips.push('Consider mentioning your learning plan for missing skills in your cover letter');
+  } else if (analysis.overallScore < 85) {
+    tips.push('Strong candidate profile - highlight specific achievements that demonstrate your matching skills');
+    tips.push('Prepare concrete examples of how you\'ve used your key skills to drive results');
+  } else {
+    tips.push('Excellent match! Focus on showcasing leadership and impact in your previous roles');
+    tips.push('You\'re likely competing with other strong candidates - differentiate through unique achievements');
+  }
+  
+  // Industry-specific tips
+  if (jobContext.industry === 'technology') {
+    tips.push('Include GitHub links and code samples to demonstrate your technical abilities');
+    if (analysis.categoryScores.technical < 80) {
+      tips.push('Consider contributing to open source projects to strengthen your technical profile');
+    }
+  } else if (jobContext.industry === 'healthcare') {
+    tips.push('Emphasize any patient care experience and regulatory compliance knowledge');
+  } else if (jobContext.industry === 'finance') {
+    tips.push('Highlight your analytical skills and any financial modeling experience');
+  }
+  
+  // Competitive positioning tips
+  if (analysis.competitivePosition.uniqueDifferentiators.length > 0) {
+    tips.push(`Leverage your unique strengths: ${analysis.competitivePosition.uniqueDifferentiators[0]}`);
+  }
+  
+  // Role-level specific tips
+  if (jobContext.roleLevel === 'senior' && analysis.contextualInsights.roleLevelMatch < 80) {
+    tips.push('Emphasize your leadership experience and strategic thinking capabilities');
+  }
+  
+  return tips.slice(0, 6);
 };
