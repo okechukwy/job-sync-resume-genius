@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
 import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
-
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<ATSOptimizationResult | null>(null);
@@ -21,48 +20,36 @@ const ATSAnalysis = () => {
   const [selectedIndustry, setSelectedIndustry] = useState("Business");
   const [showTesting, setShowTesting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const industries = [
-    "Technology", "Healthcare", "Finance", "Creative", "Business", "Research",
-    "Marketing", "Sales", "Education", "Manufacturing", "Retail"
-  ];
-
+  const industries = ["Technology", "Healthcare", "Finance", "Creative", "Business", "Research", "Marketing", "Sales", "Education", "Manufacturing", "Retail"];
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
       toast.error('Please upload a PDF, DOC, or DOCX file');
       return;
     }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
       toast.error('File size must be less than 5MB');
       return;
     }
-
     setUploadedResume(file);
     setAnalysis(null); // Clear previous analysis
     toast.success('Resume uploaded successfully!');
   };
-
   const handleAnalyze = async () => {
     if (!uploadedResume) {
       toast.error('Please upload a resume first');
       return;
     }
-
     setIsAnalyzing(true);
-    
     try {
       console.log('Starting comprehensive resume analysis...');
-      
+
       // Extract text from uploaded resume
       const resumeText = await readFileContent(uploadedResume);
-      
       console.log('Extracted resume text length:', resumeText?.length || 0);
-      
       if (!resumeText || resumeText.trim().length < 50) {
         toast.error('Unable to extract sufficient text from your resume. Please ensure it\'s not an image-based PDF and try again.');
         setIsAnalyzing(false);
@@ -73,34 +60,25 @@ const ATSAnalysis = () => {
       if (resumeText.length > 15000) {
         console.log('Resume text is very long, truncating for API limits...');
       }
-
       console.log('Calling ATS optimization service with comprehensive analysis...');
 
       // Call the AI optimization service
-      const result = await optimizeForATS(
-        resumeText,
-        jobDescription.trim() || undefined,
-        selectedIndustry
-      );
-
+      const result = await optimizeForATS(resumeText, jobDescription.trim() || undefined, selectedIndustry);
       console.log('Analysis result received:', {
         atsScore: result?.atsScore,
         contentOptimizations: result?.contentOptimizations?.length,
         formatOptimizations: result?.formatOptimizations?.length
       });
-
       if (!result) {
         throw new Error('No analysis result received');
       }
-
       setAnalysis(result);
       toast.success(`Comprehensive ATS analysis complete! Score: ${result.atsScore}/100 with ${result.contentOptimizations.length} content optimizations`);
     } catch (error) {
       console.error('Analysis error:', error);
-      
+
       // Show more specific error messages
       let errorMessage = 'Failed to analyze resume. Please try again.';
-      
       if (error instanceof Error) {
         if (error.message.includes('fetch')) {
           errorMessage = 'Network error. Please check your connection and try again.';
@@ -114,19 +92,16 @@ const ATSAnalysis = () => {
           errorMessage = error.message;
         }
       }
-      
       toast.error(errorMessage);
     } finally {
       setIsAnalyzing(false);
     }
   };
-
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success';
     if (score >= 60) return 'text-warning';
     return 'text-destructive';
   };
-
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -137,7 +112,6 @@ const ATSAnalysis = () => {
         return <Info className="h-4 w-4 text-primary" />;
     }
   };
-
   const getPriorityBadge = (priority: string) => {
     const colors = {
       high: 'bg-destructive/10 text-destructive border-destructive/20',
@@ -146,7 +120,6 @@ const ATSAnalysis = () => {
     };
     return colors[priority as keyof typeof colors] || colors.low;
   };
-
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'quantification':
@@ -163,7 +136,6 @@ const ATSAnalysis = () => {
         return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const getCategoryBadge = (category: string) => {
     const colors = {
       quantification: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -175,10 +147,8 @@ const ATSAnalysis = () => {
     };
     return colors[category as keyof typeof colors] || colors.formatting;
   };
-
   const getGroupedOptimizations = () => {
     if (!analysis?.contentOptimizations) return {};
-    
     return analysis.contentOptimizations.reduce((groups, optimization) => {
       const section = optimization.section;
       if (!groups[section]) {
@@ -188,9 +158,7 @@ const ATSAnalysis = () => {
       return groups;
     }, {} as Record<string, typeof analysis.contentOptimizations>);
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  return <div className="min-h-screen bg-gradient-hero">
       <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -213,16 +181,9 @@ const ATSAnalysis = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleResumeUpload}
-              className="hidden"
-            />
+            <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" />
             
-            {uploadedResume ? (
-              <div className="glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4">
+            {uploadedResume ? <div className="glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-success" />
@@ -234,23 +195,13 @@ const ATSAnalysis = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowTesting(!showTesting)}
-                      className="flex items-center gap-2"
-                    >
-                      <TestTube className="h-4 w-4" />
-                      {showTesting ? 'Hide Testing' : 'Show Testing'}
-                    </Button>
+                    
                     <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                       Change File
                     </Button>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
+              </div> : <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
                 <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium mb-2">Upload your resume for comprehensive ATS analysis</p>
                 <p className="text-muted-foreground mb-6">
@@ -259,8 +210,7 @@ const ATSAnalysis = () => {
                 <Button onClick={() => fileInputRef.current?.click()}>
                   Choose File
                 </Button>
-              </div>
-            )}
+              </div>}
 
             {/* Industry Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -271,11 +221,9 @@ const ATSAnalysis = () => {
                     <SelectValue placeholder="Select your industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    {industries.map((industry) => (
-                      <SelectItem key={industry} value={industry}>
+                    {industries.map(industry => <SelectItem key={industry} value={industry}>
                         {industry}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -284,45 +232,25 @@ const ATSAnalysis = () => {
             {/* Job Description (Optional) */}
             <div className="space-y-2">
               <Label htmlFor="jobDescription">Job Description (Optional)</Label>
-              <Textarea
-                id="jobDescription"
-                placeholder="Paste the job description for more targeted optimization..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="min-h-[100px]"
-              />
+              <Textarea id="jobDescription" placeholder="Paste the job description for more targeted optimization..." value={jobDescription} onChange={e => setJobDescription(e.target.value)} className="min-h-[100px]" />
               <p className="text-sm text-muted-foreground">
                 Adding a job description will provide more targeted keyword analysis and recommendations.
               </p>
             </div>
             
-            {uploadedResume && (
-              <Button 
-                variant="hero" 
-                className="w-full" 
-                onClick={handleAnalyze}
-                disabled={isAnalyzing}
-              >
+            {uploadedResume && <Button variant="hero" className="w-full" onClick={handleAnalyze} disabled={isAnalyzing}>
                 {isAnalyzing ? 'Analyzing ATS Compatibility...' : 'Start Comprehensive ATS Analysis'}
-              </Button>
-            )}
+              </Button>}
           </CardContent>
         </Card>
 
         {/* Testing Component */}
-        {showTesting && uploadedResume && (
-          <div className="mb-8">
-            <OptimizationTesting 
-              resumeText=""
-              jobDescription={jobDescription}
-              industry={selectedIndustry}
-            />
-          </div>
-        )}
+        {showTesting && uploadedResume && <div className="mb-8">
+            <OptimizationTesting resumeText="" jobDescription={jobDescription} industry={selectedIndustry} />
+          </div>}
 
         {/* Analysis Results */}
-        {analysis && (
-          <div className="space-y-8">
+        {analysis && <div className="space-y-8">
             {/* Overall Score */}
             <Card className="glass-card">
               <CardHeader>
@@ -356,51 +284,41 @@ const ATSAnalysis = () => {
                   <div>
                     <h3 className="font-semibold mb-3 text-success">Found Keywords</h3>
                     <div className="flex flex-wrap gap-2">
-                      {analysis.keywordMatches.found.map((keyword, index) => (
-                        <Badge key={index} variant="secondary" className="bg-success/10 text-success border-success/20">
+                      {analysis.keywordMatches.found.map((keyword, index) => <Badge key={index} variant="secondary" className="bg-success/10 text-success border-success/20">
                           {keyword}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
                   </div>
                   <div>
                     <h3 className="font-semibold mb-3 text-warning">Missing Keywords</h3>
                     <div className="flex flex-wrap gap-2">
-                      {analysis.keywordMatches.missing.map((keyword, index) => (
-                        <Badge key={index} variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                      {analysis.keywordMatches.missing.map((keyword, index) => <Badge key={index} variant="secondary" className="bg-warning/10 text-warning border-warning/20">
                           {keyword}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
                   </div>
                 </div>
                 
-                {analysis.keywordMatches.suggestions.length > 0 && (
-                  <div className="mt-6">
+                {analysis.keywordMatches.suggestions.length > 0 && <div className="mt-6">
                     <h3 className="font-semibold mb-3">Keyword Suggestions</h3>
                     <ul className="space-y-2">
-                      {analysis.keywordMatches.suggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start gap-3">
+                      {analysis.keywordMatches.suggestions.map((suggestion, index) => <li key={index} className="flex items-start gap-3">
                           <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                           {suggestion}
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
 
             {/* Format Optimizations */}
-            {analysis.formatOptimizations.length > 0 && (
-              <Card className="glass-card">
+            {analysis.formatOptimizations.length > 0 && <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>Format Issues</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analysis.formatOptimizations.map((optimization, index) => (
-                      <div key={index} className="glass-card p-4 rounded-lg">
+                    {analysis.formatOptimizations.map((optimization, index) => <div key={index} className="glass-card p-4 rounded-lg">
                         <div className="flex items-start gap-3">
                           {getPriorityIcon(optimization.priority)}
                           <div className="flex-1">
@@ -413,16 +331,13 @@ const ATSAnalysis = () => {
                             <p className="text-muted-foreground">{optimization.recommendation}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Content Optimizations - Enhanced Display with Grouping */}
-            {analysis.contentOptimizations.length > 0 && (
-              <Card className="glass-card">
+            {analysis.contentOptimizations.length > 0 && <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
@@ -434,22 +349,18 @@ const ATSAnalysis = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {Object.entries(getGroupedOptimizations()).map(([sectionName, optimizations]) => (
-                      <div key={sectionName} className="space-y-4">
+                    {Object.entries(getGroupedOptimizations()).map(([sectionName, optimizations]) => <div key={sectionName} className="space-y-4">
                         <h3 className="text-lg font-semibold text-primary border-b border-border/20 pb-2">
                           {sectionName} ({optimizations.length} improvement{optimizations.length !== 1 ? 's' : ''})
                         </h3>
-                        {optimizations.map((optimization, index) => (
-                          <div key={`${sectionName}-${index}`} className="glass-card p-4 rounded-lg border border-border/50">
+                        {optimizations.map((optimization, index) => <div key={`${sectionName}-${index}`} className="glass-card p-4 rounded-lg border border-border/50">
                             <div className="flex items-start gap-3 mb-3">
                               {getCategoryIcon(optimization.category || 'formatting')}
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  {optimization.category && (
-                                    <Badge className={getCategoryBadge(optimization.category)}>
+                                  {optimization.category && <Badge className={getCategoryBadge(optimization.category)}>
                                       {optimization.category.replace('-', ' ')}
-                                    </Badge>
-                                  )}
+                                    </Badge>}
                                 </div>
                               </div>
                             </div>
@@ -470,14 +381,11 @@ const ATSAnalysis = () => {
                                 <strong>Why this helps:</strong> {optimization.reasoning}
                               </p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                          </div>)}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Overall Recommendations */}
             <Card className="glass-card">
@@ -486,20 +394,15 @@ const ATSAnalysis = () => {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {analysis.overallRecommendations.map((rec, index) => (
-                    <li key={index} className="flex items-start gap-3">
+                  {analysis.overallRecommendations.map((rec, index) => <li key={index} className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                       {rec}
-                    </li>
-                  ))}
+                    </li>)}
                 </ul>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ATSAnalysis;
