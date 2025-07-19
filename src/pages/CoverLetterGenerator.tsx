@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import { downloadFile } from "@/utils/downloadUtils";
 import TemplateSelector from "@/components/cover-letter/TemplateSelector";
 import { getTemplateById, getRecommendedTemplate } from "@/config/coverLetterTemplates";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getLineFormatting } from "@/utils/coverLetterFormatting";
 
 const CoverLetterGenerator = () => {
   const [formData, setFormData] = useState({
@@ -145,6 +145,35 @@ const CoverLetterGenerator = () => {
   };
 
   const selectedTemplate = getTemplateById(formData.templateId);
+
+  const renderFormattedCoverLetter = (content: string, templateId: string) => {
+    const lines = content.split('\n');
+    
+    return lines.map((line, index) => {
+      const trimmedLine = line.trim();
+      
+      if (!trimmedLine) {
+        return <div key={index} className="h-2" />;
+      }
+      
+      const formatting = getLineFormatting(trimmedLine, templateId);
+      
+      const style: React.CSSProperties = {
+        fontSize: formatting.fontSize,
+        fontWeight: formatting.fontWeight as any,
+        textAlign: formatting.textAlign,
+        marginBottom: formatting.marginBottom,
+        lineHeight: '1.4',
+        color: '#1f2937'
+      };
+      
+      return (
+        <div key={index} style={style}>
+          {trimmedLine}
+        </div>
+      );
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -522,16 +551,8 @@ const CoverLetterGenerator = () => {
               <CardContent>
                 {generatedLetter ? (
                   <div className="bg-background/50 rounded-lg p-8 min-h-96 max-w-4xl mx-auto">
-                    <div 
-                      className="whitespace-pre-wrap text-sm leading-relaxed"
-                      style={{
-                        fontFamily: 'system-ui, -apple-system, sans-serif',
-                        fontSize: '11pt',
-                        lineHeight: '1.4',
-                        color: '#1f2937'
-                      }}
-                    >
-                      {generatedLetter}
+                    <div className="font-serif">
+                      {renderFormattedCoverLetter(generatedLetter, formData.templateId)}
                     </div>
                   </div>
                 ) : (
