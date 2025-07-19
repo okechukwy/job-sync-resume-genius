@@ -83,6 +83,8 @@ export interface CoverLetterRequest {
   userBackground?: string;
   letterLength?: 'brief' | 'standard' | 'detailed';
   closingType?: string;
+  templateId?: string;
+  industry?: string;
 }
 
 export interface CoverLetterResult {

@@ -24,7 +24,56 @@ interface CoverLetterRequest {
   userBackground?: string;
   letterLength?: 'brief' | 'standard' | 'detailed';
   closingType?: string;
+  templateId?: string;
+  industry?: string;
 }
+
+const getTemplateInstructions = (templateId: string) => {
+  const templates = {
+    'classic-professional': {
+      headerStyle: 'centered',
+      bodyFormat: 'paragraph',
+      instructions: 'Use centered header format with formal business letter structure. Focus on traditional paragraph format with professional tone.'
+    },
+    'modern-minimalist': {
+      headerStyle: 'left-aligned',
+      bodyFormat: 'paragraph',
+      instructions: 'Use left-aligned header with clean, modern formatting. Employ contemporary language while maintaining professionalism.'
+    },
+    'creative-professional': {
+      headerStyle: 'creative',
+      bodyFormat: 'mixed',
+      instructions: 'Use creative header with mixed format (intro paragraph + bullet achievements + closing paragraph). Balance creativity with professionalism.'
+    },
+    'executive-format': {
+      headerStyle: 'executive',
+      bodyFormat: 'paragraph',
+      instructions: 'Use sophisticated executive header format. Focus on leadership qualities and strategic thinking.'
+    },
+    'achievement-bullet': {
+      headerStyle: 'left-aligned',
+      bodyFormat: 'bullet-points',
+      instructions: 'Use left-aligned header with bullet-point format for achievements. Emphasize quantifiable results and metrics.'
+    },
+    'skills-showcase': {
+      headerStyle: 'modern',
+      bodyFormat: 'skills-focused',
+      instructions: 'Use modern header with skills integration. Highlight technical competencies and specialized knowledge.'
+    },
+    'healthcare-formal': {
+      headerStyle: 'centered',
+      bodyFormat: 'paragraph',
+      instructions: 'Use formal centered header. Emphasize credentials, certifications, and healthcare-specific experience.'
+    },
+    'startup-dynamic': {
+      headerStyle: 'creative',
+      bodyFormat: 'mixed',
+      instructions: 'Use dynamic creative header with mixed format. Emphasize innovation, adaptability, and startup culture fit.'
+    }
+  };
+  
+  return templates[templateId as keyof typeof templates] || templates['classic-professional'];
+};
 
 serve(async (req) => {
   console.log('Cover letter generation request received');
@@ -56,14 +105,19 @@ serve(async (req) => {
       keyPoints,
       userBackground,
       letterLength = 'standard',
-      closingType = 'Sincerely'
+      closingType = 'Sincerely',
+      templateId = 'classic-professional',
+      industry
     }: CoverLetterRequest = await req.json();
 
-    console.log('Processing cover letter for:', { jobTitle, companyName, tone, letterLength });
+    console.log('Processing cover letter for:', { jobTitle, companyName, tone, letterLength, templateId });
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
+
+    // Get template configuration
+    const template = getTemplateInstructions(templateId);
 
     // Build contact information
     const contactInfo = [email, phone, location].filter(Boolean).join(' | ');
@@ -75,23 +129,37 @@ serve(async (req) => {
       ? `${recipientName}\n${companyName}\n${companyAddress}`
       : `${recipientName}\n${companyName}`;
 
-    // Create comprehensive AI prompt for professional business letter format
-    const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter that follows standard business letter conventions.
+    // Create template-specific AI prompt
+    const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter using the "${templateId}" template style.
+
+TEMPLATE-SPECIFIC INSTRUCTIONS:
+${template.instructions}
+
+HEADER STYLE: ${template.headerStyle}
+BODY FORMAT: ${template.bodyFormat}
 
 CRITICAL FORMATTING REQUIREMENTS:
-1. Start with sender's information (name and contact details) aligned to the left
-2. Add current date below sender info
-3. Add recipient information (hiring manager name, company name, and address if provided)
-4. Use professional salutation addressing the hiring manager by name if provided
-5. Write ${letterLength} content (brief: 2-3 paragraphs, standard: 3-4 paragraphs, detailed: 4-5 paragraphs)
-6. End with professional closing ("${closingType}")
-7. Include signature line with sender's name
-8. Use proper paragraph spacing and business letter structure
+1. Apply the specified header style (${template.headerStyle})
+2. Use the specified body format (${template.bodyFormat})
+3. Include sender's information formatted according to template style
+4. Add current date below sender info
+5. Add recipient information (hiring manager name, company name, and address if provided)
+6. Use professional salutation addressing the hiring manager by name if provided
+7. Write ${letterLength} content following the template's body format
+8. End with professional closing ("${closingType}")
+9. Include signature line with sender's name
+10. Use proper paragraph spacing and template-specific structure
+
+BODY FORMAT GUIDELINES:
+- paragraph: Traditional paragraph format with 3-4 well-structured paragraphs
+- bullet-points: Include bullet-pointed achievements with quantifiable results
+- mixed: Intro paragraph + bullet achievements + closing paragraph
+- skills-focused: Integrate skills naturally throughout with emphasis on competencies
 
 CONTENT REQUIREMENTS:
-- Opening paragraph: Express interest and briefly mention how you learned about the position
-- Body paragraph(s): Highlight relevant experience, skills, and achievements that match job requirements
-- Closing paragraph: Reiterate interest, mention next steps, and include call to action
+- Opening: Express interest and connection to the role/company
+- Body: Highlight relevant experience, skills, and achievements matching job requirements
+- Closing: Reiterate interest, mention next steps, include call to action
 - Match tone: ${tone} throughout the letter
 - Incorporate keywords from job description naturally
 - Show knowledge of the company and role
@@ -103,11 +171,13 @@ TONE GUIDELINES:
 - Creative: Innovative language, unique approach, storytelling elements
 - Formal: Traditional, conservative, very respectful language
 
+${industry ? `INDUSTRY FOCUS: Tailor language and emphasis for ${industry} industry standards and expectations.` : ''}
+
 CRITICAL: Do NOT use placeholders like [Company Address] or [City, State ZIP Code]. Use the actual information provided or omit if not available.
 
-Return ONLY the complete cover letter in proper business format, ready for printing or PDF conversion.`;
+Return ONLY the complete cover letter in the specified template format, ready for printing or PDF conversion.`;
 
-    const userPrompt = `Create a ${letterLength} cover letter with these details:
+    const userPrompt = `Create a ${letterLength} cover letter using the "${templateId}" template with these details:
 
 SENDER INFORMATION:
 ${senderInfo}
@@ -131,16 +201,18 @@ ${userBackground ? `CANDIDATE BACKGROUND:
 ${userBackground}` : ''}
 
 Please write a complete, professional business letter that:
-1. Uses proper business letter format with sender info, date, and recipient details
-2. Addresses the hiring manager appropriately (${recipientName})
-3. Demonstrates clear understanding of the role and company
-4. Highlights relevant qualifications and achievements
-5. Uses ${tone} tone throughout
-6. Ends with "${closingType}" and proper signature block
-7. Is ${letterLength} in length
-8. Uses ACTUAL information provided, NO PLACEHOLDERS
+1. Uses the ${templateId} template format with ${template.headerStyle} header style
+2. Employs ${template.bodyFormat} body format as specified
+3. Addresses the hiring manager appropriately (${recipientName})
+4. Demonstrates clear understanding of the role and company
+5. Highlights relevant qualifications and achievements
+6. Uses ${tone} tone throughout
+7. Ends with "${closingType}" and proper signature block
+8. Is ${letterLength} in length
+9. Uses ACTUAL information provided, NO PLACEHOLDERS
+${industry ? `10. Is optimized for the ${industry} industry` : ''}
 
-IMPORTANT: Use the actual company information provided. Do not include placeholder text like "[Company Address]" or "[City, State ZIP Code]". If company address is not provided, simply use the company name in the recipient block.`;
+IMPORTANT: Use the actual company information provided. Do not include placeholder text. If company address is not provided, simply use the company name in the recipient block.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -168,11 +240,12 @@ IMPORTANT: Use the actual company information provided. Do not include placehold
     const data = await response.json();
     const generatedLetter = data.choices[0].message.content;
 
-    console.log('Cover letter generated successfully');
+    console.log('Cover letter generated successfully with template:', templateId);
 
     return new Response(JSON.stringify({ 
       coverLetter: generatedLetter,
-      success: true 
+      success: true,
+      templateUsed: templateId
     }), {
       headers: { 
         ...corsHeaders, 
