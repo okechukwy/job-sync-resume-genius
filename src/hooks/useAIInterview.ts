@@ -258,13 +258,22 @@ export const useAIInterview = () => {
     return { response: newResponse, session: updatedSession };
   }, [currentSession, analyzeResponse]);
 
-  const completeSession = useCallback(async () => {
-    if (!currentSession) {
+  const completeSession = useCallback(async (sessionToComplete?: InterviewSession) => {
+    // Use the passed session or fall back to current session
+    const sessionForCompletion = sessionToComplete || currentSession;
+    
+    if (!sessionForCompletion) {
       throw new Error('No active session to complete');
     }
 
+    console.log('Completing session with data:', {
+      sessionId: sessionForCompletion.id,
+      responseCount: sessionForCompletion.responses.length,
+      questionCount: sessionForCompletion.questions.length
+    });
+
     // Only complete sessions that have actual responses
-    if (currentSession.responses.length === 0) {
+    if (sessionForCompletion.responses.length === 0) {
       console.log('Session has no responses, not saving to database');
       toast({
         title: "Session Not Saved",
@@ -272,7 +281,7 @@ export const useAIInterview = () => {
         variant: "default",
       });
       
-      const completedSession = { ...currentSession, completed: true };
+      const completedSession = { ...sessionForCompletion, completed: true };
       setCurrentSession(completedSession);
       return completedSession;
     }
@@ -285,34 +294,34 @@ export const useAIInterview = () => {
 
       const sessionData = {
         user_id: userData.user.id,
-        session_type: currentSession.sessionType,
-        role_focus: currentSession.roleFocus,
-        questions: currentSession.questions,
-        responses: currentSession.responses,
+        session_type: sessionForCompletion.sessionType,
+        role_focus: sessionForCompletion.roleFocus,
+        questions: sessionForCompletion.questions,
+        responses: sessionForCompletion.responses,
         completed: true,
         scores: {
-          overall: currentSession.totalScore,
+          overall: sessionForCompletion.totalScore,
           communication: Math.round(
-            currentSession.responses.reduce((sum, r) => sum + r.analysis.scores.communication, 0) / 
-            currentSession.responses.length
+            sessionForCompletion.responses.reduce((sum, r) => sum + r.analysis.scores.communication, 0) / 
+            sessionForCompletion.responses.length
           ),
           content: Math.round(
-            currentSession.responses.reduce((sum, r) => sum + r.analysis.scores.content, 0) / 
-            currentSession.responses.length
+            sessionForCompletion.responses.reduce((sum, r) => sum + r.analysis.scores.content, 0) / 
+            sessionForCompletion.responses.length
           ),
           structure: Math.round(
-            currentSession.responses.reduce((sum, r) => sum + r.analysis.scores.structure, 0) / 
-            currentSession.responses.length
+            sessionForCompletion.responses.reduce((sum, r) => sum + r.analysis.scores.structure, 0) / 
+            sessionForCompletion.responses.length
           ),
           impact: Math.round(
-            currentSession.responses.reduce((sum, r) => sum + r.analysis.scores.impact, 0) / 
-            currentSession.responses.length
+            sessionForCompletion.responses.reduce((sum, r) => sum + r.analysis.scores.impact, 0) / 
+            sessionForCompletion.responses.length
           )
         },
         feedback: {
-          strengths: [...new Set(currentSession.responses.flatMap(r => r.analysis.strengths))],
-          improvements: currentSession.responses.flatMap(r => r.analysis.improvements),
-          summary: currentSession.responses[currentSession.responses.length - 1]?.analysis.summary || ''
+          strengths: [...new Set(sessionForCompletion.responses.flatMap(r => r.analysis.strengths))],
+          improvements: sessionForCompletion.responses.flatMap(r => r.analysis.improvements),
+          summary: sessionForCompletion.responses[sessionForCompletion.responses.length - 1]?.analysis.summary || ''
         }
       } as any;
 
@@ -325,12 +334,16 @@ export const useAIInterview = () => {
         throw error;
       }
 
-      const completedSession = { ...currentSession, completed: true };
-      setCurrentSession(completedSession);
+      const completedSession = { ...sessionForCompletion, completed: true };
+      
+      // Only update current session if we're completing the current session
+      if (!sessionToComplete || sessionToComplete.id === currentSession?.id) {
+        setCurrentSession(completedSession);
+      }
 
       toast({
         title: "Session Completed",
-        description: `Your interview session has been saved with an overall score of ${currentSession.totalScore}%.`,
+        description: `Your interview session has been saved with an overall score of ${sessionForCompletion.totalScore}%.`,
       });
 
       return completedSession;
@@ -342,8 +355,13 @@ export const useAIInterview = () => {
         variant: "destructive",
       });
       
-      const completedSession = { ...currentSession, completed: true };
-      setCurrentSession(completedSession);
+      const completedSession = { ...sessionForCompletion, completed: true };
+      
+      // Only update current session if we're completing the current session
+      if (!sessionToComplete || sessionToComplete.id === currentSession?.id) {
+        setCurrentSession(completedSession);
+      }
+      
       return completedSession;
     }
   }, [currentSession, toast]);
