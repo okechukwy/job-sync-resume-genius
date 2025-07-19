@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +35,13 @@ const ATSAnalysis = () => {
       return;
     }
 
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
     setUploadedResume(file);
+    setAnalysis(null); // Clear previous analysis
     toast.success('Resume uploaded successfully!');
   };
 
@@ -49,14 +54,26 @@ const ATSAnalysis = () => {
     setIsAnalyzing(true);
     
     try {
+      console.log('Starting resume analysis...');
+      
       // Extract text from uploaded resume
       const resumeText = await readFileContent(uploadedResume);
       
-      if (!resumeText || resumeText.trim().length < 100) {
-        toast.error('Unable to extract sufficient text from your resume. Please ensure it\'s not an image-based PDF.');
+      console.log('Extracted resume text length:', resumeText?.length || 0);
+      
+      if (!resumeText || resumeText.trim().length < 50) {
+        toast.error('Unable to extract sufficient text from your resume. Please ensure it\'s not an image-based PDF and try again.');
         setIsAnalyzing(false);
         return;
       }
+
+      // Validate inputs before sending
+      if (resumeText.length > 10000) {
+        console.log('Resume text is very long, truncating...');
+        // Truncate if too long to avoid API limits
+      }
+
+      console.log('Calling ATS optimization service...');
 
       // Call the AI optimization service
       const result = await optimizeForATS(
@@ -65,11 +82,33 @@ const ATSAnalysis = () => {
         selectedIndustry
       );
 
+      console.log('Analysis result:', result);
+
+      if (!result) {
+        throw new Error('No analysis result received');
+      }
+
       setAnalysis(result);
       toast.success('ATS analysis complete!');
     } catch (error) {
       console.error('Analysis error:', error);
-      toast.error('Failed to analyze resume. Please try again.');
+      
+      // Show more specific error messages
+      let errorMessage = 'Failed to analyze resume. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('Insufficient resume content')) {
+          errorMessage = 'Your resume doesn\'t contain enough text for analysis. Please upload a text-based resume.';
+        } else if (error.message.includes('Service configuration error')) {
+          errorMessage = 'Analysis service is temporarily unavailable. Please try again later.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsAnalyzing(false);
     }
