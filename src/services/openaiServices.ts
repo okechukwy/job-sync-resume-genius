@@ -70,6 +70,9 @@ export interface QuestionGenerationResult {
 
 export interface CoverLetterRequest {
   fullName: string;
+  email?: string;
+  phone?: string;
+  location?: string;
   jobTitle: string;
   companyName: string;
   hiringManager?: string;
@@ -77,6 +80,8 @@ export interface CoverLetterRequest {
   tone: string;
   keyPoints?: string;
   userBackground?: string;
+  letterLength?: 'brief' | 'standard' | 'detailed';
+  closingType?: string;
 }
 
 export interface CoverLetterResult {

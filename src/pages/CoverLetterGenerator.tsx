@@ -6,26 +6,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wand2, Download, Copy, RefreshCw, AlertCircle } from "lucide-react";
+import { Wand2, Download, Copy, RefreshCw, AlertCircle, FileText, File, FileImage } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { generateCoverLetter, CoverLetterRequest } from "@/services/openaiServices";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { downloadFile } from "@/utils/downloadUtils";
 
 const CoverLetterGenerator = () => {
   const [formData, setFormData] = useState({
     fullName: "",
+    email: "",
+    phone: "",
+    location: "",
     jobTitle: "",
     companyName: "",
     hiringManager: "",
     jobDescription: "",
     tone: "",
     keyPoints: "",
-    userBackground: ""
+    userBackground: "",
+    letterLength: "standard" as 'brief' | 'standard' | 'detailed',
+    closingType: "Sincerely"
   });
   const [generatedLetter, setGeneratedLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [downloadFormat, setDownloadFormat] = useState<'txt' | 'pdf' | 'docx'>('pdf');
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -48,13 +55,18 @@ const CoverLetterGenerator = () => {
     try {
       const request: CoverLetterRequest = {
         fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
         jobTitle: formData.jobTitle,
         companyName: formData.companyName,
         hiringManager: formData.hiringManager,
         jobDescription: formData.jobDescription,
         tone: formData.tone,
         keyPoints: formData.keyPoints,
-        userBackground: formData.userBackground
+        userBackground: formData.userBackground,
+        letterLength: formData.letterLength,
+        closingType: formData.closingType
       };
 
       const result = await generateCoverLetter(request);
@@ -80,17 +92,17 @@ const CoverLetterGenerator = () => {
     toast.success('Cover letter copied to clipboard!');
   };
 
-  const handleDownload = () => {
-    const element = document.createElement('a');
-    const file = new Blob([generatedLetter], {
-      type: 'text/plain'
-    });
-    element.href = URL.createObjectURL(file);
-    element.download = `cover_letter_${formData.jobTitle.replace(/\s+/g, '_')}_${formData.companyName.replace(/\s+/g, '_')}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    toast.success('Cover letter downloaded!');
+  const handleDownload = async () => {
+    if (!generatedLetter) return;
+    
+    const fileName = `cover_letter_${formData.jobTitle.replace(/\s+/g, '_')}_${formData.companyName.replace(/\s+/g, '_')}`;
+    
+    try {
+      await downloadFile(generatedLetter, fileName, downloadFormat, false);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error('Download failed. Please try again.');
+    }
   };
 
   const handleRegenerate = () => {
@@ -127,64 +139,143 @@ const CoverLetterGenerator = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Wand2 className="h-5 w-5" />
-                Job Details
+                Cover Letter Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input 
-                  id="fullName" 
-                  placeholder="e.g., John Smith" 
-                  value={formData.fullName} 
-                  onChange={e => handleInputChange('fullName', e.target.value)} 
-                />
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input 
+                      id="fullName" 
+                      placeholder="e.g., John Smith" 
+                      value={formData.fullName} 
+                      onChange={e => handleInputChange('fullName', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input 
+                      id="email" 
+                      type="email"
+                      placeholder="john.smith@example.com" 
+                      value={formData.email} 
+                      onChange={e => handleInputChange('email', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input 
+                      id="phone" 
+                      placeholder="+1 (555) 123-4567" 
+                      value={formData.phone} 
+                      onChange={e => handleInputChange('phone', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input 
+                      id="location" 
+                      placeholder="New York, NY" 
+                      value={formData.location} 
+                      onChange={e => handleInputChange('location', e.target.value)} 
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="jobTitle">Job Title *</Label>
-                <Input 
-                  id="jobTitle" 
-                  placeholder="e.g., Senior Software Engineer" 
-                  value={formData.jobTitle} 
-                  onChange={e => handleInputChange('jobTitle', e.target.value)} 
-                />
+              {/* Job Information */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Job Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="jobTitle">Job Title *</Label>
+                    <Input 
+                      id="jobTitle" 
+                      placeholder="e.g., Senior Software Engineer" 
+                      value={formData.jobTitle} 
+                      onChange={e => handleInputChange('jobTitle', e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Input 
+                      id="companyName" 
+                      placeholder="e.g., Google" 
+                      value={formData.companyName} 
+                      onChange={e => handleInputChange('companyName', e.target.value)} 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="hiringManager">Hiring Manager Name</Label>
+                  <Input 
+                    id="hiringManager" 
+                    placeholder="e.g., Sarah Johnson (optional)" 
+                    value={formData.hiringManager} 
+                    onChange={e => handleInputChange('hiringManager', e.target.value)} 
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name *</Label>
-                <Input 
-                  id="companyName" 
-                  placeholder="e.g., Google" 
-                  value={formData.companyName} 
-                  onChange={e => handleInputChange('companyName', e.target.value)} 
-                />
-              </div>
+              {/* Customization Options */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Customization</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tone">Tone & Style *</Label>
+                    <Select onValueChange={value => handleInputChange('tone', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select tone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                        <SelectItem value="confident">Confident</SelectItem>
+                        <SelectItem value="creative">Creative</SelectItem>
+                        <SelectItem value="formal">Formal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="hiringManager">Hiring Manager Name</Label>
-                <Input 
-                  id="hiringManager" 
-                  placeholder="e.g., Sarah Johnson (optional)" 
-                  value={formData.hiringManager} 
-                  onChange={e => handleInputChange('hiringManager', e.target.value)} 
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="letterLength">Letter Length</Label>
+                    <Select value={formData.letterLength} onValueChange={value => handleInputChange('letterLength', value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="brief">Brief (2-3 paragraphs)</SelectItem>
+                        <SelectItem value="standard">Standard (3-4 paragraphs)</SelectItem>
+                        <SelectItem value="detailed">Detailed (4-5 paragraphs)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tone">Tone & Style *</Label>
-                <Select onValueChange={value => handleInputChange('tone', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select tone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
-                    <SelectItem value="confident">Confident</SelectItem>
-                    <SelectItem value="creative">Creative</SelectItem>
-                    <SelectItem value="formal">Formal</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <div className="space-y-2">
+                    <Label htmlFor="closingType">Closing Type</Label>
+                    <Select value={formData.closingType} onValueChange={value => handleInputChange('closingType', value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sincerely">Sincerely</SelectItem>
+                        <SelectItem value="Best regards">Best regards</SelectItem>
+                        <SelectItem value="Yours truly">Yours truly</SelectItem>
+                        <SelectItem value="Kind regards">Kind regards</SelectItem>
+                        <SelectItem value="Respectfully">Respectfully</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -246,7 +337,35 @@ const CoverLetterGenerator = () => {
             <CardHeader>
               <CardTitle>Generated Cover Letter</CardTitle>
               {generatedLetter && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="downloadFormat" className="text-sm">Format:</Label>
+                    <Select value={downloadFormat} onValueChange={(value: 'txt' | 'pdf' | 'docx') => setDownloadFormat(value)}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pdf">
+                          <div className="flex items-center gap-2">
+                            <FileImage className="w-3 h-3" />
+                            PDF
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="docx">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-3 h-3" />
+                            DOCX
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="txt">
+                          <div className="flex items-center gap-2">
+                            <File className="w-3 h-3" />
+                            TXT
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button variant="outline" size="sm" onClick={handleCopy}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
@@ -264,7 +383,7 @@ const CoverLetterGenerator = () => {
             </CardHeader>
             <CardContent>
               {generatedLetter ? (
-                <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap text-sm leading-relaxed">
+                <div className="bg-background/50 rounded-lg p-6 min-h-96 whitespace-pre-wrap text-sm leading-relaxed font-mono">
                   {generatedLetter}
                 </div>
               ) : (
@@ -295,9 +414,9 @@ const CoverLetterGenerator = () => {
           <Card className="glass-card text-center">
             <CardContent className="pt-6">
               <div className="text-3xl mb-2">🎨</div>
-              <h3 className="font-semibold mb-2">Tone Customization</h3>
+              <h3 className="font-semibold mb-2">Multiple Formats</h3>
               <p className="text-sm text-muted-foreground">
-                Choose from different writing styles to match company culture
+                Download in PDF, Word, or plain text formats for any application
               </p>
             </CardContent>
           </Card>
@@ -305,9 +424,9 @@ const CoverLetterGenerator = () => {
           <Card className="glass-card text-center">
             <CardContent className="pt-6">
               <div className="text-3xl mb-2">🔍</div>
-              <h3 className="font-semibold mb-2">Keyword Optimization</h3>
+              <h3 className="font-semibold mb-2">Professional Format</h3>
               <p className="text-sm text-muted-foreground">
-                Automatically incorporates relevant keywords from job descriptions
+                Complete business letter format with proper addressing and closing
               </p>
             </CardContent>
           </Card>

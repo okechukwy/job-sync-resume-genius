@@ -11,6 +11,9 @@ const corsHeaders = {
 
 interface CoverLetterRequest {
   fullName: string;
+  email?: string;
+  phone?: string;
+  location?: string;
   jobTitle: string;
   companyName: string;
   hiringManager?: string;
@@ -18,6 +21,8 @@ interface CoverLetterRequest {
   tone: string;
   keyPoints?: string;
   userBackground?: string;
+  letterLength?: 'brief' | 'standard' | 'detailed';
+  closingType?: string;
 }
 
 serve(async (req) => {
@@ -38,65 +43,87 @@ serve(async (req) => {
   try {
     const {
       fullName,
+      email,
+      phone,
+      location,
       jobTitle,
       companyName,
       hiringManager,
       jobDescription,
       tone,
       keyPoints,
-      userBackground
+      userBackground,
+      letterLength = 'standard',
+      closingType = 'Sincerely'
     }: CoverLetterRequest = await req.json();
 
-    console.log('Processing cover letter for:', { jobTitle, companyName, tone });
+    console.log('Processing cover letter for:', { jobTitle, companyName, tone, letterLength });
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Create comprehensive AI prompt
-    const systemPrompt = `You are an expert career coach and professional writer specializing in creating compelling cover letters. Your task is to write a personalized, professional cover letter that:
+    // Create comprehensive AI prompt for professional business letter format
+    const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter that follows standard business letter conventions:
 
-1. Analyzes the job description to understand key requirements and company culture
-2. Matches the candidate's background to specific job needs
-3. Uses industry-appropriate language and terminology
-4. Adapts the writing style based on the specified tone
-5. Creates a cohesive narrative that shows value proposition
+FORMATTING REQUIREMENTS:
+1. Start with the current date
+2. Include recipient address block (if hiring manager provided)
+3. Use professional salutation
+4. Write ${letterLength} content (brief: 2-3 paragraphs, standard: 3-4 paragraphs, detailed: 4-5 paragraphs)
+5. End with professional closing ("${closingType}")
+6. Include signature line with sender's name
+7. Use proper paragraph spacing and business letter structure
 
-Writing Guidelines:
-- Keep it concise but impactful (3-4 paragraphs)
-- Use specific examples and achievements when possible
-- Show enthusiasm appropriate to the tone
-- Include relevant keywords from the job description
-- Maintain professional formatting
-- End with a strong call to action
+CONTENT REQUIREMENTS:
+- Opening paragraph: Express interest and briefly mention how you learned about the position
+- Body paragraph(s): Highlight relevant experience, skills, and achievements that match job requirements
+- Closing paragraph: Reiterate interest, mention next steps, and include call to action
+- Match tone: ${tone} throughout the letter
+- Incorporate keywords from job description naturally
+- Show knowledge of the company and role
 
-Tone Styles:
+TONE GUIDELINES:
 - Professional: Formal, respectful, emphasis on qualifications
-- Enthusiastic: Energetic, passionate, shows excitement
-- Confident: Assertive, highlights achievements, direct
-- Creative: Innovative language, unique approach, storytelling
-- Formal: Traditional, conservative, very respectful
+- Enthusiastic: Energetic, passionate, shows excitement for the role
+- Confident: Assertive, highlights achievements, direct communication
+- Creative: Innovative language, unique approach, storytelling elements
+- Formal: Traditional, conservative, very respectful language
 
-Return only the cover letter text without any additional formatting or explanations.`;
+Return ONLY the complete cover letter in proper business format, ready for printing or PDF conversion.`;
 
-    const userPrompt = `Create a cover letter with these details:
+    const contactInfo = [email, phone, location].filter(Boolean).join(' | ');
+    const senderInfo = contactInfo ? `${fullName}\n${contactInfo}` : fullName;
 
-Candidate Name: ${fullName}
-Position: ${jobTitle}
-Company: ${companyName}
-${hiringManager ? `Hiring Manager: ${hiringManager}` : ''}
-Tone: ${tone}
+    const userPrompt = `Create a ${letterLength} cover letter with these details:
 
-Job Description:
+SENDER INFORMATION:
+${senderInfo}
+
+POSITION DETAILS:
+- Job Title: ${jobTitle}
+- Company: ${companyName}
+${hiringManager ? `- Hiring Manager: ${hiringManager}` : '- Hiring Manager: Hiring Manager'}
+
+TONE: ${tone}
+
+JOB DESCRIPTION:
 ${jobDescription}
 
-${keyPoints ? `Key Points to Highlight:
+${keyPoints ? `KEY POINTS TO HIGHLIGHT:
 ${keyPoints}` : ''}
 
-${userBackground ? `Additional Background:
+${userBackground ? `CANDIDATE BACKGROUND:
 ${userBackground}` : ''}
 
-Please write a compelling cover letter that matches this person's profile to the job requirements while maintaining the ${tone} tone throughout.`;
+Please write a complete, professional business letter that:
+1. Uses proper business letter format with date and addresses
+2. Addresses the hiring manager appropriately
+3. Demonstrates clear understanding of the role and company
+4. Highlights relevant qualifications and achievements
+5. Uses ${tone} tone throughout
+6. Ends with "${closingType}" and proper signature block
+7. Is ${letterLength} in length (${letterLength === 'brief' ? '2-3 paragraphs' : letterLength === 'standard' ? '3-4 paragraphs' : '4-5 paragraphs'})`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -111,7 +138,7 @@ Please write a compelling cover letter that matches this person's profile to the
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: letterLength === 'brief' ? 800 : letterLength === 'standard' ? 1200 : 1600,
       }),
     });
 
