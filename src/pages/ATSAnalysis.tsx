@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,6 +171,19 @@ const ATSAnalysis = () => {
       formatting: 'bg-gray-50 text-gray-700 border-gray-200'
     };
     return colors[category as keyof typeof colors] || colors.formatting;
+  };
+
+  const getGroupedOptimizations = () => {
+    if (!analysis?.contentOptimizations) return {};
+    
+    return analysis.contentOptimizations.reduce((groups, optimization) => {
+      const section = optimization.section;
+      if (!groups[section]) {
+        groups[section] = [];
+      }
+      groups[section].push(optimization);
+      return groups;
+    }, {} as Record<string, typeof analysis.contentOptimizations>);
   };
 
   return (
@@ -378,7 +390,7 @@ const ATSAnalysis = () => {
               </Card>
             )}
 
-            {/* Content Optimizations - Enhanced Display */}
+            {/* Content Optimizations - Enhanced Display with Grouping */}
             {analysis.contentOptimizations.length > 0 && (
               <Card className="glass-card">
                 <CardHeader>
@@ -392,38 +404,44 @@ const ATSAnalysis = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {analysis.contentOptimizations.map((optimization, index) => (
-                      <div key={index} className="glass-card p-4 rounded-lg border border-border/50">
-                        <div className="flex items-start gap-3 mb-3">
-                          {getCategoryIcon(optimization.category || 'formatting')}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-semibold">{optimization.section}</h4>
-                              {optimization.category && (
-                                <Badge className={getCategoryBadge(optimization.category)}>
-                                  {optimization.category.replace('-', ' ')}
-                                </Badge>
-                              )}
+                    {Object.entries(getGroupedOptimizations()).map(([sectionName, optimizations]) => (
+                      <div key={sectionName} className="space-y-4">
+                        <h3 className="text-lg font-semibold text-primary border-b border-border/20 pb-2">
+                          {sectionName} ({optimizations.length} improvement{optimizations.length !== 1 ? 's' : ''})
+                        </h3>
+                        {optimizations.map((optimization, index) => (
+                          <div key={`${sectionName}-${index}`} className="glass-card p-4 rounded-lg border border-border/50">
+                            <div className="flex items-start gap-3 mb-3">
+                              {getCategoryIcon(optimization.category || 'formatting')}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  {optimization.category && (
+                                    <Badge className={getCategoryBadge(optimization.category)}>
+                                      {optimization.category.replace('-', ' ')}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                              <div>
+                                <p className="text-sm font-medium text-muted-foreground mb-2">Current:</p>
+                                <p className="text-sm bg-muted/50 p-3 rounded border">{optimization.current}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-success mb-2">Improved:</p>
+                                <p className="text-sm bg-success/10 p-3 rounded border border-success/20">{optimization.improved}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-primary/5 p-3 rounded border border-primary/10">
+                              <p className="text-sm text-muted-foreground">
+                                <strong>Why this helps:</strong> {optimization.reasoning}
+                              </p>
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground mb-2">Current:</p>
-                            <p className="text-sm bg-muted/50 p-3 rounded border">{optimization.current}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-success mb-2">Improved:</p>
-                            <p className="text-sm bg-success/10 p-3 rounded border border-success/20">{optimization.improved}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-primary/5 p-3 rounded border border-primary/10">
-                          <p className="text-sm text-muted-foreground">
-                            <strong>Why this helps:</strong> {optimization.reasoning}
-                          </p>
-                        </div>
+                        ))}
                       </div>
                     ))}
                   </div>

@@ -76,7 +76,7 @@ serve(async (req) => {
 
     const systemPrompt = `You are an ATS (Applicant Tracking System) optimization expert. Analyze the provided resume comprehensively and return specific recommendations to improve ATS compatibility and keyword matching.
 
-IMPORTANT: You must provide comprehensive analysis with AT LEAST 6-8 content optimizations covering ALL major resume sections. Analyze every section thoroughly and provide specific, actionable improvements.
+IMPORTANT: Provide COMPREHENSIVE analysis with detailed content optimizations covering ALL resume sections. Analyze EVERY section thoroughly and provide ALL applicable improvements without artificial limits.
 
 Return a JSON object with this structure:
 {
@@ -107,35 +107,60 @@ Return a JSON object with this structure:
   ]
 }
 
-COMPREHENSIVE ANALYSIS REQUIREMENTS:
-1. **Professional Summary/Objective**: Analyze for keyword density, industry relevance, and impact
-2. **Experience Section**: Look for quantifiable achievements, action verbs, keyword optimization, and industry terminology
-3. **Skills Section**: Check for relevant technical and soft skills, ATS-friendly formatting
-4. **Education Section**: Verify proper formatting and relevant certifications
-5. **Achievement Highlighting**: Identify opportunities to add metrics and quantifiable results
-6. **Industry Alignment**: Ensure terminology matches industry standards and job requirements
+COMPREHENSIVE SECTION-BY-SECTION ANALYSIS REQUIREMENTS:
+Analyze EVERY section present in the resume and provide ALL applicable optimizations:
 
-CONTENT OPTIMIZATION CATEGORIES TO INCLUDE:
-- **Quantification**: Add specific numbers, percentages, metrics to achievements
-- **Keywords**: Integrate relevant industry and job-specific keywords naturally
-- **Action Verbs**: Replace weak verbs with strong, impactful action words
-- **Achievement**: Transform responsibilities into achievement-focused statements
-- **Industry Alignment**: Use industry-standard terminology and practices
-- **Formatting**: Improve ATS readability and structure
+1. **Professional Summary/Objective**: 
+   - Keyword density and industry relevance
+   - Impact and quantification opportunities
+   - Industry-specific language alignment
 
-Focus on:
-- Keyword density and relevance matching job description
-- ATS-friendly formatting and structure
-- Section organization and hierarchy
-- Industry-specific terminology integration
-- Quantifiable achievements and impact metrics
-- Action verb optimization and variety
-- Professional language enhancement
-- Skills alignment with job requirements
+2. **Experience Section**: 
+   - EACH job entry should be analyzed separately
+   - Quantifiable achievements identification
+   - Action verb optimization
+   - Keyword integration opportunities
+   - Achievement vs responsibility transformation
 
-Provide AT LEAST 6-8 diverse content optimizations covering different sections and categories.`;
+3. **Skills Section**: 
+   - Technical skills alignment with industry standards
+   - Soft skills relevant to role
+   - ATS-friendly formatting
+   - Missing critical skills identification
 
-    let userPrompt = `Analyze this resume comprehensively for ATS optimization in the ${industry} industry. Provide detailed content optimizations for ALL major sections:\n\n${resumeText}`;
+4. **Education Section**: 
+   - Proper formatting for ATS parsing
+   - Relevant certifications and achievements
+   - Industry-relevant coursework highlighting
+
+5. **Additional Sections** (if present):
+   - Projects, Publications, Awards, Volunteer work
+   - Optimize each for keyword relevance and ATS compatibility
+
+6. **Overall Structure & Formatting**:
+   - Section organization and hierarchy
+   - ATS-friendly formatting issues
+   - Header and contact information optimization
+
+CONTENT OPTIMIZATION CATEGORIES TO COMPREHENSIVELY COVER:
+- **Quantification**: Add specific numbers, percentages, metrics to ALL achievements
+- **Keywords**: Integrate relevant industry and job-specific keywords throughout ALL sections
+- **Action Verbs**: Replace weak verbs with strong, impactful action words in ALL experience entries
+- **Achievement**: Transform ALL responsibilities into achievement-focused statements
+- **Industry Alignment**: Use industry-standard terminology in ALL applicable sections
+- **Formatting**: Improve ATS readability and structure throughout the resume
+
+ANALYSIS APPROACH:
+- Go through the resume section by section systematically
+- For each section, identify ALL possible improvements
+- Provide specific before/after examples for each optimization
+- Don't limit the number of suggestions - provide ALL that would benefit the candidate
+- Focus on thoroughness and completeness rather than brevity
+- Each optimization should be specific, actionable, and impactful
+
+Provide comprehensive analysis covering every improvable aspect of the resume without arbitrary limits on the number of suggestions.`;
+
+    let userPrompt = `Analyze this resume comprehensively for ATS optimization in the ${industry} industry. Provide detailed content optimizations for ALL sections and ALL applicable improvements:\n\n${resumeText}`;
     
     if (jobDescription) {
       userPrompt += `\n\nTarget job description for keyword matching and alignment:\n${jobDescription}`;
@@ -156,7 +181,7 @@ Provide AT LEAST 6-8 diverse content optimizations covering different sections a
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 3000,
+        max_tokens: 4000,
       }),
     });
 
@@ -184,52 +209,21 @@ Provide AT LEAST 6-8 diverse content optimizations covering different sections a
       const jsonText = optimizationText.replace(/```json\n?|\n?```/g, '').trim();
       optimization = JSON.parse(jsonText);
       
-      // Validate the structure and ensure comprehensive content optimizations
+      // Validate the structure
       if (!optimization.atsScore || !optimization.keywordMatches || !optimization.overallRecommendations) {
         throw new Error('Invalid response structure from AI');
       }
 
-      // Ensure we have sufficient content optimizations
-      if (!optimization.contentOptimizations || optimization.contentOptimizations.length < 4) {
-        console.warn('Insufficient content optimizations received, adding fallback suggestions');
-        optimization.contentOptimizations = optimization.contentOptimizations || [];
-        
-        // Add fallback content optimizations if needed
-        const fallbackOptimizations = [
-          {
-            section: "Professional Summary",
-            current: "Generic professional summary",
-            improved: "Industry-specific summary with quantifiable achievements and relevant keywords",
-            reasoning: "Tailored summaries with metrics improve ATS scoring and recruiter engagement",
-            category: "keywords"
-          },
-          {
-            section: "Experience Section",
-            current: "Managed team responsibilities",
-            improved: "Led a team of 8 professionals, increasing productivity by 25% through process optimization",
-            reasoning: "Quantified achievements with specific metrics demonstrate measurable impact",
-            category: "quantification"
-          },
-          {
-            section: "Skills Section",
-            current: "Basic skills listing",
-            improved: "Industry-relevant technical and soft skills with proficiency levels",
-            reasoning: "Comprehensive skills alignment with job requirements improves keyword matching",
-            category: "industry-alignment"
-          }
-        ];
-
-        // Add fallback optimizations to reach minimum threshold
-        while (optimization.contentOptimizations.length < 6 && fallbackOptimizations.length > 0) {
-          optimization.contentOptimizations.push(fallbackOptimizations.shift());
-        }
+      // Ensure we have content optimizations array
+      if (!optimization.contentOptimizations) {
+        optimization.contentOptimizations = [];
       }
 
     } catch (parseError) {
       console.error('Failed to parse OpenAI response as JSON:', parseError);
       console.error('Raw response:', optimizationText);
       
-      // Return a comprehensive fallback response
+      // Return a comprehensive fallback response with more suggestions
       optimization = {
         atsScore: 50,
         keywordMatches: {
@@ -251,54 +245,100 @@ Provide AT LEAST 6-8 diverse content optimizations covering different sections a
         contentOptimizations: [
           {
             section: 'Professional Summary',
-            current: 'Unable to analyze specific content',
-            improved: 'Add a compelling 2-3 sentence summary highlighting your key achievements with quantifiable results',
-            reasoning: 'A strong professional summary with metrics improves ATS scoring and recruiter engagement',
-            category: 'quantification'
-          },
-          {
-            section: 'Experience Section',
-            current: 'Unable to analyze specific achievements',
-            improved: 'Transform job responsibilities into quantified achievements (e.g., "Increased sales by 30%")',
-            reasoning: 'Quantified achievements demonstrate measurable impact and improve keyword matching',
-            category: 'quantification'
-          },
-          {
-            section: 'Skills Section',
-            current: 'Unable to analyze current skills',
-            improved: 'Include both technical and soft skills relevant to your target industry and role',
-            reasoning: 'Comprehensive skills section improves keyword matching with job descriptions',
+            current: 'Generic or missing professional summary',
+            improved: 'Add a compelling 2-3 sentence summary highlighting your key achievements with quantifiable results and industry-relevant keywords',
+            reasoning: 'A strong professional summary with metrics and keywords improves ATS scoring and recruiter engagement',
             category: 'keywords'
           },
           {
-            section: 'Action Verbs',
-            current: 'Unable to analyze current language',
-            improved: 'Use strong action verbs like "achieved," "optimized," "implemented," "led"',
-            reasoning: 'Powerful action verbs create more impactful statements and improve ATS parsing',
+            section: 'Professional Summary',
+            current: 'Summary without quantifiable impact',
+            improved: 'Include specific metrics like "increased efficiency by 25%" or "managed $2M budget"',
+            reasoning: 'Quantified achievements in the summary immediately demonstrate your value proposition',
+            category: 'quantification'
+          },
+          {
+            section: 'Experience - Job Responsibilities',
+            current: 'Managed team and handled projects',
+            improved: 'Led a cross-functional team of 8 professionals, increasing project delivery speed by 30% through process optimization',
+            reasoning: 'Specific numbers and outcomes demonstrate measurable impact rather than just listing duties',
+            category: 'quantification'
+          },
+          {
+            section: 'Experience - Action Verbs',
+            current: 'Responsible for, handled, worked on',
+            improved: 'Achieved, optimized, implemented, spearheaded, delivered',
+            reasoning: 'Strong action verbs create more impactful statements and improve ATS parsing',
             category: 'action-verbs'
           },
           {
-            section: 'Industry Alignment',
-            current: 'Unable to analyze industry relevance',
-            improved: 'Incorporate industry-standard terminology and practices throughout your resume',
-            reasoning: 'Industry-aligned language improves relevance scoring in ATS systems',
+            section: 'Experience - Achievement Focus',
+            current: 'Job duties and responsibilities listed',
+            improved: 'Transform each bullet point into a specific achievement with metrics and outcomes',
+            reasoning: 'Achievement-focused descriptions demonstrate your impact and value to potential employers',
+            category: 'achievement'
+          },
+          {
+            section: 'Skills Section',
+            current: 'Basic skills listing without context',
+            improved: 'Organize skills into categories (Technical, Leadership, Industry-Specific) with proficiency levels',
+            reasoning: 'Structured skills section with relevant categories improves keyword matching and ATS parsing',
+            category: 'keywords'
+          },
+          {
+            section: 'Skills Section',
+            current: 'Generic skills not aligned with industry',
+            improved: 'Include industry-standard tools, technologies, and methodologies relevant to your target role',
+            reasoning: 'Industry-aligned skills improve relevance scoring in ATS systems and keyword matching',
             category: 'industry-alignment'
           },
           {
-            section: 'Achievement Highlighting',
-            current: 'Unable to analyze specific achievements',
-            improved: 'Add specific metrics, percentages, and outcomes to demonstrate your impact',
-            reasoning: 'Quantified achievements provide concrete evidence of your value to potential employers',
+            section: 'Education Section',
+            current: 'Basic degree information only',
+            improved: 'Include relevant coursework, academic achievements, certifications, and GPA if strong (3.5+)',
+            reasoning: 'Comprehensive education details provide additional keyword opportunities and demonstrate qualifications',
+            category: 'keywords'
+          },
+          {
+            section: 'Overall Formatting',
+            current: 'Complex formatting or graphics',
+            improved: 'Use simple, clean formatting with clear section headers and consistent bullet points',
+            reasoning: 'ATS-friendly formatting ensures all content is properly parsed and indexed',
+            category: 'formatting'
+          },
+          {
+            section: 'Industry Terminology',
+            current: 'Generic business language',
+            improved: 'Incorporate industry-specific terminology, acronyms, and standard practices throughout',
+            reasoning: 'Industry-specific language signals expertise and improves relevance matching',
+            category: 'industry-alignment'
+          },
+          {
+            section: 'Contact Information',
+            current: 'Basic contact details only',
+            improved: 'Include LinkedIn profile, professional website/portfolio, and ensure phone/email are ATS-readable',
+            reasoning: 'Complete contact information with professional links enhances your professional presence',
+            category: 'formatting'
+          },
+          {
+            section: 'Projects/Portfolio',
+            current: 'Missing or briefly mentioned projects',
+            improved: 'Add a dedicated projects section with specific technologies used, outcomes achieved, and measurable impact',
+            reasoning: 'Project details demonstrate practical application of skills and provide additional keyword opportunities',
             category: 'achievement'
           }
         ],
         overallRecommendations: [
           'There was an issue with the detailed analysis. Please try again for comprehensive optimization suggestions.',
-          'Focus on adding quantifiable achievements throughout your resume.',
-          'Ensure your skills section includes both technical and soft skills relevant to your target role.',
-          'Use strong action verbs to begin bullet points in your experience section.',
-          'Incorporate industry-specific keywords naturally throughout your resume.',
-          'Consider adding a professional summary if you don\'t have one already.'
+          'Focus on adding quantifiable achievements with specific metrics throughout your resume.',
+          'Ensure every job experience includes measurable outcomes and impact statements.',
+          'Use strong action verbs to begin each bullet point in your experience section.',
+          'Incorporate industry-specific keywords naturally throughout all sections.',
+          'Add a compelling professional summary if missing, or enhance the existing one with metrics.',
+          'Organize your skills section to highlight the most relevant technical and soft skills.',
+          'Consider adding a projects section to showcase practical application of your skills.',
+          'Ensure consistent formatting that is ATS-friendly throughout the document.',
+          'Tailor your resume content to match the specific job description and industry requirements.'
         ]
       };
     }
