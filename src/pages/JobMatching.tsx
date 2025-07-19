@@ -312,14 +312,16 @@ const JobMatching = () => {
                     </div>
                   ))}
                   
-                  {/* Additional optimization tips */}
+                  {/* Dynamic Pro Tips */}
                   <div className="mt-6 p-4 glass-card rounded-lg border border-blue-500/20 bg-blue-500/5">
-                    <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">💡 Pro Tips</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Quantify achievements with numbers and percentages</li>
-                      <li>• Use action verbs at the beginning of bullet points</li>
-                      <li>• Mirror the language and terminology used in the job posting</li>
-                      <li>• Keep your resume to 1-2 pages for maximum impact</li>
+                    <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">💡 Personalized Pro Tips</h4>
+                    <ul className="text-sm text-muted-foreground space-y-2">
+                      {analysis.proTips.map((tip: string, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-blue-500 font-bold mt-0.5">•</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>

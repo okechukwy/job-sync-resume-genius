@@ -10,6 +10,7 @@ export interface JobMatchingResult {
     hasSkill: boolean;
   }>;
   recommendations: string[];
+  proTips: string[];
 }
 
 // Common tech keywords and skills
@@ -22,6 +23,127 @@ const COMMON_KEYWORDS = [
   'Mobile Development', 'iOS', 'Android', 'Flutter', 'React Native', 'UI/UX', 'Design',
   'Project Management', 'Leadership', 'Team Management', 'Communication', 'Problem Solving'
 ];
+
+// Detect industry/role type from job description
+const detectIndustryAndRole = (jobDescription: string): { industry: string; level: string; role: string } => {
+  const lowerText = jobDescription.toLowerCase();
+  
+  // Industry detection
+  let industry = 'general';
+  if (lowerText.includes('software') || lowerText.includes('developer') || lowerText.includes('engineer') || lowerText.includes('tech')) {
+    industry = 'technology';
+  } else if (lowerText.includes('healthcare') || lowerText.includes('medical') || lowerText.includes('nurse') || lowerText.includes('doctor')) {
+    industry = 'healthcare';
+  } else if (lowerText.includes('finance') || lowerText.includes('banking') || lowerText.includes('investment') || lowerText.includes('accounting')) {
+    industry = 'finance';
+  } else if (lowerText.includes('marketing') || lowerText.includes('sales') || lowerText.includes('brand') || lowerText.includes('advertising')) {
+    industry = 'marketing';
+  } else if (lowerText.includes('design') || lowerText.includes('creative') || lowerText.includes('ux') || lowerText.includes('ui')) {
+    industry = 'design';
+  }
+  
+  // Level detection
+  let level = 'mid';
+  if (lowerText.includes('senior') || lowerText.includes('lead') || lowerText.includes('principal') || lowerText.includes('manager')) {
+    level = 'senior';
+  } else if (lowerText.includes('junior') || lowerText.includes('entry') || lowerText.includes('graduate') || lowerText.includes('intern')) {
+    level = 'entry';
+  }
+  
+  // Role detection
+  let role = 'individual contributor';
+  if (lowerText.includes('manager') || lowerText.includes('director') || lowerText.includes('lead') || lowerText.includes('supervisor')) {
+    role = 'management';
+  }
+  
+  return { industry, level, role };
+};
+
+// Generate dynamic pro tips based on analysis results
+const generateProTips = (
+  jobDescription: string,
+  matchScore: number,
+  missingKeywords: string[],
+  skillsGap: Array<{ skill: string; importance: string; hasSkill: boolean }>
+): string[] => {
+  const tips: string[] = [];
+  const { industry, level, role } = detectIndustryAndRole(jobDescription);
+  
+  // Score-based tips
+  if (matchScore < 50) {
+    tips.push('Focus on gaining the fundamental skills listed in the job requirements before applying');
+    tips.push('Consider taking online courses or bootcamps to bridge major skill gaps');
+  } else if (matchScore < 70) {
+    tips.push('You have a good foundation - focus on adding the missing high-priority skills to strengthen your profile');
+    tips.push('Highlight transferable skills that relate to the missing requirements');
+  } else if (matchScore < 85) {
+    tips.push('You\'re a strong candidate - emphasize your matching skills and briefly address any gaps');
+    tips.push('Use specific examples and metrics to demonstrate your experience with the skills you have');
+  } else {
+    tips.push('Excellent match! Focus on crafting a compelling narrative that showcases your expertise');
+    tips.push('Quantify your achievements and impact in previous roles to stand out from other qualified candidates');
+  }
+  
+  // Missing keywords specific tips
+  const criticalMissing = skillsGap.filter(skill => !skill.hasSkill && skill.importance === 'High');
+  if (criticalMissing.length > 0) {
+    const topMissing = criticalMissing.slice(0, 3).map(skill => skill.skill);
+    tips.push(`Priority focus areas: ${topMissing.join(', ')} - these are critical requirements for this role`);
+  }
+  
+  // Industry-specific tips
+  switch (industry) {
+    case 'technology':
+      if (missingKeywords.some(k => ['GitHub', 'Git', 'API', 'CI/CD'].includes(k))) {
+        tips.push('Create a strong GitHub portfolio showcasing your coding projects and contributions');
+      }
+      if (level === 'senior') {
+        tips.push('Emphasize your system design experience and mentoring capabilities');
+      }
+      break;
+    case 'healthcare':
+      tips.push('Highlight any patient care experience and relevant certifications or licenses');
+      if (missingKeywords.some(k => k.toLowerCase().includes('electronic health record'))) {
+        tips.push('Gain familiarity with EHR systems commonly used in healthcare settings');
+      }
+      break;
+    case 'finance':
+      tips.push('Emphasize your analytical skills and experience with financial modeling or analysis');
+      if (missingKeywords.some(k => ['Excel', 'SQL', 'Python'].includes(k))) {
+        tips.push('Strengthen your technical skills in Excel, SQL, or Python for financial analysis');
+      }
+      break;
+    case 'marketing':
+      if (missingKeywords.some(k => ['Analytics', 'SEO', 'SEM', 'Social Media'].includes(k))) {
+        tips.push('Build experience with digital marketing tools and analytics platforms');
+      }
+      tips.push('Create a portfolio showcasing successful marketing campaigns and their measurable results');
+      break;
+    case 'design':
+      tips.push('Develop a strong design portfolio that demonstrates your creative process and problem-solving approach');
+      if (missingKeywords.some(k => ['Figma', 'Adobe', 'Sketch'].includes(k))) {
+        tips.push('Master the design tools mentioned in the job description through practice projects');
+      }
+      break;
+  }
+  
+  // Role-level tips
+  if (role === 'management') {
+    tips.push('Highlight your leadership experience, team management skills, and strategic thinking abilities');
+    tips.push('Include examples of how you\'ve successfully led teams through challenges or growth');
+  }
+  
+  // General optimization tips
+  if (missingKeywords.length > 5) {
+    tips.push('Gradually incorporate missing keywords into your resume where truthful and relevant');
+  }
+  
+  tips.push('Tailor your resume summary to mirror the language and priorities mentioned in this job posting');
+  tips.push('Use the STAR method (Situation, Task, Action, Result) to describe your achievements with specific metrics');
+  
+  // Return the most relevant tips (limit to 6)
+  return tips.slice(0, 6);
+};
 
 // Extract keywords from text using various patterns
 const extractKeywords = (text: string): string[] => {
@@ -212,6 +334,9 @@ export const analyzeJobMatch = async (
     // Generate recommendations
     const recommendations = generateRecommendations(missingKeywords, skillsGap);
     
+    // Generate dynamic pro tips
+    const proTips = generateProTips(jobDescription, matchScore, missingKeywords, skillsGap);
+    
     return {
       matchScore,
       matchedKeywords: matchedKeywords.slice(0, 10), // Limit display
@@ -219,7 +344,8 @@ export const analyzeJobMatch = async (
       skillsGap: skillsGap
         .filter(skill => skill.importance === 'High' || !skill.hasSkill)
         .slice(0, 8), // Show most relevant skills
-      recommendations
+      recommendations,
+      proTips
     };
   } catch (error) {
     console.error('Error analyzing job match:', error);
