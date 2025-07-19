@@ -33,7 +33,7 @@ const getTemplateInstructions = (templateId: string) => {
     'classic-professional': {
       headerStyle: 'centered',
       bodyFormat: 'paragraph',
-      instructions: 'Use centered header format with formal business letter structure. Focus on traditional paragraph format with professional tone.'
+      instructions: 'Use centered header format with formal business letter structure. Center the sender information using appropriate spacing. Focus on traditional paragraph format with professional tone.'
     },
     'modern-minimalist': {
       headerStyle: 'left-aligned',
@@ -43,36 +43,56 @@ const getTemplateInstructions = (templateId: string) => {
     'creative-professional': {
       headerStyle: 'creative',
       bodyFormat: 'mixed',
-      instructions: 'Use creative header with mixed format (intro paragraph + bullet achievements + closing paragraph). Balance creativity with professionalism.'
+      instructions: 'Use creative header with mixed format (intro paragraph + bullet achievements + closing paragraph). Balance creativity with professionalism using plain text formatting.'
     },
     'executive-format': {
       headerStyle: 'executive',
       bodyFormat: 'paragraph',
-      instructions: 'Use sophisticated executive header format. Focus on leadership qualities and strategic thinking.'
+      instructions: 'Use sophisticated executive header format with premium spacing. Focus on leadership qualities and strategic thinking.'
     },
     'achievement-bullet': {
       headerStyle: 'left-aligned',
       bodyFormat: 'bullet-points',
-      instructions: 'Use left-aligned header with bullet-point format for achievements. Emphasize quantifiable results and metrics.'
+      instructions: 'Use left-aligned header with bullet-point format for achievements. Emphasize quantifiable results and metrics using • or - for bullets.'
     },
     'skills-showcase': {
-      headerStyle: 'modern',
+      headerStyle: 'left-aligned',
       bodyFormat: 'skills-focused',
-      instructions: 'Use modern header with skills integration. Highlight technical competencies and specialized knowledge.'
+      instructions: 'Use left-aligned header with skills integration. Highlight technical competencies and specialized knowledge throughout the letter.'
     },
     'healthcare-formal': {
       headerStyle: 'centered',
       bodyFormat: 'paragraph',
-      instructions: 'Use formal centered header. Emphasize credentials, certifications, and healthcare-specific experience.'
+      instructions: 'Use formal centered header with appropriate spacing. Emphasize credentials, certifications, and healthcare-specific experience.'
     },
     'startup-dynamic': {
       headerStyle: 'creative',
       bodyFormat: 'mixed',
-      instructions: 'Use dynamic creative header with mixed format. Emphasize innovation, adaptability, and startup culture fit.'
+      instructions: 'Use dynamic creative header with mixed format. Emphasize innovation, adaptability, and startup culture fit using engaging plain text formatting.'
     }
   };
   
   return templates[templateId as keyof typeof templates] || templates['classic-professional'];
+};
+
+const cleanHtmlTags = (text: string): string => {
+  // Remove common HTML tags that might appear in the output
+  return text
+    .replace(/<\/?center>/gi, '')
+    .replace(/<\/?b>/gi, '')
+    .replace(/<\/?strong>/gi, '')
+    .replace(/<\/?i>/gi, '')
+    .replace(/<\/?em>/gi, '')
+    .replace(/<\/?u>/gi, '')
+    .replace(/<\/?p>/gi, '')
+    .replace(/<\/?div>/gi, '')
+    .replace(/<\/?span>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .trim();
 };
 
 serve(async (req) => {
@@ -129,8 +149,15 @@ serve(async (req) => {
       ? `${recipientName}\n${companyName}\n${companyAddress}`
       : `${recipientName}\n${companyName}`;
 
-    // Create template-specific AI prompt
+    // Create template-specific AI prompt with explicit plain text instructions
     const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter using the "${templateId}" template style.
+
+CRITICAL OUTPUT REQUIREMENTS:
+- Generate PLAIN TEXT ONLY - NO HTML tags, NO markup, NO special formatting codes
+- Use only standard text characters, spaces, line breaks, and basic punctuation
+- Do NOT use <center>, <b>, <strong>, <i>, <em>, <p>, <div>, or ANY HTML tags
+- Format using spacing, line breaks, and text alignment only
+- The output must be ready for plain text display and PDF generation
 
 TEMPLATE-SPECIFIC INSTRUCTIONS:
 ${template.instructions}
@@ -138,23 +165,12 @@ ${template.instructions}
 HEADER STYLE: ${template.headerStyle}
 BODY FORMAT: ${template.bodyFormat}
 
-CRITICAL FORMATTING REQUIREMENTS:
-1. Apply the specified header style (${template.headerStyle})
-2. Use the specified body format (${template.bodyFormat})
-3. Include sender's information formatted according to template style
-4. Add current date below sender info
-5. Add recipient information (hiring manager name, company name, and address if provided)
-6. Use professional salutation addressing the hiring manager by name if provided
-7. Write ${letterLength} content following the template's body format
-8. End with professional closing ("${closingType}")
-9. Include signature line with sender's name
-10. Use proper paragraph spacing and template-specific structure
-
-BODY FORMAT GUIDELINES:
-- paragraph: Traditional paragraph format with 3-4 well-structured paragraphs
-- bullet-points: Include bullet-pointed achievements with quantifiable results
-- mixed: Intro paragraph + bullet achievements + closing paragraph
-- skills-focused: Integrate skills naturally throughout with emphasis on competencies
+PLAIN TEXT FORMATTING GUIDELINES:
+1. ${template.headerStyle} header: ${template.headerStyle === 'centered' ? 'Center text using appropriate spacing (about 20-25 spaces before text)' : 'Align text to the left margin'}
+2. Use proper paragraph spacing with double line breaks between sections
+3. For bullet points, use "• " or "- " at the beginning of lines
+4. Use standard business letter spacing and structure
+5. No HTML tags or markup language of any kind
 
 CONTENT REQUIREMENTS:
 - Opening: Express interest and connection to the role/company
@@ -173,9 +189,13 @@ TONE GUIDELINES:
 
 ${industry ? `INDUSTRY FOCUS: Tailor language and emphasis for ${industry} industry standards and expectations.` : ''}
 
-CRITICAL: Do NOT use placeholders like [Company Address] or [City, State ZIP Code]. Use the actual information provided or omit if not available.
+FINAL OUTPUT VALIDATION:
+- Ensure NO HTML tags appear anywhere in the letter
+- Use only plain text formatting with spaces and line breaks
+- Verify professional business letter structure using plain text only
+- The letter should be ready for direct display without any HTML processing
 
-Return ONLY the complete cover letter in the specified template format, ready for printing or PDF conversion.`;
+Return ONLY the complete cover letter in plain text format, ready for printing or PDF conversion.`;
 
     const userPrompt = `Create a ${letterLength} cover letter using the "${templateId}" template with these details:
 
@@ -200,19 +220,17 @@ ${keyPoints}` : ''}
 ${userBackground ? `CANDIDATE BACKGROUND:
 ${userBackground}` : ''}
 
-Please write a complete, professional business letter that:
-1. Uses the ${templateId} template format with ${template.headerStyle} header style
-2. Employs ${template.bodyFormat} body format as specified
-3. Addresses the hiring manager appropriately (${recipientName})
-4. Demonstrates clear understanding of the role and company
-5. Highlights relevant qualifications and achievements
-6. Uses ${tone} tone throughout
-7. Ends with "${closingType}" and proper signature block
-8. Is ${letterLength} in length
-9. Uses ACTUAL information provided, NO PLACEHOLDERS
-${industry ? `10. Is optimized for the ${industry} industry` : ''}
+CRITICAL FORMATTING REQUIREMENTS:
+1. Use PLAIN TEXT ONLY - absolutely no HTML tags or markup
+2. Format the header according to ${template.headerStyle} style using text spacing only
+3. Use ${template.bodyFormat} body format with plain text techniques
+4. Address the hiring manager appropriately (${recipientName})
+5. Use "${closingType}" closing with proper signature block
+6. Ensure ${letterLength} length appropriate content
+7. NO HTML tags like <center>, <b>, <p>, or any other markup
+8. Use only spaces, line breaks, and standard punctuation for formatting
 
-IMPORTANT: Use the actual company information provided. Do not include placeholder text. If company address is not provided, simply use the company name in the recipient block.`;
+REMEMBER: The output must be clean plain text that displays perfectly without any HTML processing.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -221,7 +239,7 @@ IMPORTANT: Use the actual company information provided. Do not include placehold
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-2024-08-06',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -238,7 +256,10 @@ IMPORTANT: Use the actual company information provided. Do not include placehold
     }
 
     const data = await response.json();
-    const generatedLetter = data.choices[0].message.content;
+    let generatedLetter = data.choices[0].message.content;
+
+    // Clean any HTML tags that might have slipped through
+    generatedLetter = cleanHtmlTags(generatedLetter);
 
     console.log('Cover letter generated successfully with template:', templateId);
 
