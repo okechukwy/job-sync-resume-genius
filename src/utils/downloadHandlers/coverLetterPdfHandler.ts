@@ -64,6 +64,9 @@ export const downloadCoverLetterAsPdf = async (
       } else if (context?.section === 'closing' || context?.section === 'signature') {
         // Closing and signature elements
         spacingToApply = HEADER_SPACING;
+      } else if (context?.section === 'salutation') {
+        // Salutation/greeting gets tight spacing
+        spacingToApply = HEADER_SPACING;
       }
       
       // Handle text wrapping for left-aligned content
@@ -139,6 +142,9 @@ export const downloadCoverLetterAsPdf = async (
       } else if (formatting.textAlign === 'center' || formatting.textAlign === 'right') {
         spacingToApply = context?.section === 'header' ? HEADER_SPACING : PARAGRAPH_SPACING;
       } else if (context?.section === 'closing' || context?.section === 'signature') {
+        spacingToApply = HEADER_SPACING;
+      } else if (context?.section === 'salutation') {
+        // Salutation/greeting gets tight spacing
         spacingToApply = HEADER_SPACING;
       }
       
