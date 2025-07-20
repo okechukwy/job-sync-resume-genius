@@ -19,7 +19,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '2px' // Drastically reduced from 8px
+    marginBottom: '0px' // No default margin - handled by PDF spacing logic
   };
 
   // Determine context if not provided
@@ -41,7 +41,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '14pt',
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '3px', // Reduced spacing
+      marginBottom: '0px', // Spacing handled by PDF logic
       isHeader: true
     };
   }
@@ -50,7 +50,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt',
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '1px', // Minimal contact spacing
+      marginBottom: '0px', // Spacing handled by PDF logic
       isContact: true
     };
   }
@@ -59,7 +59,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '4px' // Reduced from 16px
+      marginBottom: '0px' // Spacing handled by PDF logic
     };
   }
   else if (isRecipient) {
@@ -67,7 +67,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '1px' // Minimal recipient spacing
+      marginBottom: '0px' // Spacing handled by PDF logic
     };
   }
   else if (isSalutation) {
@@ -75,7 +75,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '3px' // Reduced salutation spacing
+      marginBottom: '0px' // Spacing handled by PDF logic
     };
   }
   else if (isClosing || isSignature) {
@@ -83,7 +83,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: isSignature ? '2px' : '6px' // Reduced closing spacing
+      marginBottom: '0px' // Spacing handled by PDF logic
     };
   }
   else if (isSectionHeader) {
@@ -91,7 +91,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '12pt',
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '3px' // Reduced header spacing
+      marginBottom: '0px' // Spacing handled by PDF logic
     };
   }
 
