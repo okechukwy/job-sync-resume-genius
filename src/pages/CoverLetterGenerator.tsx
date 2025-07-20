@@ -182,15 +182,18 @@ const CoverLetterGenerator = () => {
         lineHeightClass = 'leading-relaxed';
       }
       
+      // Use only fontSize and fontWeight in inline styles, text alignment via CSS class
       const style: React.CSSProperties = {
         fontSize: formatting.fontSize,
         fontWeight: formatting.fontWeight as any,
-        textAlign: formatting.textAlign,
         color: '#1f2937'
       };
       
+      // Combine all CSS classes including text alignment
+      const cssClasses = `${spacingClass} ${lineHeightClass} ${formatting.textAlignClass || 'text-left'}`;
+      
       return (
-        <div key={index} style={style} className={`${spacingClass} ${lineHeightClass}`}>
+        <div key={index} style={style} className={cssClasses}>
           {line}
         </div>
       );

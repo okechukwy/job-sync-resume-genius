@@ -5,6 +5,7 @@ export interface LineFormatting {
   marginBottom: string;
   isHeader?: boolean;
   isContact?: boolean;
+  textAlignClass?: string; // Add this for Tailwind class mapping
 }
 
 interface LetterContext {
@@ -19,7 +20,8 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
     fontSize: '10pt', // Reduced default size for better density
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '0px' // PDF handler controls all spacing
+    marginBottom: '0px', // PDF handler controls all spacing
+    textAlignClass: 'text-left' // Default Tailwind class
   };
 
   // Determine context if not provided
@@ -37,19 +39,23 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
 
   // Apply template-specific formatting optimized for single-page fit
   if (isName && lineContext.section === 'header') {
+    const shouldCenter = templateId.includes('classic') || templateId.includes('healthcare');
     formatting = {
       fontSize: '11pt', // Reduced from 12pt
       fontWeight: 'bold',
-      textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
+      textAlign: shouldCenter ? 'center' : 'left',
+      textAlignClass: shouldCenter ? 'text-center' : 'text-left',
       marginBottom: '0px',
       isHeader: true
     };
   }
   else if (isContact && lineContext.section === 'header') {
+    const shouldCenter = templateId.includes('classic') || templateId.includes('healthcare');
     formatting = {
       fontSize: '9pt', // Reduced from 10pt
       fontWeight: 'normal',
-      textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
+      textAlign: shouldCenter ? 'center' : 'left',
+      textAlignClass: shouldCenter ? 'text-center' : 'text-left',
       marginBottom: '0px',
       isContact: true
     };
@@ -59,6 +65,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt', // Reduced from 11pt
       fontWeight: 'normal',
       textAlign: 'right',
+      textAlignClass: 'text-right',
       marginBottom: '0px'
     };
   }
@@ -67,6 +74,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt', // Reduced from 11pt
       fontWeight: 'normal',
       textAlign: 'left',
+      textAlignClass: 'text-left',
       marginBottom: '0px'
     };
   }
@@ -75,6 +83,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt', // Consistent with body text
       fontWeight: 'bold',
       textAlign: 'left',
+      textAlignClass: 'text-left',
       marginBottom: '0px'
     };
   }
