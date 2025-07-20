@@ -14,12 +14,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting optimized for single-page business letters with ZERO spacing
+  // Optimized formatting for single-page business letters
   let formatting: LineFormatting = {
-    fontSize: '11pt',
+    fontSize: '10pt', // Reduced default size for better density
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '0px' // Absolutely no additional margins - PDF handles all spacing
+    marginBottom: '0px' // PDF handler controls all spacing
   };
 
   // Determine context if not provided
@@ -35,47 +35,47 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   const isSignature = isSignatureLine(line, lineContext);
   const isSectionHeader = isSectionHeaderLine(line);
 
-  // Apply template-specific formatting with consistent sizing for single-page fit
+  // Apply template-specific formatting optimized for single-page fit
   if (isName && lineContext.section === 'header') {
     formatting = {
-      fontSize: '12pt', // Consistent header sizing
+      fontSize: '11pt', // Reduced from 12pt
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // Zero spacing - PDF handles it
+      marginBottom: '0px',
       isHeader: true
     };
   }
   else if (isContact && lineContext.section === 'header') {
     formatting = {
-      fontSize: '10pt', // Slightly smaller for contact info
+      fontSize: '9pt', // Reduced from 10pt
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // Zero spacing - PDF handles it
+      marginBottom: '0px',
       isContact: true
     };
   }
   else if (isDate) {
     formatting = {
-      fontSize: '11pt', // Standard body text size
+      fontSize: '10pt', // Reduced from 11pt
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '0px' // Zero spacing - PDF handles it
+      marginBottom: '0px'
     };
   }
   else if (isRecipient || isSalutation || isClosing || isSignature) {
     formatting = {
-      fontSize: '11pt', // Standard body text size
+      fontSize: '10pt', // Reduced from 11pt
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px' // Zero spacing - PDF handles it
+      marginBottom: '0px'
     };
   }
   else if (isSectionHeader) {
     formatting = {
-      fontSize: '11pt', // Same as body text for consistency
+      fontSize: '10pt', // Consistent with body text
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '0px' // Zero spacing - PDF handles it
+      marginBottom: '0px'
     };
   }
 
@@ -267,7 +267,7 @@ export const isSectionHeaderLine = (line: string): boolean => {
          !trimmedLine.toLowerCase().includes('dear');
 };
 
-// Enhanced processing function for cover letters
+// Enhanced processing function for cover letters with optimized spacing
 export const processLetterLines = (content: string, templateId: string) => {
   const lines = content.split('\n');
   const processedLines = [];
