@@ -11,7 +11,7 @@ export interface LineFormatting {
 interface LetterContext {
   lineIndex: number;
   totalLines: number;
-  section: 'header' | 'date' | 'recipient' | 'body' | 'closing' | 'signature';
+  section: 'header' | 'date' | 'recipient' | 'salutation' | 'body' | 'closing' | 'signature';
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
@@ -128,8 +128,13 @@ export const determineLineContext = (line: string, lineIndex: number, totalLines
     }
   }
   
+  // Salutation section - specific detection for greeting lines
+  if (isSalutationLine(trimmedLine)) {
+    return { lineIndex, totalLines, section: 'salutation' };
+  }
+  
   // Recipient section - enhanced detection
-  if (lineIndex >= 4 && lineIndex < 15 && (isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' }) || isSalutationLine(trimmedLine))) {
+  if (lineIndex >= 4 && lineIndex < 15 && isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' })) {
     return { lineIndex, totalLines, section: 'recipient' };
   }
   
