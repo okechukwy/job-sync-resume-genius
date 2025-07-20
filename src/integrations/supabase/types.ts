@@ -424,15 +424,18 @@ export type Database = {
       user_resumes: {
         Row: {
           additional_info: Json
+          archived_at: string | null
           awards: Json
           certificates: Json
           created_at: string | null
+          description: string | null
           education: Json
           experience: Json
           id: string
           interests: Json
           is_active: boolean | null
           languages: Json
+          parent_resume_id: string | null
           personal_info: Json
           projects: Json
           publications: Json
@@ -442,19 +445,23 @@ export type Database = {
           title: string
           updated_at: string | null
           user_id: string
+          version_number: number
           volunteering: Json
         }
         Insert: {
           additional_info?: Json
+          archived_at?: string | null
           awards?: Json
           certificates?: Json
           created_at?: string | null
+          description?: string | null
           education?: Json
           experience?: Json
           id?: string
           interests?: Json
           is_active?: boolean | null
           languages?: Json
+          parent_resume_id?: string | null
           personal_info?: Json
           projects?: Json
           publications?: Json
@@ -464,19 +471,23 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id: string
+          version_number?: number
           volunteering?: Json
         }
         Update: {
           additional_info?: Json
+          archived_at?: string | null
           awards?: Json
           certificates?: Json
           created_at?: string | null
+          description?: string | null
           education?: Json
           experience?: Json
           id?: string
           interests?: Json
           is_active?: boolean | null
           languages?: Json
+          parent_resume_id?: string | null
           personal_info?: Json
           projects?: Json
           publications?: Json
@@ -486,9 +497,18 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+          version_number?: number
           volunteering?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_resumes_parent_resume_id_fkey"
+            columns: ["parent_resume_id"]
+            isOneToOne: false
+            referencedRelation: "user_resumes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -498,6 +518,19 @@ export type Database = {
       calculate_performance_metrics: {
         Args: { user_uuid: string; period?: string }
         Returns: undefined
+      }
+      get_resume_version_metrics: {
+        Args: { resume_id: string }
+        Returns: {
+          total_applications: number
+          responses_received: number
+          interviews_scheduled: number
+          offers_received: number
+          avg_ats_score: number
+          response_rate: number
+          interview_rate: number
+          offer_rate: number
+        }[]
       }
     }
     Enums: {

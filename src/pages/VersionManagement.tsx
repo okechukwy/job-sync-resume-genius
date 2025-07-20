@@ -1,81 +1,32 @@
-import { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Eye, Copy, MoreHorizontal, Plus } from "lucide-react";
+import { FileText, Download, Eye, Copy, MoreHorizontal, Plus, Lightbulb, RotateCcw, Archive } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
+import { useResumeVersions } from "@/hooks/useResumeVersions";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const VersionManagement = () => {
-  const [versions] = useState([
-    {
-      id: 1,
-      name: "Tech_v2.1",
-      description: "Latest version for software engineering roles",
-      createdDate: "2024-01-15",
-      lastModified: "2024-01-20",
-      industry: "Technology",
-      applications: 8,
-      successRate: 75,
-      status: "active"
-    },
-    {
-      id: 2,
-      name: "PM_v1.3",
-      description: "Product management focused resume",
-      createdDate: "2024-01-10",
-      lastModified: "2024-01-18",
-      industry: "Product Management",
-      applications: 5,
-      successRate: 60,
-      status: "active"
-    },
-    {
-      id: 3,
-      name: "Frontend_v1.1",
-      description: "Frontend developer specialization",
-      createdDate: "2024-01-05",
-      lastModified: "2024-01-12",
-      industry: "Technology",
-      applications: 3,
-      successRate: 33,
-      status: "archived"
-    },
-    {
-      id: 4,
-      name: "Tech_v2.0",
-      description: "Previous tech version - high success rate",
-      createdDate: "2024-01-01",
-      lastModified: "2024-01-15",
-      industry: "Technology",
-      applications: 12,
-      successRate: 83,
-      status: "archived"
-    },
-    {
-      id: 5,
-      name: "General_v1.0",
-      description: "General purpose resume template",
-      createdDate: "2023-12-15",
-      lastModified: "2024-01-01",
-      industry: "General",
-      applications: 2,
-      successRate: 50,
-      status: "archived"
-    }
-  ]);
+  const {
+    versions,
+    insights,
+    loading,
+    insightsLoading,
+    generateInsights,
+    duplicateVersion,
+    archiveVersion,
+    restoreVersion,
+  } = useResumeVersions();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-success text-success-foreground';
-      case 'archived':
-        return 'bg-secondary text-secondary-foreground';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
+  const getStatusColor = (isActive: boolean, archivedAt?: string) => {
+    if (archivedAt) return 'bg-secondary text-secondary-foreground';
+    if (isActive) return 'bg-success text-success-foreground';
+    return 'bg-muted text-muted-foreground';
   };
 
   const getSuccessRateColor = (rate: number) => {
@@ -85,19 +36,39 @@ const VersionManagement = () => {
   };
 
   const handleDownload = (version: any) => {
-    toast.success(`Downloaded ${version.name}`);
+    toast.success(`Downloaded ${version.title}`);
   };
 
-  const handleDuplicate = (version: any) => {
-    toast.success(`Created copy of ${version.name}`);
+  const handleDuplicate = async (version: any) => {
+    await duplicateVersion(version.id, `${version.title} Copy`);
   };
 
-  const handleArchive = (version: any) => {
-    toast.success(`Archived ${version.name}`);
+  const handleArchive = async (version: any) => {
+    await archiveVersion(version.id);
   };
 
-  const activeVersions = versions.filter(v => v.status === 'active');
-  const archivedVersions = versions.filter(v => v.status === 'archived');
+  const handleRestore = async (version: any) => {
+    await restoreVersion(version.id);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  const activeVersions = versions.filter(v => v.is_active && !v.archived_at);
+  const archivedVersions = versions.filter(v => v.archived_at);
+  
+  // Calculate statistics
+  const totalVersions = versions.length;
+  const totalActiveVersions = activeVersions.length;
+  const totalApplications = versions.reduce((sum, v) => sum + (v.metrics?.total_applications || 0), 0);
+  const avgSuccessRate = versions.length > 0 
+    ? versions.reduce((sum, v) => sum + (v.metrics?.offer_rate || 0), 0) / versions.length 
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -112,32 +83,87 @@ const VersionManagement = () => {
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Keep track of different resume versions and easily switch between them for different applications.
           </p>
+          <div className="flex justify-center gap-4 mt-6">
+            <Button 
+              onClick={generateInsights} 
+              disabled={insightsLoading || versions.length === 0}
+              variant="outline"
+              className="glass-card"
+            >
+              <Lightbulb className="h-4 w-4 mr-2" />
+              {insightsLoading ? "Generating AI Insights..." : "Get AI Insights"}
+            </Button>
+          </div>
         </div>
+
+        {/* AI Insights Section */}
+        {insights.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-6">AI-Powered Insights</h2>
+            <div className="grid gap-4">
+              {insights.map((insight) => {
+                const version = versions.find(v => v.id === insight.id);
+                return (
+                  <Card key={insight.id} className="glass-card">
+                    <CardHeader>
+                      <CardTitle className="text-lg">{version?.title || 'Unknown Version'}</CardTitle>
+                      <p className="text-muted-foreground">{insight.analysis}</p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {insight.recommendations.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Recommendations:</h4>
+                          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                            {insight.recommendations.map((rec, idx) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {insight.strengths.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Strengths:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {insight.strengths.map((strength, idx) => (
+                              <Badge key={idx} variant="outline" className="bg-success/10 text-success border-success/20">
+                                {strength}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="glass-card">
             <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold">{versions.length}</div>
+              <div className="text-3xl font-bold">{totalVersions}</div>
               <div className="text-sm text-muted-foreground">Total Versions</div>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-success">{activeVersions.length}</div>
+              <div className="text-3xl font-bold text-success">{totalActiveVersions}</div>
               <div className="text-sm text-muted-foreground">Active Versions</div>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold">{versions.reduce((acc, v) => acc + v.applications, 0)}</div>
+              <div className="text-3xl font-bold">{totalApplications}</div>
               <div className="text-sm text-muted-foreground">Total Applications</div>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardContent className="pt-6 text-center">
               <div className="text-3xl font-bold text-primary">
-                {Math.round(versions.reduce((acc, v) => acc + v.successRate, 0) / versions.length)}%
+                {Math.round(avgSuccessRate)}%
               </div>
               <div className="text-sm text-muted-foreground">Avg Success Rate</div>
             </CardContent>
@@ -156,84 +182,98 @@ const VersionManagement = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeVersions.map((version) => (
-              <Card key={version.id} className="glass-card hover:shadow-glow transition-all duration-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{version.name}</CardTitle>
-                      <Badge className={getStatusColor(version.status)} variant="secondary">
-                        {version.status}
-                      </Badge>
+          {activeVersions.length === 0 ? (
+            <Alert className="glass-card">
+              <AlertDescription>
+                No active resume versions found. Create your first resume to get started!
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeVersions.map((version) => (
+                <Card key={version.id} className="glass-card hover:shadow-glow transition-all duration-300">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{version.title}</CardTitle>
+                        <Badge className={getStatusColor(version.is_active, version.archived_at)} variant="secondary">
+                          v{version.version_number}
+                        </Badge>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="glass-card">
+                          <DropdownMenuItem onClick={() => handleDownload(version)}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicate(version)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleArchive(version)}>
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archive
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="glass-card">
-                        <DropdownMenuItem onClick={() => handleDownload(version)}>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDuplicate(version)}>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleArchive(version)}>
-                          <FileText className="h-4 w-4 mr-2" />
-                          Archive
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">{version.description}</p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Industry:</span>
-                      <Badge variant="outline">{version.industry}</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {version.description || "No description provided"}
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Template:</span>
+                        <Badge variant="outline">{version.template_id}</Badge>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Applications:</span>
+                        <span className="font-medium">{version.metrics?.total_applications || 0}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Success Rate:</span>
+                        <span className={`font-medium ${getSuccessRateColor(version.metrics?.offer_rate || 0)}`}>
+                          {Math.round(version.metrics?.offer_rate || 0)}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>ATS Score:</span>
+                        <span className="font-medium">{Math.round(version.metrics?.avg_ats_score || 0)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Last Modified:</span>
+                        <span className="text-muted-foreground">
+                          {new Date(version.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Applications:</span>
-                      <span className="font-medium">{version.applications}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Success Rate:</span>
-                      <span className={`font-medium ${getSuccessRateColor(version.successRate)}`}>
-                        {version.successRate}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Last Modified:</span>
-                      <span className="text-muted-foreground">
-                        {new Date(version.lastModified).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                    <Button variant="hero" size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      Use
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      <Button variant="hero" size="sm" className="flex-1">
+                        <Download className="h-4 w-4 mr-2" />
+                        Use
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Version History */}
@@ -260,25 +300,28 @@ const VersionManagement = () => {
                       <tr key={version.id} className="border-b border-border/10 hover:bg-background/50">
                         <td className="py-4 px-6">
                           <div>
-                            <div className="font-medium">{version.name}</div>
-                            <div className="text-sm text-muted-foreground">{version.description}</div>
+                            <div className="font-medium">{version.title}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {version.description || "No description provided"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">v{version.version_number}</div>
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <Badge variant="outline">{version.industry}</Badge>
+                          <Badge variant="outline">{version.template_id}</Badge>
                         </td>
                         <td className="py-4 px-6 text-muted-foreground">
-                          {new Date(version.createdDate).toLocaleDateString()}
+                          {new Date(version.created_at).toLocaleDateString()}
                         </td>
-                        <td className="py-4 px-6 font-medium">{version.applications}</td>
+                        <td className="py-4 px-6 font-medium">{version.metrics?.total_applications || 0}</td>
                         <td className="py-4 px-6">
-                          <span className={`font-medium ${getSuccessRateColor(version.successRate)}`}>
-                            {version.successRate}%
+                          <span className={`font-medium ${getSuccessRateColor(version.metrics?.offer_rate || 0)}`}>
+                            {Math.round(version.metrics?.offer_rate || 0)}%
                           </span>
                         </td>
                         <td className="py-4 px-6">
-                          <Badge className={getStatusColor(version.status)}>
-                            {version.status}
+                          <Badge className={getStatusColor(version.is_active, version.archived_at)}>
+                            {version.archived_at ? 'archived' : 'active'}
                           </Badge>
                         </td>
                         <td className="py-4 px-6">
@@ -292,6 +335,15 @@ const VersionManagement = () => {
                             <Button variant="ghost" size="sm" onClick={() => handleDuplicate(version)}>
                               <Copy className="h-4 w-4" />
                             </Button>
+                            {version.archived_at ? (
+                              <Button variant="ghost" size="sm" onClick={() => handleRestore(version)}>
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="sm" onClick={() => handleArchive(version)}>
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
