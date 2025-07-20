@@ -11,6 +11,7 @@ import { calculateATSScore } from "@/utils/atsScoreCalculator";
 import { ResumeLayoutRenderer } from "./resume-layouts/ResumeLayoutRenderer";
 import { useTemplateStyles } from "./live-preview/hooks/useTemplateStyles";
 import { getLayoutVariant, formatDate } from "./live-preview/utils/previewUtils";
+import { getTemplateById } from "@/config/templateConfig";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -19,6 +20,48 @@ interface ResumePreviewProps {
 
 const ResumePreview = ({ data, template }: ResumePreviewProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
+
+  // Enhanced template mapping for new system
+  const getTemplateId = (templateName: string): string | undefined => {
+    const nameMapping: Record<string, string> = {
+      // Professional templates
+      'Corporate Executive': 'corporate-executive',
+      'Modern Professional': 'modern-professional',
+      'Academic Researcher': 'academic-researcher',
+      'Business Manager': 'business-manager',
+      'Finance Executive': 'finance-executive',
+      'Healthcare Professional': 'healthcare-professional',
+      'Legal Professional': 'legal-professional',
+      'Consulting Expert': 'consulting-expert',
+      
+      // Creative templates
+      'Graphic Designer': 'graphic-designer',
+      'UX/UI Designer': 'ux-ui-designer',
+      'Marketing Creative': 'marketing-creative',
+      'Content Creator': 'content-creator',
+      'Art Director': 'art-director',
+      'Photographer': 'photographer',
+      
+      // Technical templates
+      'Software Engineer Pro': 'software-engineer-pro',
+      'Data Scientist Elite': 'data-scientist-elite',
+      'DevOps Engineer': 'devops-engineer',
+      'Cybersecurity Expert': 'cybersecurity-expert',
+      'AI/ML Engineer': 'ai-ml-engineer',
+      'Cloud Architect': 'cloud-architect',
+      
+      // Legacy mapping
+      'Medical Doctor': 'healthcare-professional',
+      'Software Engineer': 'software-engineer-pro',
+      'Data Scientist': 'data-scientist-elite'
+    };
+    return nameMapping[templateName];
+  };
+
+  const templateId = getTemplateId(template);
+  const unifiedTemplate = templateId ? getTemplateById(templateId) : null;
+  const templateStyles = useTemplateStyles(template);
+  const layoutVariant = getLayoutVariant(template);
 
   const handleDownload = async () => {
     if (!resumeRef.current) return;
@@ -101,23 +144,22 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
     toast.info("You can use the Previous button to edit any section");
   };
 
-  const templateStyles = useTemplateStyles(template);
-  const layoutVariant = getLayoutVariant(template);
-
-  // Get layout-specific spacing
+  // Get enhanced spacing based on template category
   const getLayoutSpacing = () => {
-    const spacing = {
-      'standard': 'p-8',
-      'spacious': 'p-12',
-      'dynamic': 'p-8',
-      'premium': 'p-10',
-      'compact': 'p-6'
-    };
-    return spacing[templateStyles.spacing] || 'p-8';
+    if (unifiedTemplate) {
+      const stylePreset = unifiedTemplate.stylePreset;
+      if (stylePreset.includes('spacious') || stylePreset.includes('creative') || stylePreset.includes('portfolio')) {
+        return 'p-12';
+      }
+      if (stylePreset.includes('compact') || stylePreset.includes('technical') || stylePreset.includes('developer')) {
+        return 'p-6';
+      }
+    }
+    return 'p-8';
   };
 
   // Calculate dynamic ATS score
-  const atsResult = useMemo(() => calculateATSScore(data, "Professional"), [data]);
+  const atsResult = useMemo(() => calculateATSScore(data, template), [data, template]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -142,7 +184,10 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
           </p>
         </div>
         <Badge variant="secondary" className="glass-card">
-          Professional Resume
+          {unifiedTemplate ? 
+            `${unifiedTemplate.category.charAt(0).toUpperCase() + unifiedTemplate.category.slice(1)} Resume` : 
+            'Professional Resume'
+          }
         </Badge>
       </div>
 
@@ -169,17 +214,23 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
             data={data}
             styles={templateStyles}
             layoutVariant={layoutVariant}
+            templateId={templateId}
             formatDate={formatDate}
           />
         </CardContent>
       </Card>
 
-      {/* Dynamic ATS Score Card */}
+      {/* Enhanced ATS Score Card */}
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             📊 ATS Optimization Score
             <Badge variant="secondary">{atsResult.overallScore}/100</Badge>
+            {unifiedTemplate && (
+              <Badge variant="outline" className="ml-2">
+                {unifiedTemplate.category} Template
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -1,3 +1,4 @@
+
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { ResumeLayoutRenderer } from "./resume-layouts/ResumeLayoutRenderer";
 import { useState, useRef, useEffect } from "react";
@@ -17,20 +18,41 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   
-  // Debug logging
-  console.log('LivePreview - Received template:', template);
-  
-  // Create template name to ID mapping for the unified system
+  // Enhanced template mapping for new system
   const getTemplateId = (templateName: string): string | undefined => {
     const nameMapping: Record<string, string> = {
-      'Medical Doctor': 'medical-doctor',
-      'Registered Nurse': 'registered-nurse',
-      'Mental Health Professional': 'mental-health-professional',
-      'Software Engineer Pro': 'software-engineer',
-      'Data Scientist Elite': 'data-scientist',
+      // Professional templates
+      'Corporate Executive': 'corporate-executive',
+      'Modern Professional': 'modern-professional',
+      'Academic Researcher': 'academic-researcher',
+      'Business Manager': 'business-manager',
+      'Finance Executive': 'finance-executive',
+      'Healthcare Professional': 'healthcare-professional',
+      'Legal Professional': 'legal-professional',
+      'Consulting Expert': 'consulting-expert',
+      
+      // Creative templates
       'Graphic Designer': 'graphic-designer',
       'UX/UI Designer': 'ux-ui-designer',
-      'Copywriter': 'copywriter'
+      'Marketing Creative': 'marketing-creative',
+      'Content Creator': 'content-creator',
+      'Art Director': 'art-director',
+      'Photographer': 'photographer',
+      
+      // Technical templates
+      'Software Engineer Pro': 'software-engineer-pro',
+      'Data Scientist Elite': 'data-scientist-elite',
+      'DevOps Engineer': 'devops-engineer',
+      'Cybersecurity Expert': 'cybersecurity-expert',
+      'AI/ML Engineer': 'ai-ml-engineer',
+      'Cloud Architect': 'cloud-architect',
+      
+      // Legacy mapping for backward compatibility
+      'Medical Doctor': 'healthcare-professional',
+      'Registered Nurse': 'healthcare-professional',
+      'Mental Health Professional': 'healthcare-professional',
+      'Software Engineer': 'software-engineer-pro',
+      'Data Scientist': 'data-scientist-elite'
     };
     return nameMapping[templateName];
   };
@@ -42,10 +64,9 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
   const templateStyles = useTemplateStyles(template);
   const layoutVariant = getLayoutVariant(template);
   
+  console.log('LivePreview - Template:', template);
   console.log('LivePreview - Template ID:', templateId);
   console.log('LivePreview - Unified template found:', !!unifiedTemplate);
-  console.log('LivePreview - Layout variant:', layoutVariant);
-  console.log('LivePreview - Template styles:', templateStyles);
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.1, 1.2));
@@ -67,7 +88,6 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
         preview.scrollTo({ top: 0, behavior: 'smooth' });
       };
       
-      // Small delay to allow for content updates
       const timeoutId = setTimeout(scrollToTop, 100);
       return () => clearTimeout(timeoutId);
     }

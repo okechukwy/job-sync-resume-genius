@@ -1,4 +1,5 @@
-// Unified Layout Component - Replaces 6 separate layout components
+
+// Enhanced Unified Layout Component - Supports 20 Distinct Template Designs
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { StylePreset } from "@/config/templateConfig";
 
@@ -9,7 +10,7 @@ interface UnifiedLayoutProps {
 }
 
 export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutProps) => {
-  // Add safety check for undefined stylePreset
+  // Safety check for undefined stylePreset
   if (!stylePreset) {
     return (
       <div className="bg-white shadow-lg max-w-4xl mx-auto font-sans p-8">
@@ -20,7 +21,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     );
   }
 
-  const { layout, spacing } = stylePreset;
+  const { layout, spacing, typography, visualElements } = stylePreset;
   
   // Apply dynamic CSS custom properties for theming
   const layoutStyle = {
@@ -42,25 +43,67 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     spacious: 'space-y-8'
   }[spacing];
 
+  const typographyClass = {
+    serif: 'font-serif',
+    sans: 'font-sans',
+    modern: 'font-sans',
+    technical: 'font-mono'
+  }[typography];
+
+  const renderDecorativeElements = () => {
+    if (!visualElements.decorativeElements) return null;
+    
+    // Category-specific decorative elements
+    if (stylePreset.id.includes('creative') || stylePreset.id.includes('graphic') || stylePreset.id.includes('art')) {
+      return (
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-white/20"></div>
+          <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-white/15"></div>
+          <div className="absolute top-1/2 right-8 w-8 h-8 rounded-full bg-white/10"></div>
+        </div>
+      );
+    }
+    
+    if (stylePreset.id.includes('tech') || stylePreset.id.includes('developer') || stylePreset.id.includes('engineer')) {
+      return (
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
+          <div className="absolute top-2 right-2 w-20 h-1 bg-white/30"></div>
+          <div className="absolute top-4 right-2 w-16 h-1 bg-white/25"></div>
+          <div className="absolute top-6 right-2 w-12 h-1 bg-white/20"></div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-black/5"></div>
+    );
+  };
+
   const renderHeader = () => {
-    // Different header styles based on layout
     const getHeaderContent = () => (
       <div className="relative z-10">
-        <h1 className={`font-bold mb-2 ${layout === 'traditional' ? 'text-3xl' : layout === 'academic' ? 'text-2xl' : 'text-4xl'}`}>
+        <h1 className={`font-bold mb-2 ${
+          visualElements.headerStyle === 'banner' ? 'text-4xl' : 
+          visualElements.headerStyle === 'minimal' ? 'text-2xl' :
+          visualElements.headerStyle === 'traditional' ? 'text-3xl' : 'text-4xl'
+        }`}>
           {data.personalInfo.fullName}
         </h1>
-        {layout === 'academic' && (
-          <p className="text-lg opacity-90 mb-2">
-            Academic Professional
-          </p>
-        )}
-        {layout !== 'academic' && (
-          <p className="text-xl opacity-90 mb-4">
-            {layout === 'traditional' ? 'Executive Professional' : 
-             layout === 'sidebar' ? 'Modern Professional' : 'Professional'}
-          </p>
-        )}
-        <div className={`flex flex-wrap gap-4 text-sm opacity-80 ${layout === 'academic' ? 'text-xs' : ''}`}>
+        
+        {/* Professional title based on template category */}
+        <p className={`opacity-90 mb-4 ${
+          visualElements.headerStyle === 'minimal' ? 'text-sm' : 'text-xl'
+        }`}>
+          {stylePreset.id.includes('executive') ? 'Executive Professional' :
+           stylePreset.id.includes('academic') ? 'Academic Professional' :
+           stylePreset.id.includes('creative') || stylePreset.id.includes('designer') ? 'Creative Professional' :
+           stylePreset.id.includes('tech') || stylePreset.id.includes('engineer') ? 'Technical Professional' :
+           'Professional'}
+        </p>
+        
+        <div className={`flex flex-wrap gap-4 text-sm opacity-80 ${
+          visualElements.headerStyle === 'minimal' ? 'text-xs' : ''
+        }`}>
           {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
           {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
           {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
@@ -68,68 +111,117 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       </div>
     );
 
-    if (layout === 'traditional') {
-      return (
-        <header 
-          className="p-6 text-white relative border-b-4"
-          style={{ 
-            background: 'var(--template-header-bg)', 
-            color: 'var(--template-header-text)',
-            borderColor: 'var(--template-section-border)'
-          }}
-        >
-          {getHeaderContent()}
-        </header>
-      );
+    // Header style variations
+    switch (visualElements.headerStyle) {
+      case 'banner':
+        return (
+          <header 
+            className="p-8 text-white relative overflow-hidden border-b-4"
+            style={{ 
+              background: 'var(--template-header-bg)', 
+              color: 'var(--template-header-text)',
+              borderColor: 'var(--template-section-border)'
+            }}
+          >
+            {renderDecorativeElements()}
+            {getHeaderContent()}
+          </header>
+        );
+      
+      case 'centered':
+        return (
+          <header 
+            className="p-8 text-white relative overflow-hidden text-center"
+            style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+          >
+            {renderDecorativeElements()}
+            {getHeaderContent()}
+          </header>
+        );
+      
+      case 'split':
+        return (
+          <header 
+            className="p-8 text-white relative overflow-hidden"
+            style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+          >
+            {renderDecorativeElements()}
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                {getHeaderContent()}
+              </div>
+              {visualElements.iconAccents && (
+                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-white/20"></div>
+                </div>
+              )}
+            </div>
+          </header>
+        );
+      
+      case 'minimal':
+        return (
+          <header 
+            className="p-6 text-white relative"
+            style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+          >
+            {getHeaderContent()}
+          </header>
+        );
+      
+      case 'traditional':
+        return (
+          <header 
+            className="p-6 text-white relative border-b-4"
+            style={{ 
+              background: 'var(--template-header-bg)', 
+              color: 'var(--template-header-text)',
+              borderColor: 'var(--template-section-border)'
+            }}
+          >
+            {getHeaderContent()}
+          </header>
+        );
+      
+      default:
+        return (
+          <header 
+            className="p-8 text-white relative overflow-hidden"
+            style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
+          >
+            {renderDecorativeElements()}
+            {getHeaderContent()}
+          </header>
+        );
     }
-
-    if (layout === 'academic') {
-      return (
-        <header 
-          className="p-8 text-white relative"
-          style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
-          {getHeaderContent()}
-        </header>
-      );
-    }
-
-    return (
-      <header 
-        className="p-8 text-white relative overflow-hidden"
-        style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
-      >
-        {layout === 'creative' && (
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/20"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/15"></div>
-          </div>
-        )}
-        
-        {(layout === 'professional' || layout === 'sidebar') && (
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-black/10"></div>
-        )}
-        
-        {getHeaderContent()}
-      </header>
-    );
   };
 
-  const renderSection = (title: string, children: React.ReactNode, borderStyle?: string) => (
-    <section className="mb-6">
-      <h2 
-        className={`text-lg font-bold mb-4 pb-2 ${borderStyle || 'border-b-2'}`}
-        style={{ 
-          borderColor: 'var(--template-section-border)',
-          color: 'var(--template-primary)'
-        }}
-      >
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
+  const renderSection = (title: string, children: React.ReactNode, customBorder?: boolean) => {
+    const borderStyle = customBorder && (layout === 'creative' || layout === 'portfolio') 
+      ? 'border-l-4 pl-4 border-b-0' 
+      : 'border-b-2';
+      
+    return (
+      <section className="mb-6">
+        <h2 
+          className={`text-lg font-bold mb-4 pb-2 ${borderStyle} ${visualElements.iconAccents ? 'flex items-center gap-2' : ''}`}
+          style={{ 
+            borderColor: 'var(--template-section-border)',
+            color: 'var(--template-primary)'
+          }}
+        >
+          {visualElements.iconAccents && (
+            <div 
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: 'var(--template-primary)' }}
+            ></div>
+          )}
+          {title}
+        </h2>
+        {children}
+      </section>
+    );
+  };
 
   const renderSummary = () => {
     if (!data.summary?.content) return null;
@@ -137,7 +229,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     return renderSection(
       "PROFESSIONAL SUMMARY", 
       <p className="text-gray-700 leading-relaxed">{data.summary.content}</p>,
-      layout === 'creative' ? 'border-l-4 pl-4 border-b-0' : undefined
+      true
     );
   };
 
@@ -145,7 +237,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     if (!data.experience?.length) return null;
     
     return renderSection(
-      layout === 'professional' ? "PROFESSIONAL EXPERIENCE" : "EXPERIENCE",
+      layout === 'professional' || layout === 'executive' ? "PROFESSIONAL EXPERIENCE" : "EXPERIENCE",
       <div className={spacingClass}>
         {data.experience.map((exp, index) => (
           <div key={index} className="space-y-2">
@@ -154,7 +246,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
                 <h3 className="font-semibold text-gray-900">{exp.position}</h3>
                 <p className="text-gray-600">{exp.company}</p>
               </div>
-            <span 
+              <span 
                 className="text-sm font-medium px-3 py-1 rounded-full"
                 style={{ 
                   backgroundColor: 'var(--template-accent)',
@@ -170,7 +262,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
           </div>
         ))}
       </div>,
-      layout === 'creative' ? 'border-l-4 pl-4 border-b-0' : undefined
+      true
     );
   };
 
@@ -198,7 +290,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
           </div>
         ))}
       </div>,
-      layout === 'creative' ? 'border-l-4 pl-4 border-b-0' : undefined
+      true
     );
   };
 
@@ -206,10 +298,10 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     if (!data.skills?.technical?.length && !data.skills?.soft?.length) return null;
     
     const allSkills = [...(data.skills.technical || []), ...(data.skills.soft || [])];
-    const skillsDisplay = layout === 'technical' ? 'grid grid-cols-2 gap-2' : 'flex flex-wrap gap-2';
+    const skillsDisplay = layout === 'technical' || layout === 'developer' ? 'grid grid-cols-2 gap-2' : 'flex flex-wrap gap-2';
     
     return renderSection(
-      layout === 'technical' ? "TECHNICAL SKILLS" : "SKILLS",
+      layout === 'technical' || layout === 'developer' ? "TECHNICAL SKILLS" : "SKILLS",
       <div className={skillsDisplay}>
         {allSkills.map((skill, index) => (
           <span
@@ -225,13 +317,14 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
           </span>
         ))}
       </div>,
-      layout === 'creative' ? 'border-l-4 pl-4 border-b-0' : undefined
+      true
     );
   };
 
   // Layout-specific content organization
   const renderContent = () => {
     switch (layout) {
+      case 'portfolio':
       case 'creative':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -247,6 +340,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
         );
       
       case 'technical':
+      case 'developer':
         return (
           <div className="space-y-6">
             {renderSkills()}
@@ -271,6 +365,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
         );
 
       case 'traditional':
+      case 'executive':
         return (
           <div className="space-y-8">
             {renderSummary()}
@@ -310,11 +405,11 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
 
   return (
     <div 
-      className="bg-white shadow-lg max-w-4xl mx-auto font-sans"
+      className={`bg-white shadow-lg max-w-4xl mx-auto ${typographyClass}`}
       style={layoutStyle}
     >
       {renderHeader()}
-      <main className="p-8">
+      <main className={`p-8 ${spacing === 'compact' ? 'p-6' : spacing === 'spacious' ? 'p-12' : 'p-8'}`}>
         {renderContent()}
       </main>
     </div>
