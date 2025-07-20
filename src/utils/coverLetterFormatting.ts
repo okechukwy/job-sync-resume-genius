@@ -189,7 +189,7 @@ export const isContactLine = (line: string, context?: LetterContext): boolean =>
 export const isDateLine = (line: string): boolean => {
   const trimmedLine = line.trim();
   const datePatterns = [
-    /^\w+\s+\d{1,2},?\s+\d{4}$/, // January 1, 2024
+    /^\w+\s+\d{1,2},?\s+\d{4}$/, // January 1, 2024 or January 1 2024
     /^\d{1,2}\/\d{1,2}\/\d{4}$/, // 1/1/2024
     /^\d{1,2}-\d{1,2}-\d{4}$/, // 1-1-2024
     /^\w+\s+\d{1,2}(st|nd|rd|th)?,?\s+\d{4}$/ // January 1st, 2024

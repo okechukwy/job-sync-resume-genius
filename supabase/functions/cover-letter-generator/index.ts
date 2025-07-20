@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -75,8 +74,21 @@ const getTemplateInstructions = (templateId: string) => {
   return templates[templateId as keyof typeof templates] || templates['classic-professional'];
 };
 
+const formatCurrentDate = (): string => {
+  const now = new Date();
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const month = months[now.getMonth()];
+  const day = now.getDate();
+  const year = now.getFullYear();
+  
+  return `${month} ${day}, ${year}`;
+};
+
 const cleanHtmlTags = (text: string): string => {
-  // Remove common HTML tags that might appear in the output
   return text
     .replace(/<\/?center>/gi, '')
     .replace(/<\/?b>/gi, '')
@@ -139,6 +151,9 @@ serve(async (req) => {
     // Get template configuration
     const template = getTemplateInstructions(templateId);
 
+    // Generate current date
+    const currentDate = formatCurrentDate();
+
     // Build contact information
     const contactInfo = [email, phone, location].filter(Boolean).join(' | ');
     const senderInfo = contactInfo ? `${fullName}\n${contactInfo}` : fullName;
@@ -149,7 +164,7 @@ serve(async (req) => {
       ? `${recipientName}\n${companyName}\n${companyAddress}`
       : `${recipientName}\n${companyName}`;
 
-    // Create template-specific AI prompt with explicit plain text instructions
+    // Create template-specific AI prompt with explicit plain text instructions and current date
     const systemPrompt = `You are an expert career coach and professional business letter writer. Your task is to create a complete, properly formatted cover letter using the "${templateId}" template style.
 
 CRITICAL OUTPUT REQUIREMENTS:
@@ -172,7 +187,7 @@ ${template.instructions}
 
 BUSINESS LETTER STRUCTURE:
 1. Applicant Information (name and contact) - formatting depends on template
-2. Date (right-aligned)
+2. Date: "${currentDate}" (right-aligned) - USE THIS EXACT DATE
 3. Recipient Information (hiring manager, company, address) - ALWAYS left-aligned
 4. Salutation (Dear [Name]) - left-aligned
 5. Body paragraphs - left-aligned
@@ -215,6 +230,7 @@ FINAL OUTPUT VALIDATION:
 - Only center applicant information for centered header templates
 - All recipient information, body text, and closing should be left-aligned
 - The letter should be ready for direct display without any HTML processing
+- MUST include the exact date "${currentDate}" right-aligned after the header
 
 Return ONLY the complete cover letter in plain text format, ready for printing or PDF conversion.`;
 
@@ -222,6 +238,9 @@ Return ONLY the complete cover letter in plain text format, ready for printing o
 
 SENDER INFORMATION (format according to template style):
 ${senderInfo}
+
+DATE TO USE (MUST BE RIGHT-ALIGNED):
+${currentDate}
 
 RECIPIENT INFORMATION (ALWAYS left-aligned):
 ${recipientInfo}
@@ -245,20 +264,22 @@ CRITICAL FORMATTING REQUIREMENTS:
 1. Use PLAIN TEXT ONLY - absolutely no HTML tags or markup
 2. Use proper sentence case - avoid ALL CAPS (John Smith, not JOHN SMITH)
 3. Format the applicant header according to ${template.headerStyle} style using text spacing only
-4. ALWAYS left-align recipient information, regardless of template
-5. ALWAYS left-align body paragraphs and closing
-6. Use ${template.bodyFormat} body format with plain text techniques
-7. Address the hiring manager appropriately (${recipientName})
-8. Use "${closingType}" closing with proper signature block - left-aligned
-9. Ensure ${letterLength} length appropriate content
-10. NO HTML tags like <center>, <b>, <p>, or any other markup
-11. Use only spaces, line breaks, and standard punctuation for formatting
+4. Include the exact date "${currentDate}" right-aligned after the header section
+5. ALWAYS left-align recipient information, regardless of template
+6. ALWAYS left-align body paragraphs and closing
+7. Use ${template.bodyFormat} body format with plain text techniques
+8. Address the hiring manager appropriately (${recipientName})
+9. Use "${closingType}" closing with proper signature block - left-aligned
+10. Ensure ${letterLength} length appropriate content
+11. NO HTML tags like <center>, <b>, <p>, or any other markup
+12. Use only spaces, line breaks, and standard punctuation for formatting
 
 REMEMBER: 
 - The output must be clean plain text that displays perfectly without any HTML processing
 - Use proper capitalization throughout (sentence case, not ALL CAPS)
 - Only the applicant's information should be centered for centered templates
-- Everything else (recipient, body, closing) should be left-aligned`;
+- Everything else (recipient, body, closing) should be left-aligned
+- MUST use the exact current date: "${currentDate}"`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
