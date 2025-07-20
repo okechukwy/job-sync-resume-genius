@@ -1,15 +1,16 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Eye, Copy, MoreHorizontal, Plus, Lightbulb, RotateCcw, Archive } from "lucide-react";
-import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { useResumeVersions } from "@/hooks/useResumeVersions";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreateVersionDialog } from "@/components/version-management/CreateVersionDialog";
 
 const VersionManagement = () => {
   const {
@@ -22,6 +23,9 @@ const VersionManagement = () => {
     archiveVersion,
     restoreVersion,
   } = useResumeVersions();
+
+  const [createVersionDialogOpen, setCreateVersionDialogOpen] = useState(false);
+  const [isCreatingVersion, setIsCreatingVersion] = useState(false);
 
   const getStatusColor = (isActive: boolean, archivedAt?: string) => {
     if (archivedAt) return 'bg-secondary text-secondary-foreground';
@@ -49,6 +53,15 @@ const VersionManagement = () => {
 
   const handleRestore = async (version: any) => {
     await restoreVersion(version.id);
+  };
+
+  const handleCreateNewVersion = async (sourceId: string, title?: string, description?: string) => {
+    setIsCreatingVersion(true);
+    try {
+      await duplicateVersion(sourceId, title, description);
+    } finally {
+      setIsCreatingVersion(false);
+    }
   };
 
   if (loading) {
@@ -174,12 +187,10 @@ const VersionManagement = () => {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Active Versions</h2>
-            <Link to="/get-started">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Version
-              </Button>
-            </Link>
+            <Button onClick={() => setCreateVersionDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Version
+            </Button>
           </div>
           
           {activeVersions.length === 0 ? (
@@ -388,6 +399,15 @@ const VersionManagement = () => {
           </Card>
         </div>
       </div>
+
+      {/* Create Version Dialog */}
+      <CreateVersionDialog
+        open={createVersionDialogOpen}
+        onOpenChange={setCreateVersionDialogOpen}
+        versions={versions}
+        onCreateVersion={handleCreateNewVersion}
+        isCreating={isCreatingVersion}
+      />
     </div>
   );
 };
