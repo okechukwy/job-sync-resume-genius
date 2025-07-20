@@ -21,25 +21,45 @@ export const downloadCoverLetterAsPdf = async (
     // Process the letter lines with enhanced formatting
     const processedLines = processLetterLines(content, templateId);
     
-    // Process each line with proper business letter formatting
+    // Helper function to convert CSS margin to PDF spacing
+    const convertMarginToPdfSpacing = (marginBottom: string): number => {
+      const value = parseInt(marginBottom);
+      // Convert CSS pixels to PDF points (more conservative conversion)
+      return Math.max(value * 0.5, 4);
+    };
+    
+    // Helper function to detect paragraph context
+    const isParagraphBreak = (currentIndex: number, lines: typeof processedLines): boolean => {
+      if (currentIndex === 0) return false;
+      const prevLine = lines[currentIndex - 1];
+      const currentLine = lines[currentIndex];
+      
+      // Paragraph break if previous line wasn't empty and current is body text
+      return !prevLine.isEmpty && 
+             currentLine.context?.section === 'body' &&
+             prevLine.context?.section === 'body';
+    };
+    
+    // Process each line with optimized business letter formatting
     for (let i = 0; i < processedLines.length; i++) {
       const processedLine = processedLines[i];
       
-      // Skip empty lines but add appropriate spacing
+      // Handle empty lines with minimal spacing
       if (processedLine.isEmpty) {
-        currentY += 6;
+        // Reduce empty line spacing significantly
+        currentY += 3;
         continue;
       }
       
-      const { line, formatting } = processedLine;
+      const { line, formatting, context } = processedLine;
       
       if (!formatting) {
-        currentY += 12;
+        currentY += 4; // Minimal spacing for unformatted lines
         continue;
       }
       
       // Check if we need a new page
-      if (currentY > pageHeight - margin - 20) {
+      if (currentY > pageHeight - margin - 30) {
         pdf.addPage();
         currentY = margin;
       }
@@ -47,7 +67,31 @@ export const downloadCoverLetterAsPdf = async (
       // Convert CSS-style values to jsPDF values
       const fontSize = parseInt(formatting.fontSize);
       const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
-      const spacing = Math.max(fontSize * 1.2, 12);
+      
+      // Use formatting-based spacing instead of font-size calculations
+      let spacing = convertMarginToPdfSpacing(formatting.marginBottom);
+      
+      // Context-aware spacing adjustments
+      if (context?.section === 'header') {
+        if (formatting.isHeader) {
+          spacing = 6; // Tighter spacing for name
+        } else if (formatting.isContact) {
+          spacing = 4; // Minimal spacing for contact info
+        }
+      } else if (context?.section === 'body') {
+        // Paragraph detection for body text
+        if (isParagraphBreak(i, processedLines)) {
+          spacing = 8; // Moderate spacing between paragraphs
+        } else {
+          spacing = 5; // Tight spacing within paragraphs
+        }
+      } else if (context?.section === 'date') {
+        spacing = 12; // Standard spacing after date
+      } else if (context?.section === 'recipient') {
+        spacing = 5; // Tight spacing for recipient address
+      } else if (context?.section === 'closing') {
+        spacing = 8; // Moderate spacing for closing
+      }
       
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, fontStyle);
@@ -69,13 +113,23 @@ export const downloadCoverLetterAsPdf = async (
         // Split long lines to fit page width
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         
-        for (const splitLine of splitLines) {
-          if (currentY > pageHeight - margin - 20) {
+        for (let j = 0; j < splitLines.length; j++) {
+          const splitLine = splitLines[j];
+          
+          if (currentY > pageHeight - margin - 30) {
             pdf.addPage();
             currentY = margin;
           }
+          
           pdf.text(splitLine, margin, currentY);
-          currentY += spacing;
+          
+          // Only add full spacing after the last split line
+          if (j === splitLines.length - 1) {
+            currentY += spacing;
+          } else {
+            // Minimal line spacing within split text
+            currentY += fontSize * 1.15; // Standard 1.15 line height
+          }
         }
       }
     }

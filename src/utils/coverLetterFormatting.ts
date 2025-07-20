@@ -15,12 +15,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting
+  // Default formatting with more conservative margins
   let formatting: LineFormatting = {
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '14px'
+    marginBottom: '8px' // Reduced from 14px
   };
 
   // Determine context if not provided
@@ -36,13 +36,13 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   const isSignature = isSignatureLine(line, lineContext);
   const isSectionHeader = isSectionHeaderLine(line);
 
-  // Apply template-specific formatting
+  // Apply template-specific formatting with optimized spacing
   if (isName && lineContext.section === 'header') {
     formatting = {
       fontSize: '14pt',
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '8px',
+      marginBottom: '6px', // Reduced spacing
       isHeader: true
     };
   }
@@ -51,7 +51,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt',
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '6px',
+      marginBottom: '4px', // Reduced spacing
       isContact: true
     };
   }
@@ -60,15 +60,15 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '20px'
+      marginBottom: '16px' // Reduced from 20px
     };
   }
   else if (isRecipient) {
     formatting = {
       fontSize: '11pt',
       fontWeight: 'normal',
-      textAlign: 'left', // Always left-align recipient info
-      marginBottom: '14px'
+      textAlign: 'left',
+      marginBottom: '8px' // Reduced from 14px
     };
   }
   else if (isSalutation) {
@@ -76,15 +76,15 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '16px'
+      marginBottom: '10px' // Reduced from 16px
     };
   }
   else if (isClosing || isSignature) {
     formatting = {
       fontSize: '11pt',
       fontWeight: 'normal',
-      textAlign: 'left', // Always left-align closing and signature
-      marginBottom: isSignature ? '8px' : '40px'
+      textAlign: 'left',
+      marginBottom: isSignature ? '6px' : '24px' // Reduced signature spacing
     };
   }
   else if (isSectionHeader) {
@@ -92,7 +92,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '12pt',
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '16px'
+      marginBottom: '10px' // Reduced from 16px
     };
   }
 
