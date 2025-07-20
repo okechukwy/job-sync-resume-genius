@@ -1,4 +1,3 @@
-
 export interface LineFormatting {
   fontSize: string;
   fontWeight: string;
@@ -15,12 +14,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting with more conservative margins
+  // Default formatting with minimal margins for single-page fit
   let formatting: LineFormatting = {
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '8px' // Reduced from 14px
+    marginBottom: '2px' // Drastically reduced from 8px
   };
 
   // Determine context if not provided
@@ -36,13 +35,13 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   const isSignature = isSignatureLine(line, lineContext);
   const isSectionHeader = isSectionHeaderLine(line);
 
-  // Apply template-specific formatting with optimized spacing
+  // Apply template-specific formatting with minimal spacing
   if (isName && lineContext.section === 'header') {
     formatting = {
       fontSize: '14pt',
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '6px', // Reduced spacing
+      marginBottom: '3px', // Reduced spacing
       isHeader: true
     };
   }
@@ -51,7 +50,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt',
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '4px', // Reduced spacing
+      marginBottom: '1px', // Minimal contact spacing
       isContact: true
     };
   }
@@ -60,7 +59,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '16px' // Reduced from 20px
+      marginBottom: '4px' // Reduced from 16px
     };
   }
   else if (isRecipient) {
@@ -68,7 +67,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '8px' // Reduced from 14px
+      marginBottom: '1px' // Minimal recipient spacing
     };
   }
   else if (isSalutation) {
@@ -76,7 +75,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '10px' // Reduced from 16px
+      marginBottom: '3px' // Reduced salutation spacing
     };
   }
   else if (isClosing || isSignature) {
@@ -84,7 +83,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: isSignature ? '6px' : '24px' // Reduced signature spacing
+      marginBottom: isSignature ? '2px' : '6px' // Reduced closing spacing
     };
   }
   else if (isSectionHeader) {
@@ -92,7 +91,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '12pt',
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '10px' // Reduced from 16px
+      marginBottom: '3px' // Reduced header spacing
     };
   }
 
