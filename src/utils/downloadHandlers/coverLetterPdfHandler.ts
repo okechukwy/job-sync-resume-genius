@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { processLetterLines } from '../coverLetterFormatting';
@@ -19,6 +20,7 @@ export const downloadCoverLetterAsPdf = async (
     
     // Enhanced spacing hierarchy for professional business letter format
     const MINIMAL_SPACING = 6; // Empty lines and within wrapped text
+    const SALUTATION_EMPTY_SPACING = 3.5; // Tighter spacing for empty lines in salutation context
     const HEADER_SPACING = 7; // Between header elements (name, contact, etc.)
     const DATE_SPACING = 8; // For date line
     const PARAGRAPH_SPACING = 11; // Between distinct content sections
@@ -28,7 +30,7 @@ export const downloadCoverLetterAsPdf = async (
     // Process the letter lines with enhanced formatting
     const processedLines = processLetterLines(content, templateId);
     
-    console.log(`Processing ${processedLines.length} lines for PDF generation with context-aware spacing`);
+    console.log(`Processing ${processedLines.length} lines for PDF generation with enhanced salutation spacing`);
     
     // First pass: calculate total content height with context-aware spacing
     let totalHeight = margin;
@@ -38,8 +40,11 @@ export const downloadCoverLetterAsPdf = async (
       const processedLine = processedLines[i];
       
       if (processedLine.isEmpty) {
-        lineHeights.push(MINIMAL_SPACING);
-        totalHeight += MINIMAL_SPACING;
+        // Apply special spacing for empty lines in salutation context
+        const spacingForEmpty = processedLine.context?.isEmptyInSalutationContext ? 
+          SALUTATION_EMPTY_SPACING : MINIMAL_SPACING;
+        lineHeights.push(spacingForEmpty);
+        totalHeight += spacingForEmpty;
         continue;
       }
       
@@ -65,7 +70,7 @@ export const downloadCoverLetterAsPdf = async (
         // Closing and signature elements
         spacingToApply = HEADER_SPACING;
       } else if (context?.section === 'salutation') {
-        // Salutation/greeting gets tight spacing
+        // Salutation/greeting gets TIGHT spacing
         spacingToApply = HEADER_SPACING;
       }
       
@@ -97,9 +102,13 @@ export const downloadCoverLetterAsPdf = async (
     for (let i = 0; i < processedLines.length; i++) {
       const processedLine = processedLines[i];
       
-      // Handle empty lines with minimal spacing
+      // Handle empty lines with enhanced salutation-aware spacing
       if (processedLine.isEmpty) {
-        currentY += MINIMAL_SPACING * compressionFactor;
+        const spacingForEmpty = processedLine.context?.isEmptyInSalutationContext ? 
+          SALUTATION_EMPTY_SPACING : MINIMAL_SPACING;
+        currentY += spacingForEmpty * compressionFactor;
+        
+        console.log(`Applied ${processedLine.context?.isEmptyInSalutationContext ? 'salutation-context' : 'minimal'} spacing (${spacingForEmpty}pt) to empty line at ${i}`);
         continue;
       }
       
@@ -144,7 +153,7 @@ export const downloadCoverLetterAsPdf = async (
       } else if (context?.section === 'closing' || context?.section === 'signature') {
         spacingToApply = HEADER_SPACING;
       } else if (context?.section === 'salutation') {
-        // Salutation/greeting gets tight spacing
+        // Salutation/greeting gets TIGHT spacing
         spacingToApply = HEADER_SPACING;
       }
       
@@ -205,10 +214,11 @@ export const downloadCoverLetterAsPdf = async (
     console.log(`Content fits on single page: ${fitsOnOnePage}`);
     console.log(`Compression factor applied: ${compressionFactor}`);
     console.log(`Total content height: ${finalY - margin}pt`);
+    console.log(`Enhanced salutation spacing applied with ${SALUTATION_EMPTY_SPACING}pt for empty lines in salutation context`);
     
     // Success validation
     if (fitsOnOnePage) {
-      console.log('✅ Single-page cover letter successfully generated with context-aware spacing');
+      console.log('✅ Single-page cover letter successfully generated with enhanced salutation spacing');
     } else {
       console.warn(`⚠️ Content still exceeds single page despite optimization`);
     }

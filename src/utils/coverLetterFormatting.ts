@@ -12,6 +12,7 @@ interface LetterContext {
   lineIndex: number;
   totalLines: number;
   section: 'header' | 'date' | 'recipient' | 'salutation' | 'body' | 'closing' | 'signature';
+  isEmptyInSalutationContext?: boolean; // New flag for empty lines in salutation context
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
@@ -103,7 +104,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   return formatting;
 };
 
-export const determineLineContext = (line: string, lineIndex: number, totalLines: number): LetterContext => {
+export const determineLineContext = (line: string, lineIndex: number, totalLines: number, allLines?: string[]): LetterContext => {
   const trimmedLine = line.trim();
   
   // Enhanced header section detection - more precise range
@@ -128,9 +129,24 @@ export const determineLineContext = (line: string, lineIndex: number, totalLines
     }
   }
   
-  // Salutation section - specific detection for greeting lines
+  // Enhanced salutation section detection with buffer zone
   if (isSalutationLine(trimmedLine)) {
     return { lineIndex, totalLines, section: 'salutation' };
+  }
+  
+  // Check if this empty line is within salutation context (buffer zone)
+  if (!trimmedLine && allLines) {
+    // Look for salutation lines within ±2 lines of this empty line
+    for (let i = Math.max(0, lineIndex - 2); i <= Math.min(totalLines - 1, lineIndex + 2); i++) {
+      if (allLines[i] && isSalutationLine(allLines[i].trim())) {
+        return { 
+          lineIndex, 
+          totalLines, 
+          section: 'salutation', 
+          isEmptyInSalutationContext: true 
+        };
+      }
+    }
   }
   
   // Recipient section - enhanced detection
@@ -328,11 +344,18 @@ export const processLetterLines = (content: string, templateId: string) => {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) {
-      processedLines.push({ line: '', formatting: null, isEmpty: true });
+      // Pass all lines to context determination for better empty line handling
+      const context = determineLineContext(line, i, lines.length, lines);
+      processedLines.push({ 
+        line: '', 
+        formatting: null, 
+        isEmpty: true, 
+        context: context 
+      });
       continue;
     }
     
-    const context = determineLineContext(line, i, lines.length);
+    const context = determineLineContext(line, i, lines.length, lines);
     const formatting = getLineFormatting(line, templateId, context);
     
     processedLines.push({
