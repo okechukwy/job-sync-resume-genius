@@ -18,13 +18,15 @@ export const downloadCoverLetterAsPdf = async (
     const maxWidth = pageWidth - 2 * margin;
     let currentY = margin;
     
-    // Fixed line spacing for consistent single-line formatting
-    const SINGLE_LINE_SPACING = 12; // 12pt consistent line spacing
-    
     // Process the letter lines with enhanced formatting
     const processedLines = processLetterLines(content, templateId);
     
     console.log(`Processing ${processedLines.length} lines for PDF generation`);
+    
+    // Helper function to calculate proper line height based on font size
+    const getLineHeight = (fontSize: number): number => {
+      return fontSize * 1.2; // Standard single-line spacing (120% of font size)
+    };
     
     // Helper function to detect paragraph context
     const isParagraphBreak = (currentIndex: number, lines: typeof processedLines): boolean => {
@@ -38,19 +40,20 @@ export const downloadCoverLetterAsPdf = async (
              prevLine.context?.section === 'body';
     };
     
-    // Process each line with minimal business letter formatting
+    // Process each line with proper single-line spacing
     for (let i = 0; i < processedLines.length; i++) {
       const processedLine = processedLines[i];
       
-      // Skip empty lines entirely - no spacing added
+      // Handle empty lines with minimal spacing for intentional breaks
       if (processedLine.isEmpty) {
+        currentY += 4; // Minimal 4pt spacing for intentional breaks
         continue;
       }
       
       const { line, formatting, context } = processedLine;
       
       if (!formatting) {
-        currentY += SINGLE_LINE_SPACING;
+        currentY += 12; // Default line height for unformatted lines
         continue;
       }
       
@@ -63,25 +66,9 @@ export const downloadCoverLetterAsPdf = async (
       // Convert CSS-style values to jsPDF values
       const fontSize = parseInt(formatting.fontSize);
       const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
+      const lineHeight = getLineHeight(fontSize);
       
-      // Minimal context-based spacing (0-3pt maximum)
-      let additionalSpacing = 0;
-      
-      if (context?.section === 'header') {
-        if (formatting.isHeader) {
-          additionalSpacing = 2; // Name spacing
-        }
-        // Contact info gets 0 additional spacing
-      } else if (context?.section === 'body') {
-        if (isParagraphBreak(i, processedLines)) {
-          additionalSpacing = 3; // Small gap between paragraphs
-        }
-        // Within paragraphs gets 0 additional spacing
-      } else if (context?.section === 'date') {
-        additionalSpacing = 3; // Space after date
-      } else if (context?.section === 'closing') {
-        additionalSpacing = 2; // Minimal closing spacing
-      }
+      console.log(`Line ${i}: "${line.substring(0, 50)}..." - fontSize: ${fontSize}pt, lineHeight: ${lineHeight}pt, Y: ${currentY}`);
       
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, fontStyle);
@@ -92,17 +79,17 @@ export const downloadCoverLetterAsPdf = async (
         const textWidth = pdf.getTextWidth(line);
         const centerX = (pageWidth - textWidth) / 2;
         pdf.text(line, centerX, currentY);
-        currentY += SINGLE_LINE_SPACING + additionalSpacing;
+        currentY += lineHeight;
       } else if (formatting.textAlign === 'right') {
         // Right alignment for date
         const textWidth = pdf.getTextWidth(line);
         pdf.text(line, pageWidth - margin - textWidth, currentY);
-        currentY += SINGLE_LINE_SPACING + additionalSpacing;
+        currentY += lineHeight;
       } else {
-        // Left alignment (default)
-        // Split long lines to fit page width
+        // Left alignment (default) - FIXED SPLIT TEXT LOGIC
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         
+        // Apply spacing only once per logical line, not per split segment
         for (let j = 0; j < splitLines.length; j++) {
           const splitLine = splitLines[j];
           
@@ -113,16 +100,17 @@ export const downloadCoverLetterAsPdf = async (
           
           pdf.text(splitLine, margin, currentY);
           
-          // Use consistent single-line spacing for all split lines
-          currentY += SINGLE_LINE_SPACING;
+          // Only advance Y position by line height for each split line
+          // This ensures consistent spacing between all lines
+          currentY += lineHeight;
         }
         
-        // Add minimal additional spacing only after the complete logical line
-        currentY += additionalSpacing;
+        // No additional spacing needed - line height already applied to each split line
       }
     }
     
     console.log(`PDF generated with final Y position: ${currentY}, Page height: ${pageHeight}`);
+    console.log(`Content fits on single page: ${currentY < pageHeight - margin}`);
     
     pdf.save(`${fileName}_cover_letter.pdf`);
     toast.success("Cover letter downloaded as PDF!");

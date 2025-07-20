@@ -14,12 +14,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting with minimal margins for single-page fit
+  // Default formatting optimized for single-page business letters
   let formatting: LineFormatting = {
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '0px' // No default margin - handled by PDF spacing logic
+    marginBottom: '0px' // All spacing handled by PDF logic
   };
 
   // Determine context if not provided
@@ -35,13 +35,13 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   const isSignature = isSignatureLine(line, lineContext);
   const isSectionHeader = isSectionHeaderLine(line);
 
-  // Apply template-specific formatting with minimal spacing
+  // Apply template-specific formatting with consistent sizing for single-page fit
   if (isName && lineContext.section === 'header') {
     formatting = {
-      fontSize: '14pt',
+      fontSize: '13pt', // Reduced from 14pt for better page fit
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // Spacing handled by PDF logic
+      marginBottom: '0px',
       isHeader: true
     };
   }
@@ -50,7 +50,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt',
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // Spacing handled by PDF logic
+      marginBottom: '0px',
       isContact: true
     };
   }
@@ -59,7 +59,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '0px' // Spacing handled by PDF logic
+      marginBottom: '0px'
     };
   }
   else if (isRecipient) {
@@ -67,7 +67,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px' // Spacing handled by PDF logic
+      marginBottom: '0px'
     };
   }
   else if (isSalutation) {
@@ -75,7 +75,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px' // Spacing handled by PDF logic
+      marginBottom: '0px'
     };
   }
   else if (isClosing || isSignature) {
@@ -83,15 +83,15 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px' // Spacing handled by PDF logic
+      marginBottom: '0px'
     };
   }
   else if (isSectionHeader) {
     formatting = {
-      fontSize: '12pt',
+      fontSize: '11pt', // Reduced from 12pt for consistency
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '0px' // Spacing handled by PDF logic
+      marginBottom: '0px'
     };
   }
 
