@@ -1,76 +1,124 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Calendar, TrendingUp, Target, Users } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { Plus, Calendar, TrendingUp, Target, Users, Edit2, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useJobApplications } from "@/hooks/useJobApplications";
+import { ApplicationForm } from "@/components/ApplicationForm";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface AIInsights {
+  working_well: string[];
+  improvements: string[];
+  recommendations: string[];
+}
 
 const PerformanceTracking = () => {
-  const [applications] = useState([
-    {
-      id: 1,
-      company: "Google",
-      position: "Senior Software Engineer",
-      dateApplied: "2024-01-15",
-      status: "Interview Scheduled",
-      stage: "Technical Interview",
-      resumeVersion: "Tech_v2.1",
-      atsScore: 92
-    },
-    {
-      id: 2,
-      company: "Microsoft",
-      position: "Product Manager",
-      dateApplied: "2024-01-12",
-      status: "Under Review",
-      stage: "HR Screening",
-      resumeVersion: "PM_v1.3",
-      atsScore: 88
-    },
-    {
-      id: 3,
-      company: "Meta",
-      position: "Frontend Developer",
-      dateApplied: "2024-01-10",
-      status: "Rejected",
-      stage: "Resume Review",
-      resumeVersion: "Frontend_v1.1",
-      atsScore: 65
-    },
-    {
-      id: 4,
-      company: "Amazon",
-      position: "Software Engineer",
-      dateApplied: "2024-01-08",
-      status: "Offer Received",
-      stage: "Negotiation",
-      resumeVersion: "Tech_v2.0",
-      atsScore: 94
-    }
-  ]);
+  const { user } = useAuth();
+  const { applications, metrics, loading, addApplication, updateApplication, deleteApplication } = useJobApplications();
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [editingApplication, setEditingApplication] = useState(null);
+  const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'offer received':
+    switch (status.toLowerCase().replace(' ', '_')) {
+      case 'offer_received':
         return 'bg-success text-success-foreground';
-      case 'interview scheduled':
+      case 'interview_scheduled':
+      case 'interview_completed':
         return 'bg-primary text-primary-foreground';
-      case 'under review':
+      case 'under_review':
         return 'bg-warning text-warning-foreground';
       case 'rejected':
         return 'bg-destructive text-destructive-foreground';
+      case 'withdrawn':
+        return 'bg-muted text-muted-foreground';
       default:
         return 'bg-secondary text-secondary-foreground';
     }
   };
 
+  const formatStatus = (status: string) => {
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const formatStage = (stage: string) => {
+    return stage.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const handleAddApplication = async (data: any) => {
+    await addApplication(data);
+    setShowApplicationForm(false);
+  };
+
+  const handleEditApplication = (application: any) => {
+    setEditingApplication(application);
+    setShowApplicationForm(true);
+  };
+
+  const handleUpdateApplication = async (data: any) => {
+    if (editingApplication) {
+      await updateApplication(editingApplication.id, data);
+      setEditingApplication(null);
+      setShowApplicationForm(false);
+    }
+  };
+
+  const handleDeleteApplication = async (id: string) => {
+    if (confirm('Are you sure you want to delete this application?')) {
+      await deleteApplication(id);
+    }
+  };
+
+  const generateAIInsights = async () => {
+    if (!user || applications.length === 0) return;
+    
+    setInsightsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('performance-insights', {
+        body: { userId: user.id }
+      });
+
+      if (error) throw error;
+      setAiInsights(data.insights);
+    } catch (error) {
+      console.error('Error generating AI insights:', error);
+      toast.error('Failed to generate AI insights');
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (applications.length > 0 && !aiInsights) {
+      generateAIInsights();
+    }
+  }, [applications.length, user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   const stats = {
-    totalApplications: applications.length,
-    responseRate: 75,
-    interviewRate: 50,
-    offerRate: 25,
-    avgAtsScore: 85
+    totalApplications: metrics?.total_applications || 0,
+    responseRate: metrics?.response_rate || 0,
+    interviewRate: metrics?.interview_rate || 0,
+    offerRate: metrics?.offer_rate || 0,
+    avgAtsScore: metrics?.avg_ats_score || 0
   };
 
   return (
@@ -143,7 +191,7 @@ const PerformanceTracking = () => {
         <Card className="glass-card mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Application Tracking</CardTitle>
-            <Button>
+            <Button onClick={() => setShowApplicationForm(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Application
             </Button>
@@ -160,33 +208,68 @@ const PerformanceTracking = () => {
                     <th className="text-left py-3 px-2">Stage</th>
                     <th className="text-left py-3 px-2">Resume Version</th>
                     <th className="text-left py-3 px-2">ATS Score</th>
+                    <th className="text-left py-3 px-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {applications.map((app) => (
-                    <tr key={app.id} className="border-b border-border/10 hover:bg-background/50">
-                      <td className="py-3 px-2 font-medium">{app.company}</td>
-                      <td className="py-3 px-2">{app.position}</td>
-                      <td className="py-3 px-2 text-muted-foreground">
-                        {new Date(app.dateApplied).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge className={getStatusColor(app.status)}>
-                          {app.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground">{app.stage}</td>
-                      <td className="py-3 px-2">
-                        <Badge variant="outline">{app.resumeVersion}</Badge>
-                      </td>
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{app.atsScore}%</span>
-                          <Progress value={app.atsScore} className="w-16 h-2" />
-                        </div>
+                  {applications.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                        No applications found. Add your first application to start tracking performance.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    applications.map((app) => (
+                      <tr key={app.id} className="border-b border-border/10 hover:bg-background/50">
+                        <td className="py-3 px-2 font-medium">{app.company_name}</td>
+                        <td className="py-3 px-2">{app.position_title}</td>
+                        <td className="py-3 px-2 text-muted-foreground">
+                          {new Date(app.date_applied).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-2">
+                          <Badge className={getStatusColor(app.status)}>
+                            {formatStatus(app.status)}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-2 text-muted-foreground">{formatStage(app.current_stage)}</td>
+                        <td className="py-3 px-2">
+                          {app.resume_version ? (
+                            <Badge variant="outline">{app.resume_version}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2">
+                          {app.ats_score ? (
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{app.ats_score}%</span>
+                              <Progress value={app.ats_score} className="w-16 h-2" />
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2">
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleEditApplication(app)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleDeleteApplication(app.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -206,62 +289,102 @@ const PerformanceTracking = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span>Responses Received</span>
-                <span className="font-semibold text-success">3</span>
+                <span className="font-semibold text-success">{metrics?.responses_received || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Interviews Scheduled</span>
-                <span className="font-semibold text-primary">2</span>
+                <span className="font-semibold text-primary">{metrics?.interviews_scheduled || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Offers Received</span>
-                <span className="font-semibold text-warning">1</span>
+                <span className="font-semibold text-warning">{metrics?.offers_received || 0}</span>
               </div>
               <div className="pt-4 border-t border-border/20">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Success Rate</span>
-                  <span className="font-bold text-lg text-primary">25%</span>
+                  <span className="font-bold text-lg text-primary">{stats.offerRate.toFixed(1)}%</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Improvement Insights</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>AI-Powered Insights</CardTitle>
+              {applications.length > 0 && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={generateAIInsights}
+                  disabled={insightsLoading}
+                >
+                  {insightsLoading ? 'Analyzing...' : 'Refresh Insights'}
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 glass-card rounded-lg">
-                  <h4 className="font-medium text-success mb-2">✅ What's Working</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• High ATS scores (85+ average)</li>
-                    <li>• Strong response rate from tech companies</li>
-                    <li>• Resume version 2.x performing better</li>
-                  </ul>
+              {insightsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <LoadingSpinner />
+                  <span className="ml-2 text-muted-foreground">Generating AI insights...</span>
                 </div>
-                
-                <div className="p-4 glass-card rounded-lg">
-                  <h4 className="font-medium text-warning mb-2">⚠️ Areas for Improvement</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Applications with ATS score &lt;70 get rejected</li>
-                    <li>• Consider updating older resume versions</li>
-                    <li>• Focus on companies with better cultural fit</li>
-                  </ul>
+              ) : applications.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Add some job applications to get AI-powered insights and recommendations.
                 </div>
+              ) : aiInsights ? (
+                <div className="space-y-4">
+                  <div className="p-4 glass-card rounded-lg">
+                    <h4 className="font-medium text-success mb-2">✅ What's Working</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {aiInsights.working_well.map((item, index) => (
+                        <li key={index}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="p-4 glass-card rounded-lg">
+                    <h4 className="font-medium text-warning mb-2">⚠️ Areas for Improvement</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {aiInsights.improvements.map((item, index) => (
+                        <li key={index}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-                <div className="p-4 glass-card rounded-lg">
-                  <h4 className="font-medium text-primary mb-2">💡 Recommendations</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Use Tech_v2.1 template for all applications</li>
-                    <li>• Target companies with 85%+ ATS compatibility</li>
-                    <li>• Follow up on pending applications</li>
-                  </ul>
+                  <div className="p-4 glass-card rounded-lg">
+                    <h4 className="font-medium text-primary mb-2">💡 Recommendations</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {aiInsights.recommendations.map((item, index) => (
+                        <li key={index}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Button onClick={generateAIInsights}>
+                    Generate AI Insights
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <ApplicationForm
+        open={showApplicationForm}
+        onOpenChange={(open) => {
+          setShowApplicationForm(open);
+          if (!open) {
+            setEditingApplication(null);
+          }
+        }}
+        onSubmit={editingApplication ? handleUpdateApplication : handleAddApplication}
+        initialData={editingApplication}
+        mode={editingApplication ? 'edit' : 'create'}
+      />
     </div>
   );
 };

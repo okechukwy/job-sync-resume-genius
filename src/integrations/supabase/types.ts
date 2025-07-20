@@ -53,6 +53,50 @@ export type Database = {
         }
         Relationships: []
       }
+      application_stages: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          date_completed: string | null
+          date_entered: string | null
+          feedback: string | null
+          id: string
+          notes: string | null
+          stage_name: string
+          status: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          date_completed?: string | null
+          date_entered?: string | null
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          stage_name: string
+          status: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          date_completed?: string | null
+          date_entered?: string | null
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          stage_name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_stages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cv_analyses: {
         Row: {
           analysis_type: string | null
@@ -137,6 +181,72 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          application_source: string | null
+          ats_score: number | null
+          company_name: string
+          created_at: string | null
+          current_stage: string
+          date_applied: string
+          follow_up_date: string | null
+          id: string
+          interview_dates: Json | null
+          job_description: string | null
+          job_location: string | null
+          notes: string | null
+          position_title: string
+          resume_version: string | null
+          salary_range_max: number | null
+          salary_range_min: number | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          application_source?: string | null
+          ats_score?: number | null
+          company_name: string
+          created_at?: string | null
+          current_stage?: string
+          date_applied?: string
+          follow_up_date?: string | null
+          id?: string
+          interview_dates?: Json | null
+          job_description?: string | null
+          job_location?: string | null
+          notes?: string | null
+          position_title: string
+          resume_version?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          application_source?: string | null
+          ats_score?: number | null
+          company_name?: string
+          created_at?: string | null
+          current_stage?: string
+          date_applied?: string
+          follow_up_date?: string | null
+          id?: string
+          interview_dates?: Json | null
+          job_description?: string | null
+          job_location?: string | null
+          notes?: string | null
+          position_title?: string
+          resume_version?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       linkedin_profiles: {
         Row: {
           background_uploaded: boolean | null
@@ -189,6 +299,63 @@ export type Database = {
           photo_uploaded?: boolean | null
           skills?: Json
           summary?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          avg_ats_score: number | null
+          calculated_at: string | null
+          created_at: string | null
+          id: string
+          interview_rate: number | null
+          interviews_scheduled: number | null
+          metric_period: string
+          most_successful_resume_version: string | null
+          offer_rate: number | null
+          offers_received: number | null
+          response_rate: number | null
+          responses_received: number | null
+          top_performing_companies: Json | null
+          total_applications: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avg_ats_score?: number | null
+          calculated_at?: string | null
+          created_at?: string | null
+          id?: string
+          interview_rate?: number | null
+          interviews_scheduled?: number | null
+          metric_period: string
+          most_successful_resume_version?: string | null
+          offer_rate?: number | null
+          offers_received?: number | null
+          response_rate?: number | null
+          responses_received?: number | null
+          top_performing_companies?: Json | null
+          total_applications?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avg_ats_score?: number | null
+          calculated_at?: string | null
+          created_at?: string | null
+          id?: string
+          interview_rate?: number | null
+          interviews_scheduled?: number | null
+          metric_period?: string
+          most_successful_resume_version?: string | null
+          offer_rate?: number | null
+          offers_received?: number | null
+          response_rate?: number | null
+          responses_received?: number | null
+          top_performing_companies?: Json | null
+          total_applications?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -328,7 +495,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_performance_metrics: {
+        Args: { user_uuid: string; period?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
