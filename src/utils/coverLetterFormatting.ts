@@ -85,8 +85,8 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
 export const determineLineContext = (line: string, lineIndex: number, totalLines: number): LetterContext => {
   const trimmedLine = line.trim();
   
-  // Enhanced header section detection (first 6 lines typically for name + contact)
-  if (lineIndex < 6) {
+  // Enhanced header section detection - more precise range
+  if (lineIndex < 4 && (isNameLine(trimmedLine, { lineIndex, totalLines, section: 'header' }) || isContactLine(trimmedLine, { lineIndex, totalLines, section: 'header' }))) {
     return { lineIndex, totalLines, section: 'header' };
   }
   
@@ -95,18 +95,18 @@ export const determineLineContext = (line: string, lineIndex: number, totalLines
     return { lineIndex, totalLines, section: 'date' };
   }
   
-  // Enhanced closing/signature section (last 8 lines typically)
-  if (lineIndex >= totalLines - 8) {
+  // Enhanced closing/signature section detection
+  if (lineIndex >= totalLines - 6) {
     if (isClosingLine(trimmedLine) || isSignatureLine(trimmedLine, { lineIndex, totalLines, section: 'closing' })) {
       return { lineIndex, totalLines, section: 'closing' };
     }
-    if (lineIndex >= totalLines - 4) {
+    if (lineIndex >= totalLines - 2) {
       return { lineIndex, totalLines, section: 'signature' };
     }
   }
   
-  // Recipient section (after header, before body) - enhanced detection
-  if (lineIndex >= 6 && lineIndex < 20 && (isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' }))) {
+  // Recipient section - enhanced detection
+  if (lineIndex >= 4 && lineIndex < 15 && (isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' }) || isSalutationLine(trimmedLine))) {
     return { lineIndex, totalLines, section: 'recipient' };
   }
   
@@ -140,8 +140,8 @@ export const isNameLine = (line: string, context?: LetterContext): boolean => {
     return false;
   }
   
-  // Must have capitalized words and be reasonably short, and be in first 2 lines for names
-  return hasCapitalizedWords && isShort && trimmedLine.length > 2 && context && context.lineIndex < 2;
+  // Must have capitalized words and be reasonably short, and be in first line for names
+  return hasCapitalizedWords && isShort && trimmedLine.length > 2 && context && context.lineIndex === 0;
 };
 
 export const isContactLine = (line: string, context?: LetterContext): boolean => {

@@ -153,26 +153,44 @@ const CoverLetterGenerator = () => {
     
     return processedLines.map((processedLine, index) => {
       if (processedLine.isEmpty) {
-        return <div key={index} className="h-3" />;
+        return <div key={index} className="h-2" />;
       }
       
-      const { line, formatting } = processedLine;
+      const { line, formatting, context } = processedLine;
       
       if (!formatting) {
-        return <div key={index} className="mb-3">{line}</div>;
+        return <div key={index} className="mb-2">{line}</div>;
+      }
+      
+      let spacingClass = 'mb-3';
+      let lineHeightClass = 'leading-relaxed';
+      
+      if (context?.section === 'header') {
+        spacingClass = 'mb-1';
+        lineHeightClass = 'leading-tight';
+      } else if (context?.section === 'date') {
+        spacingClass = 'mb-2';
+        lineHeightClass = 'leading-normal';
+      } else if (context?.section === 'recipient') {
+        spacingClass = 'mb-1';
+        lineHeightClass = 'leading-normal';
+      } else if (context?.section === 'closing' || context?.section === 'signature') {
+        spacingClass = 'mb-1';
+        lineHeightClass = 'leading-normal';
+      } else if (context?.section === 'body') {
+        spacingClass = 'mb-4';
+        lineHeightClass = 'leading-relaxed';
       }
       
       const style: React.CSSProperties = {
         fontSize: formatting.fontSize,
         fontWeight: formatting.fontWeight as any,
         textAlign: formatting.textAlign,
-        marginBottom: formatting.marginBottom,
-        lineHeight: '1.5',
         color: '#1f2937'
       };
       
       return (
-        <div key={index} style={style}>
+        <div key={index} style={style} className={`${spacingClass} ${lineHeightClass}`}>
           {line}
         </div>
       );
@@ -656,7 +674,7 @@ const CoverLetterGenerator = () => {
               <CardContent>
                 {generatedLetter ? (
                   <div className="bg-background/50 rounded-lg p-8 min-h-96 max-w-4xl mx-auto">
-                    <div className="font-serif text-sm leading-relaxed">
+                    <div className="font-serif text-sm">
                       {renderFormattedCoverLetter(generatedLetter, formData.templateId)}
                     </div>
                   </div>
