@@ -1,3 +1,4 @@
+
 export interface LineFormatting {
   fontSize: string;
   fontWeight: string;
@@ -14,12 +15,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting optimized for single-page business letters
+  // Default formatting optimized for single-page business letters with NO additional spacing
   let formatting: LineFormatting = {
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '0px' // All spacing handled by PDF logic
+    marginBottom: '0px' // All spacing handled by PDF logic, no additional margins
   };
 
   // Determine context if not provided
@@ -38,10 +39,10 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   // Apply template-specific formatting with consistent sizing for single-page fit
   if (isName && lineContext.section === 'header') {
     formatting = {
-      fontSize: '13pt', // Reduced from 14pt for better page fit
+      fontSize: '12pt', // Reduced from 13pt for better page fit
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px',
+      marginBottom: '0px', // No additional spacing
       isHeader: true
     };
   }
@@ -50,7 +51,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '10pt',
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px',
+      marginBottom: '0px', // No additional spacing
       isContact: true
     };
   }
@@ -59,7 +60,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '0px'
+      marginBottom: '0px' // No additional spacing
     };
   }
   else if (isRecipient) {
@@ -67,7 +68,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px'
+      marginBottom: '0px' // No additional spacing
     };
   }
   else if (isSalutation) {
@@ -75,7 +76,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px'
+      marginBottom: '0px' // No additional spacing
     };
   }
   else if (isClosing || isSignature) {
@@ -83,15 +84,15 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
       fontSize: '11pt',
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px'
+      marginBottom: '0px' // No additional spacing
     };
   }
   else if (isSectionHeader) {
     formatting = {
-      fontSize: '11pt', // Reduced from 12pt for consistency
+      fontSize: '11pt', // Consistent with body text
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '0px'
+      marginBottom: '0px' // No additional spacing
     };
   }
 

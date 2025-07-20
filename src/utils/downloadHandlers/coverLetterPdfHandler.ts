@@ -23,21 +23,22 @@ export const downloadCoverLetterAsPdf = async (
     
     console.log(`Processing ${processedLines.length} lines for PDF generation`);
     
-    // Helper function to calculate proper line height based on font size
+    // Helper function to calculate proper line height based on font size (tighter for business letters)
     const getLineHeight = (fontSize: number): number => {
-      return fontSize * 1.2; // Standard single-line spacing (120% of font size)
+      return fontSize * 1.1; // Reduced from 1.2 to 1.1 for business letter formatting
     };
     
-    // Helper function to detect paragraph context
+    // Helper function to detect paragraph breaks (not line wrapping)
     const isParagraphBreak = (currentIndex: number, lines: typeof processedLines): boolean => {
       if (currentIndex === 0) return false;
       const prevLine = lines[currentIndex - 1];
       const currentLine = lines[currentIndex];
       
-      // Paragraph break if previous line wasn't empty and current is body text
+      // Only true paragraph breaks between body sections
       return !prevLine.isEmpty && 
              currentLine.context?.section === 'body' &&
-             prevLine.context?.section === 'body';
+             prevLine.context?.section === 'body' &&
+             currentLine.line.length > 50; // Likely start of new paragraph, not continuation
     };
     
     // Process each line with proper single-line spacing
@@ -46,19 +47,25 @@ export const downloadCoverLetterAsPdf = async (
       
       // Handle empty lines with minimal spacing for intentional breaks
       if (processedLine.isEmpty) {
-        currentY += 4; // Minimal 4pt spacing for intentional breaks
+        currentY += 3; // Minimal 3pt spacing for intentional breaks
         continue;
       }
       
       const { line, formatting, context } = processedLine;
       
       if (!formatting) {
-        currentY += 12; // Default line height for unformatted lines
+        currentY += 10; // Default minimal spacing for unformatted lines
         continue;
       }
       
+      // Add paragraph spacing only for actual paragraph breaks
+      if (isParagraphBreak(i, processedLines)) {
+        currentY += 6; // 6pt extra spacing between paragraphs
+        console.log(`Added paragraph spacing at line ${i}: "${line.substring(0, 30)}..."`);
+      }
+      
       // Check if we need a new page
-      if (currentY > pageHeight - margin - 20) {
+      if (currentY > pageHeight - margin - 30) {
         pdf.addPage();
         currentY = margin;
       }
@@ -68,7 +75,7 @@ export const downloadCoverLetterAsPdf = async (
       const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
       const lineHeight = getLineHeight(fontSize);
       
-      console.log(`Line ${i}: "${line.substring(0, 50)}..." - fontSize: ${fontSize}pt, lineHeight: ${lineHeight}pt, Y: ${currentY}`);
+      console.log(`Line ${i}: "${line.substring(0, 30)}..." - fontSize: ${fontSize}pt, lineHeight: ${lineHeight}pt, Y: ${currentY}`);
       
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, fontStyle);
@@ -89,28 +96,40 @@ export const downloadCoverLetterAsPdf = async (
         // Left alignment (default) - FIXED SPLIT TEXT LOGIC
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         
-        // Apply spacing only once per logical line, not per split segment
+        console.log(`Split "${line.substring(0, 30)}..." into ${splitLines.length} segments`);
+        
+        // Apply spacing logic: minimal spacing between wrapped segments, full spacing after complete line
         for (let j = 0; j < splitLines.length; j++) {
           const splitLine = splitLines[j];
+          const isLastSegment = j === splitLines.length - 1;
           
-          if (currentY > pageHeight - margin - 20) {
+          if (currentY > pageHeight - margin - 30) {
             pdf.addPage();
             currentY = margin;
           }
           
           pdf.text(splitLine, margin, currentY);
           
-          // Only advance Y position by line height for each split line
-          // This ensures consistent spacing between all lines
-          currentY += lineHeight;
+          // Critical fix: Apply minimal spacing between wrapped segments, full line height only after complete logical line
+          if (isLastSegment) {
+            // Apply full line height after the complete logical line
+            currentY += lineHeight;
+            console.log(`Applied full line height (${lineHeight}pt) after complete line`);
+          } else {
+            // Apply minimal spacing between wrapped segments of the same logical line
+            currentY += 3; // 3pt between wrapped segments
+            console.log(`Applied minimal spacing (3pt) between wrapped segments`);
+          }
         }
-        
-        // No additional spacing needed - line height already applied to each split line
       }
     }
     
-    console.log(`PDF generated with final Y position: ${currentY}, Page height: ${pageHeight}`);
-    console.log(`Content fits on single page: ${currentY < pageHeight - margin}`);
+    const finalY = currentY;
+    const fitsOnOnePage = finalY < pageHeight - margin;
+    
+    console.log(`PDF generated with final Y position: ${finalY}pt, Page height: ${pageHeight}pt`);
+    console.log(`Content fits on single page: ${fitsOnOnePage}`);
+    console.log(`Total content height: ${finalY - margin}pt`);
     
     pdf.save(`${fileName}_cover_letter.pdf`);
     toast.success("Cover letter downloaded as PDF!");
