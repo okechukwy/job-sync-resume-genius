@@ -30,6 +30,7 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   // Detect line types with context awareness
   const isName = isNameLine(line, lineContext);
   const isContact = isContactLine(line, lineContext);
+  const isLocation = isLocationLine(line, lineContext);
   const isDate = isDateLine(line);
   const isRecipient = isRecipientLine(line, lineContext);
   const isSalutation = isSalutationLine(line);
@@ -50,6 +51,17 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
     };
   }
   else if (isContact && lineContext.section === 'header') {
+    const shouldCenter = templateId.includes('classic') || templateId.includes('healthcare');
+    formatting = {
+      fontSize: '9pt', // Reduced from 10pt
+      fontWeight: 'normal',
+      textAlign: shouldCenter ? 'center' : 'left',
+      textAlignClass: shouldCenter ? 'text-center' : 'text-left',
+      marginBottom: '0px',
+      isContact: true
+    };
+  }
+  else if (isLocation && lineContext.section === 'header') {
     const shouldCenter = templateId.includes('classic') || templateId.includes('healthcare');
     formatting = {
       fontSize: '9pt', // Reduced from 10pt
@@ -95,7 +107,9 @@ export const determineLineContext = (line: string, lineIndex: number, totalLines
   const trimmedLine = line.trim();
   
   // Enhanced header section detection - more precise range
-  if (lineIndex < 4 && (isNameLine(trimmedLine, { lineIndex, totalLines, section: 'header' }) || isContactLine(trimmedLine, { lineIndex, totalLines, section: 'header' }))) {
+  if (lineIndex < 4 && (isNameLine(trimmedLine, { lineIndex, totalLines, section: 'header' }) || 
+      isContactLine(trimmedLine, { lineIndex, totalLines, section: 'header' }) ||
+      isLocationLine(trimmedLine, { lineIndex, totalLines, section: 'header' }))) {
     return { lineIndex, totalLines, section: 'header' };
   }
   
@@ -176,6 +190,31 @@ export const isContactLine = (line: string, context?: LetterContext): boolean =>
   if (contactKeywords.some(keyword => trimmedLine.toLowerCase().includes(keyword))) return true;
   
   return false;
+};
+
+export const isLocationLine = (line: string, context?: LetterContext): boolean => {
+  const trimmedLine = line.trim();
+  
+  // Only consider location lines in the header section
+  if (context && context.section !== 'header') {
+    return false;
+  }
+  
+  // Check for city, state patterns (like "San Francisco, CA")
+  const cityStatePattern = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}$/;
+  if (cityStatePattern.test(trimmedLine)) return true;
+  
+  // Check for common city/state combinations
+  const commonStates = ['CA', 'NY', 'TX', 'FL', 'IL', 'PA', 'OH', 'GA', 'MI', 'NC', 'NJ', 'VA', 'WA', 'MA', 'AZ', 'IN', 'TN', 'MO', 'MD', 'WI', 'MN', 'CO', 'SC', 'AL', 'LA', 'KY', 'OR', 'OK', 'CT', 'IA', 'AR', 'UT', 'MS', 'NV', 'KS', 'NM', 'WV', 'NE', 'ID', 'HI', 'NH', 'ME', 'RI', 'MT', 'DE', 'SD', 'ND', 'AK', 'VT', 'WY'];
+  const hasStateCode = commonStates.some(state => trimmedLine.includes(state));
+  
+  // Check if it contains a comma (typical city, state format)
+  const hasComma = trimmedLine.includes(',');
+  
+  // Must have state code and comma, and be short enough to be a location
+  return hasStateCode && hasComma && trimmedLine.length < 50 && 
+         !trimmedLine.includes('@') && !trimmedLine.includes('(') && 
+         !/\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(trimmedLine);
 };
 
 export const isDateLine = (line: string): boolean => {
