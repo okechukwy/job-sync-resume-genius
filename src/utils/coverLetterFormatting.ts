@@ -1,4 +1,3 @@
-
 export interface LineFormatting {
   fontSize: string;
   fontWeight: string;
@@ -15,12 +14,12 @@ interface LetterContext {
 }
 
 export const getLineFormatting = (line: string, templateId: string, context?: LetterContext): LineFormatting => {
-  // Default formatting optimized for single-page business letters with NO additional spacing
+  // Default formatting optimized for single-page business letters with ZERO spacing
   let formatting: LineFormatting = {
     fontSize: '11pt',
     fontWeight: 'normal',
     textAlign: 'left',
-    marginBottom: '0px' // All spacing handled by PDF logic, no additional margins
+    marginBottom: '0px' // Absolutely no additional margins - PDF handles all spacing
   };
 
   // Determine context if not provided
@@ -39,60 +38,44 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
   // Apply template-specific formatting with consistent sizing for single-page fit
   if (isName && lineContext.section === 'header') {
     formatting = {
-      fontSize: '12pt', // Reduced from 13pt for better page fit
+      fontSize: '12pt', // Consistent header sizing
       fontWeight: 'bold',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // No additional spacing
+      marginBottom: '0px', // Zero spacing - PDF handles it
       isHeader: true
     };
   }
   else if (isContact && lineContext.section === 'header') {
     formatting = {
-      fontSize: '10pt',
+      fontSize: '10pt', // Slightly smaller for contact info
       fontWeight: 'normal',
       textAlign: templateId.includes('classic') || templateId.includes('healthcare') ? 'center' : 'left',
-      marginBottom: '0px', // No additional spacing
+      marginBottom: '0px', // Zero spacing - PDF handles it
       isContact: true
     };
   }
   else if (isDate) {
     formatting = {
-      fontSize: '11pt',
+      fontSize: '11pt', // Standard body text size
       fontWeight: 'normal',
       textAlign: 'right',
-      marginBottom: '0px' // No additional spacing
+      marginBottom: '0px' // Zero spacing - PDF handles it
     };
   }
-  else if (isRecipient) {
+  else if (isRecipient || isSalutation || isClosing || isSignature) {
     formatting = {
-      fontSize: '11pt',
+      fontSize: '11pt', // Standard body text size
       fontWeight: 'normal',
       textAlign: 'left',
-      marginBottom: '0px' // No additional spacing
-    };
-  }
-  else if (isSalutation) {
-    formatting = {
-      fontSize: '11pt',
-      fontWeight: 'normal',
-      textAlign: 'left',
-      marginBottom: '0px' // No additional spacing
-    };
-  }
-  else if (isClosing || isSignature) {
-    formatting = {
-      fontSize: '11pt',
-      fontWeight: 'normal',
-      textAlign: 'left',
-      marginBottom: '0px' // No additional spacing
+      marginBottom: '0px' // Zero spacing - PDF handles it
     };
   }
   else if (isSectionHeader) {
     formatting = {
-      fontSize: '11pt', // Consistent with body text
+      fontSize: '11pt', // Same as body text for consistency
       fontWeight: 'bold',
       textAlign: 'left',
-      marginBottom: '0px' // No additional spacing
+      marginBottom: '0px' // Zero spacing - PDF handles it
     };
   }
 
