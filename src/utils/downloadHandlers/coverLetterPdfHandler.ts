@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { processLetterLines } from '../coverLetterFormatting';
@@ -18,17 +17,20 @@ export const downloadCoverLetterAsPdf = async (
     const maxWidth = pageWidth - 2 * margin;
     let currentY = margin;
     
-    // Optimized line spacing for single-page business letters
-    const PARAGRAPH_SPACING = 11; // Between actual paragraphs/sections
+    // Enhanced spacing hierarchy for professional business letter format
+    const MINIMAL_SPACING = 6; // Empty lines and within wrapped text
+    const HEADER_SPACING = 7; // Between header elements (name, contact, etc.)
+    const DATE_SPACING = 8; // For date line
+    const PARAGRAPH_SPACING = 11; // Between distinct content sections
+    const SECTION_SPACING = 12; // Between major sections (header → date → recipient)
     const WRAPPED_LINE_SPACING = 8; // Between wrapped text within same paragraph
-    const MINIMAL_SPACING = 6; // For empty lines and tight spacing
     
     // Process the letter lines with enhanced formatting
     const processedLines = processLetterLines(content, templateId);
     
-    console.log(`Processing ${processedLines.length} lines for PDF generation with optimized spacing`);
+    console.log(`Processing ${processedLines.length} lines for PDF generation with context-aware spacing`);
     
-    // First pass: calculate total content height to check if compression needed
+    // First pass: calculate total content height with context-aware spacing
     let totalHeight = margin;
     const lineHeights = [];
     
@@ -41,22 +43,40 @@ export const downloadCoverLetterAsPdf = async (
         continue;
       }
       
-      const { line, formatting } = processedLine;
+      const { line, formatting, context } = processedLine;
       if (!formatting) continue;
       
       const fontSize = parseInt(formatting.fontSize);
       pdf.setFontSize(fontSize);
       
-      if (formatting.textAlign === 'center' || formatting.textAlign === 'right') {
-        lineHeights.push(PARAGRAPH_SPACING);
-        totalHeight += PARAGRAPH_SPACING;
-      } else {
+      // Context-aware spacing logic
+      let spacingToApply = PARAGRAPH_SPACING; // default
+      
+      if (context?.section === 'header') {
+        // Header elements get tight spacing
+        spacingToApply = HEADER_SPACING;
+      } else if (formatting.textAlign === 'right' && context?.section === 'date') {
+        // Date line gets moderate spacing
+        spacingToApply = DATE_SPACING;
+      } else if (formatting.textAlign === 'center' || formatting.textAlign === 'right') {
+        // Other centered/right-aligned elements (likely headers)
+        spacingToApply = context?.section === 'header' ? HEADER_SPACING : PARAGRAPH_SPACING;
+      } else if (context?.section === 'closing' || context?.section === 'signature') {
+        // Closing and signature elements
+        spacingToApply = HEADER_SPACING;
+      }
+      
+      // Handle text wrapping for left-aligned content
+      if (formatting.textAlign === 'left') {
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         const segmentHeight = splitLines.length > 1 ? 
-          PARAGRAPH_SPACING + (splitLines.length - 1) * WRAPPED_LINE_SPACING :
-          PARAGRAPH_SPACING;
+          spacingToApply + (splitLines.length - 1) * WRAPPED_LINE_SPACING :
+          spacingToApply;
         lineHeights.push(segmentHeight);
         totalHeight += segmentHeight;
+      } else {
+        lineHeights.push(spacingToApply);
+        totalHeight += spacingToApply;
       }
     }
     
@@ -67,7 +87,7 @@ export const downloadCoverLetterAsPdf = async (
       console.log(`Applying compression factor: ${compressionFactor} to fit single page`);
     }
     
-    // Second pass: render with optimized spacing
+    // Second pass: render with context-aware spacing
     let lineIndex = 0;
     currentY = margin;
     
@@ -104,32 +124,45 @@ export const downloadCoverLetterAsPdf = async (
       
       const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
       
-      console.log(`Line ${i}: "${line.substring(0, 30)}..." - fontSize: ${fontSize}pt, Y: ${currentY}`);
+      console.log(`Line ${i}: "${line.substring(0, 30)}..." - fontSize: ${fontSize}pt, Y: ${currentY}, Context: ${context?.section}`);
       
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, fontStyle);
       
-      // Handle different alignment types with OPTIMIZED spacing
+      // Context-aware spacing logic for rendering
+      let spacingToApply = PARAGRAPH_SPACING; // default
+      
+      if (context?.section === 'header') {
+        spacingToApply = HEADER_SPACING;
+      } else if (formatting.textAlign === 'right' && context?.section === 'date') {
+        spacingToApply = DATE_SPACING;
+      } else if (formatting.textAlign === 'center' || formatting.textAlign === 'right') {
+        spacingToApply = context?.section === 'header' ? HEADER_SPACING : PARAGRAPH_SPACING;
+      } else if (context?.section === 'closing' || context?.section === 'signature') {
+        spacingToApply = HEADER_SPACING;
+      }
+      
+      // Handle different alignment types with CONTEXT-AWARE spacing
       if (formatting.textAlign === 'center') {
-        // Center alignment for headers
+        // Center alignment for headers with tight spacing
         const textWidth = pdf.getTextWidth(line);
         const centerX = (pageWidth - textWidth) / 2;
         pdf.text(line, centerX, currentY);
-        currentY += PARAGRAPH_SPACING * compressionFactor;
+        currentY += spacingToApply * compressionFactor;
         
       } else if (formatting.textAlign === 'right') {
-        // Right alignment for date
+        // Right alignment for date with appropriate spacing
         const textWidth = pdf.getTextWidth(line);
         pdf.text(line, pageWidth - margin - textWidth, currentY);
-        currentY += PARAGRAPH_SPACING * compressionFactor;
+        currentY += spacingToApply * compressionFactor;
         
       } else {
         // Left alignment with SMART WRAPPING logic
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         
-        console.log(`Split "${line.substring(0, 30)}..." into ${splitLines.length} segments`);
+        console.log(`Split "${line.substring(0, 30)}..." into ${splitLines.length} segments with ${spacingToApply}pt spacing`);
         
-        // Apply SMART spacing: different spacing for wrapped vs separate lines
+        // Apply CONTEXT-AWARE spacing: different spacing for wrapped vs separate lines
         for (let j = 0; j < splitLines.length; j++) {
           const splitLine = splitLines[j];
           
@@ -140,19 +173,19 @@ export const downloadCoverLetterAsPdf = async (
           
           pdf.text(splitLine, margin, currentY);
           
-          // Smart spacing logic
+          // Smart spacing logic with context awareness
           if (j === 0 && splitLines.length === 1) {
-            // Single line - normal paragraph spacing
-            currentY += PARAGRAPH_SPACING * compressionFactor;
+            // Single line - use context-aware spacing
+            currentY += spacingToApply * compressionFactor;
           } else if (j === splitLines.length - 1) {
-            // Last segment of wrapped text - paragraph spacing
-            currentY += PARAGRAPH_SPACING * compressionFactor;
+            // Last segment of wrapped text - use context-aware spacing
+            currentY += spacingToApply * compressionFactor;
           } else {
             // Wrapped line within paragraph - minimal spacing
             currentY += WRAPPED_LINE_SPACING * compressionFactor;
           }
           
-          console.log(`Applied ${j === splitLines.length - 1 ? 'paragraph' : 'wrapped'} spacing to segment ${j + 1}`);
+          console.log(`Applied ${j === splitLines.length - 1 ? 'context-aware' : 'wrapped'} spacing (${j === splitLines.length - 1 ? spacingToApply : WRAPPED_LINE_SPACING}pt) to segment ${j + 1}`);
         }
       }
       
@@ -169,7 +202,7 @@ export const downloadCoverLetterAsPdf = async (
     
     // Success validation
     if (fitsOnOnePage) {
-      console.log('✅ Single-page cover letter successfully generated');
+      console.log('✅ Single-page cover letter successfully generated with context-aware spacing');
     } else {
       console.warn(`⚠️ Content still exceeds single page despite optimization`);
     }

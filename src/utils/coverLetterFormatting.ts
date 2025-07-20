@@ -85,28 +85,28 @@ export const getLineFormatting = (line: string, templateId: string, context?: Le
 export const determineLineContext = (line: string, lineIndex: number, totalLines: number): LetterContext => {
   const trimmedLine = line.trim();
   
-  // Header section (first 5 lines typically)
-  if (lineIndex < 5) {
+  // Enhanced header section detection (first 6 lines typically for name + contact)
+  if (lineIndex < 6) {
     return { lineIndex, totalLines, section: 'header' };
   }
   
-  // Date section
+  // Date section - more precise detection
   if (isDateLine(trimmedLine)) {
     return { lineIndex, totalLines, section: 'date' };
   }
   
-  // Closing/signature section (last 10 lines typically)
-  if (lineIndex >= totalLines - 10) {
+  // Enhanced closing/signature section (last 8 lines typically)
+  if (lineIndex >= totalLines - 8) {
     if (isClosingLine(trimmedLine) || isSignatureLine(trimmedLine, { lineIndex, totalLines, section: 'closing' })) {
       return { lineIndex, totalLines, section: 'closing' };
     }
-    if (lineIndex >= totalLines - 3) {
+    if (lineIndex >= totalLines - 4) {
       return { lineIndex, totalLines, section: 'signature' };
     }
   }
   
-  // Recipient section (after header, before body)
-  if (lineIndex < 15 && (isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' }))) {
+  // Recipient section (after header, before body) - enhanced detection
+  if (lineIndex >= 6 && lineIndex < 20 && (isRecipientLine(trimmedLine, { lineIndex, totalLines, section: 'recipient' }))) {
     return { lineIndex, totalLines, section: 'recipient' };
   }
   
@@ -140,8 +140,8 @@ export const isNameLine = (line: string, context?: LetterContext): boolean => {
     return false;
   }
   
-  // Must have capitalized words and be reasonably short
-  return hasCapitalizedWords && isShort && trimmedLine.length > 2;
+  // Must have capitalized words and be reasonably short, and be in first 2 lines for names
+  return hasCapitalizedWords && isShort && trimmedLine.length > 2 && context && context.lineIndex < 2;
 };
 
 export const isContactLine = (line: string, context?: LetterContext): boolean => {
