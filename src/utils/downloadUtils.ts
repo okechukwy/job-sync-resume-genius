@@ -4,6 +4,7 @@ import { downloadAsTxt } from './downloadHandlers/txtDownloadHandler';
 import { downloadAsPdf } from './downloadHandlers/pdfDownloadHandler';
 import { downloadCoverLetterAsPdf } from './downloadHandlers/coverLetterPdfHandler';
 import { downloadAsRtf } from './downloadHandlers/rtfDownloadHandler';
+import { downloadCoverLetterAsRtf } from './downloadHandlers/coverLetterRtfHandler';
 
 export const downloadFile = async (
   content: string,
@@ -26,7 +27,11 @@ export const downloadFile = async (
         }
         break;
       case 'docx':
-        await downloadAsRtf(content, fileName, isHtmlContent);
+        if (documentType === 'cover-letter') {
+          await downloadCoverLetterAsRtf(content, fileName, templateId);
+        } else {
+          await downloadAsRtf(content, fileName, isHtmlContent);
+        }
         break;
       default:
         throw new Error(`Unsupported format: ${format}`);
