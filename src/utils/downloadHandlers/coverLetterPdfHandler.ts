@@ -14,33 +14,91 @@ export const downloadCoverLetterAsPdf = async (
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
-    const margin = 15; // Reduced from 20pt for better space utilization
+    const margin = 15;
     const maxWidth = pageWidth - 2 * margin;
     let currentY = margin;
     
-    // Enhanced spacing hierarchy for professional business letter format
-    const MINIMAL_SPACING = 6; // Empty lines and within wrapped text
-    const SALUTATION_EMPTY_SPACING = 3.5; // Tighter spacing for empty lines in salutation context
-    const HEADER_SPACING = 7; // Between header elements (name, contact, etc.)
-    const DATE_SPACING = 8; // For date line
-    const PARAGRAPH_SPACING = 11; // Between distinct content sections
-    const SECTION_SPACING = 12; // Between major sections (header → date → recipient)
-    const WRAPPED_LINE_SPACING = 8; // Between wrapped text within same paragraph
+    // Enhanced spacing hierarchy with reduced salutation spacing
+    const MINIMAL_SPACING = 6;
+    const SALUTATION_EMPTY_SPACING = 2; // Reduced from 3.5pt
+    const HEADER_SPACING = 7;
+    const SALUTATION_SPACING = 5; // Reduced from 7pt
+    const DATE_SPACING = 8;
+    const PARAGRAPH_SPACING = 11;
+    const SECTION_SPACING = 12;
+    const WRAPPED_LINE_SPACING = 8;
     
-    // Process the letter lines with enhanced formatting
     const processedLines = processLetterLines(content, templateId);
     
-    console.log(`Processing ${processedLines.length} lines for PDF generation with enhanced salutation spacing`);
+    console.log(`Processing ${processedLines.length} lines for PDF generation with salutation block consolidation`);
     
-    // First pass: calculate total content height with context-aware spacing
+    // Enhanced salutation block detection
+    const detectSalutationBlock = (lines: any[], startIndex: number) => {
+      const block = { start: startIndex, end: startIndex, lines: [] };
+      
+      // Look backward for empty lines before salutation
+      let backwardIndex = startIndex - 1;
+      while (backwardIndex >= 0 && lines[backwardIndex]?.isEmpty && 
+             lines[backwardIndex]?.context?.isEmptyInSalutationContext) {
+        block.start = backwardIndex;
+        backwardIndex--;
+      }
+      
+      // Look forward for the salutation and following empty lines
+      let forwardIndex = startIndex;
+      while (forwardIndex < lines.length) {
+        const line = lines[forwardIndex];
+        if (line?.context?.section === 'salutation' || 
+            (line?.isEmpty && line?.context?.isEmptyInSalutationContext)) {
+          block.end = forwardIndex;
+          forwardIndex++;
+        } else {
+          break;
+        }
+      }
+      
+      block.lines = lines.slice(block.start, block.end + 1);
+      console.log(`Detected salutation block from ${block.start} to ${block.end} with ${block.lines.length} lines`);
+      return block;
+    };
+    
+    // First pass: calculate total content height with salutation block consolidation
     let totalHeight = margin;
     const lineHeights = [];
+    let processedIndices = new Set();
     
     for (let i = 0; i < processedLines.length; i++) {
+      if (processedIndices.has(i)) continue;
+      
       const processedLine = processedLines[i];
       
+      // Handle salutation blocks specially
+      if (processedLine.context?.section === 'salutation' && !processedLine.isEmpty) {
+        const salutationBlock = detectSalutationBlock(processedLines, i);
+        
+        // Mark all indices in this block as processed
+        for (let j = salutationBlock.start; j <= salutationBlock.end; j++) {
+          processedIndices.add(j);
+        }
+        
+        // Calculate consolidated spacing for the entire salutation block
+        const salutationLines = salutationBlock.lines.filter(line => !line.isEmpty);
+        const emptyLines = salutationBlock.lines.filter(line => line.isEmpty);
+        
+        // Apply minimal spacing within the block and single exit spacing
+        const blockHeight = salutationLines.length * SALUTATION_SPACING + 
+                           emptyLines.length * SALUTATION_EMPTY_SPACING + 
+                           SALUTATION_SPACING; // Single exit spacing
+        
+        lineHeights.push(blockHeight);
+        totalHeight += blockHeight;
+        
+        console.log(`Salutation block height: ${blockHeight}pt (${salutationLines.length} content lines, ${emptyLines.length} empty lines)`);
+        continue;
+      }
+      
+      // Handle regular lines
       if (processedLine.isEmpty) {
-        // Apply special spacing for empty lines in salutation context
         const spacingForEmpty = processedLine.context?.isEmptyInSalutationContext ? 
           SALUTATION_EMPTY_SPACING : MINIMAL_SPACING;
         lineHeights.push(spacingForEmpty);
@@ -54,23 +112,16 @@ export const downloadCoverLetterAsPdf = async (
       const fontSize = parseInt(formatting.fontSize);
       pdf.setFontSize(fontSize);
       
-      // Context-aware spacing logic
-      let spacingToApply = PARAGRAPH_SPACING; // default
+      // Context-aware spacing logic for non-salutation lines
+      let spacingToApply = PARAGRAPH_SPACING;
       
       if (context?.section === 'header') {
-        // Header elements get tight spacing
         spacingToApply = HEADER_SPACING;
       } else if (formatting.textAlign === 'right' && context?.section === 'date') {
-        // Date line gets moderate spacing
         spacingToApply = DATE_SPACING;
       } else if (formatting.textAlign === 'center' || formatting.textAlign === 'right') {
-        // Other centered/right-aligned elements (likely headers)
         spacingToApply = context?.section === 'header' ? HEADER_SPACING : PARAGRAPH_SPACING;
       } else if (context?.section === 'closing' || context?.section === 'signature') {
-        // Closing and signature elements
-        spacingToApply = HEADER_SPACING;
-      } else if (context?.section === 'salutation') {
-        // Salutation/greeting gets TIGHT spacing
         spacingToApply = HEADER_SPACING;
       }
       
@@ -95,20 +146,71 @@ export const downloadCoverLetterAsPdf = async (
       console.log(`Applying compression factor: ${compressionFactor} to fit single page`);
     }
     
-    // Second pass: render with context-aware spacing
-    let lineIndex = 0;
+    // Second pass: render with salutation block consolidation
     currentY = margin;
+    processedIndices.clear();
     
     for (let i = 0; i < processedLines.length; i++) {
+      if (processedIndices.has(i)) continue;
+      
       const processedLine = processedLines[i];
       
-      // Handle empty lines with enhanced salutation-aware spacing
+      // Handle salutation blocks with consolidated rendering
+      if (processedLine.context?.section === 'salutation' && !processedLine.isEmpty) {
+        const salutationBlock = detectSalutationBlock(processedLines, i);
+        
+        // Mark all indices in this block as processed
+        for (let j = salutationBlock.start; j <= salutationBlock.end; j++) {
+          processedIndices.add(j);
+        }
+        
+        console.log(`Rendering salutation block at Y: ${currentY}`);
+        
+        // Render each line in the salutation block with minimal internal spacing
+        for (const blockLine of salutationBlock.lines) {
+          if (blockLine.isEmpty) {
+            // Apply minimal spacing for empty lines within the block
+            currentY += SALUTATION_EMPTY_SPACING * compressionFactor;
+            console.log(`Applied minimal empty line spacing: ${SALUTATION_EMPTY_SPACING}pt`);
+            continue;
+          }
+          
+          const { line, formatting } = blockLine;
+          if (!formatting) continue;
+          
+          // Check if we need a new page
+          if (currentY > pageHeight - margin - 30) {
+            pdf.addPage();
+            currentY = margin;
+          }
+          
+          // Apply optimized font sizes
+          let fontSize = parseInt(formatting.fontSize);
+          fontSize = Math.max(9, Math.round(fontSize * 0.91));
+          
+          const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
+          
+          pdf.setFontSize(fontSize);
+          pdf.setFont(undefined, fontStyle);
+          
+          // Render the salutation line
+          pdf.text(line, margin, currentY);
+          currentY += SALUTATION_SPACING * compressionFactor;
+          
+          console.log(`Rendered salutation line: "${line.substring(0, 30)}..." with ${SALUTATION_SPACING}pt spacing`);
+        }
+        
+        // Apply single exit spacing for the entire block
+        currentY += SALUTATION_SPACING * compressionFactor;
+        console.log(`Applied salutation block exit spacing: ${SALUTATION_SPACING}pt`);
+        continue;
+      }
+      
+      // Handle regular empty lines
       if (processedLine.isEmpty) {
         const spacingForEmpty = processedLine.context?.isEmptyInSalutationContext ? 
           SALUTATION_EMPTY_SPACING : MINIMAL_SPACING;
         currentY += spacingForEmpty * compressionFactor;
-        
-        console.log(`Applied ${processedLine.context?.isEmptyInSalutationContext ? 'salutation-context' : 'minimal'} spacing (${spacingForEmpty}pt) to empty line at ${i}`);
         continue;
       }
       
@@ -117,32 +219,29 @@ export const downloadCoverLetterAsPdf = async (
       // Skip lines without formatting
       if (!formatting) continue;
       
-      // Check if we need a new page (should not happen with compression)
+      // Check if we need a new page
       if (currentY > pageHeight - margin - 30) {
         pdf.addPage();
         currentY = margin;
-        console.warn('Page break occurred despite compression - content may be too long');
       }
       
-      // Apply optimized font sizes for better density
+      // Apply optimized font sizes
       let fontSize = parseInt(formatting.fontSize);
       if (formatting.isHeader) {
-        fontSize = Math.max(10, Math.round(fontSize * 0.92)); // Reduced header size
+        fontSize = Math.max(10, Math.round(fontSize * 0.92));
       } else if (formatting.isContact) {
-        fontSize = Math.max(8, Math.round(fontSize * 0.90)); // Smaller contact info
+        fontSize = Math.max(8, Math.round(fontSize * 0.90));
       } else {
-        fontSize = Math.max(9, Math.round(fontSize * 0.91)); // Slightly smaller body text
+        fontSize = Math.max(9, Math.round(fontSize * 0.91));
       }
       
       const fontStyle = formatting.fontWeight === 'bold' ? 'bold' : 'normal';
-      
-      console.log(`Line ${i}: "${line.substring(0, 30)}..." - fontSize: ${fontSize}pt, Y: ${currentY}, Context: ${context?.section}`);
       
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, fontStyle);
       
       // Context-aware spacing logic for rendering
-      let spacingToApply = PARAGRAPH_SPACING; // default
+      let spacingToApply = PARAGRAPH_SPACING;
       
       if (context?.section === 'header') {
         spacingToApply = HEADER_SPACING;
@@ -152,32 +251,24 @@ export const downloadCoverLetterAsPdf = async (
         spacingToApply = context?.section === 'header' ? HEADER_SPACING : PARAGRAPH_SPACING;
       } else if (context?.section === 'closing' || context?.section === 'signature') {
         spacingToApply = HEADER_SPACING;
-      } else if (context?.section === 'salutation') {
-        // Salutation/greeting gets TIGHT spacing
-        spacingToApply = HEADER_SPACING;
       }
       
-      // Handle different alignment types with CONTEXT-AWARE spacing
+      // Handle different alignment types
       if (formatting.textAlign === 'center') {
-        // Center alignment for headers with tight spacing
         const textWidth = pdf.getTextWidth(line);
         const centerX = (pageWidth - textWidth) / 2;
         pdf.text(line, centerX, currentY);
         currentY += spacingToApply * compressionFactor;
         
       } else if (formatting.textAlign === 'right') {
-        // Right alignment for date with appropriate spacing
         const textWidth = pdf.getTextWidth(line);
         pdf.text(line, pageWidth - margin - textWidth, currentY);
         currentY += spacingToApply * compressionFactor;
         
       } else {
-        // Left alignment with SMART WRAPPING logic
+        // Left alignment with smart wrapping
         const splitLines = pdf.splitTextToSize(line, maxWidth);
         
-        console.log(`Split "${line.substring(0, 30)}..." into ${splitLines.length} segments with ${spacingToApply}pt spacing`);
-        
-        // Apply CONTEXT-AWARE spacing: different spacing for wrapped vs separate lines
         for (let j = 0; j < splitLines.length; j++) {
           const splitLine = splitLines[j];
           
@@ -188,39 +279,26 @@ export const downloadCoverLetterAsPdf = async (
           
           pdf.text(splitLine, margin, currentY);
           
-          // Smart spacing logic with context awareness
           if (j === 0 && splitLines.length === 1) {
-            // Single line - use context-aware spacing
             currentY += spacingToApply * compressionFactor;
           } else if (j === splitLines.length - 1) {
-            // Last segment of wrapped text - use context-aware spacing
             currentY += spacingToApply * compressionFactor;
           } else {
-            // Wrapped line within paragraph - minimal spacing
             currentY += WRAPPED_LINE_SPACING * compressionFactor;
           }
-          
-          console.log(`Applied ${j === splitLines.length - 1 ? 'context-aware' : 'wrapped'} spacing (${j === splitLines.length - 1 ? spacingToApply : WRAPPED_LINE_SPACING}pt) to segment ${j + 1}`);
         }
       }
-      
-      lineIndex++;
     }
     
     const finalY = currentY;
     const fitsOnOnePage = finalY < pageHeight - margin;
     
-    console.log(`PDF generated with final Y position: ${finalY}pt, Page height: ${pageHeight}pt`);
-    console.log(`Content fits on single page: ${fitsOnOnePage}`);
-    console.log(`Compression factor applied: ${compressionFactor}`);
-    console.log(`Total content height: ${finalY - margin}pt`);
-    console.log(`Enhanced salutation spacing applied with ${SALUTATION_EMPTY_SPACING}pt for empty lines in salutation context`);
+    console.log(`PDF generated with salutation block consolidation`);
+    console.log(`Final Y position: ${finalY}pt, Content fits on single page: ${fitsOnOnePage}`);
+    console.log(`Salutation spacing reduced to ${SALUTATION_SPACING}pt, empty lines to ${SALUTATION_EMPTY_SPACING}pt`);
     
-    // Success validation
     if (fitsOnOnePage) {
-      console.log('✅ Single-page cover letter successfully generated with enhanced salutation spacing');
-    } else {
-      console.warn(`⚠️ Content still exceeds single page despite optimization`);
+      console.log('✅ Single-page cover letter successfully generated with consolidated salutation spacing');
     }
     
     pdf.save(`${fileName}_cover_letter.pdf`);
