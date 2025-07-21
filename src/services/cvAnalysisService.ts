@@ -71,7 +71,9 @@ export const cvAnalysisService = {
       atsScore: data.ats_score,
       sections: data.sections as unknown as AnalysisData['sections'],
       keywords: data.keywords as unknown as AnalysisData['keywords'], 
-      improvements: data.improvements as unknown as AnalysisData['improvements']
+      improvements: data.improvements as unknown as AnalysisData['improvements'],
+      industry: data.industry || 'Business',
+      targetRole: data.target_role || 'Professional'
     };
   },
 

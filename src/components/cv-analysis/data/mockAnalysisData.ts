@@ -3,6 +3,8 @@ import { AnalysisData } from "../types/analysisTypes";
 export const mockAnalysisData: AnalysisData = {
   overallScore: 72,
   atsScore: 68,
+  industry: 'Technology',
+  targetRole: 'Software Engineer',
   sections: {
     contact: { score: 95, status: 'excellent' },
     summary: { score: 45, status: 'needs_work' },
@@ -14,7 +16,9 @@ export const mockAnalysisData: AnalysisData = {
   keywords: {
     found: 12,
     missing: 8,
-    suggestions: ['JavaScript', 'React', 'Node.js', 'AWS', 'Agile', 'SQL', 'Git', 'Docker']
+    suggestions: ['JavaScript', 'React', 'Node.js', 'AWS', 'Agile', 'SQL', 'Git', 'Docker'],
+    foundKeywords: ['HTML', 'CSS', 'Python', 'Problem Solving', 'Team Leadership', 'Project Management', 'Communication', 'Analysis', 'Design', 'Testing', 'Documentation', 'Collaboration'],
+    missingKeywords: ['JavaScript', 'React', 'Node.js', 'AWS', 'Agile', 'SQL', 'Git', 'Docker']
   },
   improvements: [
     {
