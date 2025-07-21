@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
@@ -16,6 +15,7 @@ import ActionableImprovements from "./components/ActionableImprovements";
 import ApplyRecommendations from "./components/ApplyRecommendations";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { validateAIImprovements, ImprovementValidationResult } from "./services/improvementValidation";
+import { calculateOptimizationCompleteness } from "./utils/optimizationUtils";
 
 const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -134,6 +134,14 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
     );
   }
 
+  // Calculate optimization completeness for passing to ApplyRecommendations
+  const optimizationCompleteness = analysisData ? 
+    calculateOptimizationCompleteness(
+      analysisData.improvements,
+      manuallyCompletedItems,
+      improvementValidation
+    ) : null;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -178,6 +186,7 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         uploadedFile={uploadedFile}
         onContinue={onContinue}
         analysisData={analysisData}
+        optimizationCompleteness={optimizationCompleteness}
         onOptimizationComplete={handleAIOptimizationComplete}
       />
 

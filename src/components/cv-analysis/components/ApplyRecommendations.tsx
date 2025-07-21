@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +7,13 @@ import CVDisplay from "./CVDisplay";
 import EnhancementLog from "./EnhancementLog";
 import DownloadOptions from "./DownloadOptions";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
+import { OptimizationCompleteness } from "../utils/optimizationUtils";
 
 interface ApplyRecommendationsProps {
   uploadedFile: File;
   onContinue: () => void;
   analysisData?: any;
+  optimizationCompleteness?: OptimizationCompleteness | null;
   onOptimizationComplete: (result: EnhancedCVResult) => void;
 }
 
@@ -20,6 +21,7 @@ const ApplyRecommendations = ({
   uploadedFile, 
   onContinue, 
   analysisData,
+  optimizationCompleteness,
   onOptimizationComplete 
 }: ApplyRecommendationsProps) => {
   const {
@@ -71,11 +73,26 @@ const ApplyRecommendations = ({
     const changesCount = enhancedResult.changesApplied.length;
     const estimatedImprovement = enhancedResult.estimatedATSScoreImprovement;
     
-    if (changesCount === 0) {
+    // Check if all improvements are truly completed before showing "already optimized"
+    const isFullyOptimized = optimizationCompleteness?.isFullyOptimized || false;
+    const hasImprovements = optimizationCompleteness?.totalImprovements > 0;
+    
+    // Only show "Resume Already Optimized" if ALL suggestions are completed
+    if (changesCount === 0 && isFullyOptimized && hasImprovements) {
       return {
         type: 'no-changes',
         title: 'Resume Already Optimized',
         description: 'Your resume is already well-optimized for ATS systems and professional standards.'
+      };
+    }
+    
+    // If no changes were made but improvements still exist, show different message
+    if (changesCount === 0 && !isFullyOptimized && hasImprovements) {
+      const remainingCount = optimizationCompleteness?.totalImprovements - optimizationCompleteness?.completedCount || 0;
+      return {
+        type: 'minimal-changes',
+        title: 'Basic Optimization Applied',
+        description: `Your resume content is solid, but ${remainingCount} suggestion${remainingCount !== 1 ? 's' : ''} in the Action Plan still need${remainingCount === 1 ? 's' : ''} attention for full optimization.`
       };
     }
     
@@ -182,25 +199,41 @@ const ApplyRecommendations = ({
                     optimizationSummary.type === 'significant' ? 'bg-green-50 border-green-200' :
                     optimizationSummary.type === 'moderate' ? 'bg-blue-50 border-blue-200' :
                     optimizationSummary.type === 'minor' ? 'bg-orange-50 border-orange-200' :
+                    optimizationSummary.type === 'minimal-changes' ? 'bg-blue-50 border-blue-200' :
                     'bg-yellow-50 border-yellow-200'
                   }`}>
                     <div className="flex items-center gap-2 mb-2">
                       {optimizationSummary.type === 'no-changes' ? (
-                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      ) : optimizationSummary.type === 'minimal-changes' ? (
+                        <AlertTriangle className="w-5 h-5 text-blue-600" />
                       ) : (
                         <CheckCircle className="w-5 h-5 text-green-600" />
                       )}
                       <h4 className={`font-semibold ${
-                        optimizationSummary.type === 'no-changes' ? 'text-yellow-800' : 'text-green-800'
+                        optimizationSummary.type === 'no-changes' ? 'text-green-800' :
+                        optimizationSummary.type === 'minimal-changes' ? 'text-blue-800' :
+                        'text-green-800'
                       }`}>
                         {optimizationSummary.title}
                       </h4>
                     </div>
                     <p className={`text-sm ${
-                      optimizationSummary.type === 'no-changes' ? 'text-yellow-700' : 'text-green-700'
+                      optimizationSummary.type === 'no-changes' ? 'text-green-700' :
+                      optimizationSummary.type === 'minimal-changes' ? 'text-blue-700' :
+                      'text-green-700'
                     }`}>
                       {optimizationSummary.description}
                     </p>
+                    
+                    {/* Show progress indicator when not fully optimized */}
+                    {optimizationSummary.type === 'minimal-changes' && optimizationCompleteness && (
+                      <div className="mt-3 text-xs text-blue-600">
+                        <div className="flex items-center gap-2">
+                          <span>Overall Progress: {optimizationCompleteness.completionPercentage}% ({optimizationCompleteness.completedCount}/{optimizationCompleteness.totalImprovements})</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 
