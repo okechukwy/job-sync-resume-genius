@@ -14,12 +14,19 @@ export const useApplyRecommendations = (
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleApplyRecommendations = async () => {
-    console.log("Starting AI-powered recommendations application");
+    console.log("Starting AI-powered recommendations application with analysis data:", {
+      hasAnalysisData: !!analysisData,
+      industry: analysisData?.industry,
+      targetRole: analysisData?.targetRole,
+      atsScore: analysisData?.atsScore,
+      missingKeywords: analysisData?.keywords?.missingKeywords?.length || 0
+    });
+    
     setIsProcessing(true);
     setRecommendationsApplied(false);
     
     try {
-      toast.info("Reading CV content...");
+      toast.info("📄 Reading CV content...");
       
       // Read original file content if not already read
       let content = originalContent;
@@ -30,14 +37,16 @@ export const useApplyRecommendations = (
 
       console.log("CV content read successfully, length:", content.length);
 
-      // Extract analysis data for AI enhancement
-      const missingKeywords = analysisData?.keywords?.missingKeywords || analysisData?.keywords?.suggestions || [];
+      // Extract and validate analysis data for AI enhancement
+      const missingKeywords = analysisData?.keywords?.missingKeywords || 
+                            analysisData?.keywords?.suggestions || 
+                            [];
       const targetIndustry = analysisData?.industry || 'Business';
-      const targetRole = analysisData?.targetRole;
-      const atsScore = analysisData?.atsScore;
+      const targetRole = analysisData?.targetRole || 'Professional';
+      const atsScore = analysisData?.atsScore || 70;
       const weakAreas = analysisData?.improvements?.map((imp: any) => imp.issue) || [];
 
-      console.log("Enhancement parameters:", {
+      console.log("Enhancement parameters validated:", {
         missingKeywords: missingKeywords.length,
         targetIndustry,
         targetRole,
@@ -45,15 +54,15 @@ export const useApplyRecommendations = (
         weakAreas: weakAreas.length
       });
 
-      // Show processing steps with better UX
+      // Show detailed progress with better UX
       toast.info("🤖 AI analyzing your CV structure...");
       
-      // Add a small delay to show the processing message
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Small delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       toast.info("⚡ Applying intelligent enhancements...");
 
-      // Apply AI-powered enhancements
+      // Apply AI-powered enhancements with proper error handling
       const enhanced = await enhanceCVWithAI(
         content,
         missingKeywords,
@@ -67,31 +76,36 @@ export const useApplyRecommendations = (
         changesApplied: enhanced.changesApplied.length,
         estimatedImprovement: enhanced.estimatedATSScoreImprovement,
         keywordsAdded: enhanced.atsImprovements.keywordsAdded.length,
-        actionVerbsImproved: enhanced.atsImprovements.actionVerbsImproved
+        actionVerbsImproved: enhanced.atsImprovements.actionVerbsImproved,
+        enhancedContentLength: enhanced.resumeContent.length
       });
 
       setEnhancedResult(enhanced);
       setRecommendationsApplied(true);
 
-      // Show success message with details
-      const successMessage = enhanced.changesApplied.length > 0 
-        ? `✅ Applied ${enhanced.changesApplied.length} AI improvements with +${enhanced.estimatedATSScoreImprovement} ATS score boost!`
-        : `✅ CV optimization complete! Your CV is already well-optimized.`;
-      
-      toast.success(successMessage);
+      // Show detailed success message
+      if (enhanced.changesApplied.length > 0) {
+        toast.success(
+          `✅ Applied ${enhanced.changesApplied.length} AI improvements! ATS score boost: +${enhanced.estimatedATSScoreImprovement} points`
+        );
+      } else {
+        toast.success("✅ CV optimization complete! Your CV is already well-optimized for ATS systems.");
+      }
 
     } catch (error) {
       console.error("Error applying recommendations:", error);
       
-      // More specific error handling
+      // Enhanced error handling with specific messages
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       
       if (errorMessage.includes('AI enhancement failed')) {
-        toast.error("AI enhancement temporarily unavailable. Using enhanced basic optimization.");
+        toast.warning("⚠️ AI enhancement temporarily unavailable. Applied basic optimization instead.");
       } else if (errorMessage.includes('Failed to read file')) {
-        toast.error("Could not read CV file. Please try uploading again.");
+        toast.error("❌ Could not read CV file. Please try uploading again.");
+      } else if (errorMessage.includes('Enhancement service temporarily unavailable')) {
+        toast.error("🔧 Enhancement service is temporarily down. Please try again in a few minutes.");
       } else {
-        toast.error("Failed to apply recommendations. Please try again.");
+        toast.error("❌ Failed to apply recommendations. Please try again.");
       }
       
       setRecommendationsApplied(false);

@@ -43,50 +43,132 @@ interface AIEnhancementResult {
   estimatedATSScoreImprovement: number;
 }
 
-// Helper function to extract JSON from markdown-wrapped response
-const extractJsonFromResponse = (responseText: string): any => {
-  console.log('Attempting to parse AI response:', responseText.substring(0, 500));
+// Enhanced JSON parsing function with better error handling
+const parseAIResponse = (responseText: string): any => {
+  console.log('Parsing AI response, length:', responseText.length);
+  console.log('Response preview:', responseText.substring(0, 500) + '...');
   
+  // Step 1: Try direct JSON parsing
   try {
-    // First try direct JSON parsing
     return JSON.parse(responseText);
-  } catch (directParseError) {
-    console.log('Direct JSON parsing failed, trying to extract from markdown...');
-    
-    // Try to extract JSON from markdown code blocks
-    const jsonMatch = responseText.match(/```json\s*\n([\s\S]*?)\n\s*```/);
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[1]);
-      } catch (markdownParseError) {
-        console.error('Failed to parse JSON from markdown block:', markdownParseError);
-      }
-    }
-    
-    // Try to extract JSON from any code blocks
-    const codeMatch = responseText.match(/```\s*\n([\s\S]*?)\n\s*```/);
-    if (codeMatch) {
-      try {
-        return JSON.parse(codeMatch[1]);
-      } catch (codeParseError) {
-        console.error('Failed to parse JSON from code block:', codeParseError);
-      }
-    }
-    
-    // Last resort: try to find JSON-like structure
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-      try {
-        const extractedJson = responseText.substring(jsonStart, jsonEnd + 1);
-        return JSON.parse(extractedJson);
-      } catch (extractError) {
-        console.error('Failed to extract and parse JSON:', extractError);
-      }
-    }
-    
-    throw new Error('Could not extract valid JSON from AI response');
+  } catch (error) {
+    console.log('Direct JSON parsing failed:', error.message);
   }
+  
+  // Step 2: Clean up common JSON issues
+  let cleanedText = responseText;
+  
+  // Remove markdown code blocks
+  cleanedText = cleanedText.replace(/```json\s*\n?/g, '').replace(/\n?\s*```/g, '');
+  
+  // Remove any trailing commas before closing braces/brackets
+  cleanedText = cleanedText.replace(/,(\s*[}\]])/g, '$1');
+  
+  // Fix escaped quotes in strings
+  cleanedText = cleanedText.replace(/\\"/g, '"');
+  
+  // Fix control characters in strings
+  cleanedText = cleanedText.replace(/[\x00-\x1f\x7f-\x9f]/g, '');
+  
+  // Try parsing cleaned text
+  try {
+    return JSON.parse(cleanedText);
+  } catch (error) {
+    console.log('Cleaned JSON parsing failed:', error.message);
+  }
+  
+  // Step 3: Extract JSON from mixed content
+  const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch (error) {
+      console.log('Extracted JSON parsing failed:', error.message);
+    }
+  }
+  
+  // Step 4: Try to reconstruct basic structure
+  console.log('All JSON parsing attempts failed, creating fallback structure');
+  return {
+    enhancedContent: responseText,
+    changesApplied: [],
+    atsImprovements: {
+      keywordsAdded: [],
+      metricsAdded: 0,
+      actionVerbsImproved: 0,
+      professionalLanguageEnhanced: 0
+    },
+    estimatedATSScoreImprovement: 0
+  };
+};
+
+// Enhanced basic optimization as fallback
+const createBasicOptimization = (
+  originalContent: string,
+  missingKeywords: string[],
+  targetIndustry: string
+): AIEnhancementResult => {
+  console.log('Creating basic optimization fallback');
+  
+  const changes = [];
+  let enhancedContent = originalContent;
+  
+  // Basic keyword integration
+  if (missingKeywords.length > 0) {
+    const keywordToAdd = missingKeywords[0];
+    if (!enhancedContent.toLowerCase().includes(keywordToAdd.toLowerCase())) {
+      enhancedContent = enhancedContent.replace(
+        /\b(experience|skills|responsibilities)\b/gi,
+        `$1 with ${keywordToAdd}`
+      );
+      changes.push({
+        section: 'Content Enhancement',
+        original: 'experience',
+        improved: `experience with ${keywordToAdd}`,
+        reasoning: 'Added missing industry keyword for better ATS compatibility',
+        category: 'keyword-integration'
+      });
+    }
+  }
+  
+  // Basic action verb improvements
+  const actionVerbReplacements = {
+    'worked on': 'managed',
+    'helped with': 'facilitated',
+    'was responsible for': 'directed',
+    'did': 'executed'
+  };
+  
+  Object.entries(actionVerbReplacements).forEach(([old, replacement]) => {
+    if (enhancedContent.toLowerCase().includes(old)) {
+      enhancedContent = enhancedContent.replace(new RegExp(old, 'gi'), replacement);
+      changes.push({
+        section: 'Content Enhancement',
+        original: old,
+        improved: replacement,
+        reasoning: 'Enhanced action verb for better professional impact',
+        category: 'action-verbs'
+      });
+    }
+  });
+  
+  return {
+    enhancedContent,
+    enhancementLog: [
+      `Applied ${changes.length} basic optimizations`,
+      'Enhanced professional language and action verbs',
+      'Integrated available keywords where appropriate',
+      'Note: Using basic optimization due to AI processing limitations'
+    ],
+    changesApplied: changes,
+    atsImprovements: {
+      keywordsAdded: missingKeywords.slice(0, 1),
+      metricsAdded: 0,
+      actionVerbsImproved: changes.filter(c => c.category === 'action-verbs').length,
+      professionalLanguageEnhanced: changes.length
+    },
+    estimatedATSScoreImprovement: Math.min(changes.length * 3, 12)
+  };
 };
 
 serve(async (req) => {
@@ -105,7 +187,7 @@ serve(async (req) => {
       weakAreas
     }: AIEnhancementRequest = await req.json();
 
-    console.log('AI CV Enhancement request:', {
+    console.log('AI CV Enhancement request received:', {
       contentLength: originalContent.length,
       missingKeywords: missingKeywords.length,
       targetIndustry,
@@ -115,68 +197,59 @@ serve(async (req) => {
     });
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+      console.error('OpenAI API key not configured');
+      const fallback = createBasicOptimization(originalContent, missingKeywords, targetIndustry);
+      return new Response(JSON.stringify(fallback), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Create comprehensive enhancement prompt
+    // Enhanced AI prompt with better JSON structure guidance
     const enhancementPrompt = `
-You are an expert ATS-optimized resume writer and career coach. Enhance this CV content to improve ATS compatibility and professional impact.
+You are an expert ATS resume optimizer. You must respond with ONLY valid JSON, no markdown formatting.
 
-**TARGET PROFILE:**
+ANALYSIS TARGET:
 - Industry: ${targetIndustry}
 - Role: ${targetRole || 'Not specified'}
 - Current ATS Score: ${atsScore || 'Unknown'}/100
-- Weak Areas: ${weakAreas?.join(', ') || 'Not specified'}
+- Missing Keywords: ${missingKeywords.join(', ')}
 
-**MISSING ATS KEYWORDS TO INTEGRATE:**
-${missingKeywords.length > 0 ? missingKeywords.join(', ') : 'None specified'}
+ORIGINAL CONTENT:
+${originalContent.substring(0, 3000)}${originalContent.length > 3000 ? '...' : ''}
 
-**ORIGINAL CV CONTENT:**
-${originalContent}
+TASK: Enhance the content for ATS compatibility while preserving all original formatting.
 
-**ENHANCEMENT REQUIREMENTS:**
-
-1. **ATS Keyword Integration**: Naturally integrate missing keywords into relevant sections
-2. **Action Verb Enhancement**: Replace weak verbs with powerful, industry-specific alternatives
-3. **Quantification**: Add metrics and numbers where achievements lack them
-4. **Professional Language**: Elevate language to executive/professional level
-5. **Achievement Focus**: Transform responsibilities into achievements
-6. **Industry Alignment**: Use terminology specific to ${targetIndustry}
-
-**CRITICAL RULES:**
-- Preserve ALL original formatting, structure, and HTML tags if present
-- Make realistic, believable enhancements (don't fabricate specific metrics)
-- Focus on language improvement, not content invention
-- Maintain the original person's voice and experiences
-- Keep all dates, names, and factual information unchanged
-- Only enhance content that can be reasonably improved
-
-**RESPONSE FORMAT:**
-Return ONLY a JSON object with this exact structure:
+RESPONSE FORMAT (JSON only, no markdown):
 {
-  "enhancedContent": "full enhanced CV content with original formatting preserved",
+  "enhancedContent": "enhanced version with original formatting preserved",
   "changesApplied": [
     {
-      "section": "Experience/Skills/Summary etc",
-      "original": "exact original text",
-      "improved": "exact improved text", 
-      "reasoning": "why this change improves ATS score",
-      "category": "keyword-integration/action-verbs/quantification/professional-language"
+      "section": "section name",
+      "original": "original text",
+      "improved": "improved text",
+      "reasoning": "explanation",
+      "category": "keyword-integration|action-verbs|quantification|professional-language"
     }
   ],
   "atsImprovements": {
-    "keywordsAdded": ["list of keywords integrated"],
-    "metricsAdded": 3,
-    "actionVerbsImproved": 5,
-    "professionalLanguageEnhanced": 8
+    "keywordsAdded": ["keyword1", "keyword2"],
+    "metricsAdded": 0,
+    "actionVerbsImproved": 2,
+    "professionalLanguageEnhanced": 3
   },
   "estimatedATSScoreImprovement": 15
 }
 
-Focus on realistic, professional enhancements that will genuinely improve ATS performance.
+RULES:
+- Make realistic improvements only
+- Preserve ALL original formatting
+- Keep all dates and factual information unchanged
+- Focus on professional language enhancement
+- Naturally integrate missing keywords
+- Replace weak action verbs with strong ones
 `;
 
-    // Call OpenAI API
+    console.log('Calling OpenAI API...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -188,15 +261,15 @@ Focus on realistic, professional enhancements that will genuinely improve ATS pe
         messages: [
           {
             role: 'system',
-            content: 'You are an expert ATS resume optimizer. Always respond with valid JSON only.'
+            content: 'You are an expert ATS resume optimizer. Always respond with valid JSON only, no markdown formatting.'
           },
           {
             role: 'user',
             content: enhancementPrompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 4000
+        temperature: 0.2,
+        max_tokens: 3000
       }),
     });
 
@@ -207,32 +280,66 @@ Focus on realistic, professional enhancements that will genuinely improve ATS pe
     const aiResponse = await response.json();
     const aiContent = aiResponse.choices[0].message.content;
 
-    console.log('AI response received, length:', aiContent.length);
+    console.log('AI response received, attempting to parse...');
 
-    // Parse AI response with improved JSON extraction
+    // Use enhanced JSON parsing
     let enhancementResult: AIEnhancementResult;
     try {
-      const parsed = extractJsonFromResponse(aiContent);
+      const parsed = parseAIResponse(aiContent);
+      
+      // Validate and structure the response
       enhancementResult = {
-        enhancedContent: parsed.enhancedContent,
+        enhancedContent: parsed.enhancedContent || originalContent,
         enhancementLog: [
-          `Applied ${parsed.changesApplied.length} AI-powered enhancements`,
-          `Integrated ${parsed.atsImprovements.keywordsAdded.length} missing keywords`,
-          `Enhanced ${parsed.atsImprovements.actionVerbsImproved} action verbs`,
-          `Added ${parsed.atsImprovements.metricsAdded} quantifiable metrics`,
-          `Improved ${parsed.atsImprovements.professionalLanguageEnhanced} professional language elements`,
-          `Estimated ATS score improvement: +${parsed.estimatedATSScoreImprovement} points`
+          `Applied ${parsed.changesApplied?.length || 0} AI-powered enhancements`,
+          `Integrated ${parsed.atsImprovements?.keywordsAdded?.length || 0} missing keywords`,
+          `Enhanced ${parsed.atsImprovements?.actionVerbsImproved || 0} action verbs`,
+          `Added ${parsed.atsImprovements?.metricsAdded || 0} quantifiable metrics`,
+          `Improved ${parsed.atsImprovements?.professionalLanguageEnhanced || 0} professional language elements`,
+          `Estimated ATS score improvement: +${parsed.estimatedATSScoreImprovement || 0} points`
         ],
-        changesApplied: parsed.changesApplied,
-        atsImprovements: parsed.atsImprovements,
-        estimatedATSScoreImprovement: parsed.estimatedATSScoreImprovement
+        changesApplied: parsed.changesApplied || [],
+        atsImprovements: {
+          keywordsAdded: parsed.atsImprovements?.keywordsAdded || [],
+          metricsAdded: parsed.atsImprovements?.metricsAdded || 0,
+          actionVerbsImproved: parsed.atsImprovements?.actionVerbsImproved || 0,
+          professionalLanguageEnhanced: parsed.atsImprovements?.professionalLanguageEnhanced || 0
+        },
+        estimatedATSScoreImprovement: parsed.estimatedATSScoreImprovement || 0
       };
+      
+      console.log('AI enhancement successful:', {
+        changesApplied: enhancementResult.changesApplied.length,
+        estimatedImprovement: enhancementResult.estimatedATSScoreImprovement
+      });
+      
     } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      // Fallback to basic enhancement if AI parsing fails
-      enhancementResult = {
-        enhancedContent: originalContent,
-        enhancementLog: ['AI enhancement failed, using basic optimization'],
+      console.error('AI response parsing failed completely:', parseError);
+      enhancementResult = createBasicOptimization(originalContent, missingKeywords, targetIndustry);
+    }
+
+    return new Response(JSON.stringify(enhancementResult), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in AI CV enhancement:', error);
+    
+    // Fallback to basic optimization on any error
+    try {
+      const { originalContent, missingKeywords, targetIndustry } = await req.json();
+      const fallback = createBasicOptimization(originalContent, missingKeywords || [], targetIndustry || 'Business');
+      
+      return new Response(JSON.stringify(fallback), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      
+      return new Response(JSON.stringify({ 
+        error: 'Enhancement service temporarily unavailable',
+        enhancedContent: '',
+        enhancementLog: ['Enhancement failed - please try again later'],
         changesApplied: [],
         atsImprovements: {
           keywordsAdded: [],
@@ -241,35 +348,10 @@ Focus on realistic, professional enhancements that will genuinely improve ATS pe
           professionalLanguageEnhanced: 0
         },
         estimatedATSScoreImprovement: 0
-      };
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
-
-    console.log('Enhancement completed:', {
-      changesApplied: enhancementResult.changesApplied.length,
-      estimatedImprovement: enhancementResult.estimatedATSScoreImprovement
-    });
-
-    return new Response(JSON.stringify(enhancementResult), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
-  } catch (error) {
-    console.error('Error in AI CV enhancement:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to enhance CV',
-      enhancedContent: '',
-      enhancementLog: ['Enhancement failed due to technical error'],
-      changesApplied: [],
-      atsImprovements: {
-        keywordsAdded: [],
-        metricsAdded: 0,
-        actionVerbsImproved: 0,
-        professionalLanguageEnhanced: 0
-      },
-      estimatedATSScoreImprovement: 0
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   }
 });

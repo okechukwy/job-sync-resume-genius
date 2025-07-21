@@ -74,18 +74,32 @@ const ApplyRecommendations = ({ uploadedFile, onContinue, analysisData }: ApplyR
             </p>
             
             {analysisData && (
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-800 mb-2">
-                  <strong>Optimization targets:</strong>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-sm font-medium text-blue-800 mb-3">
+                  🎯 Optimization Targets:
                 </p>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  {analysisData.keywords?.missingKeywords && analysisData.keywords.missingKeywords.length > 0 && (
-                    <li>• Integrate {analysisData.keywords.missingKeywords.length} missing ATS keywords</li>
+                <div className="space-y-2 text-sm text-blue-700">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    <span>Industry: <strong>{analysisData.industry || 'Business'}</strong></span>
+                  </div>
+                  {analysisData.targetRole && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Target Role: <strong>{analysisData.targetRole}</strong></span>
+                    </div>
                   )}
-                  <li>• Target industry: {analysisData.industry || 'Business'}</li>
-                  {analysisData.targetRole && <li>• Role: {analysisData.targetRole}</li>}
-                  <li>• Current ATS score: {analysisData.atsScore || 'Unknown'}/100</li>
-                </ul>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Current ATS Score: <strong>{analysisData.atsScore || 'Unknown'}/100</strong></span>
+                  </div>
+                  {analysisData.keywords?.missingKeywords?.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4" />
+                      <span>Missing Keywords: <strong>{analysisData.keywords.missingKeywords.length}</strong> to integrate</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             
