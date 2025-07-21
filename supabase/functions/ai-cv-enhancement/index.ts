@@ -43,6 +43,52 @@ interface AIEnhancementResult {
   estimatedATSScoreImprovement: number;
 }
 
+// Helper function to extract JSON from markdown-wrapped response
+const extractJsonFromResponse = (responseText: string): any => {
+  console.log('Attempting to parse AI response:', responseText.substring(0, 500));
+  
+  try {
+    // First try direct JSON parsing
+    return JSON.parse(responseText);
+  } catch (directParseError) {
+    console.log('Direct JSON parsing failed, trying to extract from markdown...');
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = responseText.match(/```json\s*\n([\s\S]*?)\n\s*```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1]);
+      } catch (markdownParseError) {
+        console.error('Failed to parse JSON from markdown block:', markdownParseError);
+      }
+    }
+    
+    // Try to extract JSON from any code blocks
+    const codeMatch = responseText.match(/```\s*\n([\s\S]*?)\n\s*```/);
+    if (codeMatch) {
+      try {
+        return JSON.parse(codeMatch[1]);
+      } catch (codeParseError) {
+        console.error('Failed to parse JSON from code block:', codeParseError);
+      }
+    }
+    
+    // Last resort: try to find JSON-like structure
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      try {
+        const extractedJson = responseText.substring(jsonStart, jsonEnd + 1);
+        return JSON.parse(extractedJson);
+      } catch (extractError) {
+        console.error('Failed to extract and parse JSON:', extractError);
+      }
+    }
+    
+    throw new Error('Could not extract valid JSON from AI response');
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -106,7 +152,7 @@ ${originalContent}
 - Only enhance content that can be reasonably improved
 
 **RESPONSE FORMAT:**
-Return a JSON object with:
+Return ONLY a JSON object with this exact structure:
 {
   "enhancedContent": "full enhanced CV content with original formatting preserved",
   "changesApplied": [
@@ -161,12 +207,12 @@ Focus on realistic, professional enhancements that will genuinely improve ATS pe
     const aiResponse = await response.json();
     const aiContent = aiResponse.choices[0].message.content;
 
-    console.log('AI response length:', aiContent.length);
+    console.log('AI response received, length:', aiContent.length);
 
-    // Parse AI response
+    // Parse AI response with improved JSON extraction
     let enhancementResult: AIEnhancementResult;
     try {
-      const parsed = JSON.parse(aiContent);
+      const parsed = extractJsonFromResponse(aiContent);
       enhancementResult = {
         enhancedContent: parsed.enhancedContent,
         enhancementLog: [

@@ -31,11 +31,11 @@ export const useApplyRecommendations = (
       console.log("CV content read successfully, length:", content.length);
 
       // Extract analysis data for AI enhancement
-      const missingKeywords = analysisData?.keywords?.missing || [];
+      const missingKeywords = analysisData?.keywords?.missingKeywords || analysisData?.keywords?.suggestions || [];
       const targetIndustry = analysisData?.industry || 'Business';
       const targetRole = analysisData?.targetRole;
       const atsScore = analysisData?.atsScore;
-      const weakAreas = analysisData?.improvements?.map((imp: any) => imp.area) || [];
+      const weakAreas = analysisData?.improvements?.map((imp: any) => imp.issue) || [];
 
       console.log("Enhancement parameters:", {
         missingKeywords: missingKeywords.length,

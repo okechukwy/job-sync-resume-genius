@@ -79,8 +79,8 @@ const ApplyRecommendations = ({ uploadedFile, onContinue, analysisData }: ApplyR
                   <strong>Optimization targets:</strong>
                 </p>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  {analysisData.keywords?.missing && analysisData.keywords.missing.length > 0 && (
-                    <li>• Integrate {analysisData.keywords.missing.length} missing ATS keywords</li>
+                  {analysisData.keywords?.missingKeywords && analysisData.keywords.missingKeywords.length > 0 && (
+                    <li>• Integrate {analysisData.keywords.missingKeywords.length} missing ATS keywords</li>
                   )}
                   <li>• Target industry: {analysisData.industry || 'Business'}</li>
                   {analysisData.targetRole && <li>• Role: {analysisData.targetRole}</li>}

@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -43,6 +44,8 @@ serve(async (req) => {
 {
   "overallScore": number (0-100),
   "atsScore": number (0-100),
+  "industry": "${industry}",
+  "targetRole": "detected or suggested role based on resume content",
   "sections": {
     "contact": {"score": number, "status": "excellent|good|fair|needs_work"},
     "summary": {"score": number, "status": "excellent|good|fair|needs_work"},
@@ -54,7 +57,9 @@ serve(async (req) => {
   "keywords": {
     "found": number,
     "missing": number,
-    "suggestions": [array of missing keywords specific to ${industry}]
+    "foundKeywords": [array of keywords found in resume],
+    "missingKeywords": [array of missing keywords specific to ${industry}],
+    "suggestions": [array of keyword suggestions for improvement]
   },
   "improvements": [
     {
@@ -65,7 +70,7 @@ serve(async (req) => {
   ]
 }
 
-Focus on ${industry}-specific requirements, keywords, and best practices. Be specific and actionable in your recommendations.`
+Focus on ${industry}-specific requirements, keywords, and best practices. Be specific and actionable in your recommendations. Make sure to include actual keyword arrays in foundKeywords and missingKeywords.`
           },
           {
             role: 'user',
@@ -100,10 +105,26 @@ Focus on ${industry}-specific requirements, keywords, and best practices. Be spe
       throw new Error('Failed to parse AI analysis response');
     }
 
-    // Validate the analysis structure
+    // Validate and ensure proper structure
     if (!analysis.overallScore || !analysis.sections || !analysis.keywords || !analysis.improvements) {
       console.error('Invalid analysis structure:', analysis);
       throw new Error('Invalid analysis structure from AI');
+    }
+
+    // Ensure keywords have proper arrays
+    if (!analysis.keywords.foundKeywords) {
+      analysis.keywords.foundKeywords = [];
+    }
+    if (!analysis.keywords.missingKeywords) {
+      analysis.keywords.missingKeywords = analysis.keywords.suggestions?.slice(0, analysis.keywords.missing) || [];
+    }
+
+    // Ensure industry and targetRole are set
+    if (!analysis.industry) {
+      analysis.industry = industry;
+    }
+    if (!analysis.targetRole) {
+      analysis.targetRole = `${industry} Professional`;
     }
 
     console.log('Successfully analyzed CV with score:', analysis.overallScore);
