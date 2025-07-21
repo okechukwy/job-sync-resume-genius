@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
@@ -99,10 +100,11 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
       {/* Improvement Suggestions */}
       <ImprovementSuggestions improvements={analysisData.improvements} />
 
-      {/* Apply Recommendations */}
+      {/* Apply Recommendations with analysis data */}
       <ApplyRecommendations 
         uploadedFile={uploadedFile}
         onContinue={onContinue}
+        analysisData={analysisData}
       />
 
       {/* Action Buttons */}

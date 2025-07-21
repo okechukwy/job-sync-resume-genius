@@ -1,16 +1,21 @@
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
-import { enhanceCV, EnhancedCVResult } from "@/services/cvEnhancement";
+import { enhanceCVWithAI, EnhancedCVResult } from "@/services/cvEnhancement";
 
-export const useApplyRecommendations = (uploadedFile: File) => {
+export const useApplyRecommendations = (
+  uploadedFile: File, 
+  analysisData?: any
+) => {
   const [recommendationsApplied, setRecommendationsApplied] = useState(false);
   const [enhancedResult, setEnhancedResult] = useState<EnhancedCVResult | null>(null);
   const [originalContent, setOriginalContent] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleApplyRecommendations = async () => {
-    console.log("Apply recommendations clicked - should NOT redirect");
-    toast.success("Applying recommendations to your resume...");
+    console.log("Starting AI-powered recommendations application");
+    setIsProcessing(true);
     
     try {
       // Read original file content if not already read
@@ -20,35 +25,63 @@ export const useApplyRecommendations = (uploadedFile: File) => {
         setOriginalContent(content);
       }
 
-      // Simulate applying each recommendation
-      const recommendations = [
-        "Adding professional summary section...",
-        "Enhancing experience descriptions with metrics...", 
-        "Expanding skills section with missing keywords...",
-        "Optimizing formatting for ATS compatibility...",
-        "Finalizing optimized version..."
+      // Extract analysis data for AI enhancement
+      const missingKeywords = analysisData?.keywords?.missing || [];
+      const targetIndustry = analysisData?.industry || 'Business';
+      const targetRole = analysisData?.targetRole;
+      const atsScore = analysisData?.atsScore;
+      const weakAreas = analysisData?.improvements?.map((imp: any) => imp.area) || [];
+
+      // Show processing steps
+      const processingSteps = [
+        "Analyzing CV structure and content...",
+        "Identifying enhancement opportunities...",
+        "Applying AI-powered language improvements...",
+        "Integrating missing ATS keywords...",
+        "Optimizing professional language...",
+        "Finalizing enhanced version..."
       ];
       
       let currentStep = 0;
-      const applyNext = async () => {
-        if (currentStep < recommendations.length) {
-          toast.info(recommendations[currentStep]);
+      const showNextStep = () => {
+        if (currentStep < processingSteps.length) {
+          toast.info(processingSteps[currentStep]);
           currentStep++;
-          setTimeout(applyNext, 800);
-        } else {
-          // Apply enhancements
-          const enhanced = await enhanceCV(content);
-          setEnhancedResult(enhanced);
-          setRecommendationsApplied(true);
-          console.log("All recommendations applied - staying on analysis page");
-          toast.success("All recommendations applied to your CV! Review the optimized version below.");
+          setTimeout(showNextStep, 800);
         }
       };
       
-      setTimeout(applyNext, 500);
+      toast.success("Starting AI-powered CV optimization...");
+      setTimeout(showNextStep, 500);
+
+      // Apply AI-powered enhancements
+      const enhanced = await enhanceCVWithAI(
+        content,
+        missingKeywords,
+        targetIndustry,
+        targetRole,
+        atsScore,
+        weakAreas
+      );
+
+      setEnhancedResult(enhanced);
+      setRecommendationsApplied(true);
+      
+      console.log("AI enhancement completed:", {
+        changesApplied: enhanced.changesApplied.length,
+        estimatedImprovement: enhanced.estimatedATSScoreImprovement
+      });
+
+      toast.success(
+        `AI optimization complete! Applied ${enhanced.changesApplied.length} improvements with estimated +${enhanced.estimatedATSScoreImprovement} ATS score boost.`
+      );
+
     } catch (error) {
-      toast.error("Failed to read CV content. Please try again.");
-      console.error("Error reading file:", error);
+      console.error("Error applying recommendations:", error);
+      toast.error("Failed to apply recommendations. Please try again.");
+      setRecommendationsApplied(false);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -56,6 +89,7 @@ export const useApplyRecommendations = (uploadedFile: File) => {
     recommendationsApplied,
     enhancedResult,
     originalContent,
+    isProcessing,
     handleApplyRecommendations
   };
 };
