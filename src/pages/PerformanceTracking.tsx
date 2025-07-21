@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +15,16 @@ import { BulkActions } from "@/components/performance/BulkActions";
 import { MetricsLegend } from "@/components/performance/MetricsLegend";
 import { ApplicationsTable } from "@/components/performance/ApplicationsTable";
 import { SuccessMetrics } from "@/components/performance/SuccessMetrics";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AIInsights {
   working_well: string[];
@@ -32,6 +41,8 @@ const PerformanceTracking = () => {
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [applicationToDelete, setApplicationToDelete] = useState<string | null>(null);
 
   const handleAddApplication = async (data: any) => {
     await addApplication(data);
@@ -52,9 +63,27 @@ const PerformanceTracking = () => {
   };
 
   const handleDeleteApplication = async (id: string) => {
-    if (confirm('Are you sure you want to delete this application?')) {
-      await deleteApplication(id);
+    setApplicationToDelete(id);
+    setDeleteConfirmationOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (applicationToDelete) {
+      try {
+        await deleteApplication(applicationToDelete);
+        toast.success('Application deleted successfully');
+      } catch (error) {
+        toast.error('Failed to delete application');
+      } finally {
+        setDeleteConfirmationOpen(false);
+        setApplicationToDelete(null);
+      }
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmationOpen(false);
+    setApplicationToDelete(null);
   };
 
   const handleQuickStatusUpdate = async (id: string, status: string) => {
@@ -308,6 +337,26 @@ const PerformanceTracking = () => {
         initialData={editingApplication}
         mode={editingApplication ? 'edit' : 'create'}
       />
+
+      <AlertDialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Application</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this application? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
