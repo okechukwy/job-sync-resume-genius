@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,63 +10,19 @@ import jsPDF from "jspdf";
 import { useRef, useMemo } from "react";
 import { calculateATSScore } from "@/utils/atsScoreCalculator";
 import { ResumeLayoutRenderer } from "./resume-layouts/ResumeLayoutRenderer";
-import { useTemplateStyles } from "./live-preview/hooks/useTemplateStyles";
-import { getLayoutVariant, formatDate } from "./live-preview/utils/previewUtils";
 import { getTemplateById } from "@/config/templateConfig";
 
 interface ResumePreviewProps {
   data: ResumeData;
-  template: string;
+  template: string; // This is now always a template ID
 }
 
 const ResumePreview = ({ data, template }: ResumePreviewProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  // Enhanced template mapping for unified system - same as LivePreview
-  const getTemplateId = (templateName: string): string | undefined => {
-    const nameMapping: Record<string, string> = {
-      // Professional templates
-      'Corporate Executive': 'corporate-executive',
-      'Modern Professional': 'modern-professional',
-      'Academic Researcher': 'academic-researcher',
-      'Business Manager': 'business-manager',
-      'Finance Executive': 'finance-executive',
-      'Healthcare Professional': 'healthcare-professional',
-      'Legal Professional': 'legal-professional',
-      'Consulting Expert': 'consulting-expert',
-      
-      // Creative templates
-      'Graphic Designer': 'graphic-designer',
-      'UX/UI Designer': 'ux-ui-designer',
-      'Marketing Creative': 'marketing-creative',
-      'Content Creator': 'content-creator',
-      'Art Director': 'art-director',
-      'Photographer': 'photographer',
-      
-      // Technical templates
-      'Software Engineer Pro': 'software-engineer-pro',
-      'Data Scientist Elite': 'data-scientist-elite',
-      'DevOps Engineer': 'devops-engineer',
-      'Cybersecurity Expert': 'cybersecurity-expert',
-      'AI/ML Engineer': 'ai-ml-engineer',
-      'Cloud Architect': 'cloud-architect',
-      
-      // Legacy mappings
-      'Tech Professional': 'software-engineer-pro',
-      'Healthcare Specialist': 'healthcare-professional',
-      'Finance Expert': 'finance-executive',
-      'Creative Professional': 'graphic-designer',
-      'Medical Doctor': 'healthcare-professional',
-      'Software Engineer': 'software-engineer-pro',
-      'Data Scientist': 'data-scientist-elite'
-    };
-    return nameMapping[templateName];
-  };
-
-  const templateId = getTemplateId(template);
-  const unifiedTemplate = templateId ? getTemplateById(templateId) : null;
-  const templateStyles = useTemplateStyles(template);
-  const layoutVariant = getLayoutVariant(template);
+  // SIMPLIFIED: template is already an ID, use it directly
+  const templateId = template;
+  const unifiedTemplate = getTemplateById(templateId);
 
   const handleDownload = async () => {
     if (!resumeRef.current) return;
@@ -162,8 +119,11 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
     return 'p-8';
   };
 
-  // Calculate dynamic ATS score
-  const atsResult = useMemo(() => calculateATSScore(data, template), [data, template]);
+  // Calculate dynamic ATS score - pass template name for legacy compatibility
+  const atsResult = useMemo(() => {
+    const templateName = unifiedTemplate ? unifiedTemplate.name : 'Professional';
+    return calculateATSScore(data, templateName);
+  }, [data, unifiedTemplate]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -216,10 +176,17 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
         <CardContent className={`${getLayoutSpacing()} bg-white text-black`}>
           <ResumeLayoutRenderer 
             data={data}
-            styles={templateStyles}
-            layoutVariant={layoutVariant}
             templateId={templateId}
-            formatDate={formatDate}
+            formatDate={(dateString: string) => {
+              try {
+                return new Date(dateString).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  year: 'numeric' 
+                });
+              } catch {
+                return dateString;
+              }
+            }}
           />
         </CardContent>
       </Card>

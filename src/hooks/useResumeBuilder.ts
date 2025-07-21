@@ -43,8 +43,9 @@ export const useResumeBuilder = () => {
       console.log('🔍 Found unified template:', template);
       
       if (template) {
-        console.log('✅ Setting template:', template.name);
-        setSelectedTemplate(template.name);
+        console.log('✅ Setting template ID:', template.id);
+        // CRITICAL FIX: Store template ID instead of name
+        setSelectedTemplate(template.id);
         setCurrentStep('build');
         toast.success(`${template.name} template selected! Let's build your resume.`);
       } else {
@@ -87,9 +88,15 @@ export const useResumeBuilder = () => {
   };
 
   const handleTemplateSelect = (templateId: string) => {
+    console.log('📝 Template selected:', templateId);
+    // CRITICAL FIX: Store template ID directly, no conversion
     setSelectedTemplate(templateId);
     setCurrentStep('build');
-    toast.success('Template selected! Let\'s build your resume.');
+    
+    // Get template name for display in toast
+    const template = templateConfigs.find(t => t.id === templateId);
+    const templateName = template ? template.name : 'Template';
+    toast.success(`${templateName} selected! Let's build your resume.`);
   };
 
   const handleBackToTemplates = () => {
@@ -104,7 +111,7 @@ export const useResumeBuilder = () => {
   return {
     // State
     currentStep,
-    selectedTemplate,
+    selectedTemplate, // This is now always a template ID
     uploadedFile,
     fileInputRef,
     

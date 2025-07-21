@@ -2,92 +2,71 @@
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { getTemplateById, getStylePresetById } from "@/config/templateConfig";
 import { UnifiedLayout } from "./UnifiedLayout";
-import { TemplateStyles } from "./types";
-import { ClassicProfessionalLayout } from "./ClassicProfessionalLayout";
-import { ModernMinimalistLayout } from "./ModernMinimalistLayout";
-import { CreativeShowcaseLayout } from "./CreativeShowcaseLayout";
-import { ExecutivePremiumLayout } from "./ExecutivePremiumLayout";
-import { TechForwardLayout } from "./TechForwardLayout";
-import { HealthcareLayout } from "./HealthcareLayout";
-import { createSectionRenderers } from "./sectionRenderers";
 
 interface ResumeLayoutRendererProps {
   data: ResumeData;
-  styles?: TemplateStyles;
-  layoutVariant?: string;
   templateId?: string;
   formatDate: (dateString: string) => string;
 }
 
-export const ResumeLayoutRenderer = ({ data, styles, layoutVariant, templateId, formatDate }: ResumeLayoutRendererProps) => {
-  // PRIORITIZE the unified system - this is the key fix
-  if (templateId) {
-    const template = getTemplateById(templateId);
-    const stylePreset = template ? getStylePresetById(template.stylePreset) : null;
+export const ResumeLayoutRenderer = ({ data, templateId, formatDate }: ResumeLayoutRendererProps) => {
+  console.log('ResumeLayoutRenderer - Template ID received:', templateId);
+  
+  // CRITICAL FIX: Always use unified system, no legacy fallbacks
+  if (!templateId) {
+    console.warn('ResumeLayoutRenderer - No template ID provided, using default');
+    // Use a default template instead of returning null
+    templateId = 'modern-professional';
+  }
+
+  const template = getTemplateById(templateId);
+  console.log('ResumeLayoutRenderer - Template found:', template?.name);
+  
+  if (!template) {
+    console.error('ResumeLayoutRenderer - Template not found for ID:', templateId);
+    // Fallback to a known template instead of returning null
+    const fallbackTemplate = getTemplateById('modern-professional');
+    const fallbackStylePreset = fallbackTemplate ? getStylePresetById(fallbackTemplate.stylePreset) : null;
     
-    console.log('ResumeLayoutRenderer - Using unified system:', {
-      templateId,
-      template: template?.name,
-      stylePreset: stylePreset?.name
-    });
-    
-    if (template && stylePreset) {
+    if (fallbackTemplate && fallbackStylePreset) {
+      console.log('ResumeLayoutRenderer - Using fallback template:', fallbackTemplate.name);
       return (
         <UnifiedLayout 
           data={data}
-          stylePreset={stylePreset}
+          stylePreset={fallbackStylePreset}
           formatDate={formatDate}
         />
       );
     }
+    
+    return (
+      <div className="p-8 text-center text-red-500">
+        <h3 className="text-lg font-semibold mb-2">Template Error</h3>
+        <p>Template "{templateId}" not found. Please select a different template.</p>
+      </div>
+    );
   }
 
-  // Only fallback to legacy system if unified system fails
-  console.log('ResumeLayoutRenderer - Falling back to legacy system:', {
-    styles: !!styles,
-    layoutVariant
-  });
+  const stylePreset = getStylePresetById(template.stylePreset);
+  console.log('ResumeLayoutRenderer - Style preset found:', stylePreset?.name);
   
-  if (!styles || !layoutVariant) {
-    // If no styles or layout variant, try to use a default unified template
-    const defaultStylePreset = getStylePresetById('modern-professional');
-    if (defaultStylePreset) {
-      console.log('ResumeLayoutRenderer - Using default unified template');
-      return (
-        <UnifiedLayout 
-          data={data}
-          stylePreset={defaultStylePreset}
-          formatDate={formatDate}
-        />
-      );
-    }
-    return null;
+  if (!stylePreset) {
+    console.error('ResumeLayoutRenderer - Style preset not found for:', template.stylePreset);
+    return (
+      <div className="p-8 text-center text-red-500">
+        <h3 className="text-lg font-semibold mb-2">Style Error</h3>
+        <p>Style preset for template "{template.name}" not found.</p>
+      </div>
+    );
   }
+
+  console.log('ResumeLayoutRenderer - Rendering unified layout for:', template.name);
   
-  const { renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection } = createSectionRenderers(data, styles, formatDate);
-
-  const layoutProps = {
-    data,
-    styles,
-    formatDate,
-    renderSummarySection,
-    renderExperienceSection,
-    renderEducationSection,
-    renderSkillsSection
-  };
-
-  switch (layoutVariant) {
-    case 'modern-minimalist':
-      return <ModernMinimalistLayout {...layoutProps} />;
-    case 'creative-showcase':
-      return <CreativeShowcaseLayout {...layoutProps} />;
-    case 'executive-premium':
-      return <ExecutivePremiumLayout {...layoutProps} />;
-    case 'tech-forward':
-      return <TechForwardLayout {...layoutProps} />;
-    case 'healthcare':
-      return <HealthcareLayout {...layoutProps} />;
-    default:
-      return <ClassicProfessionalLayout {...layoutProps} />;
-  }
+  return (
+    <UnifiedLayout 
+      data={data}
+      stylePreset={stylePreset}
+      formatDate={formatDate}
+    />
+  );
 };

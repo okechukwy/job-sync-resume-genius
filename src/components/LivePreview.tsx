@@ -1,15 +1,12 @@
-
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { ResumeLayoutRenderer } from "./resume-layouts/ResumeLayoutRenderer";
 import { useState, useRef, useEffect } from "react";
 import { PreviewControls } from "./live-preview/PreviewControls";
-import { useTemplateStyles } from "./live-preview/hooks/useTemplateStyles";
-import { getLayoutVariant, formatDate } from "./live-preview/utils/previewUtils";
 import { getTemplateById } from "@/config/templateConfig";
 
 interface LivePreviewProps {
   data: ResumeData;
-  template: string;
+  template: string; // This is now always a template ID
   className?: string;
 }
 
@@ -18,76 +15,13 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   
-  // Enhanced template mapping for unified system - now comprehensive
-  const getTemplateId = (templateName: string): string | undefined => {
-    const nameMapping: Record<string, string> = {
-      // Professional templates - exact matches from templateConfig.ts
-      'Corporate Executive': 'corporate-executive',
-      'Modern Professional': 'modern-professional',
-      'Academic Researcher': 'academic-researcher',
-      'Business Manager': 'business-manager',
-      'Finance Executive': 'finance-executive',
-      'Healthcare Professional': 'healthcare-professional',
-      'Legal Professional': 'legal-professional',
-      'Consulting Expert': 'consulting-expert',
-      
-      // Creative templates
-      'Graphic Designer': 'graphic-designer',
-      'UX/UI Designer': 'ux-ui-designer',
-      'Marketing Creative': 'marketing-creative',
-      'Content Creator': 'content-creator',
-      'Art Director': 'art-director',
-      'Photographer': 'photographer',
-      
-      // Technical templates
-      'Software Engineer Pro': 'software-engineer-pro',
-      'Data Scientist Elite': 'data-scientist-elite',
-      'DevOps Engineer': 'devops-engineer',
-      'Cybersecurity Expert': 'cybersecurity-expert',
-      'AI/ML Engineer': 'ai-ml-engineer',
-      'Cloud Architect': 'cloud-architect',
-      
-      // Legacy template mappings from allTemplates
-      'Tech Professional': 'software-engineer-pro',
-      'Healthcare Specialist': 'healthcare-professional',
-      'Finance Expert': 'finance-executive',
-      'Creative Professional': 'graphic-designer',
-      'Medical Doctor': 'healthcare-professional',
-      'Registered Nurse': 'healthcare-professional',
-      'Mental Health Professional': 'healthcare-professional',
-      'Software Engineer': 'software-engineer-pro',
-      'Data Scientist': 'data-scientist-elite',
-      'Investment Banker': 'finance-executive',
-      'Financial Analyst': 'finance-executive',
-      'Accountant Pro': 'finance-executive',
-      'Marketing Manager': 'marketing-creative',
-      'Sales Manager': 'business-manager',
-      'Operations Manager': 'business-manager',
-      'Project Manager': 'business-manager',
-      'Business Analyst': 'business-manager',
-      'Consultant': 'consulting-expert',
-      'HR Manager': 'business-manager',
-      'Research Scientist': 'academic-researcher',
-      'Lab Technician': 'academic-researcher',
-      'Recent Graduate': 'modern-professional',
-      'Elegant Professional': 'corporate-executive',
-      'Gradient Modern': 'modern-professional',
-      'Minimalist Pro': 'modern-professional',
-      'Colorful Fresh': 'marketing-creative'
-    };
-    return nameMapping[templateName];
-  };
-
-  const templateId = getTemplateId(template);
-  const unifiedTemplate = templateId ? getTemplateById(templateId) : null;
+  // SIMPLIFIED: template is already an ID, use it directly
+  const templateId = template;
+  const unifiedTemplate = getTemplateById(templateId);
   
-  // Use unified system if template exists, fallback to legacy system
-  const templateStyles = useTemplateStyles(template);
-  const layoutVariant = getLayoutVariant(template);
-  
-  console.log('LivePreview - Template:', template);
   console.log('LivePreview - Template ID:', templateId);
   console.log('LivePreview - Unified template found:', !!unifiedTemplate);
+  console.log('LivePreview - Template data:', unifiedTemplate);
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.1, 1.2));
@@ -156,10 +90,17 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
         >
           <ResumeLayoutRenderer 
             data={data}
-            styles={templateStyles}
-            layoutVariant={layoutVariant}
             templateId={templateId}
-            formatDate={formatDate}
+            formatDate={(dateString: string) => {
+              try {
+                return new Date(dateString).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  year: 'numeric' 
+                });
+              } catch {
+                return dateString;
+              }
+            }}
           />
         </div>
       </div>
