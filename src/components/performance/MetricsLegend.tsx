@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,8 @@ export const MetricsLegend = () => {
     { status: 'interview_in_progress', label: 'Interview In Progress', description: 'Interview is currently taking place', metric: 'Maintains Interview Rate' },
     { status: 'interview_completed', label: 'Interview Completed', description: 'Interview process completed', metric: 'Maintains Interview Rate' },
     { status: 'offer_received', label: 'Offer Received', description: 'Job offer has been received', metric: 'Increases Offer Rate' },
+    { status: 'rejected', label: 'Rejected', description: 'Application was not successful', metric: 'Final outcome - no impact on rates' },
+    { status: 'withdrawn', label: 'Withdrawn', description: 'You withdrew your application', metric: 'Removes from active pipeline' },
   ];
 
   const metricExplanations = [
