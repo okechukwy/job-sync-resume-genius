@@ -32,7 +32,7 @@ const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
           <Zap className="w-5 h-5" />
           Keyword Analysis
           {hasCountDiscrepancy && (
-            <AlertTriangle className="w-4 h-4 text-warning" title="Data consistency issue detected" />
+            <AlertTriangle className="w-4 h-4 text-warning" aria-label="Data consistency issue detected" />
           )}
         </CardTitle>
       </CardHeader>
