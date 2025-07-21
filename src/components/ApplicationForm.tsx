@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -57,6 +58,56 @@ const stageOptions = [
   { value: 'completed', label: 'Completed' },
 ];
 
+const formatDateForInput = (dateValue: any): string => {
+  if (!dateValue) return new Date().toISOString().split('T')[0];
+  
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
+      return new Date().toISOString().split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
+  } catch {
+    return new Date().toISOString().split('T')[0];
+  }
+};
+
+const getDefaultFormValues = (initialData?: Partial<JobApplication>, mode?: 'create' | 'edit'): ApplicationFormData => {
+  if (mode === 'edit' && initialData) {
+    return {
+      company_name: initialData.company_name || '',
+      position_title: initialData.position_title || '',
+      job_description: initialData.job_description || '',
+      date_applied: formatDateForInput(initialData.date_applied),
+      status: (initialData.status as any) || 'applied',
+      current_stage: (initialData.current_stage as any) || 'application_submitted',
+      resume_version: initialData.resume_version || '',
+      ats_score: initialData.ats_score || undefined,
+      salary_range_min: initialData.salary_range_min || undefined,
+      salary_range_max: initialData.salary_range_max || undefined,
+      job_location: initialData.job_location || '',
+      application_source: initialData.application_source || '',
+      notes: initialData.notes || '',
+    };
+  }
+  
+  return {
+    company_name: '',
+    position_title: '',
+    job_description: '',
+    date_applied: new Date().toISOString().split('T')[0],
+    status: 'applied',
+    current_stage: 'application_submitted',
+    resume_version: '',
+    ats_score: undefined,
+    salary_range_min: undefined,
+    salary_range_max: undefined,
+    job_location: '',
+    application_source: '',
+    notes: '',
+  };
+};
+
 export const ApplicationForm = ({ 
   open, 
   onOpenChange, 
@@ -68,28 +119,28 @@ export const ApplicationForm = ({
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
-    defaultValues: {
-      company_name: initialData?.company_name || '',
-      position_title: initialData?.position_title || '',
-      job_description: initialData?.job_description || '',
-      date_applied: initialData?.date_applied ? new Date(initialData.date_applied).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: (initialData?.status as any) || 'applied',
-      current_stage: (initialData?.current_stage as any) || 'application_submitted',
-      resume_version: initialData?.resume_version || '',
-      ats_score: initialData?.ats_score || undefined,
-      salary_range_min: initialData?.salary_range_min || undefined,
-      salary_range_max: initialData?.salary_range_max || undefined,
-      job_location: initialData?.job_location || '',
-      application_source: initialData?.application_source || '',
-      notes: initialData?.notes || '',
-    },
+    defaultValues: getDefaultFormValues(initialData, mode),
   });
+
+  // Reset form when initialData changes or mode changes
+  useEffect(() => {
+    if (open) {
+      const formValues = getDefaultFormValues(initialData, mode);
+      form.reset(formValues);
+    }
+  }, [initialData, mode, open, form]);
+
+  // Clear form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      form.reset(getDefaultFormValues(undefined, 'create'));
+    }
+  }, [open, form]);
 
   const handleSubmit = async (data: ApplicationFormData) => {
     setIsSubmitting(true);
     try {
       await onSubmit(data);
-      form.reset();
       onOpenChange(false);
     } catch (error) {
       console.error('Form submission error:', error);
@@ -158,7 +209,7 @@ export const ApplicationForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -183,7 +234,7 @@ export const ApplicationForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Current Stage</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select stage" />
