@@ -97,6 +97,7 @@ const AIInterviewPrep = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [transcript, setTranscript] = useState("");
   const [lastAnalysis, setLastAnalysis] = useState<InterviewAnalysis | null>(null);
+  const [lastAnsweredQuestionId, setLastAnsweredQuestionId] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [activeTab, setActiveTab] = useState("practice");
@@ -202,6 +203,7 @@ const AIInterviewPrep = () => {
       setCurrentQuestionIndex(0);
       setTranscript("");
       setLastAnalysis(null);
+      setLastAnsweredQuestionId(null); // Reset last answered question on new session
       setConnectionStatus('online'); // Reset connection status on successful start
       
       toast({
@@ -249,6 +251,7 @@ const AIInterviewPrep = () => {
           console.log('New response count:', result.session.responses.length);
           
           setLastAnalysis(result.response.analysis);
+          setLastAnsweredQuestionId(currentQuestion.id); // Track the question that was just answered
           
           // Check if analysis indicates limited service
           if (result.response.analysis.summary.includes('temporarily unavailable')) {
@@ -314,6 +317,7 @@ const AIInterviewPrep = () => {
     setCurrentQuestionIndex(0);
     setTranscript("");
     setLastAnalysis(null);
+    setLastAnsweredQuestionId(null); // Reset last answered question on reset
     if (recognition && isRecording) {
       recognition.stop();
       setIsRecording(false);
@@ -329,11 +333,17 @@ const AIInterviewPrep = () => {
     setCurrentQuestionIndex(0);
     setTranscript("");
     setLastAnalysis(null);
+    setLastAnsweredQuestionId(null); // Reset last answered question when going back
     // Reset the session to null to show configuration screen instead of completing it
     setCurrentSession(null);
   };
 
   const currentQuestion = currentSession?.questions[currentQuestionIndex];
+
+  // Find the last answered question for sample answer display
+  const lastAnsweredQuestion = lastAnsweredQuestionId && currentSession 
+    ? currentSession.questions.find(q => q.id === lastAnsweredQuestionId)
+    : null;
 
   // Enhanced progress calculation that accounts for processing state
   const completedResponses = currentSession?.responses?.length || 0;
@@ -861,9 +871,9 @@ const AIInterviewPrep = () => {
                 )}
 
                 {/* Sample Answer Section */}
-                {lastAnalysis && currentQuestion && (
+                {lastAnalysis && lastAnsweredQuestion && (
                   <SampleAnswerSection
-                    sampleAnswer={currentSession?.sampleAnswers?.[currentQuestion.id]}
+                    sampleAnswer={currentSession?.sampleAnswers?.[lastAnsweredQuestion.id]}
                     isLoading={generatingSample}
                   />
                 )}
