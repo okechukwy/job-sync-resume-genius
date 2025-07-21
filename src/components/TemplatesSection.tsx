@@ -1,15 +1,10 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { allTemplates } from "@/data/templateData";
-import { Eye, FileText } from "lucide-react";
-import { toast } from "sonner";
 
 const TemplatesSection = () => {
-  const navigate = useNavigate();
-
   // Show a curated selection of featured templates from different industries
   const featuredTemplateNames = [
     "Tech Professional",
@@ -25,29 +20,6 @@ const TemplatesSection = () => {
   const featuredTemplates = featuredTemplateNames.map(name => 
     allTemplates.find(template => template.name === name)
   ).filter(Boolean);
-
-  const handleUseTemplate = (templateName: string) => {
-    try {
-      console.log('🚀 Template button clicked from landing page!', templateName);
-      
-      // Create template parameter for URL - convert name to slug format
-      const templateParam = templateName.toLowerCase().replace(/\s+/g, '-');
-      const url = `/get-started?template=${encodeURIComponent(templateParam)}`;
-      
-      console.log('🔗 Navigating to:', url);
-      console.log('📝 Template parameter:', templateParam);
-      
-      toast.success(`Starting ${templateName} template...`);
-      
-      // Navigate using useNavigate hook
-      navigate(url);
-      
-      console.log('✅ Navigation completed');
-    } catch (error) {
-      console.error('❌ Navigation failed:', error);
-      toast.error('Failed to start template. Please try again.');
-    }
-  };
 
   return (
     <section id="templates" className="py-24 px-4 relative">
@@ -81,32 +53,18 @@ const TemplatesSection = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {template.tags.map((tag, idx) => (
                     <Badge key={idx} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
-                
-                {/* Action buttons */}
-                <div className="flex gap-3">
-                  <Link to={template.route} className="flex-1">
-                    <Button variant="outline" className="w-full" size="sm">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Preview
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="default" 
-                    className="flex-1" 
-                    size="sm"
-                    onClick={() => handleUseTemplate(template.name)}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Use Template
+                <Link to={template.route}>
+                  <Button variant="outline" className="w-full">
+                    Preview Template
                   </Button>
-                </div>
+                </Link>
               </CardContent>
             </Card>
           ))}
