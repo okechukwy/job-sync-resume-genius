@@ -149,6 +149,7 @@ export type Database = {
           questions: Json
           responses: Json
           role_focus: string | null
+          sample_answers: Json | null
           scores: Json
           session_type: string
           user_id: string
@@ -162,6 +163,7 @@ export type Database = {
           questions?: Json
           responses?: Json
           role_focus?: string | null
+          sample_answers?: Json | null
           scores?: Json
           session_type: string
           user_id: string
@@ -175,6 +177,7 @@ export type Database = {
           questions?: Json
           responses?: Json
           role_focus?: string | null
+          sample_answers?: Json | null
           scores?: Json
           session_type?: string
           user_id?: string

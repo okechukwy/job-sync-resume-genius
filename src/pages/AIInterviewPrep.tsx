@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
+import SampleAnswerSection from "@/components/interview/SampleAnswerSection";
 import { useSessionHistory } from "@/hooks/useSessionHistory";
 import { SessionHistoryFilters } from "@/components/interview/SessionHistoryFilters";
 import { SessionHistoryItem } from "@/components/interview/SessionHistoryItem";
@@ -57,6 +58,7 @@ const AIInterviewPrep = () => {
   const {
     loading,
     analyzing,
+    generatingSample,
     currentSession,
     retryCount,
     startSession,
@@ -856,6 +858,14 @@ const AIInterviewPrep = () => {
                       )}
                     </CardContent>
                   </Card>
+                )}
+
+                {/* Sample Answer Section */}
+                {lastAnalysis && currentQuestion && (
+                  <SampleAnswerSection
+                    sampleAnswer={currentSession?.sampleAnswers?.[currentQuestion.id]}
+                    isLoading={generatingSample}
+                  />
                 )}
               </div>
             )}

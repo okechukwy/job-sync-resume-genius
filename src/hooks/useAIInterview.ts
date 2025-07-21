@@ -30,6 +30,14 @@ export interface InterviewAnalysis {
   summary: string;
 }
 
+export interface SampleAnswer {
+  sampleAnswer: string;
+  structure: string;
+  keyPoints: string[];
+  tips: string[];
+  reasoning: string;
+}
+
 export interface InterviewSession {
   id: string;
   questions: InterviewQuestion[];
@@ -45,12 +53,14 @@ export interface InterviewSession {
   totalScore: number;
   createdAt: string;
   questionCount: number;
+  sampleAnswers?: Record<string, SampleAnswer>;
 }
 
 export const useAIInterview = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [generatingSample, setGeneratingSample] = useState(false);
   const [currentSession, setCurrentSession] = useState<InterviewSession | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -172,6 +182,43 @@ export const useAIInterview = () => {
     }
   }, [toast]);
 
+  const generateSampleAnswer = useCallback(async (
+    question: string,
+    sessionType: string,
+    roleFocus: string
+  ): Promise<SampleAnswer> => {
+    setGeneratingSample(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-sample-answer', {
+        body: { question, sessionType, roleFocus }
+      });
+
+      if (error) {
+        console.error('Sample answer generation error:', error);
+        throw error;
+      }
+
+      return data as SampleAnswer;
+    } catch (error) {
+      console.error('Error generating sample answer:', error);
+      toast({
+        title: "Sample Answer Error",
+        description: "Failed to generate sample answer. Please try again.",
+        variant: "destructive",
+      });
+      
+      return {
+        sampleAnswer: "I would approach this question by providing a structured response with specific examples from my experience, demonstrating relevant skills and showing the impact of my actions.",
+        structure: "Structured approach with examples",
+        keyPoints: ["Clear structure", "Specific examples", "Demonstrated impact"],
+        tips: ["Use concrete examples", "Show measurable results", "Connect to role requirements"],
+        reasoning: "This approach demonstrates competency and provides evidence of capability."
+      };
+    } finally {
+      setGeneratingSample(false);
+    }
+  }, [toast]);
+
   const startSession = useCallback(async (
     sessionType: string,
     roleFocus: string,
@@ -234,6 +281,13 @@ export const useAIInterview = () => {
       currentSession.roleFocus
     );
 
+    // Generate sample answer in the background
+    const sampleAnswerPromise = generateSampleAnswer(
+      question.text,
+      currentSession.sessionType,
+      currentSession.roleFocus
+    );
+
     const newResponse = {
       questionId,
       transcript,
@@ -241,9 +295,16 @@ export const useAIInterview = () => {
       duration
     };
 
+    // Get the sample answer
+    const sampleAnswer = await sampleAnswerPromise;
+
     const updatedSession = {
       ...currentSession,
-      responses: [...currentSession.responses, newResponse]
+      responses: [...currentSession.responses, newResponse],
+      sampleAnswers: {
+        ...currentSession.sampleAnswers,
+        [questionId]: sampleAnswer
+      }
     };
 
     const totalScore = updatedSession.responses.reduce(
@@ -256,7 +317,7 @@ export const useAIInterview = () => {
     setCurrentSession(updatedSession);
 
     return { response: newResponse, session: updatedSession };
-  }, [currentSession, analyzeResponse]);
+  }, [currentSession, analyzeResponse, generateSampleAnswer]);
 
   const completeSession = useCallback(async (sessionToComplete?: InterviewSession) => {
     // Use the passed session or fall back to current session
@@ -414,10 +475,12 @@ export const useAIInterview = () => {
   return {
     loading,
     analyzing,
+    generatingSample,
     currentSession,
     retryCount,
     generateQuestions,
     analyzeResponse,
+    generateSampleAnswer,
     startSession,
     addResponse,
     completeSession,
