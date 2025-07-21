@@ -83,7 +83,7 @@ export const SuccessMetrics = ({ metrics, applications, onRefreshMetrics }: Succ
             <span className="font-semibold text-success">{metrics?.responses_received || 0}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Interviews Scheduled</span>
+            <span>Interview Activity</span>
             <span className="font-semibold text-primary">{metrics?.interviews_scheduled || 0}</span>
           </div>
           <div className="flex justify-between items-center">
@@ -99,6 +99,33 @@ export const SuccessMetrics = ({ metrics, applications, onRefreshMetrics }: Succ
             </div>
           </div>
         </div>
+
+        {/* Granular Interview Breakdown */}
+        {metrics && ((metrics as any).interviews_scheduled_count > 0 || (metrics as any).interviews_in_progress_count > 0 || (metrics as any).interviews_completed_count > 0) && (
+          <div className="pt-4 border-t border-border/20">
+            <h4 className="font-medium mb-3">Interview Pipeline</h4>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-xl font-bold text-orange-600">
+                  {(metrics as any).interviews_scheduled_count || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Scheduled</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-blue-600">
+                  {(metrics as any).interviews_in_progress_count || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">In Progress</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-green-600">
+                  {(metrics as any).interviews_completed_count || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Completed</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Status Breakdown */}
         {Object.keys(statusBreakdown).length > 0 && (
