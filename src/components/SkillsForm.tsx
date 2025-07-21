@@ -1,4 +1,5 @@
 
+import React from "react";
 import SkillsSection from "./skills/SkillsSection";
 import SkillsTips from "./skills/SkillsTips";
 import { SkillsFormProps } from "@/types/skillsTypes";
