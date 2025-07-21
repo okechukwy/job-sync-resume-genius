@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,17 +26,14 @@ interface PublicationsFormProps {
 const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFormProps) => {
   const [publications, setPublications] = useState<PublicationEntry[]>(data);
 
-  const validatePublications = useCallback(() => {
-    return true; // Optional section - always valid
-  }, []);
+  // Always mark as valid since this is an optional section
+  useEffect(() => {
+    onValidationChange?.(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(publications);
   }, [publications, onUpdate]);
-
-  useEffect(() => {
-    onValidationChange?.(validatePublications());
-  }, [validatePublications, onValidationChange]);
 
   const addPublication = () => {
     const newPublication: PublicationEntry = {
@@ -66,7 +64,7 @@ const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFo
       <div>
         <h2 className="text-xl font-semibold mb-2">Publications</h2>
         <p className="text-muted-foreground mb-6">
-          List your published works, research papers, articles, or blog posts. This section is optional but valuable for academic and research roles.
+          List your published works, research papers, articles, or blog posts. This section is optional.
         </p>
       </div>
 
@@ -87,7 +85,7 @@ const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFo
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor={`title-${publication.id}`}>Publication Title *</Label>
+              <Label htmlFor={`title-${publication.id}`}>Publication Title</Label>
               <Input
                 id={`title-${publication.id}`}
                 value={publication.title}
@@ -99,7 +97,7 @@ const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFo
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor={`publisher-${publication.id}`}>Publisher/Journal *</Label>
+                <Label htmlFor={`publisher-${publication.id}`}>Publisher/Journal</Label>
                 <Input
                   id={`publisher-${publication.id}`}
                   value={publication.publisher}
@@ -109,7 +107,7 @@ const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFo
                 />
               </div>
               <div>
-                <Label htmlFor={`date-${publication.id}`}>Publication Date *</Label>
+                <Label htmlFor={`date-${publication.id}`}>Publication Date</Label>
                 <Input
                   id={`date-${publication.id}`}
                   type="date"
@@ -162,6 +160,7 @@ const PublicationsForm = ({ data, onUpdate, onValidationChange }: PublicationsFo
           <p>• Include DOI or URL when available for easy verification</p>
           <p>• Mention co-authors if it demonstrates collaboration skills</p>
           <p>• Include relevant blog posts or articles for non-academic roles</p>
+          <p>• This section is optional - you can skip it if you prefer</p>
         </CardContent>
       </Card>
     </div>

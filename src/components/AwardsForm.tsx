@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,17 +25,14 @@ interface AwardsFormProps {
 const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => {
   const [awards, setAwards] = useState<AwardEntry[]>(data);
 
-  const validateAwards = useCallback(() => {
-    return true; // Optional section - always valid
-  }, []);
+  // Always mark as valid since this is an optional section
+  useEffect(() => {
+    onValidationChange?.(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(awards);
   }, [awards, onUpdate]);
-
-  useEffect(() => {
-    onValidationChange?.(validateAwards());
-  }, [validateAwards, onValidationChange]);
 
   const addAward = () => {
     const newAward: AwardEntry = {
@@ -64,7 +62,7 @@ const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => 
       <div>
         <h2 className="text-xl font-semibold mb-2">Awards & Honors</h2>
         <p className="text-muted-foreground mb-6">
-          Showcase your achievements, awards, and recognition. This section is optional but helps highlight your excellence.
+          Showcase your achievements, awards, and recognition. This section is optional.
         </p>
       </div>
 
@@ -85,7 +83,7 @@ const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => 
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor={`title-${award.id}`}>Award Title *</Label>
+              <Label htmlFor={`title-${award.id}`}>Award Title</Label>
               <Input
                 id={`title-${award.id}`}
                 value={award.title}
@@ -97,7 +95,7 @@ const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor={`issuer-${award.id}`}>Issuing Organization *</Label>
+                <Label htmlFor={`issuer-${award.id}`}>Issuing Organization</Label>
                 <Input
                   id={`issuer-${award.id}`}
                   value={award.issuer}
@@ -107,7 +105,7 @@ const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => 
                 />
               </div>
               <div>
-                <Label htmlFor={`date-${award.id}`}>Date Received *</Label>
+                <Label htmlFor={`date-${award.id}`}>Date Received</Label>
                 <Input
                   id={`date-${award.id}`}
                   type="date"
@@ -147,6 +145,7 @@ const AwardsForm = ({ data, onUpdate, onValidationChange }: AwardsFormProps) => 
           <p>• List awards in reverse chronological order (most recent first)</p>
           <p>• Include both formal awards and informal recognition</p>
           <p>• Mention the scope of competition (company-wide, regional, national, etc.)</p>
+          <p>• This section is optional - you can skip it if you prefer</p>
         </CardContent>
       </Card>
     </div>

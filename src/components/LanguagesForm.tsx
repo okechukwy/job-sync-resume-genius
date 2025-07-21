@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, Languages, Globe } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { languageSchema, LanguageFormData } from "@/schemas/resumeFormSchemas";
+import { optionalLanguageSchema, OptionalLanguageFormData } from "@/schemas/optionalResumeSchemas";
 import { cn } from "@/lib/utils";
 
 interface LanguagesFormProps {
@@ -30,23 +31,29 @@ const LanguagesForm = ({ data, onUpdate, onValidationChange }: LanguagesFormProp
     reset,
     setValue,
     watch,
-    formState: { errors, isValid }
-  } = useForm<LanguageFormData>({
-    resolver: zodResolver(languageSchema),
+    formState: { errors }
+  } = useForm<OptionalLanguageFormData>({
+    resolver: zodResolver(optionalLanguageSchema),
     mode: "onChange"
   });
 
   const watchProficiency = watch("proficiency");
 
+  // Always mark as valid since this is an optional section
   useEffect(() => {
-    onValidationChange(languages.length > 0 || isValid);
-  }, [languages.length, isValid, onValidationChange]);
+    onValidationChange(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(languages);
   }, [languages, onUpdate]);
 
-  const addLanguage = (formData: LanguageFormData) => {
+  const addLanguage = (formData: OptionalLanguageFormData) => {
+    // Only add if both language and proficiency are provided
+    if (!formData.language?.trim() || !formData.proficiency) {
+      return;
+    }
+
     const newLanguage = {
       id: Date.now().toString(),
       language: formData.language,
@@ -115,7 +122,7 @@ const LanguagesForm = ({ data, onUpdate, onValidationChange }: LanguagesFormProp
         </div>
         <h2 className="text-2xl font-bold">Languages</h2>
         <p className="text-muted-foreground">
-          Add the languages you speak and your proficiency level
+          Add the languages you speak and your proficiency level. This section is optional.
         </p>
       </div>
 
@@ -130,7 +137,7 @@ const LanguagesForm = ({ data, onUpdate, onValidationChange }: LanguagesFormProp
         <CardContent>
           <form onSubmit={handleSubmit(addLanguage)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="language">Language *</Label>
+              <Label htmlFor="language">Language</Label>
               <Input
                 id="language"
                 placeholder="e.g., Spanish"
@@ -147,7 +154,7 @@ const LanguagesForm = ({ data, onUpdate, onValidationChange }: LanguagesFormProp
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="proficiency">Proficiency Level *</Label>
+              <Label htmlFor="proficiency">Proficiency Level</Label>
               <Select onValueChange={(value) => setValue("proficiency", value as any)}>
                 <SelectTrigger className={cn(errors.proficiency && "border-destructive")}>
                   <SelectValue placeholder="Select proficiency level" />
@@ -258,7 +265,7 @@ const LanguagesForm = ({ data, onUpdate, onValidationChange }: LanguagesFormProp
       {languages.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Languages className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No languages added yet. Add the languages you speak above.</p>
+          <p>No languages added yet. This section is optional - you can skip it or add languages above.</p>
         </div>
       )}
     </div>

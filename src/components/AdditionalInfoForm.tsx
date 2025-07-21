@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,17 +17,14 @@ interface AdditionalInfoFormProps {
 const AdditionalInfoForm = ({ data, onUpdate, onValidationChange }: AdditionalInfoFormProps) => {
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo>(data);
 
-  const validateAdditionalInfo = useCallback(() => {
-    return true; // Optional section - always valid
-  }, []);
+  // Always mark as valid since this is an optional section
+  useEffect(() => {
+    onValidationChange?.(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(additionalInfo);
   }, [additionalInfo, onUpdate]);
-
-  useEffect(() => {
-    onValidationChange?.(validateAdditionalInfo());
-  }, [validateAdditionalInfo, onValidationChange]);
 
   const handleContentChange = (content: string) => {
     setAdditionalInfo({ content });
@@ -37,7 +35,7 @@ const AdditionalInfoForm = ({ data, onUpdate, onValidationChange }: AdditionalIn
       <div>
         <h2 className="text-xl font-semibold mb-2">Additional Information</h2>
         <p className="text-muted-foreground mb-6">
-          Add any other relevant information that doesn't fit in other sections. This could include security clearances, visa status, or other relevant details.
+          Add any other relevant information that doesn't fit in other sections. This section is optional.
         </p>
       </div>
 
@@ -71,6 +69,7 @@ const AdditionalInfoForm = ({ data, onUpdate, onValidationChange }: AdditionalIn
           <p>• Include professional memberships or affiliations</p>
           <p>• Mention any unique qualifications or circumstances</p>
           <p>• Keep it professional and job-relevant</p>
+          <p>• This section is optional - you can skip it if you prefer</p>
         </CardContent>
       </Card>
     </div>

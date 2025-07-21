@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Code, Calendar, ExternalLink, Github, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { projectSchema, ProjectFormData } from "@/schemas/resumeFormSchemas";
+import { optionalProjectSchema, OptionalProjectFormData } from "@/schemas/optionalResumeSchemas";
 import { cn } from "@/lib/utils";
 
 interface ProjectsFormProps {
@@ -41,17 +42,18 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
     reset,
     setValue,
     watch,
-    formState: { errors, isValid }
-  } = useForm<ProjectFormData>({
-    resolver: zodResolver(projectSchema),
+    formState: { errors }
+  } = useForm<OptionalProjectFormData>({
+    resolver: zodResolver(optionalProjectSchema),
     mode: "onChange"
   });
 
   const watchCurrent = watch("current");
 
+  // Always mark as valid since this is an optional section
   useEffect(() => {
-    onValidationChange(projects.length > 0 || isValid);
-  }, [projects.length, isValid, onValidationChange]);
+    onValidationChange(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(projects);
@@ -72,15 +74,20 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
     setCurrentTechnologies(currentTechnologies.filter(t => t !== tech));
   };
 
-  const addProject = (formData: ProjectFormData) => {
+  const addProject = (formData: OptionalProjectFormData) => {
+    // Only add if at least name and description are provided
+    if (!formData.name?.trim() || !formData.description?.trim()) {
+      return;
+    }
+
     const newProject = {
       id: Date.now().toString(),
       name: formData.name,
       description: formData.description,
       technologies: currentTechnologies,
-      startDate: formData.startDate,
+      startDate: formData.startDate || '',
       endDate: formData.endDate,
-      current: formData.current,
+      current: formData.current || false,
       projectUrl: formData.projectUrl,
       githubUrl: formData.githubUrl
     };
@@ -143,7 +150,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
         </div>
         <h2 className="text-2xl font-bold">Projects</h2>
         <p className="text-muted-foreground">
-          Showcase your personal and professional projects
+          Showcase your personal and professional projects. This section is optional.
         </p>
       </div>
 
@@ -158,7 +165,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
         <CardContent>
           <form onSubmit={handleSubmit(addProject)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Project Name *</Label>
+              <Label htmlFor="name">Project Name</Label>
               <Input
                 id="name"
                 placeholder="e.g., E-commerce Platform"
@@ -169,7 +176,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 placeholder="Describe what you built, the problem it solved, and your role..."
@@ -182,7 +189,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
 
             {/* Technologies */}
             <div className="space-y-2">
-              <Label>Technologies Used *</Label>
+              <Label>Technologies Used</Label>
               <div className="flex gap-2">
                 <Input
                   value={techInput}
@@ -237,7 +244,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date *</Label>
+                <Label htmlFor="startDate">Start Date</Label>
                 <Input
                   id="startDate"
                   type="month"
@@ -320,56 +327,58 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
           </CardHeader>
           <CardContent className="space-y-4">
             {projects.map((project, index) => (
-              <div key={project.id} className="flex items-start justify-between p-4 border rounded-lg">
-                <div className="flex-1 space-y-2">
+              <div key={project.id} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold flex items-center gap-2">
                     <Code className="w-4 h-4 text-primary" />
                     {project.name}
                   </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {project.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => editProject(index)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteProject(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
+                {project.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {project.technologies.map((tech) => (
                       <Badge key={tech} variant="outline" className="text-xs">
                         {tech}
                       </Badge>
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Calendar className="w-3 h-3" />
-                    {project.startDate} - {project.current ? 'Present' : project.endDate}
-                  </p>
-                  <div className="flex gap-2">
-                    {project.projectUrl && (
-                      <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3" />
-                        Live Demo
-                      </a>
-                    )}
-                    {project.githubUrl && (
-                      <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                        <Github className="w-3 h-3" />
-                        Source Code
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => editProject(index)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteProject(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                )}
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  {project.startDate && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {project.startDate} - {project.current ? 'Present' : project.endDate}
+                    </span>
+                  )}
+                  {project.projectUrl && (
+                    <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary">
+                      <ExternalLink className="w-3 h-3" />
+                      Live
+                    </a>
+                  )}
+                  {project.githubUrl && (
+                    <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary">
+                      <Github className="w-3 h-3" />
+                      Code
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -380,7 +389,7 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
       {projects.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Code className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No projects added yet. Showcase your work above.</p>
+          <p>No projects added yet. This section is optional - you can skip it or add projects above.</p>
         </div>
       )}
     </div>

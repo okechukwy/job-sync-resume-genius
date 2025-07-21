@@ -1,13 +1,13 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Award, Calendar, Building } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { certificateSchema, CertificateFormData } from "@/schemas/resumeFormSchemas";
+import { optionalCertificateSchema, OptionalCertificateFormData } from "@/schemas/optionalResumeSchemas";
 import { cn } from "@/lib/utils";
 
 interface CertificatesFormProps {
@@ -33,27 +33,32 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
     register,
     handleSubmit,
     reset,
-    formState: { errors, isValid },
-    watch
-  } = useForm<CertificateFormData>({
-    resolver: zodResolver(certificateSchema),
+    formState: { errors },
+  } = useForm<OptionalCertificateFormData>({
+    resolver: zodResolver(optionalCertificateSchema),
     mode: "onChange"
   });
 
+  // Always mark as valid since this is an optional section
   useEffect(() => {
-    onValidationChange(certificates.length > 0 || isValid);
-  }, [certificates.length, isValid, onValidationChange]);
+    onValidationChange(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(certificates);
   }, [certificates, onUpdate]);
 
-  const addCertificate = (formData: CertificateFormData) => {
+  const addCertificate = (formData: OptionalCertificateFormData) => {
+    // Only add if at least name and issuer are provided
+    if (!formData.name?.trim() || !formData.issuer?.trim()) {
+      return;
+    }
+
     const newCertificate = {
       id: Date.now().toString(),
       name: formData.name,
       issuer: formData.issuer,
-      issueDate: formData.issueDate,
+      issueDate: formData.issueDate || '',
       expiryDate: formData.expiryDate,
       credentialId: formData.credentialId,
       credentialUrl: formData.credentialUrl
@@ -111,7 +116,7 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
         </div>
         <h2 className="text-2xl font-bold">Certifications & Licenses</h2>
         <p className="text-muted-foreground">
-          Add your professional certifications and licenses to showcase your expertise
+          Add your professional certifications and licenses. This section is optional.
         </p>
       </div>
 
@@ -151,7 +156,7 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
           <form onSubmit={handleSubmit(addCertificate)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Certificate Name *</Label>
+                <Label htmlFor="name">Certificate Name</Label>
                 <Input
                   id="name"
                   placeholder="e.g., AWS Solutions Architect"
@@ -162,7 +167,7 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="issuer">Issuing Organization *</Label>
+                <Label htmlFor="issuer">Issuing Organization</Label>
                 <Input
                   id="issuer"
                   placeholder="e.g., Amazon Web Services"
@@ -173,7 +178,7 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="issueDate">Issue Date *</Label>
+                <Label htmlFor="issueDate">Issue Date</Label>
                 <Input
                   id="issueDate"
                   type="month"
@@ -286,7 +291,7 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
       {certificates.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No certificates added yet. Add your professional certifications above.</p>
+          <p>No certificates added yet. This section is optional - you can skip it or add certificates above.</p>
         </div>
       )}
     </div>

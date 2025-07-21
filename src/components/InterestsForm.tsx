@@ -1,14 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Heart, X } from "lucide-react";
+import { Plus, Heart, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { interestsSchema, InterestsFormData } from "@/schemas/resumeFormSchemas";
-import { cn } from "@/lib/utils";
+import { optionalInterestsSchema, OptionalInterestsFormData } from "@/schemas/optionalResumeSchemas";
 
 interface InterestsFormProps {
   data: {
@@ -24,19 +24,20 @@ const InterestsForm = ({ data, onUpdate, onValidationChange, industry }: Interes
   const [interestInput, setInterestInput] = useState("");
 
   const {
-    register,
-    handleSubmit,
     setValue,
-    formState: { errors, isValid }
-  } = useForm<InterestsFormData>({
-    resolver: zodResolver(interestsSchema),
+  } = useForm<OptionalInterestsFormData>({
+    resolver: zodResolver(optionalInterestsSchema),
     mode: "onChange"
   });
 
+  // Always mark as valid since this is an optional section
+  useEffect(() => {
+    onValidationChange(true);
+  }, [onValidationChange]);
+
   useEffect(() => {
     setValue("interests", interests);
-    onValidationChange(interests.length > 0);
-  }, [interests, setValue, onValidationChange]);
+  }, [interests, setValue]);
 
   useEffect(() => {
     onUpdate({ interests });
@@ -105,7 +106,7 @@ const InterestsForm = ({ data, onUpdate, onValidationChange, industry }: Interes
         </div>
         <h2 className="text-2xl font-bold">Interests & Hobbies</h2>
         <p className="text-muted-foreground">
-          Share your personal interests to give employers a sense of who you are
+          Share your personal interests. This section is optional.
         </p>
       </div>
 
@@ -172,10 +173,6 @@ const InterestsForm = ({ data, onUpdate, onValidationChange, industry }: Interes
                 </div>
               </div>
             )}
-
-            {errors.interests && (
-              <p className="text-sm text-destructive">{errors.interests.message}</p>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -193,6 +190,7 @@ const InterestsForm = ({ data, onUpdate, onValidationChange, industry }: Interes
                 <li>• Avoid controversial topics unless directly relevant</li>
                 <li>• Be genuine - only include interests you actually pursue</li>
                 <li>• Limit to 4-8 interests to keep it concise</li>
+                <li>• This section is optional - you can skip it if you prefer</li>
               </ul>
             </div>
           </div>
@@ -202,7 +200,7 @@ const InterestsForm = ({ data, onUpdate, onValidationChange, industry }: Interes
       {interests.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No interests added yet. Add your hobbies and interests above.</p>
+          <p>No interests added yet. This section is optional - you can skip it or add interests above.</p>
         </div>
       )}
     </div>

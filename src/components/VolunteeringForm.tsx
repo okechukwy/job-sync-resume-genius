@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,17 +28,14 @@ interface VolunteeringFormProps {
 const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFormProps) => {
   const [volunteering, setVolunteering] = useState<VolunteeringEntry[]>(data);
 
-  const validateVolunteering = useCallback(() => {
-    return true; // Optional section - always valid
-  }, []);
+  // Always mark as valid since this is an optional section
+  useEffect(() => {
+    onValidationChange?.(true);
+  }, [onValidationChange]);
 
   useEffect(() => {
     onUpdate(volunteering);
   }, [volunteering, onUpdate]);
-
-  useEffect(() => {
-    onValidationChange?.(validateVolunteering());
-  }, [validateVolunteering, onValidationChange]);
 
   const addVolunteering = () => {
     const newEntry: VolunteeringEntry = {
@@ -69,7 +67,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
       <div>
         <h2 className="text-xl font-semibold mb-2">Volunteering</h2>
         <p className="text-muted-foreground mb-6">
-          Add your volunteer work and community involvement. This section is optional but shows your character and values.
+          Add your volunteer work and community involvement. This section is optional.
         </p>
       </div>
 
@@ -91,7 +89,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor={`organization-${entry.id}`}>Organization *</Label>
+                <Label htmlFor={`organization-${entry.id}`}>Organization</Label>
                 <Input
                   id={`organization-${entry.id}`}
                   value={entry.organization}
@@ -101,7 +99,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
                 />
               </div>
               <div>
-                <Label htmlFor={`role-${entry.id}`}>Role *</Label>
+                <Label htmlFor={`role-${entry.id}`}>Role</Label>
                 <Input
                   id={`role-${entry.id}`}
                   value={entry.role}
@@ -114,7 +112,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor={`startDate-${entry.id}`}>Start Date *</Label>
+                <Label htmlFor={`startDate-${entry.id}`}>Start Date</Label>
                 <Input
                   id={`startDate-${entry.id}`}
                   type="date"
@@ -151,7 +149,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
             </div>
 
             <div>
-              <Label htmlFor={`description-${entry.id}`}>Description *</Label>
+              <Label htmlFor={`description-${entry.id}`}>Description</Label>
               <Textarea
                 id={`description-${entry.id}`}
                 value={entry.description}
@@ -179,6 +177,7 @@ const VolunteeringForm = ({ data, onUpdate, onValidationChange }: VolunteeringFo
           <p>• Quantify your impact when possible (e.g., "helped 200+ families")</p>
           <p>• Focus on roles that demonstrate responsibility and commitment</p>
           <p>• Show progression in volunteer roles if applicable</p>
+          <p>• This section is optional - you can skip it if you prefer</p>
         </CardContent>
       </Card>
     </div>
