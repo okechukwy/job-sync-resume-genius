@@ -16,14 +16,19 @@ export const useApplyRecommendations = (
   const handleApplyRecommendations = async () => {
     console.log("Starting AI-powered recommendations application");
     setIsProcessing(true);
+    setRecommendationsApplied(false);
     
     try {
+      toast.info("Reading CV content...");
+      
       // Read original file content if not already read
       let content = originalContent;
       if (!content) {
         content = await readFileContent(uploadedFile);
         setOriginalContent(content);
       }
+
+      console.log("CV content read successfully, length:", content.length);
 
       // Extract analysis data for AI enhancement
       const missingKeywords = analysisData?.keywords?.missing || [];
@@ -32,27 +37,21 @@ export const useApplyRecommendations = (
       const atsScore = analysisData?.atsScore;
       const weakAreas = analysisData?.improvements?.map((imp: any) => imp.area) || [];
 
-      // Show processing steps
-      const processingSteps = [
-        "Analyzing CV structure and content...",
-        "Identifying enhancement opportunities...",
-        "Applying AI-powered language improvements...",
-        "Integrating missing ATS keywords...",
-        "Optimizing professional language...",
-        "Finalizing enhanced version..."
-      ];
+      console.log("Enhancement parameters:", {
+        missingKeywords: missingKeywords.length,
+        targetIndustry,
+        targetRole,
+        atsScore,
+        weakAreas: weakAreas.length
+      });
+
+      // Show processing steps with better UX
+      toast.info("🤖 AI analyzing your CV structure...");
       
-      let currentStep = 0;
-      const showNextStep = () => {
-        if (currentStep < processingSteps.length) {
-          toast.info(processingSteps[currentStep]);
-          currentStep++;
-          setTimeout(showNextStep, 800);
-        }
-      };
+      // Add a small delay to show the processing message
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      toast.success("Starting AI-powered CV optimization...");
-      setTimeout(showNextStep, 500);
+      toast.info("⚡ Applying intelligent enhancements...");
 
       // Apply AI-powered enhancements
       const enhanced = await enhanceCVWithAI(
@@ -64,22 +63,39 @@ export const useApplyRecommendations = (
         weakAreas
       );
 
-      setEnhancedResult(enhanced);
-      setRecommendationsApplied(true);
-      
-      console.log("AI enhancement completed:", {
+      console.log("AI enhancement completed successfully:", {
         changesApplied: enhanced.changesApplied.length,
-        estimatedImprovement: enhanced.estimatedATSScoreImprovement
+        estimatedImprovement: enhanced.estimatedATSScoreImprovement,
+        keywordsAdded: enhanced.atsImprovements.keywordsAdded.length,
+        actionVerbsImproved: enhanced.atsImprovements.actionVerbsImproved
       });
 
-      toast.success(
-        `AI optimization complete! Applied ${enhanced.changesApplied.length} improvements with estimated +${enhanced.estimatedATSScoreImprovement} ATS score boost.`
-      );
+      setEnhancedResult(enhanced);
+      setRecommendationsApplied(true);
+
+      // Show success message with details
+      const successMessage = enhanced.changesApplied.length > 0 
+        ? `✅ Applied ${enhanced.changesApplied.length} AI improvements with +${enhanced.estimatedATSScoreImprovement} ATS score boost!`
+        : `✅ CV optimization complete! Your CV is already well-optimized.`;
+      
+      toast.success(successMessage);
 
     } catch (error) {
       console.error("Error applying recommendations:", error);
-      toast.error("Failed to apply recommendations. Please try again.");
+      
+      // More specific error handling
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      if (errorMessage.includes('AI enhancement failed')) {
+        toast.error("AI enhancement temporarily unavailable. Using enhanced basic optimization.");
+      } else if (errorMessage.includes('Failed to read file')) {
+        toast.error("Could not read CV file. Please try uploading again.");
+      } else {
+        toast.error("Failed to apply recommendations. Please try again.");
+      }
+      
       setRecommendationsApplied(false);
+      setEnhancedResult(null);
     } finally {
       setIsProcessing(false);
     }

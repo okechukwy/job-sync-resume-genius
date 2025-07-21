@@ -35,3 +35,6 @@ verify_jwt = true
 
 [functions.cover-letter-generator]
 verify_jwt = true
+
+[functions.ai-cv-enhancement]
+verify_jwt = true

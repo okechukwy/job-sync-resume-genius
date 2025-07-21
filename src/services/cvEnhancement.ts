@@ -31,61 +31,160 @@ interface AIEnhancementRequest {
   weakAreas?: string[];
 }
 
-// Enhanced content detection - less restrictive than before
+// Improved content detection - more inclusive
 const isEnhanceableContent = (line: string): boolean => {
   const trimmed = line.trim();
   
   // Must have some content
-  if (!trimmed || trimmed.length < 15) return false;
+  if (!trimmed || trimmed.length < 10) return false;
   
   // Skip obvious non-content lines
-  if (/^[A-Z\s]{5,}$/.test(trimmed)) return false; // All caps headers
+  if (/^[A-Z\s]{3,}$/.test(trimmed)) return false; // All caps headers
   if (/@|phone|tel|email|linkedin|github|http/i.test(trimmed)) return false; // Contact/URLs
-  if (/^[-=_•*\s]{1,}$/.test(trimmed)) return false; // Only separators
+  if (/^[-=_•*\s]+$/.test(trimmed)) return false; // Only separators
   if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(trimmed)) return false; // Just dates
+  if (/^\d+$/.test(trimmed)) return false; // Just numbers
   
-  // Allow more content types for enhancement
-  const hasMultipleWords = trimmed.split(/\s+/).length >= 3;
-  const looksLikeContent = /[a-zA-Z]/.test(trimmed) && hasMultipleWords;
+  // More inclusive - allow content with at least 2 words
+  const words = trimmed.split(/\s+/);
+  const hasMultipleWords = words.length >= 2;
+  const hasLetters = /[a-zA-Z]/.test(trimmed);
   
-  return looksLikeContent;
+  return hasLetters && hasMultipleWords;
 };
 
-// Enhanced basic content enhancement with more patterns
-const enhanceContentLine = (line: string): string => {
-  if (!isEnhanceableContent(line)) return line;
+// Enhanced action verb and professional language patterns
+const enhanceContentLine = (line: string, missingKeywords: string[] = []): { enhanced: string; changes: EnhancedCVResult['changesApplied'] } => {
+  if (!isEnhanceableContent(line)) return { enhanced: line, changes: [] };
+  
+  const original = line;
+  const changes: EnhancedCVResult['changesApplied'] = [];
   
   let enhanced = line
-    // Enhanced action verbs
-    .replace(/\b(worked|did|was responsible for|handled|dealt with)\b/gi, 'managed')
-    .replace(/\b(helped|assisted|aided)\b/gi, 'supported')
-    .replace(/\b(made|created|built|developed)\b/gi, 'engineered')
-    .replace(/\b(improved|enhanced|bettered|upgraded)\b/gi, 'optimized')
-    .replace(/\b(led|headed|ran)\b/gi, 'directed')
-    .replace(/\b(organized|arranged)\b/gi, 'coordinated')
-    .replace(/\b(used|utilized)\b/gi, 'leveraged')
-    .replace(/\b(worked with|collaborated with)\b/gi, 'partnered with')
-    .replace(/\b(worked on|focused on)\b/gi, 'delivered')
+    // Enhanced action verbs with more patterns
+    .replace(/\b(worked on|worked with|did|was responsible for|handled|dealt with|took care of)\b/gi, (match) => {
+      const replacement = 'managed';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'Replaced weak action verb with stronger alternative',
+        category: 'action-verbs'
+      });
+      return replacement;
+    })
+    .replace(/\b(helped|assisted|aided|supported)\b/gi, (match) => {
+      const replacement = 'facilitated';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'Enhanced action verb for better impact',
+        category: 'action-verbs'
+      });
+      return replacement;
+    })
+    .replace(/\b(made|created|built|developed)\b/gi, (match) => {
+      const replacement = 'engineered';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'Used more technical and impactful action verb',
+        category: 'action-verbs'
+      });
+      return replacement;
+    })
+    .replace(/\b(improved|enhanced|bettered|upgraded)\b/gi, (match) => {
+      const replacement = 'optimized';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'More professional and specific action verb',
+        category: 'action-verbs'
+      });
+      return replacement;
+    })
+    .replace(/\b(led|headed|ran|managed)\b/gi, (match) => {
+      const replacement = 'directed';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'More executive-level action verb',
+        category: 'action-verbs'
+      });
+      return replacement;
+    })
     
     // Professional language enhancement
-    .replace(/\b(good|nice|okay|fine)\b/gi, 'exceptional')
-    .replace(/\b(big|large|huge)\b/gi, 'substantial')
-    .replace(/\b(small|little)\b/gi, 'streamlined')
-    .replace(/\b(fast|quick)\b/gi, 'efficient')
-    .replace(/\b(many|lots of|a lot of)\b/gi, 'multiple')
-    .replace(/\b(got|received|obtained)\b/gi, 'achieved')
-    .replace(/\b(did well|performed well)\b/gi, 'excelled')
-    
-    // Add quantification suggestions where appropriate
-    .replace(/\b(increased|improved|enhanced)\b/gi, 'increased by X%')
-    .replace(/\b(reduced|decreased|cut)\b/gi, 'reduced by X%')
-    .replace(/\b(managed|led|supervised)\b/gi, 'managed team of X')
-    .replace(/\b(completed|finished|delivered)\b/gi, 'delivered X projects');
-    
-  return enhanced;
+    .replace(/\b(good|nice|okay|fine)\b/gi, (match) => {
+      const replacement = 'exceptional';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'Enhanced professional language',
+        category: 'professional-language'
+      });
+      return replacement;
+    })
+    .replace(/\b(big|large|huge)\b/gi, (match) => {
+      const replacement = 'substantial';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'More professional and specific descriptor',
+        category: 'professional-language'
+      });
+      return replacement;
+    })
+    .replace(/\b(fast|quick)\b/gi, (match) => {
+      const replacement = 'efficient';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'More professional and business-oriented term',
+        category: 'professional-language'
+      });
+      return replacement;
+    })
+    .replace(/\b(many|lots of|a lot of)\b/gi, (match) => {
+      const replacement = 'multiple';
+      changes.push({
+        section: 'Content Enhancement',
+        original: match,
+        improved: replacement,
+        reasoning: 'More professional and concise language',
+        category: 'professional-language'
+      });
+      return replacement;
+    });
+
+  // Try to integrate missing keywords naturally
+  if (missingKeywords.length > 0) {
+    const keywordToAdd = missingKeywords[Math.floor(Math.random() * missingKeywords.length)];
+    if (Math.random() < 0.3 && !enhanced.toLowerCase().includes(keywordToAdd.toLowerCase())) {
+      enhanced = enhanced.replace(/\b(with|using|leveraging)\b/gi, (match) => {
+        changes.push({
+          section: 'Content Enhancement',
+          original: match,
+          improved: `${match} ${keywordToAdd}`,
+          reasoning: 'Integrated missing ATS keyword naturally',
+          category: 'keyword-integration'
+        });
+        return `${match} ${keywordToAdd}`;
+      });
+    }
+  }
+
+  return { enhanced, changes };
 };
 
-// AI-powered enhancement function
+// AI-powered enhancement function with improved error handling
 export const enhanceCVWithAI = async (
   originalContent: string,
   missingKeywords: string[] = [],
@@ -94,11 +193,19 @@ export const enhanceCVWithAI = async (
   atsScore?: number,
   weakAreas?: string[]
 ): Promise<EnhancedCVResult> => {
-  console.log('Starting AI-powered CV enhancement...');
+  console.log('Starting AI-powered CV enhancement...', {
+    contentLength: originalContent.length,
+    missingKeywords: missingKeywords.length,
+    targetIndustry,
+    targetRole,
+    atsScore
+  });
   
   const isHtml = originalContent.includes('<') && originalContent.includes('>');
   
   try {
+    console.log('Calling ai-cv-enhancement edge function...');
+    
     // Call the AI enhancement edge function
     const { data, error } = await supabase.functions.invoke('ai-cv-enhancement', {
       body: {
@@ -114,14 +221,22 @@ export const enhanceCVWithAI = async (
 
     if (error) {
       console.error('AI enhancement error:', error);
-      throw new Error(error.message || 'Failed to enhance CV with AI');
+      throw new Error(`AI enhancement failed: ${error.message || 'Unknown error'}`);
     }
 
-    console.log('AI enhancement completed successfully');
+    if (!data) {
+      console.error('No data returned from AI enhancement');
+      throw new Error('No data returned from AI enhancement');
+    }
+
+    console.log('AI enhancement completed successfully', {
+      changesApplied: data.changesApplied?.length || 0,
+      estimatedImprovement: data.estimatedATSScoreImprovement || 0
+    });
     
     return {
-      resumeContent: data.enhancedContent,
-      enhancementLog: data.enhancementLog,
+      resumeContent: data.enhancedContent || originalContent,
+      enhancementLog: data.enhancementLog || ['AI enhancement completed'],
       isHtmlContent: isHtml,
       changesApplied: data.changesApplied || [],
       atsImprovements: data.atsImprovements || {
@@ -134,7 +249,7 @@ export const enhanceCVWithAI = async (
     };
 
   } catch (error) {
-    console.error('AI enhancement failed, falling back to basic enhancement:', error);
+    console.error('AI enhancement failed, falling back to enhanced basic enhancement:', error);
     
     // Fallback to enhanced basic optimization
     return await enhanceCVBasic(originalContent, missingKeywords, targetIndustry);
@@ -147,6 +262,8 @@ const enhanceCVBasic = async (
   missingKeywords: string[] = [],
   targetIndustry: string = 'Business'
 ): Promise<EnhancedCVResult> => {
+  console.log('Using enhanced basic CV optimization as fallback');
+  
   const isHtml = originalContent.includes('<') && originalContent.includes('>');
   let enhancedContent: string;
   let changesApplied: EnhancedCVResult['changesApplied'] = [];
@@ -164,25 +281,27 @@ const enhanceCVBasic = async (
   return {
     resumeContent: enhancedContent,
     enhancementLog: [
-      `Applied ${changesApplied.length} basic enhancements`,
+      `Applied ${changesApplied.length} enhanced basic optimizations`,
       'Enhanced professional language and action verbs',
       'Integrated available keywords where appropriate',
       'Improved content structure and readability',
-      'Note: AI enhancement unavailable, using basic optimization'
+      'Note: AI enhancement unavailable, using enhanced basic optimization'
     ],
     isHtmlContent: isHtml,
     changesApplied,
     atsImprovements: {
-      keywordsAdded: missingKeywords.slice(0, 3),
+      keywordsAdded: missingKeywords.slice(0, Math.min(3, changesApplied.filter(c => c.category === 'keyword-integration').length)),
       metricsAdded: changesApplied.filter(c => c.category === 'quantification').length,
       actionVerbsImproved: changesApplied.filter(c => c.category === 'action-verbs').length,
       professionalLanguageEnhanced: changesApplied.filter(c => c.category === 'professional-language').length
     },
-    estimatedATSScoreImprovement: Math.min(changesApplied.length * 2, 10)
+    estimatedATSScoreImprovement: Math.min(changesApplied.length * 2, 15)
   };
 };
 
 const enhanceHtmlContentBasic = (htmlContent: string, missingKeywords: string[] = []) => {
+  console.log('Enhancing HTML content with basic optimization');
+  
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
   const changes: EnhancedCVResult['changesApplied'] = [];
@@ -202,18 +321,12 @@ const enhanceHtmlContentBasic = (htmlContent: string, missingKeywords: string[] 
   
   textNodes.forEach(textNode => {
     const originalText = textNode.textContent || '';
-    if (isEnhanceableContent(originalText)) {
-      const enhancedText = enhanceContentLine(originalText);
+    if (originalText.trim()) {
+      const result = enhanceContentLine(originalText, missingKeywords);
       
-      if (originalText !== enhancedText) {
-        changes.push({
-          section: 'CV Content',
-          original: originalText.trim(),
-          improved: enhancedText.trim(),
-          reasoning: 'Enhanced professional language and action verbs',
-          category: 'professional-language'
-        });
-        textNode.textContent = enhancedText;
+      if (result.enhanced !== originalText) {
+        changes.push(...result.changes);
+        textNode.textContent = result.enhanced;
       }
     }
   });
@@ -225,25 +338,20 @@ const enhanceHtmlContentBasic = (htmlContent: string, missingKeywords: string[] 
 };
 
 const enhanceTextContentBasic = (textContent: string, missingKeywords: string[] = []) => {
+  console.log('Enhancing text content with basic optimization');
+  
   const lines = textContent.split('\n');
   const enhancedLines: string[] = [];
   const changes: EnhancedCVResult['changesApplied'] = [];
   
   for (const line of lines) {
-    const originalLine = line;
-    const enhancedLine = enhanceContentLine(line);
-    
-    if (originalLine !== enhancedLine) {
-      changes.push({
-        section: 'CV Content',
-        original: originalLine.trim(),
-        improved: enhancedLine.trim(),
-        reasoning: 'Enhanced professional language and action verbs',
-        category: 'professional-language'
-      });
+    if (line.trim()) {
+      const result = enhanceContentLine(line, missingKeywords);
+      changes.push(...result.changes);
+      enhancedLines.push(result.enhanced);
+    } else {
+      enhancedLines.push(line);
     }
-    
-    enhancedLines.push(enhancedLine);
   }
   
   return {
@@ -256,5 +364,3 @@ const enhanceTextContentBasic = (textContent: string, missingKeywords: string[] 
 export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResult> => {
   return await enhanceCVWithAI(originalContent);
 };
-
-// Function already exported above with 'export const'
