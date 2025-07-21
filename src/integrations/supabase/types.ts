@@ -106,9 +106,11 @@ export type Database = {
           file_size: number
           id: string
           improvements: Json
+          industry: string | null
           keywords: Json
           overall_score: number
           sections: Json
+          target_role: string | null
           user_id: string
         }
         Insert: {
@@ -119,9 +121,11 @@ export type Database = {
           file_size: number
           id?: string
           improvements?: Json
+          industry?: string | null
           keywords?: Json
           overall_score: number
           sections?: Json
+          target_role?: string | null
           user_id: string
         }
         Update: {
@@ -132,9 +136,11 @@ export type Database = {
           file_size?: number
           id?: string
           improvements?: Json
+          industry?: string | null
           keywords?: Json
           overall_score?: number
           sections?: Json
+          target_role?: string | null
           user_id?: string
         }
         Relationships: []

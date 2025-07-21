@@ -32,6 +32,8 @@ export const cvAnalysisService = {
         sections: analysisData.sections as any,
         keywords: analysisData.keywords as any,
         improvements: analysisData.improvements as any,
+        industry: analysisData.industry,
+        target_role: analysisData.targetRole,
         analysis_type: "ai_generated"
       } as TablesInsert<'cv_analyses'>)
       .select()
@@ -72,8 +74,8 @@ export const cvAnalysisService = {
       sections: data.sections as unknown as AnalysisData['sections'],
       keywords: data.keywords as unknown as AnalysisData['keywords'], 
       improvements: data.improvements as unknown as AnalysisData['improvements'],
-      industry: data.industry || 'Business',
-      targetRole: data.target_role || 'Professional'
+      industry: (data as any).industry || 'Business',
+      targetRole: (data as any).target_role || 'Professional'
     };
   },
 
