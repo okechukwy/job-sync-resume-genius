@@ -8,16 +8,21 @@ import { analyzeCVWithAI } from "@/services/openaiServices";
 import { readFileContent } from "@/utils/fileReader";
 import { useState, useEffect } from "react";
 import { cvAnalysisService } from "@/services/cvAnalysisService";
-import { validateAnalysisData, logValidationResult } from "./utils/dataValidation";
+import { validateAnalysisData } from "./utils/dataValidation";
 import EnhancedOverallScores from "./components/EnhancedOverallScores";
 import EnhancedSectionBreakdown from "./components/EnhancedSectionBreakdown";
 import StreamlinedKeywordAnalysis from "./components/StreamlinedKeywordAnalysis";
 import ActionableImprovements from "./components/ActionableImprovements";
 import ApplyRecommendations from "./components/ApplyRecommendations";
+import { EnhancedCVResult } from "@/services/cvEnhancement";
+import { validateAIImprovements, ImprovementValidationResult } from "./services/improvementValidation";
 
 const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [manuallyCompletedItems, setManuallyCompletedItems] = useState<number[]>([]);
+  const [aiOptimizationResult, setAIOptimizationResult] = useState<EnhancedCVResult | null>(null);
+  const [improvementValidation, setImprovementValidation] = useState<ImprovementValidationResult | null>(null);
 
   useEffect(() => {
     const performAnalysis = async () => {
@@ -28,13 +33,10 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         const fileContent = await readFileContent(uploadedFile);
         const rawAnalysis = await analyzeCVWithAI(fileContent);
         
-        // Validate and correct the analysis data (silent processing)
         const validationResult = validateAnalysisData(rawAnalysis);
-        logValidationResult(validationResult, 'CV Analysis');
         
         if (!validationResult.isValid) {
-          console.error('Analysis validation failed:', validationResult.errors);
-          // Use corrected data or fallback gracefully without showing technical errors to user
+          console.log('Using fallback data due to validation issues');
           const { mockAnalysisData } = await import("./data/mockAnalysisData");
           setAnalysisData(mockAnalysisData);
           toast.success("✅ Resume analysis completed!");
@@ -42,7 +44,6 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
           const finalAnalysis = validationResult.correctedData || rawAnalysis;
           setAnalysisData(finalAnalysis);
           
-          // Save analysis to database
           await cvAnalysisService.saveCVAnalysis(
             uploadedFile.name,
             uploadedFile.size,
@@ -54,7 +55,6 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
       } catch (error) {
         console.error("Analysis failed:", error);
         toast.error("Analysis temporarily unavailable. Showing demo insights.");
-        // Fallback to mock data gracefully
         const { mockAnalysisData } = await import("./data/mockAnalysisData");
         setAnalysisData(mockAnalysisData);
       } finally {
@@ -64,6 +64,43 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
 
     performAnalysis();
   }, [uploadedFile]);
+
+  const handleAIOptimizationComplete = (result: EnhancedCVResult) => {
+    setAIOptimizationResult(result);
+    
+    if (analysisData && result.changesApplied.length > 0) {
+      const validation = validateAIImprovements(analysisData.improvements, result);
+      setImprovementValidation(validation);
+      
+      // Show detailed feedback about what was actually improved
+      const addressedCount = validation.addressed.length;
+      const partialCount = validation.partiallyAddressed.length;
+      
+      if (addressedCount > 0) {
+        toast.success(
+          `✅ AI successfully addressed ${addressedCount} improvement${addressedCount !== 1 ? 's' : ''}${
+            partialCount > 0 ? ` and partially addressed ${partialCount} more` : ''
+          }!`
+        );
+      } else if (partialCount > 0) {
+        toast.warning(
+          `⚡ AI made some improvements but only partially addressed ${partialCount} suggestion${partialCount !== 1 ? 's' : ''}. Consider manual adjustments.`
+        );
+      } else {
+        toast.info("ℹ️ AI optimization applied formatting improvements. Your content was already well-optimized.");
+      }
+    } else {
+      toast.info("ℹ️ Your resume is already well-optimized. No significant changes were needed.");
+    }
+  };
+
+  const handleManualImprovementToggle = (index: number) => {
+    setManuallyCompletedItems(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
 
   const handleContinueOptimization = () => {
     toast.success("Continuing to manual editing...");
@@ -120,30 +157,30 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         </p>
       </div>
 
-      {/* Enhanced Overall Scores */}
       <EnhancedOverallScores 
         overallScore={analysisData.overallScore}
         atsScore={analysisData.atsScore}
         industry={analysisData.industry}
       />
 
-      {/* Enhanced Section Breakdown */}
       <EnhancedSectionBreakdown sections={analysisData.sections} />
 
-      {/* Streamlined Keywords Analysis */}
       <StreamlinedKeywordAnalysis keywords={analysisData.keywords} />
 
-      {/* Actionable Improvement Suggestions */}
-      <ActionableImprovements improvements={analysisData.improvements} />
+      <ActionableImprovements 
+        improvements={analysisData.improvements}
+        manuallyCompletedItems={manuallyCompletedItems}
+        improvementValidation={improvementValidation}
+        onToggleComplete={handleManualImprovementToggle}
+      />
 
-      {/* Apply Recommendations with analysis data */}
       <ApplyRecommendations 
         uploadedFile={uploadedFile}
         onContinue={onContinue}
         analysisData={analysisData}
+        onOptimizationComplete={handleAIOptimizationComplete}
       />
 
-      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
         <Button 
           variant="hero" 

@@ -2,25 +2,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle2, Clock, Zap } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Zap, Bot, User } from "lucide-react";
 import { Improvement } from "../types/analysisTypes";
-import { useState } from "react";
+import { ImprovementValidationResult, getImprovementStatus } from "../services/improvementValidation";
 
 interface ActionableImprovementsProps {
   improvements: Improvement[];
+  manuallyCompletedItems: number[];
+  improvementValidation: ImprovementValidationResult | null;
+  onToggleComplete: (index: number) => void;
 }
 
-const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) => {
-  const [completedItems, setCompletedItems] = useState<number[]>([]);
-
-  const toggleCompleted = (index: number) => {
-    setCompletedItems(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
-  };
-
+const ActionableImprovements = ({ 
+  improvements, 
+  manuallyCompletedItems, 
+  improvementValidation,
+  onToggleComplete 
+}: ActionableImprovementsProps) => {
   const getPriorityConfig = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -47,6 +45,34 @@ const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) =
     }
   };
 
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'ai-applied':
+        return {
+          icon: <Bot className="w-4 h-4 text-blue-600" />,
+          badge: 'secondary' as const,
+          label: 'AI Applied',
+          bg: 'bg-blue-50 border-blue-200'
+        };
+      case 'manually-completed':
+        return {
+          icon: <User className="w-4 h-4 text-green-600" />,
+          badge: 'secondary' as const,
+          label: 'Manually Done',
+          bg: 'bg-green-50 border-green-200'
+        };
+      case 'partially-applied':
+        return {
+          icon: <CheckCircle2 className="w-4 h-4 text-orange-600" />,
+          badge: 'secondary' as const,
+          label: 'Partially Applied',
+          bg: 'bg-orange-50 border-orange-200'
+        };
+      default:
+        return null;
+    }
+  };
+
   const sortedImprovements = [...improvements].sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     return priorityOrder[a.priority as keyof typeof priorityOrder] - 
@@ -54,7 +80,12 @@ const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) =
   });
 
   const highPriorityCount = improvements.filter(i => i.priority === 'high').length;
-  const completedCount = completedItems.length;
+  const totalCompleted = manuallyCompletedItems.length + 
+    (improvementValidation?.addressed.length || 0) + 
+    (improvementValidation?.partiallyAddressed.length || 0);
+
+  const aiAddressedCount = improvementValidation?.addressed.length || 0;
+  const partiallyAddressedCount = improvementValidation?.partiallyAddressed.length || 0;
 
   return (
     <Card className="glass-card">
@@ -63,11 +94,22 @@ const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) =
           <AlertTriangle className="w-5 h-5" />
           Action Plan & Improvements
         </CardTitle>
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm flex-wrap">
           <div className="flex items-center gap-1">
             <span className="text-muted-foreground">Progress:</span>
-            <span className="font-medium">{completedCount}/{improvements.length}</span>
+            <span className="font-medium">{totalCompleted}/{improvements.length}</span>
           </div>
+          {aiAddressedCount > 0 && (
+            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+              <Bot className="w-3 h-3 mr-1" />
+              {aiAddressedCount} AI Applied
+            </Badge>
+          )}
+          {partiallyAddressedCount > 0 && (
+            <Badge variant="secondary" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+              {partiallyAddressedCount} Partially Applied
+            </Badge>
+          )}
           {highPriorityCount > 0 && (
             <Badge variant="destructive" className="text-xs">
               {highPriorityCount} High Priority
@@ -78,45 +120,69 @@ const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) =
       <CardContent>
         <div className="space-y-4">
           {sortedImprovements.map((improvement, index) => {
-            const config = getPriorityConfig(improvement.priority);
-            const isCompleted = completedItems.includes(index);
+            const priorityConfig = getPriorityConfig(improvement.priority);
+            const status = improvementValidation ? 
+              getImprovementStatus(index, improvementValidation, manuallyCompletedItems) : 
+              (manuallyCompletedItems.includes(index) ? 'manually-completed' : 'not-addressed');
+            const statusConfig = getStatusConfig(status);
+            const isCompleted = status !== 'not-addressed';
             
             return (
               <div 
                 key={index} 
                 className={`relative p-4 rounded-lg border transition-all ${
-                  isCompleted ? 'opacity-60 bg-success/5 border-success/20' : config.bg
-                } ${isCompleted ? '' : 'hover:shadow-sm'}`}
+                  statusConfig ? statusConfig.bg : priorityConfig.bg
+                } ${isCompleted ? 'opacity-90' : 'hover:shadow-sm'}`}
               >
                 <div className="flex gap-3">
                   <div className="flex-shrink-0 mt-1">
-                    {isCompleted ? (
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                    ) : (
-                      config.icon
-                    )}
+                    {statusConfig ? statusConfig.icon : priorityConfig.icon}
                   </div>
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
+                      <div className="flex-1">
                         <h4 className={`font-semibold ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
                           {improvement.issue}
                         </h4>
-                        <Badge 
-                          variant={isCompleted ? 'outline' : config.badge} 
-                          className="text-xs mt-1"
-                        >
-                          {isCompleted ? 'Completed' : config.label}
-                        </Badge>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge 
+                            variant={statusConfig ? statusConfig.badge : priorityConfig.badge} 
+                            className="text-xs"
+                          >
+                            {statusConfig ? statusConfig.label : priorityConfig.label}
+                          </Badge>
+                          {status === 'ai-applied' && (
+                            <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                              ✨ Automatically improved by AI
+                            </span>
+                          )}
+                          {status === 'partially-applied' && (
+                            <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                              ⚡ Partially addressed by AI
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <Button
-                        variant={isCompleted ? "outline" : "ghost"}
-                        size="sm"
-                        onClick={() => toggleCompleted(index)}
-                        className="flex-shrink-0"
-                      >
-                        {isCompleted ? 'Undo' : 'Mark Done'}
-                      </Button>
+                      {status === 'not-addressed' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onToggleComplete(index)}
+                          className="flex-shrink-0"
+                        >
+                          Mark Done
+                        </Button>
+                      )}
+                      {status === 'manually-completed' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onToggleComplete(index)}
+                          className="flex-shrink-0"
+                        >
+                          Undo
+                        </Button>
+                      )}
                     </div>
                     
                     <div className={`text-sm leading-relaxed ${
@@ -143,18 +209,24 @@ const ActionableImprovements = ({ improvements }: ActionableImprovementsProps) =
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-blue-900">Optimization Progress</h4>
             <span className="text-sm text-blue-700">
-              {Math.round((completedCount / improvements.length) * 100)}% Complete
+              {Math.round((totalCompleted / improvements.length) * 100)}% Complete
             </span>
           </div>
           <div className="w-full bg-blue-200 rounded-full h-2">
             <div 
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(completedCount / improvements.length) * 100}%` }}
+              style={{ width: `${(totalCompleted / improvements.length) * 100}%` }}
             />
           </div>
-          {completedCount === improvements.length && (
+          {totalCompleted === improvements.length && (
             <div className="mt-3 text-sm text-blue-800 font-medium">
-              🎉 Great job! You've addressed all optimization recommendations.
+              🎉 Excellent! You've addressed all optimization recommendations.
+            </div>
+          )}
+          {aiAddressedCount > 0 && (
+            <div className="mt-2 text-xs text-blue-700">
+              <Bot className="w-3 h-3 inline mr-1" />
+              AI automatically handled {aiAddressedCount} improvement{aiAddressedCount !== 1 ? 's' : ''}
             </div>
           )}
         </div>

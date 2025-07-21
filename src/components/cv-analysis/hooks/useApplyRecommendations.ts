@@ -6,7 +6,8 @@ import { enhanceCVWithAI, EnhancedCVResult } from "@/services/cvEnhancement";
 
 export const useApplyRecommendations = (
   uploadedFile: File, 
-  analysisData?: any
+  analysisData?: any,
+  onOptimizationComplete?: (result: EnhancedCVResult) => void
 ) => {
   const [recommendationsApplied, setRecommendationsApplied] = useState(false);
   const [enhancedResult, setEnhancedResult] = useState<EnhancedCVResult | null>(null);
@@ -19,7 +20,8 @@ export const useApplyRecommendations = (
       industry: analysisData?.industry,
       targetRole: analysisData?.targetRole,
       atsScore: analysisData?.atsScore,
-      missingKeywords: analysisData?.keywords?.missingKeywords?.length || 0
+      missingKeywords: analysisData?.keywords?.missingKeywords?.length || 0,
+      improvementsCount: analysisData?.improvements?.length || 0
     });
     
     setIsProcessing(true);
@@ -83,13 +85,9 @@ export const useApplyRecommendations = (
       setEnhancedResult(enhanced);
       setRecommendationsApplied(true);
 
-      // Show detailed success message
-      if (enhanced.changesApplied.length > 0) {
-        toast.success(
-          `✅ Applied ${enhanced.changesApplied.length} AI improvements! ATS score boost: +${enhanced.estimatedATSScoreImprovement} points`
-        );
-      } else {
-        toast.success("✅ CV optimization complete! Your CV is already well-optimized for ATS systems.");
+      // Notify parent component about the optimization completion
+      if (onOptimizationComplete) {
+        onOptimizationComplete(enhanced);
       }
 
     } catch (error) {
