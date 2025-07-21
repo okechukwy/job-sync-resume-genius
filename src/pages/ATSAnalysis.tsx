@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
@@ -204,12 +205,18 @@ const ATSAnalysis = () => {
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Upload Your Resume
+              {isAnalyzing && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analysis in progress...
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={isAnalyzing} />
             
-            {uploadedResume ? <div className="glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4">
+            {uploadedResume ? <div className={`glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4 ${isAnalyzing ? 'opacity-75' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-success" />
@@ -221,19 +228,38 @@ const ATSAnalysis = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                      Change File
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isAnalyzing}
+                      className={isAnalyzing ? 'cursor-not-allowed opacity-50' : ''}
+                      title={isAnalyzing ? 'Cannot change file during analysis' : 'Change file'}
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        'Change File'
+                      )}
                     </Button>
                   </div>
                 </div>
+                {isAnalyzing && (
+                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                    <Info className="w-4 h-4 inline mr-1" />
+                    File changes are disabled during analysis to ensure accurate results.
+                  </div>
+                )}
               </div> : <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
                 <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium mb-2">Upload your resume for comprehensive ATS analysis</p>
                 <p className="text-muted-foreground mb-6">
                   Supported formats: PDF, DOC, DOCX (max 5MB)
                 </p>
-                <Button onClick={() => fileInputRef.current?.click()}>
+                <Button onClick={() => fileInputRef.current?.click()} disabled={isAnalyzing}>
                   Choose File
                 </Button>
               </div>}
@@ -242,8 +268,8 @@ const ATSAnalysis = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="industry">Target Industry</Label>
-                <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-                  <SelectTrigger>
+                <Select value={selectedIndustry} onValueChange={setSelectedIndustry} disabled={isAnalyzing}>
+                  <SelectTrigger className={isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}>
                     <SelectValue placeholder="Select your industry" />
                   </SelectTrigger>
                   <SelectContent>
@@ -258,14 +284,28 @@ const ATSAnalysis = () => {
             {/* Job Description (Optional) */}
             <div className="space-y-2">
               <Label htmlFor="jobDescription">Job Description (Optional)</Label>
-              <Textarea id="jobDescription" placeholder="Paste the job description for more targeted optimization..." value={jobDescription} onChange={e => setJobDescription(e.target.value)} className="min-h-[100px]" />
+              <Textarea 
+                id="jobDescription" 
+                placeholder="Paste the job description for more targeted optimization..." 
+                value={jobDescription} 
+                onChange={e => setJobDescription(e.target.value)} 
+                className={`min-h-[100px] ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isAnalyzing}
+              />
               <p className="text-sm text-muted-foreground">
                 Adding a job description will provide more targeted keyword analysis and recommendations.
               </p>
             </div>
             
             {uploadedResume && <Button variant="hero" className="w-full" onClick={handleAnalyze} disabled={isAnalyzing}>
-                {isAnalyzing ? 'Analyzing ATS Compatibility...' : 'Start Comprehensive ATS Analysis'}
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing ATS Compatibility...
+                  </>
+                ) : (
+                  'Start Comprehensive ATS Analysis'
+                )}
               </Button>}
           </CardContent>
         </Card>
