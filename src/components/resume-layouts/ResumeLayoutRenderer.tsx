@@ -1,3 +1,4 @@
+
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { getTemplateById, getStylePresetById } from "@/config/templateConfig";
 import { UnifiedLayout } from "./UnifiedLayout";
@@ -19,12 +20,18 @@ interface ResumeLayoutRendererProps {
 }
 
 export const ResumeLayoutRenderer = ({ data, styles, layoutVariant, templateId, formatDate }: ResumeLayoutRendererProps) => {
-  // If templateId is provided, use the new unified system
+  // PRIORITIZE the unified system - this is the key fix
   if (templateId) {
     const template = getTemplateById(templateId);
-    const stylePreset = template ? getStylePresetById(template.stylePreset) : getStylePresetById('classic-blue');
+    const stylePreset = template ? getStylePresetById(template.stylePreset) : null;
     
-    if (stylePreset) {
+    console.log('ResumeLayoutRenderer - Using unified system:', {
+      templateId,
+      template: template?.name,
+      stylePreset: stylePreset?.name
+    });
+    
+    if (template && stylePreset) {
       return (
         <UnifiedLayout 
           data={data}
@@ -35,8 +42,27 @@ export const ResumeLayoutRenderer = ({ data, styles, layoutVariant, templateId, 
     }
   }
 
-  // Fallback to legacy system for backward compatibility
-  if (!styles || !layoutVariant) return null;
+  // Only fallback to legacy system if unified system fails
+  console.log('ResumeLayoutRenderer - Falling back to legacy system:', {
+    styles: !!styles,
+    layoutVariant
+  });
+  
+  if (!styles || !layoutVariant) {
+    // If no styles or layout variant, try to use a default unified template
+    const defaultStylePreset = getStylePresetById('modern-professional');
+    if (defaultStylePreset) {
+      console.log('ResumeLayoutRenderer - Using default unified template');
+      return (
+        <UnifiedLayout 
+          data={data}
+          stylePreset={defaultStylePreset}
+          formatDate={formatDate}
+        />
+      );
+    }
+    return null;
+  }
   
   const { renderSummarySection, renderExperienceSection, renderEducationSection, renderSkillsSection } = createSectionRenderers(data, styles, formatDate);
 

@@ -18,10 +18,10 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   
-  // Enhanced template mapping for new system
+  // Enhanced template mapping for unified system - now comprehensive
   const getTemplateId = (templateName: string): string | undefined => {
     const nameMapping: Record<string, string> = {
-      // Professional templates
+      // Professional templates - exact matches from templateConfig.ts
       'Corporate Executive': 'corporate-executive',
       'Modern Professional': 'modern-professional',
       'Academic Researcher': 'academic-researcher',
@@ -47,12 +47,33 @@ const LivePreview = ({ data, template, className = "" }: LivePreviewProps) => {
       'AI/ML Engineer': 'ai-ml-engineer',
       'Cloud Architect': 'cloud-architect',
       
-      // Legacy mapping for backward compatibility
+      // Legacy template mappings from allTemplates
+      'Tech Professional': 'software-engineer-pro',
+      'Healthcare Specialist': 'healthcare-professional',
+      'Finance Expert': 'finance-executive',
+      'Creative Professional': 'graphic-designer',
       'Medical Doctor': 'healthcare-professional',
       'Registered Nurse': 'healthcare-professional',
       'Mental Health Professional': 'healthcare-professional',
       'Software Engineer': 'software-engineer-pro',
-      'Data Scientist': 'data-scientist-elite'
+      'Data Scientist': 'data-scientist-elite',
+      'Investment Banker': 'finance-executive',
+      'Financial Analyst': 'finance-executive',
+      'Accountant Pro': 'finance-executive',
+      'Marketing Manager': 'marketing-creative',
+      'Sales Manager': 'business-manager',
+      'Operations Manager': 'business-manager',
+      'Project Manager': 'business-manager',
+      'Business Analyst': 'business-manager',
+      'Consultant': 'consulting-expert',
+      'HR Manager': 'business-manager',
+      'Research Scientist': 'academic-researcher',
+      'Lab Technician': 'academic-researcher',
+      'Recent Graduate': 'modern-professional',
+      'Elegant Professional': 'corporate-executive',
+      'Gradient Modern': 'modern-professional',
+      'Minimalist Pro': 'modern-professional',
+      'Colorful Fresh': 'marketing-creative'
     };
     return nameMapping[templateName];
   };

@@ -21,7 +21,7 @@ interface ResumePreviewProps {
 const ResumePreview = ({ data, template }: ResumePreviewProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  // Enhanced template mapping for new system
+  // Enhanced template mapping for unified system - same as LivePreview
   const getTemplateId = (templateName: string): string | undefined => {
     const nameMapping: Record<string, string> = {
       // Professional templates
@@ -50,7 +50,11 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
       'AI/ML Engineer': 'ai-ml-engineer',
       'Cloud Architect': 'cloud-architect',
       
-      // Legacy mapping
+      // Legacy mappings
+      'Tech Professional': 'software-engineer-pro',
+      'Healthcare Specialist': 'healthcare-professional',
+      'Finance Expert': 'finance-executive',
+      'Creative Professional': 'graphic-designer',
       'Medical Doctor': 'healthcare-professional',
       'Software Engineer': 'software-engineer-pro',
       'Data Scientist': 'data-scientist-elite'
@@ -147,11 +151,11 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
   // Get enhanced spacing based on template category
   const getLayoutSpacing = () => {
     if (unifiedTemplate) {
-      const stylePreset = unifiedTemplate.stylePreset;
-      if (stylePreset.includes('spacious') || stylePreset.includes('creative') || stylePreset.includes('portfolio')) {
+      const category = unifiedTemplate.category;
+      if (category === 'creative') {
         return 'p-12';
       }
-      if (stylePreset.includes('compact') || stylePreset.includes('technical') || stylePreset.includes('developer')) {
+      if (category === 'technical') {
         return 'p-6';
       }
     }
