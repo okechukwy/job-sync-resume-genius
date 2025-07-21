@@ -1,16 +1,20 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Plus, Calendar, TrendingUp, Target, Users, Edit2, Trash2 } from "lucide-react";
+import { Plus, Calendar, TrendingUp, Target, Users } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useJobApplications } from "@/hooks/useJobApplications";
 import { ApplicationForm } from "@/components/ApplicationForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { BulkActions } from "@/components/performance/BulkActions";
+import { MetricsLegend } from "@/components/performance/MetricsLegend";
+import { ApplicationsTable } from "@/components/performance/ApplicationsTable";
 
 interface AIInsights {
   working_well: string[];
@@ -25,36 +29,8 @@ const PerformanceTracking = () => {
   const [editingApplication, setEditingApplication] = useState(null);
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase().replace(' ', '_')) {
-      case 'offer_received':
-        return 'bg-success text-success-foreground';
-      case 'interview_scheduled':
-      case 'interview_completed':
-        return 'bg-primary text-primary-foreground';
-      case 'under_review':
-        return 'bg-warning text-warning-foreground';
-      case 'rejected':
-        return 'bg-destructive text-destructive-foreground';
-      case 'withdrawn':
-        return 'bg-muted text-muted-foreground';
-      default:
-        return 'bg-secondary text-secondary-foreground';
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  const formatStage = (stage: string) => {
-    return stage.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleAddApplication = async (data: any) => {
     await addApplication(data);
@@ -77,6 +53,30 @@ const PerformanceTracking = () => {
   const handleDeleteApplication = async (id: string) => {
     if (confirm('Are you sure you want to delete this application?')) {
       await deleteApplication(id);
+    }
+  };
+
+  const handleQuickStatusUpdate = async (id: string, status: string) => {
+    setIsUpdating(true);
+    try {
+      await updateApplication(id, { status });
+      toast.success('Status updated successfully');
+    } catch (error) {
+      toast.error('Failed to update status');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleBulkStatusUpdate = async (ids: string[], status: string) => {
+    setIsUpdating(true);
+    try {
+      await Promise.all(ids.map(id => updateApplication(id, { status })));
+      toast.success(`${ids.length} applications updated successfully`);
+    } catch (error) {
+      toast.error('Failed to update applications');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -187,6 +187,11 @@ const PerformanceTracking = () => {
           </Card>
         </div>
 
+        {/* Metrics Legend */}
+        <div className="mb-8">
+          <MetricsLegend />
+        </div>
+
         {/* Applications Table */}
         <Card className="glass-card mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -197,82 +202,23 @@ const PerformanceTracking = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/20">
-                    <th className="text-left py-3 px-2">Company</th>
-                    <th className="text-left py-3 px-2">Position</th>
-                    <th className="text-left py-3 px-2">Date Applied</th>
-                    <th className="text-left py-3 px-2">Status</th>
-                    <th className="text-left py-3 px-2">Stage</th>
-                    <th className="text-left py-3 px-2">Resume Version</th>
-                    <th className="text-left py-3 px-2">ATS Score</th>
-                    <th className="text-left py-3 px-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                        No applications found. Add your first application to start tracking performance.
-                      </td>
-                    </tr>
-                  ) : (
-                    applications.map((app) => (
-                      <tr key={app.id} className="border-b border-border/10 hover:bg-background/50">
-                        <td className="py-3 px-2 font-medium">{app.company_name}</td>
-                        <td className="py-3 px-2">{app.position_title}</td>
-                        <td className="py-3 px-2 text-muted-foreground">
-                          {new Date(app.date_applied).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-2">
-                          <Badge className={getStatusColor(app.status)}>
-                            {formatStatus(app.status)}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-2 text-muted-foreground">{formatStage(app.current_stage)}</td>
-                        <td className="py-3 px-2">
-                          {app.resume_version ? (
-                            <Badge variant="outline">{app.resume_version}</Badge>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-2">
-                          {app.ats_score ? (
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{app.ats_score}%</span>
-                              <Progress value={app.ats_score} className="w-16 h-2" />
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-2">
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              onClick={() => handleEditApplication(app)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              onClick={() => handleDeleteApplication(app.id)}
-                            >
-                              <Trash2 className="w-4 h-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <BulkActions
+              applications={applications}
+              selectedIds={selectedApplicationIds}
+              onSelectionChange={setSelectedApplicationIds}
+              onBulkUpdate={handleBulkStatusUpdate}
+              isUpdating={isUpdating}
+            />
+            
+            <ApplicationsTable
+              applications={applications}
+              selectedIds={selectedApplicationIds}
+              onSelectionChange={setSelectedApplicationIds}
+              onEditApplication={handleEditApplication}
+              onDeleteApplication={handleDeleteApplication}
+              onStatusUpdate={handleQuickStatusUpdate}
+              isUpdating={isUpdating}
+            />
           </CardContent>
         </Card>
 
