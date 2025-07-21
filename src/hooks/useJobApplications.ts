@@ -67,6 +67,27 @@ export const useJobApplications = () => {
     }
   };
 
+  const refreshMetrics = async (period: string = 'all_time') => {
+    if (!user) return;
+    
+    try {
+      // Trigger recalculation of metrics
+      const { error } = await supabase.rpc('calculate_performance_metrics', {
+        user_uuid: user.id,
+        period: period
+      });
+      
+      if (error) throw error;
+      
+      // Fetch updated metrics
+      await fetchMetrics(period);
+      toast.success('Metrics refreshed successfully');
+    } catch (err) {
+      console.error('Error refreshing metrics:', err);
+      toast.error('Failed to refresh metrics');
+    }
+  };
+
   const addApplication = async (applicationData: any) => {
     if (!user) return;
 
@@ -224,6 +245,7 @@ export const useJobApplications = () => {
     addApplication,
     updateApplication,
     deleteApplication,
+    refreshMetrics,
     refetch: () => Promise.all([fetchApplications(), fetchMetrics()]),
   };
 };

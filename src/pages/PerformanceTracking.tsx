@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { BulkActions } from "@/components/performance/BulkActions";
 import { MetricsLegend } from "@/components/performance/MetricsLegend";
 import { ApplicationsTable } from "@/components/performance/ApplicationsTable";
+import { SuccessMetrics } from "@/components/performance/SuccessMetrics";
 
 interface AIInsights {
   working_well: string[];
@@ -24,7 +25,7 @@ interface AIInsights {
 
 const PerformanceTracking = () => {
   const { user } = useAuth();
-  const { applications, metrics, loading, addApplication, updateApplication, deleteApplication } = useJobApplications();
+  const { applications, metrics, loading, addApplication, updateApplication, deleteApplication, refreshMetrics } = useJobApplications();
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [editingApplication, setEditingApplication] = useState(null);
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
@@ -224,35 +225,11 @@ const PerformanceTracking = () => {
 
         {/* Success Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Success Metrics</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Applications Sent</span>
-                <span className="font-semibold">{stats.totalApplications}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Responses Received</span>
-                <span className="font-semibold text-success">{metrics?.responses_received || 0}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Interviews Scheduled</span>
-                <span className="font-semibold text-primary">{metrics?.interviews_scheduled || 0}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Offers Received</span>
-                <span className="font-semibold text-warning">{metrics?.offers_received || 0}</span>
-              </div>
-              <div className="pt-4 border-t border-border/20">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Success Rate</span>
-                  <span className="font-bold text-lg text-primary">{stats.offerRate.toFixed(1)}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <SuccessMetrics 
+            metrics={metrics}
+            applications={applications}
+            onRefreshMetrics={refreshMetrics}
+          />
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between">
