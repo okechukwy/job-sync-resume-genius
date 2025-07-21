@@ -1,6 +1,8 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AnalysisData } from "@/components/cv-analysis/types/analysisTypes";
 import { TablesInsert } from "@/integrations/supabase/types";
+import { validateAnalysisData, logValidationResult } from "@/components/cv-analysis/utils/dataValidation";
 
 export interface SavedCVAnalysis {
   id: string;
@@ -12,7 +14,7 @@ export interface SavedCVAnalysis {
 }
 
 export const cvAnalysisService = {
-  // Save CV analysis results
+  // Save CV analysis results with validation
   async saveCVAnalysis(
     fileName: string,
     fileSize: number,
@@ -21,19 +23,25 @@ export const cvAnalysisService = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error("User not authenticated");
 
+    // Validate data before saving
+    const validationResult = validateAnalysisData(analysisData);
+    logValidationResult(validationResult, 'CV Analysis Save');
+    
+    const dataToSave = validationResult.correctedData || analysisData;
+
     const { data, error } = await supabase
       .from("cv_analyses")
       .insert({
         user_id: user.user.id,
         file_name: fileName,
         file_size: fileSize,
-        overall_score: analysisData.overallScore,
-        ats_score: analysisData.atsScore,
-        sections: analysisData.sections as any,
-        keywords: analysisData.keywords as any,
-        improvements: analysisData.improvements as any,
-        industry: analysisData.industry,
-        target_role: analysisData.targetRole,
+        overall_score: dataToSave.overallScore,
+        ats_score: dataToSave.atsScore,
+        sections: dataToSave.sections as any,
+        keywords: dataToSave.keywords as any,
+        improvements: dataToSave.improvements as any,
+        industry: dataToSave.industry,
+        target_role: dataToSave.targetRole,
         analysis_type: "ai_generated"
       } as TablesInsert<'cv_analyses'>)
       .select()
@@ -58,7 +66,7 @@ export const cvAnalysisService = {
     return data;
   },
 
-  // Load specific CV analysis
+  // Load specific CV analysis with validation
   async loadCVAnalysis(analysisId: string): Promise<AnalysisData> {
     const { data, error } = await supabase
       .from("cv_analyses")
@@ -68,7 +76,7 @@ export const cvAnalysisService = {
 
     if (error) throw error;
 
-    return {
+    const rawAnalysis = {
       overallScore: data.overall_score,
       atsScore: data.ats_score,
       sections: data.sections as unknown as AnalysisData['sections'],
@@ -77,6 +85,12 @@ export const cvAnalysisService = {
       industry: (data as any).industry || 'Business',
       targetRole: (data as any).target_role || 'Professional'
     };
+
+    // Validate loaded data
+    const validationResult = validateAnalysisData(rawAnalysis);
+    logValidationResult(validationResult, 'CV Analysis Load');
+    
+    return validationResult.correctedData || rawAnalysis;
   },
 
   // Delete CV analysis

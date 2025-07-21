@@ -8,6 +8,64 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Data validation and correction function
+const validateAndCorrectAnalysisData = (analysis: any) => {
+  console.log('Validating and correcting analysis data...');
+  
+  // Ensure keywords have proper arrays and correct counts
+  if (analysis.keywords) {
+    if (!Array.isArray(analysis.keywords.foundKeywords)) {
+      analysis.keywords.foundKeywords = [];
+    }
+    if (!Array.isArray(analysis.keywords.missingKeywords)) {
+      analysis.keywords.missingKeywords = [];
+    }
+    if (!Array.isArray(analysis.keywords.suggestions)) {
+      analysis.keywords.suggestions = [];
+    }
+    
+    // Correct the counts to match actual array lengths
+    analysis.keywords.found = analysis.keywords.foundKeywords.length;
+    analysis.keywords.missing = analysis.keywords.missingKeywords.length;
+    
+    console.log('Corrected keyword counts:', {
+      found: analysis.keywords.found,
+      missing: analysis.keywords.missing,
+      foundKeywords: analysis.keywords.foundKeywords.length,
+      missingKeywords: analysis.keywords.missingKeywords.length
+    });
+  }
+  
+  // Validate section scores are within 0-100 range
+  if (analysis.sections) {
+    Object.keys(analysis.sections).forEach(section => {
+      const sectionData = analysis.sections[section];
+      if (sectionData.score < 0 || sectionData.score > 100) {
+        console.warn(`Invalid score for section ${section}: ${sectionData.score}, clamping to 0-100`);
+        sectionData.score = Math.max(0, Math.min(100, sectionData.score));
+      }
+    });
+  }
+  
+  // Validate overall and ATS scores
+  if (analysis.overallScore < 0 || analysis.overallScore > 100) {
+    console.warn(`Invalid overall score: ${analysis.overallScore}, clamping to 0-100`);
+    analysis.overallScore = Math.max(0, Math.min(100, analysis.overallScore));
+  }
+  
+  if (analysis.atsScore < 0 || analysis.atsScore > 100) {
+    console.warn(`Invalid ATS score: ${analysis.atsScore}, clamping to 0-100`);
+    analysis.atsScore = Math.max(0, Math.min(100, analysis.atsScore));
+  }
+  
+  // Ensure improvements array exists
+  if (!Array.isArray(analysis.improvements)) {
+    analysis.improvements = [];
+  }
+  
+  return analysis;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,7 +97,16 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a professional resume analyst and career coach specializing in ${industry}. Analyze the provided resume and return a detailed JSON analysis with the following structure:
+            content: `You are a professional resume analyst and career coach specializing in ${industry}. Analyze the provided resume and return a detailed JSON analysis.
+
+CRITICAL INSTRUCTIONS:
+1. Ensure foundKeywords and missingKeywords arrays contain actual keyword strings
+2. The "found" and "missing" counts will be auto-calculated from array lengths
+3. Provide specific, actionable keywords and suggestions
+4. All scores must be between 0-100
+5. Status values must be: "excellent", "good", "fair", or "needs_work"
+
+Return ONLY valid JSON with this exact structure:
 
 {
   "overallScore": number (0-100),
@@ -55,11 +122,9 @@ serve(async (req) => {
     "formatting": {"score": number, "status": "excellent|good|fair|needs_work"}
   },
   "keywords": {
-    "found": number,
-    "missing": number,
-    "foundKeywords": [array of keywords found in resume],
-    "missingKeywords": [array of missing keywords specific to ${industry}],
-    "suggestions": [array of keyword suggestions for improvement]
+    "foundKeywords": ["keyword1", "keyword2", "keyword3"],
+    "missingKeywords": ["missing1", "missing2", "missing3"],
+    "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
   },
   "improvements": [
     {
@@ -70,7 +135,7 @@ serve(async (req) => {
   ]
 }
 
-Focus on ${industry}-specific requirements, keywords, and best practices. Be specific and actionable in your recommendations. Make sure to include actual keyword arrays in foundKeywords and missingKeywords.`
+Focus on ${industry}-specific requirements and provide realistic, actionable recommendations.`
           },
           {
             role: 'user',
@@ -93,7 +158,7 @@ Focus on ${industry}-specific requirements, keywords, and best practices. Be spe
     
     console.log('Raw OpenAI response:', analysisText);
 
-    // Parse the JSON response
+    // Parse the JSON response with improved error handling
     let analysis;
     try {
       // Remove any markdown formatting if present
@@ -102,21 +167,28 @@ Focus on ${industry}-specific requirements, keywords, and best practices. Be spe
     } catch (parseError) {
       console.error('Failed to parse OpenAI response as JSON:', parseError);
       console.error('Raw response:', analysisText);
-      throw new Error('Failed to parse AI analysis response');
+      
+      // Try to extract JSON from the response
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          analysis = JSON.parse(jsonMatch[0]);
+        } catch (secondParseError) {
+          console.error('Second parse attempt failed:', secondParseError);
+          throw new Error('Failed to parse AI analysis response');
+        }
+      } else {
+        throw new Error('No valid JSON found in AI response');
+      }
     }
 
-    // Validate and ensure proper structure
+    // Validate and correct the analysis data
+    analysis = validateAndCorrectAnalysisData(analysis);
+
+    // Final validation check
     if (!analysis.overallScore || !analysis.sections || !analysis.keywords || !analysis.improvements) {
-      console.error('Invalid analysis structure:', analysis);
+      console.error('Invalid analysis structure after correction:', analysis);
       throw new Error('Invalid analysis structure from AI');
-    }
-
-    // Ensure keywords have proper arrays
-    if (!analysis.keywords.foundKeywords) {
-      analysis.keywords.foundKeywords = [];
-    }
-    if (!analysis.keywords.missingKeywords) {
-      analysis.keywords.missingKeywords = analysis.keywords.suggestions?.slice(0, analysis.keywords.missing) || [];
     }
 
     // Ensure industry and targetRole are set
@@ -127,7 +199,14 @@ Focus on ${industry}-specific requirements, keywords, and best practices. Be spe
       analysis.targetRole = `${industry} Professional`;
     }
 
-    console.log('Successfully analyzed CV with score:', analysis.overallScore);
+    console.log('Successfully analyzed CV with corrected data:', {
+      overallScore: analysis.overallScore,
+      atsScore: analysis.atsScore,
+      foundKeywords: analysis.keywords.foundKeywords.length,
+      missingKeywords: analysis.keywords.missingKeywords.length,
+      foundCount: analysis.keywords.found,
+      missingCount: analysis.keywords.missing
+    });
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
