@@ -7,7 +7,7 @@ import { ChevronDown, ChevronRight, Lightbulb, Target, BookOpen } from 'lucide-r
 import { SampleAnswer } from '@/hooks/useAIInterview';
 
 interface SampleAnswerSectionProps {
-  sampleAnswer: SampleAnswer;
+  sampleAnswer?: SampleAnswer;
   isLoading?: boolean;
 }
 
@@ -16,6 +16,11 @@ const SampleAnswerSection: React.FC<SampleAnswerSectionProps> = ({
   isLoading = false 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Don't render anything if no sample answer and not loading
+  if (!sampleAnswer && !isLoading) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -63,63 +68,65 @@ const SampleAnswerSection: React.FC<SampleAnswerSectionProps> = ({
         
         <CollapsibleContent>
           <CardContent className="pt-0">
-            <div className="space-y-4">
-              {/* Main Sample Answer */}
-              <div className="p-4 bg-muted/30 rounded-lg">
-                <p className="text-sm leading-relaxed">{sampleAnswer.sampleAnswer}</p>
-              </div>
-
-              {/* Answer Structure */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-sm">Answer Structure</span>
+            {sampleAnswer && (
+              <div className="space-y-4">
+                {/* Main Sample Answer */}
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <p className="text-sm leading-relaxed">{sampleAnswer.sampleAnswer}</p>
                 </div>
-                <p className="text-sm text-muted-foreground ml-6">
-                  {sampleAnswer.structure}
-                </p>
-              </div>
 
-              {/* Key Points */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-sm">Key Points</span>
+                {/* Answer Structure */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Answer Structure</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground ml-6">
+                    {sampleAnswer.structure}
+                  </p>
                 </div>
-                <ul className="ml-6 space-y-1">
-                  {sampleAnswer.keyPoints.map((point, index) => (
-                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              {/* Tips */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-sm">Tips</span>
+                {/* Key Points */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Key Points</span>
+                  </div>
+                  <ul className="ml-6 space-y-1">
+                    {sampleAnswer.keyPoints.map((point, index) => (
+                      <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="ml-6 space-y-1">
-                  {sampleAnswer.tips.map((tip, index) => (
-                    <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              {/* Reasoning */}
-              <div className="space-y-2">
-                <span className="font-medium text-sm">Why This Answer Works</span>
-                <p className="text-sm text-muted-foreground">
-                  {sampleAnswer.reasoning}
-                </p>
+                {/* Tips */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Tips</span>
+                  </div>
+                  <ul className="ml-6 space-y-1">
+                    {sampleAnswer.tips.map((tip, index) => (
+                      <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Reasoning */}
+                <div className="space-y-2">
+                  <span className="font-medium text-sm">Why This Answer Works</span>
+                  <p className="text-sm text-muted-foreground">
+                    {sampleAnswer.reasoning}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
