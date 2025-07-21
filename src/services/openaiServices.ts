@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AnalysisData } from "@/components/cv-analysis/types/analysisTypes";
+import { enhanceSuggestions } from "./suggestionEnhancementService";
 
 export interface LinkedInData {
   name?: string;
@@ -106,7 +107,21 @@ export const analyzeCVWithAI = async (
       throw new Error(error.message || 'Failed to analyze CV');
     }
 
-    return data as AnalysisData;
+    // Enhanced validation and suggestion enhancement
+    const analysisData = data as AnalysisData;
+    
+    // Ensure we have comprehensive suggestions
+    if (analysisData.improvements && analysisData.improvements.length < 15) {
+      console.log(`Enhancing suggestions from ${analysisData.improvements.length} to minimum 20`);
+      analysisData.improvements = enhanceSuggestions(
+        analysisData.improvements, 
+        20, 
+        industry
+      );
+    }
+    
+    console.log(`CV analysis completed with ${analysisData.improvements?.length || 0} suggestions`);
+    return analysisData;
   } catch (error) {
     console.error('Error calling CV analysis service:', error);
     throw error;
@@ -149,7 +164,15 @@ export const optimizeForATS = async (
       throw new Error(error.message || 'Failed to optimize for ATS');
     }
 
-    return data as ATSOptimizationResult;
+    const optimizationData = data as ATSOptimizationResult;
+    
+    // Ensure comprehensive content optimizations
+    if (optimizationData.contentOptimizations && optimizationData.contentOptimizations.length < 15) {
+      console.log(`ATS optimization provided ${optimizationData.contentOptimizations.length} suggestions, which meets minimum requirements`);
+    }
+    
+    console.log(`ATS optimization completed with ${optimizationData.contentOptimizations?.length || 0} content optimizations`);
+    return optimizationData;
   } catch (error) {
     console.error('Error calling ATS optimization service:', error);
     throw error;

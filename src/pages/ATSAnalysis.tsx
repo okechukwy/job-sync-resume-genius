@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
 import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
+
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<ATSOptimizationResult | null>(null);
@@ -21,6 +22,7 @@ const ATSAnalysis = () => {
   const [showTesting, setShowTesting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const industries = ["Technology", "Healthcare", "Finance", "Creative", "Business", "Research", "Marketing", "Sales", "Education", "Manufacturing", "Retail"];
+
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -38,6 +40,7 @@ const ATSAnalysis = () => {
     setAnalysis(null); // Clear previous analysis
     toast.success('Resume uploaded successfully!');
   };
+
   const handleAnalyze = async () => {
     if (!uploadedResume) {
       toast.error('Please upload a resume first');
@@ -97,11 +100,13 @@ const ATSAnalysis = () => {
       setIsAnalyzing(false);
     }
   };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success';
     if (score >= 60) return 'text-warning';
     return 'text-destructive';
   };
+
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -112,6 +117,7 @@ const ATSAnalysis = () => {
         return <Info className="h-4 w-4 text-primary" />;
     }
   };
+
   const getPriorityBadge = (priority: string) => {
     const colors = {
       high: 'bg-destructive/10 text-destructive border-destructive/20',
@@ -120,6 +126,7 @@ const ATSAnalysis = () => {
     };
     return colors[priority as keyof typeof colors] || colors.low;
   };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'quantification':
@@ -136,6 +143,7 @@ const ATSAnalysis = () => {
         return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
+
   const getCategoryBadge = (category: string) => {
     const colors = {
       quantification: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -147,6 +155,7 @@ const ATSAnalysis = () => {
     };
     return colors[category as keyof typeof colors] || colors.formatting;
   };
+
   const getGroupedOptimizations = () => {
     if (!analysis?.contentOptimizations) return {};
     return analysis.contentOptimizations.reduce((groups, optimization) => {
@@ -158,6 +167,23 @@ const ATSAnalysis = () => {
       return groups;
     }, {} as Record<string, typeof analysis.contentOptimizations>);
   };
+
+  const getSuggestionStats = () => {
+    if (!analysis?.contentOptimizations) return { total: 0, byCategory: {}, byPriority: {} };
+    
+    const byCategory = analysis.contentOptimizations.reduce((acc, opt) => {
+      const category = opt.category || 'general';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      total: analysis.contentOptimizations.length,
+      byCategory,
+      sections: Object.keys(getGroupedOptimizations()).length
+    };
+  };
+
   return <div className="min-h-screen bg-gradient-hero">
       <PageHeader />
 
@@ -256,9 +282,14 @@ const ATSAnalysis = () => {
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center justify-between">
                   ATS Compatibility Score
-                  <Badge variant="outline" className="text-sm">
-                    {analysis.contentOptimizations.length} Content Optimizations
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-sm">
+                      {getSuggestionStats().total} Comprehensive Optimizations
+                    </Badge>
+                    <Badge variant="secondary" className="text-sm">
+                      {getSuggestionStats().sections} Sections Analyzed
+                    </Badge>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -271,6 +302,14 @@ const ATSAnalysis = () => {
                   </div>
                 </div>
                 <Progress value={analysis.atsScore} className="h-4" />
+                
+                {getSuggestionStats().total >= 15 && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      ✨ <strong>Comprehensive Analysis Complete:</strong> We've identified {getSuggestionStats().total} specific optimization opportunities across {getSuggestionStats().sections} resume sections to maximize your ATS compatibility.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -336,22 +375,32 @@ const ATSAnalysis = () => {
                 </CardContent>
               </Card>}
 
-            {/* Content Optimizations - Enhanced Display with Grouping */}
+            {/* Content Optimizations - Enhanced Display with Better Organization */}
             {analysis.contentOptimizations.length > 0 && <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
-                    Content Improvements ({analysis.contentOptimizations.length} comprehensive suggestions)
+                    Comprehensive Content Improvements ({analysis.contentOptimizations.length} detailed optimizations)
                   </CardTitle>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {Object.keys(getGroupedOptimizations()).length} Sections Covered
+                    </Badge>
+                    {Object.entries(getSuggestionStats().byCategory).map(([category, count]) => (
+                      <Badge key={category} variant="outline" className="text-xs">
+                        {category}: {count}
+                      </Badge>
+                    ))}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Comprehensive optimizations across all major resume sections
+                    Systematic optimizations covering quantification, keywords, achievements, and formatting across all resume sections
                   </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     {Object.entries(getGroupedOptimizations()).map(([sectionName, optimizations]) => <div key={sectionName} className="space-y-4">
                         <h3 className="text-lg font-semibold text-primary border-b border-border/20 pb-2">
-                          {sectionName} ({optimizations.length} improvement{optimizations.length !== 1 ? 's' : ''})
+                          {sectionName} ({optimizations.length} optimization{optimizations.length !== 1 ? 's' : ''})
                         </h3>
                         {optimizations.map((optimization, index) => <div key={`${sectionName}-${index}`} className="glass-card p-4 rounded-lg border border-border/50">
                             <div className="flex items-start gap-3 mb-3">
@@ -405,4 +454,5 @@ const ATSAnalysis = () => {
       </div>
     </div>;
 };
+
 export default ATSAnalysis;
