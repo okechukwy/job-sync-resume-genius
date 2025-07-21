@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Users, Trophy, Check, MoreHorizontal } from 'lucide-react';
+import { Users, Trophy, Check, MoreHorizontal, Activity } from 'lucide-react';
 import type { JobApplication } from '@/hooks/useJobApplications';
 
 interface BulkActionsProps {
@@ -19,6 +19,7 @@ interface BulkActionsProps {
 const bulkActions = [
   { status: 'under_review', label: 'Mark as Under Review', icon: Users, description: 'These applications will be marked as under review' },
   { status: 'interview_scheduled', label: 'Schedule Interview', icon: Users, description: 'These applications will be marked as interview scheduled' },
+  { status: 'interview_in_progress', label: 'Start Interview', icon: Activity, description: 'These applications will be marked as interview in progress' },
   { status: 'interview_completed', label: 'Complete Interview', icon: Check, description: 'These applications will be marked as interview completed' },
   { status: 'offer_received', label: 'Mark Offer Received', icon: Trophy, description: 'These applications will be marked as offer received' },
 ];
@@ -52,6 +53,7 @@ export const BulkActions = ({
       case 'under_review':
         return `+${count} to Responses Received`;
       case 'interview_scheduled':
+      case 'interview_in_progress':
       case 'interview_completed':
         return `+${count} to Interviews Scheduled`;
       case 'offer_received':

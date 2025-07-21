@@ -13,6 +13,7 @@ export const MetricsLegend = () => {
     { status: 'applied', label: 'Applied', description: 'Initial application submitted', metric: 'Counts toward Total Applications' },
     { status: 'under_review', label: 'Under Review', description: 'Employer is reviewing your application', metric: 'Increases Response Rate' },
     { status: 'interview_scheduled', label: 'Interview Scheduled', description: 'Interview has been scheduled', metric: 'Increases Interview Rate' },
+    { status: 'interview_in_progress', label: 'Interview In Progress', description: 'Interview is currently taking place', metric: 'Maintains Interview Rate' },
     { status: 'interview_completed', label: 'Interview Completed', description: 'Interview process completed', metric: 'Maintains Interview Rate' },
     { status: 'offer_received', label: 'Offer Received', description: 'Job offer has been received', metric: 'Increases Offer Rate' },
   ];
@@ -31,7 +32,7 @@ export const MetricsLegend = () => {
     { 
       icon: Calendar, 
       name: 'Interview Rate', 
-      description: 'Percentage of applications that led to interviews (scheduled or completed)' 
+      description: 'Percentage of applications that led to interviews (scheduled, in progress, or completed)' 
     },
     { 
       icon: Trophy, 
@@ -97,7 +98,8 @@ export const MetricsLegend = () => {
               <div className="text-sm font-medium text-primary mb-1">💡 Pro Tip</div>
               <div className="text-xs text-muted-foreground">
                 Updating your application status as you progress through the hiring process will automatically 
-                recalculate your performance metrics in real-time. This helps you track your job search effectiveness.
+                recalculate your performance metrics in real-time. Use "Interview In Progress" when you've 
+                started but haven't finished your interview to track your active interviews accurately.
               </div>
             </div>
           </CardContent>
