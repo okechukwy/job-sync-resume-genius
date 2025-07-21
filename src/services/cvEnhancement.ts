@@ -257,5 +257,4 @@ export const enhanceCV = async (originalContent: string): Promise<EnhancedCVResu
   return await enhanceCVWithAI(originalContent);
 };
 
-// New export with full parameters
-export { enhanceCVWithAI };
+// Function already exported above with 'export const'
