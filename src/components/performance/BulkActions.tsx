@@ -69,8 +69,11 @@ export const BulkActions = ({
         <div className="flex items-center gap-3">
           <Checkbox
             checked={isAllSelected}
-            ref={(el) => {
-              if (el) el.indeterminate = isIndeterminate;
+            ref={(el: HTMLButtonElement | null) => {
+              if (el) {
+                const input = el.querySelector('input') as HTMLInputElement;
+                if (input) input.indeterminate = isIndeterminate;
+              }
             }}
             onCheckedChange={handleSelectAll}
           />
