@@ -63,8 +63,7 @@ const CreativeDirector = () => {
                 <div className="scale-75 origin-top-left w-[133%] h-[133%]">
                   <ResumeLayoutRenderer 
                     data={creativeProfessionalSample}
-                    styles={templateStyles.creative}
-                    layoutVariant="classic-professional"
+                    templateId="art-director"
                     formatDate={(date) => {
                       if (!date) return '';
                       const [year, month] = date.split('-');

@@ -71,8 +71,7 @@ const TechProfessional = () => {
                 <div className="scale-75 origin-top-left w-[133%] h-[133%]">
                   <ResumeLayoutRenderer 
                     data={techProfessionalSample}
-                    styles={templateStyles.tech}
-                    layoutVariant="classic-professional"
+                    templateId="software-engineer"
                     formatDate={(date) => {
                       if (!date) return '';
                       const [year, month] = date.split('-');

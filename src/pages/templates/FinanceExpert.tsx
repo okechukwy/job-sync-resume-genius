@@ -84,8 +84,7 @@ const FinanceExpert = () => {
                 <div className="scale-75 origin-top-left w-[133%] h-[133%]">
                   <ResumeLayoutRenderer 
                     data={financeProfessionalSample}
-                    styles={templateStyles.finance}
-                    layoutVariant="classic-professional"
+                    templateId="finance-executive"
                     formatDate={(date) => {
                       if (!date) return '';
                       const [year, month] = date.split('-');

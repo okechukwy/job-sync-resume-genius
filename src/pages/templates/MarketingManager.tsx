@@ -48,8 +48,7 @@ const MarketingManager = () => {
                 <div className="scale-75 origin-top-left w-[133%] h-[133%]">
                   <ResumeLayoutRenderer 
                     data={marketingManagerSample}
-                    styles={templateStyles.marketing}
-                    layoutVariant="classic-professional"
+                    templateId="marketing-creative"
                     formatDate={(date) => {
                       if (!date) return '';
                       const [year, month] = date.split('-');

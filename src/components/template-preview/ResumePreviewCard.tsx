@@ -26,8 +26,7 @@ export const ResumePreviewCard = ({
         <div className={`${backgroundClass} rounded-lg p-6 min-h-[600px] ${shadowClass}`}>
           <ResumeLayoutRenderer 
             data={data}
-            styles={styles}
-            layoutVariant={layoutVariant}
+            templateId={layoutVariant}
             formatDate={formatDate}
           />
         </div>

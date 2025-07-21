@@ -51,8 +51,7 @@ const PortfolioManager = () => {
               <div className="bg-finance-background rounded-lg p-6 min-h-[600px] finance-shadows">
                 <ResumeLayoutRenderer 
                   data={financeResumeData}
-                  styles={financeStyles}
-                  layoutVariant="classic-professional"
+                  templateId="finance-executive"
                   formatDate={formatDate}
                 />
               </div>
