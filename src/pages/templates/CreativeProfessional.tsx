@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
@@ -186,7 +187,10 @@ const CreativeProfessional = () => {
           </div>
         </div>
 
-        <TemplateActions templateName="Creative Professional" />
+        <TemplateActions 
+          templateName="Creative Professional" 
+          templateId="graphic-designer"
+        />
       </div>
     </div>
   );

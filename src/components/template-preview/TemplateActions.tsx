@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -5,17 +6,18 @@ import { toast } from "sonner";
 
 interface TemplateActionsProps {
   templateName: string;
+  templateId?: string;
 }
 
-export const TemplateActions = ({ templateName }: TemplateActionsProps) => {
+export const TemplateActions = ({ templateName, templateId }: TemplateActionsProps) => {
   const navigate = useNavigate();
 
   const handleTemplateClick = () => {
     try {
-      console.log('🚀 Template button clicked!', templateName);
+      console.log('🚀 Template button clicked!', templateName, 'ID:', templateId);
       
-      // Create template parameter for URL
-      const templateParam = templateName.toLowerCase().replace(/\s+/g, '-');
+      // Use templateId if provided, otherwise fall back to name-based conversion
+      const templateParam = templateId || templateName.toLowerCase().replace(/\s+/g, '-');
       const url = `/get-started?template=${encodeURIComponent(templateParam)}`;
       
       console.log('🔗 Navigating to:', url);
@@ -32,6 +34,7 @@ export const TemplateActions = ({ templateName }: TemplateActionsProps) => {
       toast.error('Failed to navigate. Please try again.');
     }
   };
+
   const handleDownloadSample = () => {
     toast.success("Sample resume download started!");
     
