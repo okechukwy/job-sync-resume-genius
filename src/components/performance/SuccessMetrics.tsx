@@ -1,7 +1,8 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Building, Calendar } from "lucide-react";
 import { useState } from "react";
 import type { PerformanceMetrics, JobApplication } from "@/hooks/useJobApplications";
 
@@ -23,11 +24,14 @@ export const SuccessMetrics = ({ metrics, applications, onRefreshMetrics }: Succ
     }
   };
 
-  // Calculate status breakdown from applications
-  const statusBreakdown = applications.reduce((acc, app) => {
-    acc[app.status] = (acc[app.status] || 0) + 1;
+  // Group applications by status
+  const applicationsByStatus = applications.reduce((acc, app) => {
+    if (!acc[app.status]) {
+      acc[app.status] = [];
+    }
+    acc[app.status].push(app);
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, JobApplication[]>);
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -55,6 +59,13 @@ export const SuccessMetrics = ({ metrics, applications, onRefreshMetrics }: Succ
       withdrawn: "bg-gray-500/20 text-gray-700 dark:text-gray-300"
     };
     return colors[status] || "bg-gray-500/20 text-gray-700 dark:text-gray-300";
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -127,21 +138,47 @@ export const SuccessMetrics = ({ metrics, applications, onRefreshMetrics }: Succ
           </div>
         )}
 
-        {/* Status Breakdown */}
-        {Object.keys(statusBreakdown).length > 0 && (
+        {/* Individual Application Status Breakdown */}
+        {Object.keys(applicationsByStatus).length > 0 && (
           <div className="pt-4 border-t border-border/20">
             <h4 className="font-medium mb-3">Application Status Breakdown</h4>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(statusBreakdown)
-                .sort(([,a], [,b]) => b - a)
-                .map(([status, count]) => (
-                  <Badge 
-                    key={status} 
-                    variant="secondary" 
-                    className={getStatusColor(status)}
-                  >
-                    {getStatusLabel(status)}: {count}
-                  </Badge>
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {Object.entries(applicationsByStatus)
+                .sort(([,a], [,b]) => b.length - a.length)
+                .map(([status, apps]) => (
+                  <div key={status} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant="secondary" 
+                        className={`${getStatusColor(status)} text-xs`}
+                      >
+                        {getStatusLabel(status)} ({apps.length})
+                      </Badge>
+                    </div>
+                    <div className="ml-2 space-y-1">
+                      {apps.map((app) => (
+                        <div 
+                          key={app.id} 
+                          className="flex items-center justify-between p-2 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors text-sm"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Building className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <span className="font-medium truncate">
+                              {app.company_name}
+                            </span>
+                            <span className="text-muted-foreground">-</span>
+                            <span className="text-muted-foreground truncate">
+                              {app.position_title}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                            <Calendar className="w-3 h-3" />
+                            <span>{formatDate(app.date_applied)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
             </div>
           </div>
