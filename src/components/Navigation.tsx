@@ -2,14 +2,29 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger, 
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut } from "lucide-react";
+import { LogOut, User, Settings, Shield, HelpCircle } from "lucide-react";
+import { UserSettingsDialog } from "./user-settings/UserSettingsDialog";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState("profile");
   const location = useLocation();
   const { user, signOut } = useAuth();
+
+  const handleSettingsClick = (tab: string) => {
+    setSettingsTab(tab);
+    setSettingsOpen(true);
+  };
 
   // Redirect authenticated users from homepage to dashboard
   useEffect(() => {
@@ -20,7 +35,6 @@ const Navigation = () => {
 
   const handleAnchorClick = (href: string) => {
     if (location.pathname !== '/') {
-      // If not on homepage, navigate to homepage with anchor
       window.location.href = `/${href}`;
     }
   };
@@ -33,158 +47,201 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass-card border-b border-border/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <div className="text-2xl font-bold gradient-text">
-              ResumeAI
+    <>
+      <nav className="fixed top-0 w-full z-50 glass-card border-b border-border/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div className="text-2xl font-bold gradient-text">
+                ResumeAI
+              </div>
             </div>
-          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {navItems.map((item) => (
-                item.type === "link" ? (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200"
-                    onClick={(e) => {
-                      handleAnchorClick(item.href);
-                    }}
-                  >
-                    {item.label}
-                  </a>
-                )
-              ))}
+            {/* Desktop Navigation */}
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-8">
+                {navItems.map((item) => (
+                  item.type === "link" ? (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200"
+                      onClick={(e) => {
+                        handleAnchorClick(item.href);
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  )
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="space-x-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs">
-                        {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{user.user_metadata?.full_name || user.email}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/auth">Sign In</Link>
-                </Button>
-                <Button variant="hero" size="sm" asChild>
-                  <Link to="/get-started">Get Started</Link>
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-foreground hover:text-primary focus:outline-none focus:text-primary"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 glass-card mt-2 rounded-lg border border-border/20">
-              {navItems.map((item) => (
-                item.type === "link" ? (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
-                    onClick={(e) => {
-                      handleAnchorClick(item.href);
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </a>
-                )
-              ))}
-              <div className="pt-4 border-t border-border/20 space-y-2">
-                {user ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 px-3 py-2">
+            {/* Desktop CTA */}
+            <div className="hidden md:flex items-center space-x-4">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="space-x-2">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-xs">
                           {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start"
-                      onClick={signOut}
-                    >
+                      <span>{user.user_metadata?.full_name || user.email}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-popover">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={() => handleSettingsClick('profile')}>
+                      <User className="mr-2 h-4 w-4" />
+                      Profile Settings
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => handleSettingsClick('preferences')}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Preferences
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => handleSettingsClick('security')}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      Account & Security
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={() => handleSettingsClick('help')}>
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      Help & Support
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={signOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/auth">Sign In</Link>
-                    </Button>
-                    <Button variant="hero" className="w-full" asChild>
-                      <Link to="/get-started">Get Started</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/auth">Sign In</Link>
+                  </Button>
+                  <Button variant="hero" size="sm" asChild>
+                    <Link to="/get-started">Get Started</Link>
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-foreground hover:text-primary focus:outline-none focus:text-primary"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {/* Mobile Navigation Menu */}
+          {isMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 glass-card mt-2 rounded-lg border border-border/20">
+                {navItems.map((item) => (
+                  item.type === "link" ? (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
+                      onClick={(e) => {
+                        handleAnchorClick(item.href);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  )
+                ))}
+                <div className="pt-4 border-t border-border/20 space-y-2">
+                  {user ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 px-3 py-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback className="text-xs">
+                            {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{user.user_metadata?.full_name || user.email}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={() => handleSettingsClick('profile')}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile Settings
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={signOut}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Button variant="ghost" className="w-full justify-start" asChild>
+                        <Link to="/auth">Sign In</Link>
+                      </Button>
+                      <Button variant="hero" className="w-full" asChild>
+                        <Link to="/get-started">Get Started</Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <UserSettingsDialog 
+        open={settingsOpen} 
+        onOpenChange={setSettingsOpen}
+        defaultTab={settingsTab}
+      />
+    </>
   );
 };
 
