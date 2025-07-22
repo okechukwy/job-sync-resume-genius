@@ -1,181 +1,166 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
-import { PageHeader } from "@/components/common/PageHeader";
+import { TemplateHeader } from "@/components/template-preview/TemplateHeader";
 import { TemplateActions } from "@/components/template-preview";
+import { LivePreview } from "@/components/live-preview";
+import { techProfessionalSample } from "@/data/sampleResumeData";
 
 const ResearchScientist = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
-      {/* Research Industry Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute top-16 left-12 w-24 h-24 border border-primary/20 rounded-full">
-          <div className="absolute inset-2 border border-primary/15 rounded-full">
-            <div className="absolute inset-2 border border-primary/10 rounded-full">
-              <div className="absolute inset-2 bg-primary/5 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute bottom-24 right-16 w-20 h-20 border border-primary/15 rounded-full">
-          <div className="absolute inset-3 border border-primary/10 rounded-full"></div>
-        </div>
-      </div>
-      
-      {/* Molecular Structure Lines */}
-      <div className="absolute inset-0 opacity-[0.025]">
-        <div className="absolute top-1/3 left-1/4 w-32 h-px bg-primary/15 transform rotate-45"></div>
-        <div className="absolute top-1/3 left-1/4 w-24 h-px bg-primary/12 transform -rotate-45 mt-6"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-28 h-px bg-primary/10 transform rotate-30"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-20 h-px bg-primary/8 transform -rotate-30 mt-4"></div>
-      </div>
-      <PageHeader />
+    <div className="min-h-screen bg-gradient-hero">
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <TemplateHeader
+          emoji="🔬"
+          title="Research Scientist"
+          description="Analytical design for research professionals. Perfect for showcasing research publications, methodologies, and scientific achievements."
+          tags={["Analytical", "Scientific", "Research"]}
+          badgeText="Research Scientist Template"
+        />
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-4 animate-bounce-subtle">🔬</div>
-          <Badge variant="secondary" className="mb-4 glass-card hover-lift animate-fade-in">
-            Research Scientist Template
-          </Badge>
-          <h1 className="visual-hierarchy-1 mb-6 animate-fade-in">
-            Research Scientist{" "}
-            <span className="gradient-text">Resume</span>
-          </h1>
-          <p className="visual-hierarchy-body max-w-2xl mx-auto animate-fade-in">
-            Analytical design for research professionals. 
-            Perfect for showcasing research publications, methodologies, and scientific achievements.
-          </p>
-          
-          <div className="flex flex-wrap justify-center spacing-grid mt-6 animate-fade-in">
-            <Badge variant="outline" className="hover-scale">Analytical</Badge>
-            <Badge variant="outline" className="hover-scale">Scientific</Badge>
-            <Badge variant="outline" className="hover-scale">Research</Badge>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 spacing-grid mb-12">
-          <Card className="glass-card hover-lift animate-fade-in">
-            <CardHeader>
-              <CardTitle className="visual-hierarchy-3 flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                Template Preview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white p-6 rounded-lg shadow-lg min-h-[600px] border">
-                <div className="space-y-4">
-                  <div className="border-b-2 border-blue-200 pb-4">
-                    <h2 className="text-2xl font-bold text-blue-900">Dr. Alex Research</h2>
-                    <p className="text-blue-600 font-medium">Senior Research Scientist</p>
-                    <p className="text-sm text-gray-600">a.research@lab.edu | (555) 123-4567 | PhD Molecular Biology</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">RESEARCH FOCUS</h3>
-                    <p className="text-sm text-gray-700">
-                      Molecular biologist with 10+ years conducting breakthrough research in gene therapy...
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">RESEARCH SKILLS</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div>• Molecular Biology</div>
-                      <div>• Data Analysis</div>
-                      <div>• Laboratory Management</div>
-                      <div>• Grant Writing</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">EXPERIENCE</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-gray-900">Senior Research Scientist</h4>
-                          <span className="text-sm text-blue-600 font-medium">2020 - Present</span>
-                        </div>
-                        <p className="text-sm text-gray-600">National Research Institute</p>
-                        <ul className="text-xs text-gray-700 mt-1 list-disc list-inside">
-                          <li>Published 25+ peer-reviewed articles</li>
-                          <li>Secured $2.5M in research funding</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold text-blue-900 mb-2 border-l-4 border-blue-400 pl-3">PUBLICATIONS</h3>
-                    <div className="text-sm text-gray-700">
-                      <div>• Nature Communications (2023)</div>
-                      <div>• Cell Biology Journal (2022)</div>
-                      <div>• Molecular Research Today (2021)</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="spacing-content">
-            <Card className="glass-card hover-lift animate-fade-in">
+        {/* Template Preview and Info Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          {/* Left Column - Template Preview */}
+          <div className="space-y-6">
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="visual-hierarchy-3">Template Features</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Live Preview
+                  </CardTitle>
+                  <Badge variant="outline">Interactive</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <LivePreview
+                  data={techProfessionalSample}
+                  template="research-scientist"
+                  className="h-[600px] rounded-lg overflow-hidden border border-border/20"
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Template Information */}
+          <div className="space-y-6">
+            {/* Template Features */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Template Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Publication List</h4>
-                    <p className="text-sm text-muted-foreground">Showcase peer-reviewed publications and citations</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">Publication List</span>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Research Metrics</h4>
-                    <p className="text-sm text-muted-foreground">Highlight funding secured and research impact</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">Research Metrics</span>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                  <div>
-                    <h4 className="font-medium">Technical Skills</h4>
-                    <p className="text-sm text-muted-foreground">Display specialized research methodologies</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">Technical Skills</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">Laboratory Experience</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">Grant Writing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span className="text-sm">ATS Compatible</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="glass-card hover-lift animate-fade-in">
+            {/* Perfect For */}
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="visual-hierarchy-3">Perfect For</CardTitle>
+                <CardTitle>Perfect For</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                    Research Scientists
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                    PhD Researchers
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                    Principal Investigators
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                    Laboratory Directors
-                  </li>
-                </ul>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "Research Scientists",
+                    "PhD Researchers",
+                    "Principal Investigators",
+                    "Laboratory Directors",
+                    "Clinical Researchers",
+                    "Data Scientists"
+                  ].map((role, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Industries */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Industries</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {["Research", "Biotechnology", "Pharmaceuticals", "Academia"].map((industry, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {industry}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Template Stats */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Template Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">ATS Score</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="w-full h-full bg-primary rounded-full"></div>
+                    </div>
+                    <span className="text-xs font-medium">97%</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Scientific Appeal</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="w-full h-full bg-primary rounded-full"></div>
+                    </div>
+                    <span className="text-xs font-medium">98%</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Readability</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="w-full h-full bg-primary rounded-full"></div>
+                    </div>
+                    <span className="text-xs font-medium">94%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        <TemplateActions templateName="Research Scientist" />
+        <TemplateActions 
+          templateName="Research Scientist" 
+          templateId="research-scientist"
+        />
       </div>
     </div>
   );
