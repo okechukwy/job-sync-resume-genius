@@ -247,6 +247,7 @@ export const LinkedInSummaryOptimizer = ({
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-black"
                       />
                     </FormControl>
                   </FormItem>
