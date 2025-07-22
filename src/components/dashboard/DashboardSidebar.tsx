@@ -12,7 +12,6 @@ import {
   HelpCircle,
   Download,
   Home,
-  Template,
   GitBranch,
   Target,
   UserCheck,
@@ -43,7 +42,7 @@ const navigationItems = [
     groupLabel: "Resume Tools",
     items: [
       { title: "Resume Builder", url: "/dashboard/resume/builder", icon: FileText },
-      { title: "Templates", url: "/dashboard/resume/templates", icon: Template },
+      { title: "Templates", url: "/dashboard/resume/templates", icon: FileText },
       { title: "ATS Analysis", url: "/dashboard/resume/ats-analysis", icon: Search },
       { title: "Version Management", url: "/dashboard/resume/versions", icon: GitBranch },
     ]
