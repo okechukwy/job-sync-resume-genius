@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -80,28 +79,38 @@ Return only the summary text, no additional formatting or quotes.`;
         break;
 
       case 'content-suggestions':
-        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. Generate 10 strategic post ideas that:
-- Are highly relevant to current industry trends and news
+        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. Generate a comprehensive content strategy with 8-10 strategic post ideas that:
+- Are highly relevant to current industry trends (${new Date().getFullYear()})
 - Encourage maximum engagement (likes, comments, shares, saves)
-- Mix content types: insights, tips, stories, questions, industry analysis
+- Mix content types: insights, tips, stories, questions, industry analysis, personal experiences
 - Are authentic and establish thought leadership
 - Include trending hashtags and optimal posting strategies
 - Target the user's specific audience and industry
 - Leverage psychological triggers for viral potential
 - Align with LinkedIn's algorithm preferences
+- Include practical engagement strategies
+- Consider current market conditions and remote work trends
 
-Analyze current trending topics, industry news, and successful content patterns in the user's field.
+Also provide:
+- A 4-week content calendar with optimal timing
+- Content strategy recommendations
+- Best posting times for their industry
+- Content mix recommendations
+- Trending topics to leverage
 
-Return a JSON array of objects with "title", "content", "contentType", "hashtags", and "engagementStrategy" fields.`;
+Return a JSON object with "ideas", "calendar", and "strategy" fields. Each idea should have: "title", "content", "contentType", "hashtags", "engagementStrategy", "difficulty", "engagement", and "type".`;
         
-        userPrompt = `Generate LinkedIn post ideas for: ${JSON.stringify(data)}.
+        userPrompt = `Generate comprehensive LinkedIn content strategy for: ${JSON.stringify(data)}.
         Industry: ${data.industry || 'business'}
-        Role focus: ${data.targetRole || 'professional'}
+        Role focus: ${data.targetRole || data.currentRole || 'professional'}
+        Experience level: ${data.experienceLevel || 'mid-level'}
+        Content type preference: ${data.contentType || 'thought-leadership'}
+        Posting frequency: ${data.frequency || 'weekly'}
         Expertise areas: ${data.skills?.join(', ') || 'professional skills'}
-        Content preferences: Mix of educational, inspirational, and industry insights
-        Target audience: ${data.industry} professionals, recruiters, potential clients
-        Current trends to leverage: AI transformation, remote work, sustainability, digital innovation`;
-        maxTokens = 1500;
+        Achievements to leverage: ${data.achievements?.join(', ') || 'career accomplishments'}
+        Target audience: ${data.industry} professionals, recruiters, potential clients, industry leaders
+        Current trends to leverage: AI transformation, remote work, sustainability, digital innovation, economic changes`;
+        maxTokens = 2000;
         break;
 
       case 'skills-analysis':

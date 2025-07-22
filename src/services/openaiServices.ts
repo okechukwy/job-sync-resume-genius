@@ -165,6 +165,35 @@ export interface CoverLetterResult {
   success: boolean;
 }
 
+export interface ContentIdea {
+  title: string;
+  content: string;
+  contentType: string;
+  hashtags: string[];
+  engagementStrategy: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  engagement: 'high' | 'medium' | 'low';
+  type: string;
+}
+
+export interface ContentSuggestionsResult {
+  ideas: ContentIdea[];
+  calendar: Array<{
+    week: number;
+    contentType: string;
+    topic: string;
+    status: string;
+    optimalTiming?: string;
+    expectedEngagement?: string;
+  }>;
+  strategy: {
+    postingFrequency: string;
+    bestTimes: string[];
+    contentMix: Record<string, number>;
+    trendingTopics: string[];
+  };
+}
+
 export const analyzeCVWithAI = async (
   resumeText: string, 
   industry: string = 'Business'
@@ -217,6 +246,16 @@ export const generateLinkedInContent = async (
     return result;
   } catch (error) {
     console.error('Error calling LinkedIn generator service:', error);
+    throw error;
+  }
+};
+
+export const generateContentSuggestions = async (profileData: LinkedInData): Promise<ContentSuggestionsResult> => {
+  try {
+    const result = await generateLinkedInContent('content-suggestions', profileData);
+    return result.content as ContentSuggestionsResult;
+  } catch (error) {
+    console.error('Error generating content suggestions:', error);
     throw error;
   }
 };

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,22 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users, Trash2 } from "lucide-react";
+import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users, Trash2, Clock } from "lucide-react";
 import { linkedInContentSuggestionSchema, type LinkedInContentSuggestion as LinkedInContentSuggestionType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { generateContentSuggestions, type ContentSuggestionsResult, type ContentIdea } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInContentSuggestionsProps {
   profileData: LinkedInProfile | null;
-  contentSuggestions: any;
-  onContentSuggestionsUpdate: (suggestions: any) => void;
-}
-
-interface ContentIdea {
-  title: string;
-  description: string;
-  type: string;
-  engagement: "high" | "medium" | "low";
-  difficulty: "easy" | "medium" | "hard";
+  contentSuggestions: ContentSuggestionsResult | null;
+  onContentSuggestionsUpdate: (suggestions: ContentSuggestionsResult | null) => void;
 }
 
 export const LinkedInContentSuggestions = ({ 
@@ -44,16 +38,40 @@ export const LinkedInContentSuggestions = ({
   });
 
   const generateContent = async (data: LinkedInContentSuggestionType) => {
+    if (!profileData) {
+      toast.error("Please complete your profile information first");
+      return;
+    }
+
     setIsGenerating(true);
     
-    // Simulate content generation - In a real app, this would call an AI API
-    setTimeout(() => {
-      const ideas = generateContentIdeas(data);
-      const calendar = generateContentCalendar(data);
-      onContentSuggestionsUpdate({ ideas, calendar });
+    try {
+      // Prepare enriched data for AI generation
+      const enrichedData = {
+        ...profileData,
+        contentType: data.contentType,
+        frequency: data.frequency,
+        experienceLevel: data.experienceLevel,
+        topics: data.topics,
+        currentRole: profileData.currentRole,
+        targetRole: profileData.targetRole,
+        skills: profileData.skills || [],
+        achievements: profileData.achievements || [],
+      };
+
+      console.log('Generating content suggestions with data:', enrichedData);
+      
+      const result = await generateContentSuggestions(enrichedData);
+      console.log('Generated content suggestions:', result);
+      
+      onContentSuggestionsUpdate(result);
+      toast.success("Content suggestions generated successfully!");
+    } catch (error) {
+      console.error('Error generating content suggestions:', error);
+      toast.error("Failed to generate content suggestions. Please try again.");
+    } finally {
       setIsGenerating(false);
-      toast.success("Content suggestions generated!");
-    }, 1500);
+    }
   };
 
   const clearSuggestions = () => {
@@ -61,136 +79,9 @@ export const LinkedInContentSuggestions = ({
     toast.success("Content suggestions cleared successfully!");
   };
 
-  const generateContentIdeas = (data: LinkedInContentSuggestionType) => {
-    const templates = getContentTemplates(data);
-    return templates.map(template => ({
-      ...template,
-      description: template.description.replace('{industry}', data.industry),
-    }));
-  };
-
-  const generateContentCalendar = (data: LinkedInContentSuggestionType) => {
-    const frequencies = {
-      daily: 7,
-      weekly: 4,
-      biweekly: 2,
-      monthly: 1,
-    };
-
-    const postsPerMonth = frequencies[data.frequency];
-    const calendar = [];
-
-    for (let week = 1; week <= 4; week++) {
-      if (postsPerMonth >= week || data.frequency === 'daily') {
-        calendar.push({
-          week,
-          contentType: data.contentType,
-          topic: `Week ${week} ${data.contentType} post`,
-          status: 'planned',
-        });
-      }
-    }
-
-    return calendar;
-  };
-
-  const getContentTemplates = (data: LinkedInContentSuggestionType) => {
-    const templates = {
-      'thought-leadership': [
-        {
-          title: "Industry Trends Analysis",
-          description: "Share your insights on emerging trends in {industry} and how they'll impact the future",
-          type: "Analysis",
-          engagement: "high" as const,
-          difficulty: "medium" as const,
-        },
-        {
-          title: "Lessons Learned Post",
-          description: "Share a valuable lesson you learned recently and how it applies to {industry}",
-          type: "Educational",
-          engagement: "high" as const,
-          difficulty: "easy" as const,
-        },
-        {
-          title: "Controversial Opinion",
-          description: "Share a well-reasoned contrarian view about common practices in {industry}",
-          type: "Opinion",
-          engagement: "high" as const,
-          difficulty: "hard" as const,
-        },
-      ],
-      'industry-news': [
-        {
-          title: "News Commentary",
-          description: "Comment on recent {industry} news and provide your expert perspective",
-          type: "Commentary",
-          engagement: "medium" as const,
-          difficulty: "easy" as const,
-        },
-        {
-          title: "Market Update",
-          description: "Share insights about recent market changes affecting {industry}",
-          type: "Update",
-          engagement: "medium" as const,
-          difficulty: "medium" as const,
-        },
-      ],
-      'career-tips': [
-        {
-          title: "Career Advice",
-          description: "Share actionable advice for professionals looking to advance in {industry}",
-          type: "Advice",
-          engagement: "high" as const,
-          difficulty: "easy" as const,
-        },
-        {
-          title: "Skill Development",
-          description: "Discuss essential skills for success in {industry} and how to develop them",
-          type: "Educational",
-          engagement: "medium" as const,
-          difficulty: "medium" as const,
-        },
-      ],
-      'company-updates': [
-        {
-          title: "Behind the Scenes",
-          description: "Share what you're working on and the challenges you're solving",
-          type: "Personal",
-          engagement: "medium" as const,
-          difficulty: "easy" as const,
-        },
-        {
-          title: "Team Spotlight",
-          description: "Highlight team achievements and collaborative efforts in {industry} projects",
-          type: "Team",
-          engagement: "medium" as const,
-          difficulty: "easy" as const,
-        },
-      ],
-      'achievements': [
-        {
-          title: "Project Success Story",
-          description: "Share a recent win and the process that led to success in your {industry} work",
-          type: "Success",
-          engagement: "high" as const,
-          difficulty: "medium" as const,
-        },
-        {
-          title: "Milestone Celebration",
-          description: "Celebrate professional milestones and thank those who helped along the way",
-          type: "Personal",
-          engagement: "medium" as const,
-          difficulty: "easy" as const,
-        },
-      ],
-    };
-
-    return templates[data.contentType] || templates['thought-leadership'];
-  };
-
   const copyContent = (content: string) => {
     navigator.clipboard.writeText(content);
-    toast.success("Content idea copied to clipboard!");
+    toast.success("Content copied to clipboard!");
   };
 
   const getEngagementColor = (engagement: string) => {
@@ -337,19 +228,25 @@ export const LinkedInContentSuggestions = ({
                 />
               </div>
 
-              <Button type="submit" disabled={isGenerating} className="w-full">
+              <Button type="submit" disabled={isGenerating || !profileData} className="w-full">
                 {isGenerating ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Content Ideas...
+                    Generating AI-Powered Content Ideas...
                   </>
                 ) : (
                   <>
                     <Lightbulb className="mr-2 h-4 w-4" />
-                    {hasExistingSuggestions ? "Regenerate Content Ideas" : "Generate Content Ideas"}
+                    {hasExistingSuggestions ? "Regenerate Content Ideas" : "Generate AI Content Ideas"}
                   </>
                 )}
               </Button>
+              
+              {!profileData && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Please complete your profile information in the Profile tab first.
+                </p>
+              )}
             </form>
           </Form>
         </CardContent>
@@ -358,7 +255,7 @@ export const LinkedInContentSuggestions = ({
       {/* Results */}
       {hasExistingSuggestions && (
         <Tabs defaultValue="ideas" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 glass-card">
+          <TabsList className="grid w-full grid-cols-3 glass-card">
             <TabsTrigger value="ideas" className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
               Content Ideas
@@ -366,6 +263,10 @@ export const LinkedInContentSuggestions = ({
             <TabsTrigger value="calendar" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Content Calendar
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Strategy
             </TabsTrigger>
           </TabsList>
 
@@ -379,16 +280,16 @@ export const LinkedInContentSuggestions = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => copyContent(`${idea.title}\n\n${idea.description}`)}
+                        onClick={() => copyContent(`${idea.title}\n\n${idea.content}\n\n${idea.hashtags?.join(' ')}`)}
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">{idea.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">{idea.type}</Badge>
+                    <p className="text-sm text-muted-foreground mb-4">{idea.content}</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge variant="outline">{idea.contentType}</Badge>
                       <Badge className={getEngagementColor(idea.engagement)}>
                         {idea.engagement} engagement
                       </Badge>
@@ -396,6 +297,22 @@ export const LinkedInContentSuggestions = ({
                         {idea.difficulty} difficulty
                       </Badge>
                     </div>
+                    {idea.hashtags && idea.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {idea.hashtags.map((hashtag, hashIndex) => (
+                          <Badge key={hashIndex} variant="secondary" className="text-xs">
+                            {hashtag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    {idea.engagementStrategy && (
+                      <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Engagement Strategy:</strong> {idea.engagementStrategy}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -417,16 +334,83 @@ export const LinkedInContentSuggestions = ({
                       <div>
                         <h4 className="font-medium">{item.topic}</h4>
                         <p className="text-sm text-muted-foreground">Week {item.week}</p>
+                        {item.optimalTiming && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3" />
+                            {item.optimalTiming}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{item.contentType}</Badge>
                         <Badge variant="secondary">{item.status}</Badge>
+                        {item.expectedEngagement && (
+                          <Badge className={getEngagementColor(item.expectedEngagement)}>
+                            {item.expectedEngagement}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="strategy">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Content Strategy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Posting Frequency</h4>
+                      <p className="text-sm text-muted-foreground">{contentSuggestions.strategy?.postingFrequency}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Best Posting Times</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {contentSuggestions.strategy?.bestTimes?.map((time, index) => (
+                          <Badge key={index} variant="outline">{time}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Content Mix</h4>
+                      <div className="space-y-2">
+                        {contentSuggestions.strategy?.contentMix && Object.entries(contentSuggestions.strategy.contentMix).map(([type, percentage]) => (
+                          <div key={type} className="flex justify-between text-sm">
+                            <span className="capitalize">{type.replace('-', ' ')}</span>
+                            <span>{percentage}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Trending Topics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {contentSuggestions.strategy?.trendingTopics?.map((topic, index) => (
+                      <Badge key={index} variant="secondary">{topic}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       )}

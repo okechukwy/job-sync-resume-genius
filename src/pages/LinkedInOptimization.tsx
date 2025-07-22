@@ -14,6 +14,7 @@ import { LinkedInSummaryOptimizer } from "@/components/linkedin/LinkedInSummaryO
 import { LinkedInKeywordAnalyzer } from "@/components/linkedin/LinkedInKeywordAnalyzer";
 import { LinkedInContentSuggestions } from "@/components/linkedin/LinkedInContentSuggestions";
 import { LinkedInUrlScanner } from "@/components/linkedin/LinkedInUrlScanner";
+import { type ContentSuggestionsResult } from "@/services/openaiServices";
 
 const LinkedInOptimization = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -22,9 +23,9 @@ const LinkedInOptimization = () => {
   
   // Centralized state for all generated content
   const [generatedSummaries, setGeneratedSummaries] = useState<string[]>([]);
-  const [generatedHeadlines, setGeneratedHeadlines] = useState<string[]>([]);
+  const [generatedHeadlines, setGeneratedHeadlines] = useState<string[] | null>(null);
   const [keywordAnalysisResults, setKeywordAnalysisResults] = useState(null);
-  const [contentSuggestions, setContentSuggestions] = useState(null);
+  const [contentSuggestions, setContentSuggestions] = useState<ContentSuggestionsResult | null>(null);
   const [scannedProfiles, setScannedProfiles] = useState([]);
 
   const handleProfileUpdate = (data: any) => {
@@ -109,7 +110,7 @@ const LinkedInOptimization = () => {
             <TabsTrigger value="headline" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
               Headline
-              {generatedHeadlines.length > 0 && (
+              {generatedHeadlines && generatedHeadlines.length > 0 && (
                 <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
                   {generatedHeadlines.length}
                 </Badge>
