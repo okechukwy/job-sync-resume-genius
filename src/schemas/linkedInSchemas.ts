@@ -81,6 +81,35 @@ export const linkedInUrlScanSchema = z.object({
   compareWithCurrent: z.boolean().default(true),
 });
 
+// Enhanced schemas for AI-powered analysis
+export const industryBenchmarkSchema = z.object({
+  averageProfileStrength: z.number(),
+  topPerformerGap: z.array(z.string()),
+  competitiveAdvantage: z.array(z.string()),
+});
+
+export const improvementRecommendationSchema = z.object({
+  area: z.string(),
+  priority: z.enum(["high", "medium", "low"]),
+  impact: z.string(),
+  suggestion: z.string(),
+});
+
+export const marketInsightsSchema = z.object({
+  trendingKeywords: z.array(z.string()),
+  emergingSkills: z.array(z.string()),
+  industryGrowthAreas: z.array(z.string()),
+});
+
+export const enhancedCompetitiveMetricsSchema = z.object({
+  headlineOptimization: z.number(),
+  summaryLength: z.number(),
+  skillsCount: z.number(),
+  experienceDetail: z.number(),
+  industryRanking: z.number().optional(),
+  marketPositioning: z.number().optional(),
+});
+
 export const scannedProfileSchema = z.object({
   url: z.string(),
   extractedData: linkedInProfileSchema.partial(),
@@ -93,6 +122,9 @@ export const scannedProfileSchema = z.object({
     skillsCount: z.number(),
     experienceDetail: z.number(),
   }),
+  industryBenchmarks: industryBenchmarkSchema.optional(),
+  improvementRecommendations: z.array(improvementRecommendationSchema).optional(),
+  marketInsights: marketInsightsSchema.optional(),
   scannedAt: z.date().default(() => new Date()),
 });
 
@@ -105,3 +137,6 @@ export type LinkedInKeywordAnalysis = z.infer<typeof linkedInKeywordAnalysisSche
 export type LinkedInContentSuggestion = z.infer<typeof linkedInContentSuggestionSchema>;
 export type LinkedInUrlScan = z.infer<typeof linkedInUrlScanSchema>;
 export type ScannedProfile = z.infer<typeof scannedProfileSchema>;
+export type IndustryBenchmark = z.infer<typeof industryBenchmarkSchema>;
+export type ImprovementRecommendation = z.infer<typeof improvementRecommendationSchema>;
+export type MarketInsights = z.infer<typeof marketInsightsSchema>;
