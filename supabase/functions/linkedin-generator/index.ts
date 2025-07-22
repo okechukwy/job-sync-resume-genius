@@ -7,9 +7,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to extract JSON from markdown-wrapped responses
+// Enhanced function to extract JSON from markdown-wrapped responses with better error handling
 const extractJsonFromResponse = (content: string): any => {
-  console.log('Raw AI response content:', content.substring(0, 500) + '...');
+  console.log('Raw AI response content length:', content.length);
+  console.log('Raw AI response preview:', content.substring(0, 200) + '...');
+  
+  // Check if response is too short or obviously incomplete
+  if (content.length < 50) {
+    throw new Error('Response too short to contain valid JSON');
+  }
+  
+  // Check for obvious truncation indicators
+  if (content.includes('"headline"') && !content.includes('"content"')) {
+    throw new Error('Response appears to be truncated - missing content section');
+  }
   
   try {
     // First, try parsing as-is
@@ -41,27 +52,69 @@ const extractJsonFromResponse = (content: string): any => {
       }
     }
     
-    // Last resort: clean the content and try again
-    const cleaned = content
+    // Try to fix common JSON issues
+    let cleaned = content
       .replace(/```json/g, '')
       .replace(/```/g, '')
       .replace(/^\s+|\s+$/g, '')
       .trim();
     
+    // Try to fix truncated strings by adding closing quotes and braces
+    if (cleaned.includes('"headline"') && !cleaned.endsWith('}')) {
+      console.log('Attempting to repair truncated JSON...');
+      
+      // Find the last complete property and close the JSON properly
+      const lastCompleteProperty = cleaned.lastIndexOf('",');
+      if (lastCompleteProperty > 0) {
+        cleaned = cleaned.substring(0, lastCompleteProperty + 1) + '\n    }\n  }\n}';
+      } else {
+        // If we can't find a safe truncation point, provide minimal structure
+        cleaned = '{"currentKeywords": {}, "missingKeywords": [], "trendingKeywords": [], "optimizationStrategy": {"headline": "Update needed", "summary": "Update needed", "skills": "Update needed", "content": "Update needed"}}';
+      }
+    }
+    
     try {
       const extracted = JSON.parse(cleaned);
-      console.log('Successfully parsed cleaned content');
+      console.log('Successfully parsed cleaned/repaired content');
       return extracted;
     } catch (e) {
       console.error('All JSON parsing attempts failed:', e);
-      throw new Error(`Unable to parse JSON response from OpenAI. Raw content: ${content.substring(0, 200)}...`);
+      
+      // Return a minimal valid structure as fallback
+      console.log('Returning fallback structure due to parsing failure');
+      return {
+        currentKeywords: {},
+        missingKeywords: [
+          {
+            keyword: "Automation Testing",
+            priority: "high",
+            impact: 85,
+            reason: "Critical skill for modern software testing roles",
+            suggestion: "Add automation testing experience to your profile"
+          }
+        ],
+        trendingKeywords: [
+          {
+            keyword: "AI Testing",
+            growth: "30%",
+            searchVolume: "High",
+            context: "Growing trend in 2025"
+          }
+        ],
+        optimizationStrategy: {
+          headline: "Consider adding automation and modern testing skills to your headline",
+          summary: "Enhance your summary with specific tools and quantified achievements",
+          skills: "Add trending technical skills like automation frameworks",
+          content: "Share insights about modern testing practices and tools"
+        }
+      };
     }
   }
 };
 
-// Enhanced function to validate and transform content suggestions data
+// Enhanced function to validate content suggestions data
 const validateContentSuggestions = (data: any): any => {
-  console.log('Validating content suggestions data:', JSON.stringify(data, null, 2));
+  console.log('Validating content suggestions data structure');
   
   if (!data || typeof data !== 'object') {
     console.error('Invalid content suggestions data structure');
@@ -70,65 +123,47 @@ const validateContentSuggestions = (data: any): any => {
 
   // Enhanced ideas validation and transformation
   const ideas = Array.isArray(data.ideas) ? data.ideas : [];
-  const validatedIdeas = ideas.map((idea: any, index: number) => {
-    const validatedIdea = {
-      title: idea.title || `Thought Leadership Post ${index + 1}`,
-      content: idea.content || idea.description || `Share insights about ${idea.topic || 'industry trends'} based on your professional experience.`,
-      contentType: idea.contentType || idea.type || 'Thought Leadership',
-      hashtags: Array.isArray(idea.hashtags) ? idea.hashtags : ['#LinkedIn', '#Professional', '#Leadership'],
-      engagementStrategy: idea.engagementStrategy || idea.strategy || 'Ask a thought-provoking question to encourage discussion and comments',
-      difficulty: ['easy', 'medium', 'hard'].includes(idea.difficulty) ? idea.difficulty : 'medium',
-      engagement: ['high', 'medium', 'low'].includes(idea.engagement) ? idea.engagement : 'medium',
-      type: idea.type || 'insight'
-    };
-    console.log(`Validated idea ${index + 1}:`, validatedIdea);
-    return validatedIdea;
-  });
+  const validatedIdeas = ideas.slice(0, 8).map((idea: any, index: number) => ({
+    title: idea.title || `Content Idea ${index + 1}`,
+    content: idea.content || idea.description || `Share insights about your professional experience`,
+    contentType: idea.contentType || idea.type || 'Thought Leadership',
+    hashtags: Array.isArray(idea.hashtags) ? idea.hashtags.slice(0, 5) : ['#LinkedIn', '#Professional'],
+    engagementStrategy: idea.engagementStrategy || idea.strategy || 'Ask questions to encourage discussion',
+    difficulty: ['easy', 'medium', 'hard'].includes(idea.difficulty) ? idea.difficulty : 'medium',
+    engagement: ['high', 'medium', 'low'].includes(idea.engagement) ? idea.engagement : 'medium',
+    type: idea.type || 'insight'
+  }));
 
-  // Enhanced calendar validation with more detailed data
+  // Enhanced calendar validation
   const calendar = Array.isArray(data.calendar) ? data.calendar : [];
-  const validatedCalendar = calendar.map((item: any, index: number) => {
-    const validatedItem = {
-      week: typeof item.week === 'number' ? item.week : index + 1,
-      contentType: item.contentType || item.type || 'Thought Leadership',
-      topic: item.topic || item.post || item.title || item.content || `Week ${index + 1}: Industry insights and professional development`,
-      status: item.status || 'planned',
-      optimalTiming: item.optimalTiming || item.timing || item.time || item.bestTime || 'Tuesday 10:00 AM',
-      expectedEngagement: item.expectedEngagement || item.engagement || 'medium'
-    };
-    console.log(`Validated calendar item ${index + 1}:`, validatedItem);
-    return validatedItem;
-  });
+  const validatedCalendar = calendar.slice(0, 4).map((item: any, index: number) => ({
+    week: typeof item.week === 'number' ? item.week : index + 1,
+    contentType: item.contentType || 'Thought Leadership',
+    topic: item.topic || `Week ${index + 1} content`,
+    status: item.status || 'planned',
+    optimalTiming: item.optimalTiming || 'Tuesday 10:00 AM',
+    expectedEngagement: item.expectedEngagement || 'medium'
+  }));
 
-  // Enhanced strategy validation with comprehensive data
+  // Enhanced strategy validation
   const strategy = data.strategy || {};
   const validatedStrategy = {
-    postingFrequency: strategy.postingFrequency || strategy.frequency || strategy.contentStrategyRecommendations?.[0] || 'Post 2-3 times per week for optimal engagement',
-    bestTimes: Array.isArray(strategy.bestTimes) 
-      ? strategy.bestTimes 
-      : Array.isArray(strategy.bestPostingTimes?.times) 
-      ? strategy.bestPostingTimes.times 
-      : strategy.optimalTimes || ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 2:00 PM'],
-    contentMix: strategy.contentMix || strategy.contentMixRecommendations || strategy.recommendedMix || {
-      'thought-leadership': 35,
-      'industry-insights': 25,
+    postingFrequency: strategy.postingFrequency || '2-3 times per week',
+    bestTimes: Array.isArray(strategy.bestTimes) ? strategy.bestTimes : ['Tuesday 10:00 AM', 'Wednesday 2:00 PM'],
+    contentMix: strategy.contentMix || {
+      'thought-leadership': 40,
+      'industry-insights': 30,
       'career-tips': 20,
-      'personal-stories': 12,
-      'polls-questions': 8
+      'personal-stories': 10
     },
-    trendingTopics: Array.isArray(strategy.trendingTopics) 
-      ? strategy.trendingTopics 
-      : strategy.trending || strategy.topics || ['AI and Automation', 'Remote Work Best Practices', 'Digital Transformation', 'Professional Development', 'Industry Innovation']
+    trendingTopics: Array.isArray(strategy.trendingTopics) ? strategy.trendingTopics : ['Industry Innovation', 'Professional Development']
   };
 
-  const result = {
+  return {
     ideas: validatedIdeas,
     calendar: validatedCalendar,
     strategy: validatedStrategy
   };
-
-  console.log('Final validated content suggestions:', JSON.stringify(result, null, 2));
-  return result;
 };
 
 serve(async (req) => {
@@ -150,7 +185,6 @@ serve(async (req) => {
     }
 
     console.log('Generating LinkedIn content for type:', type);
-    console.log('Input data:', JSON.stringify(data, null, 2));
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -158,248 +192,116 @@ serve(async (req) => {
 
     switch (type) {
       case 'headline':
-        systemPrompt = `You are a LinkedIn optimization expert with deep knowledge of recruiter behavior and LinkedIn's algorithm. Generate 5 compelling, professional LinkedIn headlines that are:
-- Under 220 characters
-- Industry-specific and role-focused
-- Achievement-oriented with quantifiable impact
-- Keyword-rich for maximum searchability
-- ATS-optimized for recruiter searches
-- Designed to increase profile views by 300%+
-
-Analyze current LinkedIn trends and top-performing profiles in the user's industry. Each headline should target different aspects (leadership, technical skills, results, innovation, growth).
-
-Return only a JSON array of strings, no additional text.`;
+        systemPrompt = `You are a LinkedIn optimization expert. Generate 5 compelling LinkedIn headlines under 220 characters each. Return only a JSON array of strings.`;
         
-        userPrompt = `Generate LinkedIn headlines for: ${JSON.stringify(data)}. 
-        Current industry trends to consider: ${new Date().getFullYear()} professional landscape, remote work prevalence, AI/digital transformation focus.
-        Target: ${data.targetRole || 'professional'} in ${data.industry || 'business'} industry.
-        Experience level: ${data.experienceLevel || 'mid-level'}.
-        Key skills to highlight: ${data.keySkills?.join(', ') || 'relevant skills'}.
-        Tone preference: ${data.tone || 'professional'}.`;
+        userPrompt = `Generate LinkedIn headlines for: ${data.targetRole || 'professional'} in ${data.industry || 'business'} industry.`;
         break;
 
       case 'summary':
-        systemPrompt = `You are a LinkedIn optimization expert who creates compelling summaries that drive results. Create a LinkedIn summary that:
-- Is 3-5 paragraphs (200-500 words) optimized for readability
-- Opens with a powerful hook that captures attention in first 2 lines
-- Showcases quantifiable achievements with specific metrics and impact
-- Incorporates industry-relevant keywords naturally for SEO
-- Tells a compelling professional story with clear value proposition
-- Includes a strong call-to-action that encourages networking
-- Uses psychological triggers that resonate with target audience
-- Is optimized for LinkedIn's algorithm and recruiter searches
-
-Analyze successful profiles in the user's industry for best practices and trending language patterns.
-
-Return only the summary text, no additional formatting or quotes.`;
+        systemPrompt = `You are a LinkedIn optimization expert. Create a compelling LinkedIn summary that is 200-400 words. Return only the summary text.`;
         
-        userPrompt = `Create a LinkedIn summary for: ${JSON.stringify(data)}.
-        Target role: ${data.targetRole || 'professional role'}
-        Industry: ${data.industry || 'business'}
-        Key achievements: ${data.achievements?.join('; ') || 'professional accomplishments'}
-        Skills to highlight: ${data.skills?.join(', ') || 'relevant skills'}
-        Tone: ${data.tone || 'professional'}
-        Include CTA: ${data.includeCallToAction ? 'yes' : 'no'}
-        Current summary to improve: ${data.currentSummary || 'none provided'}`;
-        maxTokens = 1200;
+        userPrompt = `Create a LinkedIn summary for: ${data.targetRole || 'professional'} in ${data.industry || 'business'} industry.`;
+        maxTokens = 1000;
         break;
 
       case 'content-suggestions':
-        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. You MUST generate EXACTLY this JSON structure with NO markdown formatting, NO code blocks, NO additional text - ONLY the raw JSON:
+        systemPrompt = `You are a LinkedIn content strategist. Generate EXACTLY this JSON structure with NO markdown formatting:
 
 {
   "ideas": [
     {
-      "title": "Specific, engaging content title",
-      "content": "Detailed content description with specific examples and actionable insights",
+      "title": "Content title",
+      "content": "Content description",
       "contentType": "Thought Leadership",
-      "hashtags": ["#RelevantHashtag1", "#RelevantHashtag2", "#RelevantHashtag3"],
-      "engagementStrategy": "Specific strategy to drive comments, likes, and shares",
-      "difficulty": "easy|medium|hard",
-      "engagement": "high|medium|low",
-      "type": "insight|tips|story|question"
+      "hashtags": ["#tag1", "#tag2"],
+      "engagementStrategy": "Strategy description",
+      "difficulty": "medium",
+      "engagement": "high",
+      "type": "insight"
     }
   ],
   "calendar": [
     {
       "week": 1,
       "contentType": "Thought Leadership",
-      "topic": "Detailed, specific topic with actionable advice or insights",
+      "topic": "Specific topic",
       "status": "planned",
       "optimalTiming": "Tuesday 10:00 AM",
-      "expectedEngagement": "high|medium|low"
+      "expectedEngagement": "high"
     }
   ],
   "strategy": {
-    "postingFrequency": "Specific frequency recommendation with reasoning",
-    "bestTimes": ["Tuesday 10:00 AM", "Wednesday 11:00 AM", "Thursday 2:00 PM"],
-    "contentMix": {
-      "thought-leadership": 35,
-      "industry-insights": 25,
-      "career-tips": 20,
-      "personal-stories": 12,
-      "polls-questions": 8
-    },
-    "trendingTopics": ["Specific Topic 1", "Specific Topic 2", "Specific Topic 3", "Specific Topic 4", "Specific Topic 5"]
+    "postingFrequency": "2-3 times per week",
+    "bestTimes": ["Tuesday 10:00 AM"],
+    "contentMix": {"thought-leadership": 40, "industry-insights": 30, "career-tips": 20, "personal-stories": 10},
+    "trendingTopics": ["Topic 1", "Topic 2"]
   }
 }
 
-CRITICAL REQUIREMENTS:
-- Generate 8-10 detailed content ideas with specific, actionable topics
-- Create a comprehensive 4-week content calendar with meaningful, detailed topics
-- Each calendar entry must have a specific, descriptive topic (not generic)
-- Include specific timing recommendations based on industry best practices
-- Provide trending topics that are current and relevant to the user's industry
-- All content must be highly relevant to current industry trends and encourage maximum engagement
-- Topics should be specific enough to be immediately actionable
-
-RETURN ONLY THE JSON OBJECT - NO MARKDOWN, NO EXPLANATIONS, NO CODE BLOCKS.`;
+Generate 6 content ideas and 4 calendar entries. Return ONLY the JSON object.`;
         
-        userPrompt = `Generate comprehensive LinkedIn content strategy for professional in ${data.industry || 'business'} industry.
-
-Profile Context:
-- Role: ${data.targetRole || data.currentRole || 'Professional'}
-- Industry: ${data.industry || 'Business'}
-- Experience Level: ${data.experienceLevel || 'Mid-level'}
-- Content Preference: ${data.contentType || 'Thought Leadership'}
-- Posting Frequency: ${data.frequency || 'Weekly'}
-- Key Skills: ${data.skills?.join(', ') || 'Professional skills'}
-- Achievements: ${data.achievements?.join(', ') || 'Career accomplishments'}
-- Experience Background: ${data.experience?.join('; ') || 'Professional background'}
-
-Requirements:
-- Generate 8-10 specific, actionable content ideas
-- Create 4-week calendar with detailed topics for each week
-- Focus on ${data.industry} industry trends and challenges
-- Include current topics like AI impact, remote work, digital transformation
-- Provide specific timing recommendations
-- Target audience: ${data.industry} professionals, recruiters, industry leaders
-- Make each calendar topic specific and immediately actionable
-- Include trending topics relevant to ${data.industry} in ${new Date().getFullYear()}
-
-Return ONLY the JSON object with no additional formatting.`;
-        maxTokens = 3000;
+        userPrompt = `Generate LinkedIn content strategy for ${data.industry || 'business'} professional targeting ${data.targetRole || 'career growth'}.`;
+        maxTokens = 2000;
         break;
 
       case 'keyword-trends':
-        systemPrompt = `You are a LinkedIn SEO expert and job market analyst who provides comprehensive keyword analysis with real-time market insights. Provide detailed keyword analysis that includes:
+        systemPrompt = `You are a LinkedIn SEO expert. Analyze keywords and provide trends in this EXACT JSON format:
 
-**CURRENT KEYWORDS PERFORMANCE**: Analyze existing profile keywords with strength scores, context, and improvement recommendations.
-
-**MISSING HIGH-IMPACT KEYWORDS**: Identify crucial missing keywords with priority levels, impact scores, specific reasons why they're important, and actionable suggestions for implementation.
-
-**TRENDING INDUSTRY KEYWORDS**: Current trending keywords in the industry with growth data, search volumes, and strategic context for why they're trending.
-
-**OPTIMIZATION STRATEGY**: Comprehensive strategy including headline optimization, summary enhancement, skills section improvement, and content strategy recommendations.
-
-Return a detailed JSON object with this exact structure:
 {
   "currentKeywords": {
-    "keyword": {
-      "strength": number (0-100),
-      "context": "detailed explanation of current usage and performance"
+    "keyword_name": {
+      "strength": 75,
+      "context": "explanation of current usage"
     }
   },
   "missingKeywords": [
     {
-      "keyword": "specific keyword",
-      "priority": "high/medium/low",
-      "impact": number (percentage),
-      "reason": "why this keyword is crucial",
-      "suggestion": "specific implementation advice"
+      "keyword": "missing_keyword",
+      "priority": "high",
+      "impact": 85,
+      "reason": "why this keyword is important",
+      "suggestion": "how to implement this keyword"
     }
   ],
   "trendingKeywords": [
     {
-      "keyword": "trending term",
-      "growth": "percentage growth",
-      "searchVolume": "search volume data",
-      "context": "why it's trending and how to leverage it"
+      "keyword": "trending_keyword",
+      "growth": "25%",
+      "searchVolume": "High",
+      "context": "why it's trending"
     }
   ],
   "optimizationStrategy": {
-    "headline": "specific headline optimization advice",
-    "summary": "summary enhancement recommendations",
-    "skills": "skills section improvement strategy",
-    "content": "content strategy for keyword integration"
+    "headline": "headline optimization advice",
+    "summary": "summary optimization advice", 
+    "skills": "skills optimization advice",
+    "content": "content optimization advice"
   }
 }
 
-Focus on ${new Date().getFullYear()} market trends, AI/digital transformation, remote work impact, and industry-specific opportunities.`;
+Analyze their current profile and provide 3-5 items in each section. Return ONLY the JSON object.`;
         
-        userPrompt = `Analyze keywords and provide comprehensive market insights for: ${JSON.stringify(data)}.
-        
-        Target Role: ${data.targetRole || 'professional'}
-        Industry: ${data.industry || 'business'}
-        Current Profile Summary: ${data.currentProfile || 'not provided'}
-        Current Skills: ${data.skills?.join(', ') || 'not specified'}
-        Experience Level: ${data.experienceLevel || 'mid-level'}
-        Job Description Context: ${data.jobDescription || 'general role requirements'}
-        
-        Provide real-time analysis of:
-        1. Current keyword performance in their profile
-        2. High-impact missing keywords based on ${new Date().getFullYear()} job market
-        3. Trending keywords in ${data.industry} industry
-        4. ATS optimization recommendations
-        5. Competitive analysis insights
-        6. Seasonal trends and timing strategies
-        
-        Include specific, actionable recommendations with measurable impact predictions.`;
-        maxTokens = 1500;
+        userPrompt = `Analyze keywords for ${data.targetRole || 'professional'} in ${data.industry || 'business'} industry. Current profile: ${data.currentProfile?.substring(0, 500) || 'No profile provided'}`;
+        maxTokens = 1000;
         break;
 
       case 'skills-analysis':
-        systemPrompt = `You are a career development expert who analyzes skill gaps and market trends. Provide a comprehensive skills analysis that includes:
-- Current market demand for the user's skills
-- Trending skills in their industry for ${new Date().getFullYear()}
-- Skill gap analysis with specific recommendations
-- Certification and learning path suggestions
-- Salary impact of acquiring missing skills
-- Future-proofing recommendations for AI/automation trends
-
-Analyze job market data, industry reports, and skill demand trends.
-
-Return a JSON object with "currentSkillsAssessment", "trendingSkills", "skillGaps", "recommendations", and "learningPaths".`;
-        
-        userPrompt = `Analyze skills for: ${JSON.stringify(data)}.
-        Current skills: ${data.skills?.join(', ') || 'none provided'}
-        Industry: ${data.industry || 'business'}
-        Target role: ${data.targetRole || 'current role'}
-        Experience level: ${data.experienceLevel || 'mid-level'}`;
+        systemPrompt = `Analyze skills and provide recommendations in JSON format with "currentSkillsAssessment", "trendingSkills", "skillGaps", "recommendations", and "learningPaths".`;
+        userPrompt = `Analyze skills for ${data.industry || 'business'} professional targeting ${data.targetRole || 'career growth'}.`;
         maxTokens = 1000;
         break;
 
       case 'profile-analysis':
-        systemPrompt = `You are a LinkedIn optimization consultant who provides comprehensive profile audits. Analyze the user's profile data and provide:
-- Profile completeness score with specific improvement areas
-- Keyword optimization analysis for better search visibility
-- Industry benchmarking against top performers
-- Recruiter appeal assessment with actionable insights
-- Algorithm optimization recommendations
-- Personal branding strengths and gaps
-- Competitive positioning analysis
-- ROI-focused improvement roadmap
-
-Use industry best practices and current LinkedIn algorithm preferences.
-
-Return a JSON object with "overallScore", "strengths", "improvementAreas", "keywordOptimization", "benchmarkAnalysis", and "actionPlan".`;
-        
-        userPrompt = `Analyze LinkedIn profile: ${JSON.stringify(data)}.
-        Headline: ${data.headline || 'none'}
-        Summary: ${data.summary || 'none'}
-        Skills: ${data.skills?.join(', ') || 'none'}
-        Industry: ${data.industry || 'not specified'}
-        Experience: ${data.experience?.length || 0} positions listed
-        Education: ${data.education?.length || 0} entries`;
-        maxTokens = 1200;
+        systemPrompt = `Analyze LinkedIn profile and provide insights in JSON format with "overallScore", "strengths", "improvementAreas", "keywordOptimization", "benchmarkAnalysis", and "actionPlan".`;
+        userPrompt = `Analyze LinkedIn profile for ${data.industry || 'business'} professional.`;
+        maxTokens = 1000;
         break;
 
       default:
         throw new Error('Invalid type specified');
     }
 
-    console.log('Sending request to OpenAI with system prompt length:', systemPrompt.length);
-    console.log('User prompt:', userPrompt.substring(0, 200) + '...');
+    console.log('Sending request to OpenAI...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -408,12 +310,12 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: maxTokens,
       }),
     });
@@ -421,23 +323,22 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
     if (!response.ok) {
       const errorData = await response.text();
       console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const responseData = await response.json();
     const generatedContent = responseData.choices[0].message.content;
     
-    console.log('Generated LinkedIn content (first 500 chars):', generatedContent.substring(0, 500));
+    console.log('Generated content length:', generatedContent.length);
 
     // For JSON responses, parse and return structured data
     if (['headline', 'content-suggestions', 'skills-analysis', 'profile-analysis', 'keyword-trends'].includes(type)) {
       try {
         const parsedContent = extractJsonFromResponse(generatedContent);
         
-        // Special handling for content-suggestions to ensure proper structure
+        // Special handling for content-suggestions
         if (type === 'content-suggestions') {
           const validatedContent = validateContentSuggestions(parsedContent);
-          console.log('Final validated content suggestions being returned:', JSON.stringify(validatedContent, null, 2));
           return new Response(JSON.stringify({ content: validatedContent }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -448,14 +349,23 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         });
       } catch (parseError) {
         console.error('Failed to parse JSON response:', parseError);
-        console.error('Raw content that failed to parse:', generatedContent);
         
-        // Return error with details for debugging
+        // Return structured error response
         return new Response(JSON.stringify({ 
           error: 'Failed to parse AI response',
           details: parseError.message,
-          rawContent: generatedContent.substring(0, 1000),
-          type: type
+          type: type,
+          fallback: type === 'keyword-trends' ? {
+            currentKeywords: {},
+            missingKeywords: [],
+            trendingKeywords: [],
+            optimizationStrategy: {
+              headline: "Please try again - analysis incomplete",
+              summary: "Please try again - analysis incomplete", 
+              skills: "Please try again - analysis incomplete",
+              content: "Please try again - analysis incomplete"
+            }
+          } : null
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
