@@ -45,9 +45,9 @@ export const LinkedInContentSuggestions = ({
     setIsGenerating(true);
     
     try {
-      // Extract current and target roles from experience data
+      // Extract current role from experience data
       const currentRole = profileData.experience?.[0]?.title || "";
-      const targetRole = profileData.targetRole || currentRole;
+      const targetRole = currentRole; // Use current role as target role
       
       // Extract achievements from experience descriptions
       const achievements = profileData.experience?.map(exp => exp.description).filter(Boolean) || [];
@@ -59,7 +59,7 @@ export const LinkedInContentSuggestions = ({
 
       // Prepare enriched data for AI generation
       const enrichedData = {
-        name: profileData.name,
+        name: profileData.headline?.split('|')[0]?.trim() || "Professional",
         headline: profileData.headline,
         summary: profileData.summary,
         industry: profileData.industry,
