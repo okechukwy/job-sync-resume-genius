@@ -151,9 +151,16 @@ const TemplatePreviewModal = ({ templateId, onClose, onSelectTemplate }: Templat
 
         {/* Preview Content - Scrollable Area */}
         <div className="flex-1 overflow-auto bg-gray-50">
-          <div className="p-4 lg:p-8 flex justify-center">
+          <div 
+            className="flex justify-center"
+            style={{ 
+              padding: '2rem',
+              minHeight: `${297 * zoomLevel + 4 * 16}px`, // Account for scaled height + padding
+              minWidth: `${210 * zoomLevel + 4 * 16}px`   // Account for scaled width + padding
+            }}
+          >
             <div 
-              className="bg-white shadow-xl transition-transform duration-200 mx-auto"
+              className="bg-white shadow-xl transition-transform duration-200"
               style={{ 
                 transform: `scale(${zoomLevel})`,
                 transformOrigin: 'top center',
