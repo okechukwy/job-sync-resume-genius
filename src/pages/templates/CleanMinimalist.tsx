@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { TemplateActions } from "@/components/template-preview/TemplateActions";
 import { LivePreview } from "@/components/live-preview";
-import { sampleResumeData } from "@/data/sampleResumeData";
+import { businessProfessionalSample } from "@/data/sampleResumeData";
 
 const CleanMinimalist = () => {
   return (
@@ -40,7 +40,7 @@ const CleanMinimalist = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <LivePreview
-                  data={sampleResumeData}
+                  data={businessProfessionalSample}
                   template="clean-minimalist"
                   className="h-[600px] rounded-lg overflow-hidden border border-border/20"
                 />

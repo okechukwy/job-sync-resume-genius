@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { TemplateActions } from "@/components/template-preview/TemplateActions";
 import { LivePreview } from "@/components/live-preview";
-import { sampleResumeData } from "@/data/sampleResumeData";
+import { creativeProfessionalSample } from "@/data/sampleResumeData";
 
 const UxUiCreative = () => {
   return (
@@ -40,7 +40,7 @@ const UxUiCreative = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <LivePreview
-                  data={sampleResumeData}
+                  data={creativeProfessionalSample}
                   template="ux-ui-creative"
                   className="h-[600px] rounded-lg overflow-hidden border border-border/20"
                 />

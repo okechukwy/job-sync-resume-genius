@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { TemplateActions } from "@/components/template-preview/TemplateActions";
 import { LivePreview } from "@/components/live-preview";
-import { sampleResumeData } from "@/data/sampleResumeData";
+import { techProfessionalSample } from "@/data/sampleResumeData";
 
 const AcademicBlue = () => {
   return (
@@ -40,7 +40,7 @@ const AcademicBlue = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <LivePreview
-                  data={sampleResumeData}
+                  data={techProfessionalSample}
                   template="academic-blue"
                   className="h-[600px] rounded-lg overflow-hidden border border-border/20"
                 />
