@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Copy, RefreshCw, Lightbulb, TrendingUp, Search, Trash2 } from "lucide-react";
-import { linkedInKeywordAnalyzerSchema, type LinkedInKeywordAnalyzer as LinkedInKeywordAnalyzerType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
-import { analyzeLinkedInKeywords } from "@/services/openaiServices";
+import { linkedInKeywordAnalysisSchema, type LinkedInKeywordAnalysis, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { getKeywordTrends } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInKeywordAnalyzerProps {
@@ -26,25 +26,21 @@ export const LinkedInKeywordAnalyzer = ({
 }: LinkedInKeywordAnalyzerProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const form = useForm<LinkedInKeywordAnalyzerType>({
-    resolver: zodResolver(linkedInKeywordAnalyzerSchema),
+  const form = useForm<LinkedInKeywordAnalysis>({
+    resolver: zodResolver(linkedInKeywordAnalysisSchema),
     defaultValues: {
       targetRole: "",
       industry: profileData?.industry || "",
-      currentContent: {
-        headline: profileData?.headline || "",
-        summary: profileData?.summary || "",
-        skills: profileData?.skills || [],
-      },
-      competitorAnalysis: false,
+      jobDescription: "",
+      currentProfile: profileData?.summary || "",
     },
   });
 
-  const analyzeKeywords = async (data: LinkedInKeywordAnalyzerType) => {
+  const analyzeKeywords = async (data: LinkedInKeywordAnalysis) => {
     setIsAnalyzing(true);
     
     try {
-      const result = await analyzeLinkedInKeywords(data);
+      const result = await getKeywordTrends(data);
       onKeywordResultsUpdate(result);
       toast.success("Keyword analysis completed successfully!");
     } catch (error) {
