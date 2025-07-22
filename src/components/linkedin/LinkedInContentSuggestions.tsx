@@ -7,12 +7,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users } from "lucide-react";
+import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users, Trash2 } from "lucide-react";
 import { linkedInContentSuggestionSchema, type LinkedInContentSuggestion as LinkedInContentSuggestionType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
 import { toast } from "sonner";
 
 interface LinkedInContentSuggestionsProps {
   profileData: LinkedInProfile | null;
+  contentSuggestions: any;
+  onContentSuggestionsUpdate: (suggestions: any) => void;
 }
 
 interface ContentIdea {
@@ -23,9 +25,11 @@ interface ContentIdea {
   difficulty: "easy" | "medium" | "hard";
 }
 
-export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSuggestionsProps) => {
-  const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([]);
-  const [contentCalendar, setContentCalendar] = useState<any[]>([]);
+export const LinkedInContentSuggestions = ({ 
+  profileData, 
+  contentSuggestions, 
+  onContentSuggestionsUpdate 
+}: LinkedInContentSuggestionsProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<LinkedInContentSuggestionType>({
@@ -46,11 +50,15 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
     setTimeout(() => {
       const ideas = generateContentIdeas(data);
       const calendar = generateContentCalendar(data);
-      setContentIdeas(ideas);
-      setContentCalendar(calendar);
+      onContentSuggestionsUpdate({ ideas, calendar });
       setIsGenerating(false);
       toast.success("Content suggestions generated!");
     }, 1500);
+  };
+
+  const clearSuggestions = () => {
+    onContentSuggestionsUpdate(null);
+    toast.success("Content suggestions cleared successfully!");
   };
 
   const generateContentIdeas = (data: LinkedInContentSuggestionType) => {
@@ -203,13 +211,23 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
     }
   };
 
+  const hasExistingSuggestions = contentSuggestions !== null;
+
   return (
     <div className="space-y-6">
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            LinkedIn Content Suggestions
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              LinkedIn Content Suggestions
+            </div>
+            {hasExistingSuggestions && (
+              <Button variant="outline" size="sm" onClick={clearSuggestions}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Results
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -328,7 +346,7 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
                 ) : (
                   <>
                     <Lightbulb className="mr-2 h-4 w-4" />
-                    Generate Content Ideas
+                    {hasExistingSuggestions ? "Regenerate Content Ideas" : "Generate Content Ideas"}
                   </>
                 )}
               </Button>
@@ -338,7 +356,7 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
       </Card>
 
       {/* Results */}
-      {contentIdeas.length > 0 && (
+      {hasExistingSuggestions && (
         <Tabs defaultValue="ideas" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 glass-card">
             <TabsTrigger value="ideas" className="flex items-center gap-2">
@@ -353,7 +371,7 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
 
           <TabsContent value="ideas">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {contentIdeas.map((idea, index) => (
+              {contentSuggestions.ideas?.map((idea: ContentIdea, index: number) => (
                 <Card key={index} className="glass-card">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
@@ -394,7 +412,7 @@ export const LinkedInContentSuggestions = ({ profileData }: LinkedInContentSugge
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {contentCalendar.map((item, index) => (
+                  {contentSuggestions.calendar?.map((item: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-4 border rounded-lg glass-card">
                       <div>
                         <h4 className="font-medium">{item.topic}</h4>

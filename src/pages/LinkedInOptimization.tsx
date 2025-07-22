@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,12 @@ const LinkedInOptimization = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState(null);
   const [analysisScore, setAnalysisScore] = useState(0);
+  
+  // Centralized state for all generated content
+  const [generatedSummaries, setGeneratedSummaries] = useState<string[]>([]);
+  const [generatedHeadlines, setGeneratedHeadlines] = useState<string[]>([]);
+  const [keywordAnalysisResults, setKeywordAnalysisResults] = useState(null);
+  const [contentSuggestions, setContentSuggestions] = useState(null);
   const [scannedProfiles, setScannedProfiles] = useState([]);
 
   const handleProfileUpdate = (data: any) => {
@@ -102,22 +109,43 @@ const LinkedInOptimization = () => {
             <TabsTrigger value="headline" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
               Headline
+              {generatedHeadlines.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
+                  {generatedHeadlines.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <Award className="h-4 w-4" />
               Summary
+              {generatedSummaries.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
+                  {generatedSummaries.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="keywords" className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
               Keywords
+              {keywordAnalysisResults && (
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">✓</Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Linkedin className="h-4 w-4" />
               Content
+              {contentSuggestions && (
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">✓</Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="scanner" className="flex items-center gap-2">
               <Search className="h-4 w-4" />
               URL Scanner
+              {scannedProfiles.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
+                  {scannedProfiles.length}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -130,19 +158,35 @@ const LinkedInOptimization = () => {
           </TabsContent>
 
           <TabsContent value="headline">
-            <LinkedInHeadlineGenerator profileData={profileData} />
+            <LinkedInHeadlineGenerator 
+              profileData={profileData} 
+              generatedHeadlines={generatedHeadlines}
+              onHeadlinesUpdate={setGeneratedHeadlines}
+            />
           </TabsContent>
 
           <TabsContent value="summary">
-            <LinkedInSummaryOptimizer profileData={profileData} />
+            <LinkedInSummaryOptimizer 
+              profileData={profileData} 
+              generatedSummaries={generatedSummaries}
+              onSummariesUpdate={setGeneratedSummaries}
+            />
           </TabsContent>
 
           <TabsContent value="keywords">
-            <LinkedInKeywordAnalyzer profileData={profileData} />
+            <LinkedInKeywordAnalyzer 
+              profileData={profileData} 
+              keywordAnalysisResults={keywordAnalysisResults}
+              onKeywordResultsUpdate={setKeywordAnalysisResults}
+            />
           </TabsContent>
 
           <TabsContent value="content">
-            <LinkedInContentSuggestions profileData={profileData} />
+            <LinkedInContentSuggestions 
+              profileData={profileData} 
+              contentSuggestions={contentSuggestions}
+              onContentSuggestionsUpdate={setContentSuggestions}
+            />
           </TabsContent>
 
           <TabsContent value="scanner">

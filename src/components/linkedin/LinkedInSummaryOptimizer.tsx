@@ -9,17 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Copy, RefreshCw, FileText, Plus, X, TrendingUp } from "lucide-react";
+import { Copy, RefreshCw, FileText, Plus, X, TrendingUp, Trash2 } from "lucide-react";
 import { linkedInSummaryOptimizerSchema, type LinkedInSummaryOptimizer as LinkedInSummaryOptimizerType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
 import { generateLinkedInContent } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInSummaryOptimizerProps {
   profileData: LinkedInProfile | null;
+  generatedSummaries: string[];
+  onSummariesUpdate: (summaries: string[]) => void;
 }
 
-export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimizerProps) => {
-  const [optimizedSummaries, setOptimizedSummaries] = useState<string[]>([]);
+export const LinkedInSummaryOptimizer = ({ 
+  profileData, 
+  generatedSummaries, 
+  onSummariesUpdate 
+}: LinkedInSummaryOptimizerProps) => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [achievements, setAchievements] = useState<string[]>([]);
   const [newAchievement, setNewAchievement] = useState("");
@@ -63,18 +68,15 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
         skills: data.skills,
         tone: data.tone,
         summary: data.currentSummary,
-        // Add the includeCallToAction flag
         includeCallToAction: data.includeCallToAction,
       });
       
-      // Handle different response formats
       if (typeof result.content === 'string') {
-        // If API returns a single summary, create variations
-        setOptimizedSummaries([result.content]);
+        onSummariesUpdate([result.content]);
       } else if (Array.isArray(result.content)) {
-        setOptimizedSummaries(result.content);
+        onSummariesUpdate(result.content);
       } else {
-        setOptimizedSummaries([String(result.content)]);
+        onSummariesUpdate([String(result.content)]);
       }
       
       toast.success("AI-optimized summary generated successfully!");
@@ -86,22 +88,37 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
     }
   };
 
+  const clearSummaries = () => {
+    onSummariesUpdate([]);
+    toast.success("Summaries cleared successfully!");
+  };
+
   const copyToClipboard = (summary: string) => {
     navigator.clipboard.writeText(summary);
     toast.success("Summary copied to clipboard!");
   };
 
+  const hasExistingSummaries = generatedSummaries.length > 0;
+
   return (
     <div className="space-y-6">
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            AI-Powered LinkedIn Summary Optimizer
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Live AI Analysis
-            </Badge>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              AI-Powered LinkedIn Summary Optimizer
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                Live AI Analysis
+              </Badge>
+            </div>
+            {hasExistingSummaries && (
+              <Button variant="outline" size="sm" onClick={clearSummaries}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Results
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -245,7 +262,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                 ) : (
                   <>
                     <FileText className="mr-2 h-4 w-4" />
-                    Generate AI Summary
+                    {hasExistingSummaries ? "Regenerate AI Summary" : "Generate AI Summary"}
                   </>
                 )}
               </Button>
@@ -255,7 +272,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
       </Card>
 
       {/* Optimized Summaries */}
-      {optimizedSummaries.length > 0 && (
+      {hasExistingSummaries && (
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -266,7 +283,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {optimizedSummaries.map((summary, index) => (
+              {generatedSummaries.map((summary, index) => (
                 <div key={index} className="p-4 border rounded-lg glass-card">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <Badge variant="outline">AI Optimized Version {index + 1}</Badge>
@@ -284,7 +301,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                     <Badge variant={summary.length <= 2600 ? "default" : "destructive"}>
                       {summary.length <= 2600 ? "Perfect Length" : "Too Long"}
                     </Badge>
-                    {summary.includes("📧") || summary.includes("connect") && (
+                    {(summary.includes("📧") || summary.includes("connect")) && (
                       <Badge variant="secondary">CTA Included</Badge>
                     )}
                   </div>

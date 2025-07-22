@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,54 +5,47 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, TrendingUp, Target, Lightbulb, RefreshCw } from "lucide-react";
-import { z } from "zod";
-import { getKeywordTrends, type KeywordTrendsResult, type LinkedInData } from "@/services/openaiServices";
+import { Copy, RefreshCw, Lightbulb, TrendingUp, Search, Trash2 } from "lucide-react";
+import { linkedInKeywordAnalyzerSchema, type LinkedInKeywordAnalyzer as LinkedInKeywordAnalyzerType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { analyzeLinkedInKeywords } from "@/services/openaiServices";
 import { toast } from "sonner";
 
-const keywordAnalyzerSchema = z.object({
-  targetRole: z.string().min(1, "Target role is required"),
-  industry: z.string().min(1, "Industry is required"),
-  location: z.string().optional(),
-  currentSkills: z.string().optional(),
-});
-
-type KeywordAnalyzerForm = z.infer<typeof keywordAnalyzerSchema>;
-
 interface LinkedInKeywordAnalyzerProps {
-  profileData: any;
+  profileData: LinkedInProfile | null;
+  keywordAnalysisResults: any;
+  onKeywordResultsUpdate: (results: any) => void;
 }
 
-export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzerProps) => {
-  const [keywordData, setKeywordData] = useState<KeywordTrendsResult | null>(null);
+export const LinkedInKeywordAnalyzer = ({ 
+  profileData, 
+  keywordAnalysisResults, 
+  onKeywordResultsUpdate 
+}: LinkedInKeywordAnalyzerProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const form = useForm<KeywordAnalyzerForm>({
-    resolver: zodResolver(keywordAnalyzerSchema),
+  const form = useForm<LinkedInKeywordAnalyzerType>({
+    resolver: zodResolver(linkedInKeywordAnalyzerSchema),
     defaultValues: {
-      targetRole: profileData?.headline?.split('|')[0]?.trim() || "",
+      targetRole: "",
       industry: profileData?.industry || "",
-      location: profileData?.location || "",
-      currentSkills: profileData?.skills?.join(', ') || "",
+      currentContent: {
+        headline: profileData?.headline || "",
+        summary: profileData?.summary || "",
+        skills: profileData?.skills || [],
+      },
+      competitorAnalysis: false,
     },
   });
 
-  const analyzeKeywords = async (data: KeywordAnalyzerForm) => {
+  const analyzeKeywords = async (data: LinkedInKeywordAnalyzerType) => {
     setIsAnalyzing(true);
     
     try {
-      const linkedInData: LinkedInData = {
-        targetRole: data.targetRole,
-        industry: data.industry,
-        location: data.location,
-        skills: data.currentSkills ? data.currentSkills.split(',').map(s => s.trim()) : [],
-      };
-
-      const result = await getKeywordTrends(linkedInData);
-      setKeywordData(result);
+      const result = await analyzeLinkedInKeywords(data);
+      onKeywordResultsUpdate(result);
       toast.success("Keyword analysis completed successfully!");
     } catch (error) {
       console.error('Error analyzing keywords:', error);
@@ -63,25 +55,37 @@ export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzer
     }
   };
 
-  const getKeywordScore = (keyword: string) => {
-    // Simple scoring based on keyword characteristics
-    if (keywordData?.primaryKeywords.includes(keyword)) return 90;
-    if (keywordData?.trendingTerms.includes(keyword)) return 85;
-    if (keywordData?.longTailKeywords.includes(keyword)) return 75;
-    return 60;
+  const clearResults = () => {
+    onKeywordResultsUpdate(null);
+    toast.success("Analysis results cleared successfully!");
   };
+
+  const copyKeywords = (keywords: string[]) => {
+    navigator.clipboard.writeText(keywords.join(", "));
+    toast.success("Keywords copied to clipboard!");
+  };
+
+  const hasExistingResults = keywordAnalysisResults !== null;
 
   return (
     <div className="space-y-6">
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            AI Keyword Trend Analysis
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Live Market Data
-            </Badge>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              AI LinkedIn Keyword Analyzer
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Search className="h-3 w-3" />
+                Industry Intelligence
+              </Badge>
+            </div>
+            {hasExistingResults && (
+              <Button variant="outline" size="sm" onClick={clearResults}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Results
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -125,54 +129,16 @@ export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzer
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location (Optional)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g., San Francisco, Remote, Global"
-                          {...field} 
-                          className="glass-card"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="currentSkills"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Skills</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Comma-separated list of your skills"
-                          {...field} 
-                          className="glass-card"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
               <Button type="submit" disabled={isAnalyzing} className="w-full">
                 {isAnalyzing ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing Market Trends...
+                    AI Analyzing Keywords...
                   </>
                 ) : (
                   <>
                     <Search className="mr-2 h-4 w-4" />
-                    Analyze Keywords & Trends
+                    {hasExistingResults ? "Regenerate Analysis" : "Analyze Keywords with AI"}
                   </>
                 )}
               </Button>
@@ -181,70 +147,100 @@ export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzer
         </CardContent>
       </Card>
 
-      {/* Keyword Analysis Results */}
-      {keywordData && (
-        <div className="space-y-6">
-          {/* Primary Keywords */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                High-Impact Keywords
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {keywordData.primaryKeywords.map((keyword, index) => (
-                    <div key={index} className="p-3 border rounded-lg glass-card">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{keyword}</span>
-                        <Badge variant="default">High Priority</Badge>
-                      </div>
-                      <Progress value={getKeywordScore(keyword)} className="h-2" />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Market Demand: {getKeywordScore(keyword)}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Trending Terms */}
+      {/* Analysis Results */}
+      {hasExistingResults && (
+        <>
+          {/* Current Keywords Performance */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Trending Terms ({new Date().getFullYear()})
+                Current Keywords Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Object.entries(keywordAnalysisResults.currentKeywords || {}).map(([keyword, data]: [string, any]) => (
+                <div key={keyword} className="p-4 border rounded-lg glass-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{keyword}</span>
+                    <Badge variant={data.strength >= 80 ? "default" : data.strength >= 60 ? "secondary" : "outline"}>
+                      {data.strength}% strength
+                    </Badge>
+                  </div>
+                  <Progress value={data.strength} className="mb-2" />
+                  <p className="text-sm text-muted-foreground">{data.context}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Missing Keywords */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                Missing High-Impact Keywords
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {keywordData.trendingTerms.map((term, index) => (
-                  <Badge key={index} variant="secondary" className="text-sm">
-                    {term}
-                  </Badge>
+              <div className="space-y-4">
+                {keywordAnalysisResults.missingKeywords?.map((keyword: any, index: number) => (
+                  <div key={index} className="p-4 border rounded-lg glass-card">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-medium">{keyword.keyword}</span>
+                          <Badge variant={keyword.priority === "high" ? "destructive" : keyword.priority === "medium" ? "secondary" : "outline"}>
+                            {keyword.priority} priority
+                          </Badge>
+                          <Badge variant="outline">{keyword.impact}% impact</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{keyword.reason}</p>
+                        <p className="text-sm"><strong>Suggestion:</strong> {keyword.suggestion}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyKeywords([keyword.keyword])}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Long-tail Keywords */}
+          {/* Trending Keywords */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                Long-tail Opportunities
+                <TrendingUp className="h-5 w-5" />
+                Trending Industry Keywords
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {keywordData.longTailKeywords.map((keyword, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded glass-card">
-                    <span className="text-sm">{keyword}</span>
-                    <Badge variant="outline">Low Competition</Badge>
+              <div className="space-y-4">
+                {keywordAnalysisResults.trendingKeywords?.map((trend: any, index: number) => (
+                  <div key={index} className="p-4 border rounded-lg glass-card">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-medium">{trend.keyword}</span>
+                          <Badge variant="default">+{trend.growth}% growth</Badge>
+                          <Badge variant="outline">{trend.searchVolume} searches</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{trend.context}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyKeywords([trend.keyword])}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -252,67 +248,37 @@ export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzer
           </Card>
 
           {/* Optimization Strategy */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>AI Optimization Strategy</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {keywordData.optimizationStrategy.personalBranding && (
+          {keywordAnalysisResults.optimizationStrategy && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  AI Optimization Strategy
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-medium mb-2">Personal Branding</h4>
-                    <div className="space-y-1">
-                      {keywordData.optimizationStrategy.personalBranding.map((action, index) => (
-                        <Alert key={index}>
-                          <AlertDescription className="text-sm">{action}</AlertDescription>
-                        </Alert>
-                      ))}
-                    </div>
+                    <h5 className="font-medium mb-2">Headline Optimization</h5>
+                    <p className="text-sm text-muted-foreground">{keywordAnalysisResults.optimizationStrategy.headline}</p>
                   </div>
-                )}
-
-                {keywordData.optimizationStrategy.ATSOptimization && (
                   <div>
-                    <h4 className="font-medium mb-2">ATS Keywords</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {keywordData.optimizationStrategy.ATSOptimization.map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="text-sm">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
+                    <h5 className="font-medium mb-2">Summary Optimization</h5>
+                    <p className="text-sm text-muted-foreground">{keywordAnalysisResults.optimizationStrategy.summary}</p>
                   </div>
-                )}
-
-                {keywordData.optimizationStrategy.timingRecommendations && (
                   <div>
-                    <h4 className="font-medium mb-2">Timing Strategy</h4>
-                    <div className="space-y-1">
-                      {keywordData.optimizationStrategy.timingRecommendations.map((timing, index) => (
-                        <Alert key={index}>
-                          <AlertDescription className="text-sm">{timing}</AlertDescription>
-                        </Alert>
-                      ))}
-                    </div>
+                    <h5 className="font-medium mb-2">Skills Section</h5>
+                    <p className="text-sm text-muted-foreground">{keywordAnalysisResults.optimizationStrategy.skills}</p>
                   </div>
-                )}
-
-                {keywordData.optimizationStrategy.competitorAnalysis?.gaps && (
                   <div>
-                    <h4 className="font-medium mb-2">Competitive Gaps</h4>
-                    <div className="space-y-1">
-                      {keywordData.optimizationStrategy.competitorAnalysis.gaps.map((gap, index) => (
-                        <Alert key={index}>
-                          <AlertDescription className="text-sm">{gap}</AlertDescription>
-                        </Alert>
-                      ))}
-                    </div>
+                    <h5 className="font-medium mb-2">Content Strategy</h5>
+                    <p className="text-sm text-muted-foreground">{keywordAnalysisResults.optimizationStrategy.content}</p>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
     </div>
   );

@@ -9,17 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { Copy, RefreshCw, Sparkles, TrendingUp, Trash2 } from "lucide-react";
 import { linkedInHeadlineGeneratorSchema, type LinkedInHeadlineGenerator as LinkedInHeadlineGeneratorType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
 import { generateLinkedInContent } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInHeadlineGeneratorProps {
   profileData: LinkedInProfile | null;
+  generatedHeadlines: string[];
+  onHeadlinesUpdate: (headlines: string[]) => void;
 }
 
-export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGeneratorProps) => {
-  const [generatedHeadlines, setGeneratedHeadlines] = useState<string[]>([]);
+export const LinkedInHeadlineGenerator = ({ 
+  profileData, 
+  generatedHeadlines, 
+  onHeadlinesUpdate 
+}: LinkedInHeadlineGeneratorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<LinkedInHeadlineGeneratorType>({
@@ -46,11 +51,10 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
       });
       
       if (Array.isArray(result.content)) {
-        setGeneratedHeadlines(result.content);
+        onHeadlinesUpdate(result.content);
         toast.success("AI-powered headlines generated successfully!");
       } else {
-        // Fallback if API returns different format
-        setGeneratedHeadlines([result.content as string]);
+        onHeadlinesUpdate([result.content as string]);
         toast.success("Headlines generated successfully!");
       }
     } catch (error) {
@@ -61,22 +65,37 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
     }
   };
 
+  const clearHeadlines = () => {
+    onHeadlinesUpdate([]);
+    toast.success("Headlines cleared successfully!");
+  };
+
   const copyToClipboard = (headline: string) => {
     navigator.clipboard.writeText(headline);
     toast.success("Headline copied to clipboard!");
   };
 
+  const hasExistingHeadlines = generatedHeadlines.length > 0;
+
   return (
     <div className="space-y-6">
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            AI-Powered LinkedIn Headline Generator
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Live AI Analysis
-            </Badge>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              AI-Powered LinkedIn Headline Generator
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                Live AI Analysis
+              </Badge>
+            </div>
+            {hasExistingHeadlines && (
+              <Button variant="outline" size="sm" onClick={clearHeadlines}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Results
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -202,7 +221,7 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Generate AI Headlines
+                    {hasExistingHeadlines ? "Regenerate AI Headlines" : "Generate AI Headlines"}
                   </>
                 )}
               </Button>
@@ -212,7 +231,7 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
       </Card>
 
       {/* Generated Headlines */}
-      {generatedHeadlines.length > 0 && (
+      {hasExistingHeadlines && (
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
