@@ -66,15 +66,20 @@ export interface KeywordTrendsResult {
   primaryKeywords: string[];
   longTailKeywords: string[];
   trendingTerms: string[];
-  seasonalKeywords: Array<{
-    keyword: string;
-    season: string;
-    searchVolume: string;
-  }>;
+  seasonalKeywords: string[];
   optimizationStrategy: {
-    immediate: string[];
-    quarterly: string[];
-    annual: string[];
+    searchVolumeDifficulty?: Record<string, { volume: number | string; difficulty: string }>;
+    competitorAnalysis?: {
+      topProfiles?: string[];
+      gaps?: string[];
+      keywordGaps?: string[];
+      topCompetitorKeywords?: string[];
+    };
+    ATSOptimization?: string[];
+    ATSOptimizationKeywords?: string[];
+    personalBranding?: string[];
+    timingRecommendations?: string[];
+    searchVolumeAndDifficulty?: Record<string, { volume: string; difficulty: string }>;
   };
 }
 

@@ -258,38 +258,57 @@ export const LinkedInKeywordAnalyzer = ({ profileData }: LinkedInKeywordAnalyzer
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Immediate Actions</h4>
-                  <div className="space-y-1">
-                    {keywordData.optimizationStrategy.immediate.map((action, index) => (
-                      <Alert key={index}>
-                        <AlertDescription className="text-sm">{action}</AlertDescription>
-                      </Alert>
-                    ))}
+                {keywordData.optimizationStrategy.personalBranding && (
+                  <div>
+                    <h4 className="font-medium mb-2">Personal Branding</h4>
+                    <div className="space-y-1">
+                      {keywordData.optimizationStrategy.personalBranding.map((action, index) => (
+                        <Alert key={index}>
+                          <AlertDescription className="text-sm">{action}</AlertDescription>
+                        </Alert>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <h4 className="font-medium mb-2">Quarterly Strategy</h4>
-                  <div className="space-y-1">
-                    {keywordData.optimizationStrategy.quarterly.map((strategy, index) => (
-                      <Alert key={index}>
-                        <AlertDescription className="text-sm">{strategy}</AlertDescription>
-                      </Alert>
-                    ))}
+                {keywordData.optimizationStrategy.ATSOptimization && (
+                  <div>
+                    <h4 className="font-medium mb-2">ATS Keywords</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {keywordData.optimizationStrategy.ATSOptimization.map((keyword, index) => (
+                        <Badge key={index} variant="outline" className="text-sm">
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <h4 className="font-medium mb-2">Annual Planning</h4>
-                  <div className="space-y-1">
-                    {keywordData.optimizationStrategy.annual.map((plan, index) => (
-                      <Alert key={index}>
-                        <AlertDescription className="text-sm">{plan}</AlertDescription>
-                      </Alert>
-                    ))}
+                {keywordData.optimizationStrategy.timingRecommendations && (
+                  <div>
+                    <h4 className="font-medium mb-2">Timing Strategy</h4>
+                    <div className="space-y-1">
+                      {keywordData.optimizationStrategy.timingRecommendations.map((timing, index) => (
+                        <Alert key={index}>
+                          <AlertDescription className="text-sm">{timing}</AlertDescription>
+                        </Alert>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {keywordData.optimizationStrategy.competitorAnalysis?.gaps && (
+                  <div>
+                    <h4 className="font-medium mb-2">Competitive Gaps</h4>
+                    <div className="space-y-1">
+                      {keywordData.optimizationStrategy.competitorAnalysis.gaps.map((gap, index) => (
+                        <Alert key={index}>
+                          <AlertDescription className="text-sm">{gap}</AlertDescription>
+                        </Alert>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
