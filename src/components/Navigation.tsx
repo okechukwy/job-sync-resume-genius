@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -10,6 +10,13 @@ const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+
+  // Redirect authenticated users from homepage to dashboard
+  useEffect(() => {
+    if (user && location.pathname === '/') {
+      window.location.href = '/dashboard';
+    }
+  }, [user, location.pathname]);
 
   const handleAnchorClick = (href: string) => {
     if (location.pathname !== '/') {
