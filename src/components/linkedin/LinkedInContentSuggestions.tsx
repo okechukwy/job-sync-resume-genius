@@ -508,13 +508,6 @@ export const LinkedInContentSuggestions = ({
                       <Badge key={index} variant="secondary">{topic}</Badge>
                     ))}
                   </div>
-                  {contentSuggestions?.strategy?.additionalRecommendations && (
-                    <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Additional Recommendations:</strong> {contentSuggestions.strategy.additionalRecommendations}
-                      </p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
