@@ -16,6 +16,7 @@ export interface LinkedInData {
   headline?: string;
   summary?: string;
   education?: any[];
+  includeCallToAction?: boolean;
 }
 
 export interface SkillsAnalysisResult {
