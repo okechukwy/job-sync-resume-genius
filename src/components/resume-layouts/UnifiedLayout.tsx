@@ -1,4 +1,3 @@
-
 // Enhanced Unified Layout Component - Supports 20 Distinct Template Designs
 import { ResumeData } from "@/hooks/useResumeSteps";
 import { StylePreset } from "@/config/templateConfig";
@@ -321,7 +320,6 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     );
   };
 
-  // Layout-specific content organization
   const renderContent = () => {
     switch (layout) {
       case 'portfolio':
@@ -405,11 +403,15 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
 
   return (
     <div 
-      className={`bg-white shadow-lg max-w-4xl mx-auto ${typographyClass}`}
-      style={layoutStyle}
+      className={`bg-white shadow-lg mx-auto ${typographyClass}`}
+      style={{
+        ...layoutStyle,
+        width: '794px', // A4 width in pixels (210mm at 96 DPI)
+        minHeight: '1123px', // A4 height in pixels (297mm at 96 DPI)
+      }}
     >
       {renderHeader()}
-      <main className={`p-8 ${spacing === 'compact' ? 'p-6' : spacing === 'spacious' ? 'p-12' : 'p-8'}`}>
+      <main className={`${spacing === 'compact' ? 'p-6' : spacing === 'spacious' ? 'p-12' : 'p-8'}`}>
         {renderContent()}
       </main>
     </div>

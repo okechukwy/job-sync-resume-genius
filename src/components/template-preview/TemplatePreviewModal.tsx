@@ -18,6 +18,10 @@ const TemplatePreviewModal = ({ templateId, onClose, onSelectTemplate }: Templat
   const [isFullscreen, setIsFullscreen] = useState(false);
   const template = templateConfigs.find(t => t.id === templateId);
 
+  // A4 dimensions in pixels (96 DPI standard)
+  const A4_WIDTH_PX = 794;  // 210mm in pixels
+  const A4_HEIGHT_PX = 1123; // 297mm in pixels
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -152,11 +156,10 @@ const TemplatePreviewModal = ({ templateId, onClose, onSelectTemplate }: Templat
         {/* Preview Content - Scrollable Area */}
         <div className="flex-1 overflow-auto bg-gray-50">
           <div 
-            className="flex justify-center"
+            className="flex justify-center py-8"
             style={{ 
-              padding: '2rem',
-              minHeight: `${297 * zoomLevel + 4 * 16}px`, // Account for scaled height + padding
-              minWidth: `${210 * zoomLevel + 4 * 16}px`   // Account for scaled width + padding
+              minHeight: `${A4_HEIGHT_PX * zoomLevel + 64}px`, // Scaled height + padding
+              minWidth: `${A4_WIDTH_PX * zoomLevel + 64}px`,   // Scaled width + padding
             }}
           >
             <div 
@@ -164,8 +167,6 @@ const TemplatePreviewModal = ({ templateId, onClose, onSelectTemplate }: Templat
               style={{ 
                 transform: `scale(${zoomLevel})`,
                 transformOrigin: 'top center',
-                width: '210mm',
-                minHeight: '297mm',
               }}
             >
               <UnifiedLayout 
