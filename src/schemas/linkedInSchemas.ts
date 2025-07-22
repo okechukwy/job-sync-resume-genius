@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const linkedInExperienceSchema = z.object({
@@ -31,6 +32,8 @@ export const linkedInProfileSchema = z.object({
   skills: z.array(z.string()).max(50, "Maximum 50 skills allowed").default([]),
   photo: z.boolean().default(false),
   background: z.boolean().default(false),
+  photoUrl: z.string().optional(),
+  backgroundUrl: z.string().optional(),
   customUrl: z.string().optional(),
   contactInfo: z.object({
     email: z.string().email().optional(),

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Upload } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { linkedInProfileSchema, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { ProfileAssetUpload } from "./ProfileAssetUpload";
 import { toast } from "sonner";
 
 interface LinkedInProfileFormProps {
@@ -32,6 +34,8 @@ export const LinkedInProfileForm = ({ onUpdate }: LinkedInProfileFormProps) => {
       skills: [],
       photo: false,
       background: false,
+      photoUrl: "",
+      backgroundUrl: "",
     },
   });
 
@@ -48,6 +52,26 @@ export const LinkedInProfileForm = ({ onUpdate }: LinkedInProfileFormProps) => {
     const updatedSkills = skills.filter(skill => skill !== skillToRemove);
     setSkills(updatedSkills);
     form.setValue("skills", updatedSkills);
+  };
+
+  const handlePhotoUpload = (url: string) => {
+    form.setValue("photo", true);
+    form.setValue("photoUrl", url);
+  };
+
+  const handlePhotoRemove = () => {
+    form.setValue("photo", false);
+    form.setValue("photoUrl", "");
+  };
+
+  const handleBackgroundUpload = (url: string) => {
+    form.setValue("background", true);
+    form.setValue("backgroundUrl", url);
+  };
+
+  const handleBackgroundRemove = () => {
+    form.setValue("background", false);
+    form.setValue("backgroundUrl", "");
   };
 
   const onSubmit = (data: LinkedInProfile) => {
@@ -180,24 +204,24 @@ export const LinkedInProfileForm = ({ onUpdate }: LinkedInProfileFormProps) => {
               )}
             </div>
 
-            {/* Profile Assets */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <FormLabel>Profile Assets</FormLabel>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-3 border rounded-lg glass-card">
-                    <span className="text-sm">Professional Profile Photo</span>
-                    <Badge variant={form.watch("photo") ? "default" : "secondary"}>
-                      {form.watch("photo") ? "Added" : "Missing"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg glass-card">
-                    <span className="text-sm">Background Banner</span>
-                    <Badge variant={form.watch("background") ? "default" : "secondary"}>
-                      {form.watch("background") ? "Added" : "Missing"}
-                    </Badge>
-                  </div>
-                </div>
+            {/* Profile Assets Section */}
+            <div className="space-y-6">
+              <FormLabel>Profile Assets</FormLabel>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ProfileAssetUpload
+                  type="photo"
+                  currentUrl={form.watch("photoUrl")}
+                  isUploaded={form.watch("photo")}
+                  onUploadSuccess={handlePhotoUpload}
+                  onRemove={handlePhotoRemove}
+                />
+                <ProfileAssetUpload
+                  type="background"
+                  currentUrl={form.watch("backgroundUrl")}
+                  isUploaded={form.watch("background")}
+                  onUploadSuccess={handleBackgroundUpload}
+                  onRemove={handleBackgroundRemove}
+                />
               </div>
             </div>
 
