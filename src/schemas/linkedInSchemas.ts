@@ -38,7 +38,7 @@ export const linkedInProfileSchema = z.object({
   contactInfo: z.object({
     email: z.string().email().optional(),
     phone: z.string().optional(),
-    website: z.string().url().optional(),
+    website: z.string().url().optional().or(z.literal("")),
   }).optional(),
 });
 
