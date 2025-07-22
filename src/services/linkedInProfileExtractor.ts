@@ -1,4 +1,3 @@
-
 import { LinkedInProfile, ScannedProfile } from "@/schemas/linkedInSchemas";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,6 +26,13 @@ interface EnhancedScannedProfile extends ScannedProfile {
   };
 }
 
+interface CompetitiveBenchmarkingConfig {
+  targetIndustry?: string;
+  experienceLevel?: "entry" | "mid" | "senior" | "executive";
+  geographicMarket?: "global" | "regional" | "local";
+  competitorCompanies?: string[];
+}
+
 export class LinkedInProfileExtractor {
   private static validateLinkedInUrl(url: string): boolean {
     try {
@@ -41,7 +47,8 @@ export class LinkedInProfileExtractor {
     url: string, 
     scanDepth: "basic" | "detailed" | "comprehensive" = "detailed",
     analysisType: "personal" | "competitive" | "industry" = "personal",
-    compareWithCurrent: boolean = true
+    compareWithCurrent: boolean = true,
+    competitiveBenchmarking?: CompetitiveBenchmarkingConfig
   ): Promise<ProfileExtractionResult> {
     if (!this.validateLinkedInUrl(url)) {
       return {
@@ -58,7 +65,8 @@ export class LinkedInProfileExtractor {
           profileUrl: url,
           scanDepth,
           analysisType,
-          compareWithCurrent
+          compareWithCurrent,
+          competitiveBenchmarking
         }
       });
 

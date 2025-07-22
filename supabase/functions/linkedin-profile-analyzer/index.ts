@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -7,11 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface CompetitiveBenchmarkingConfig {
+  targetIndustry?: string;
+  experienceLevel?: "entry" | "mid" | "senior" | "executive";
+  geographicMarket?: "global" | "regional" | "local";
+  competitorCompanies?: string[];
+}
+
 interface ProfileAnalysisRequest {
   profileUrl: string;
   scanDepth: 'basic' | 'detailed' | 'comprehensive';
   analysisType: 'personal' | 'competitive' | 'industry';
   compareWithCurrent?: boolean;
+  competitiveBenchmarking?: CompetitiveBenchmarkingConfig;
 }
 
 interface CompetitiveMetrics {
@@ -106,7 +113,14 @@ function cleanAndParseJSON(content: string): any {
   }
 }
 
-function generateDynamicPrompts(scanDepth: string, analysisType: string, profileUrl: string, username: string) {
+function generateDynamicPrompts(
+  scanDepth: string, 
+  analysisType: string, 
+  profileUrl: string, 
+  username: string, 
+  compareWithCurrent: boolean,
+  competitiveBenchmarking?: CompetitiveBenchmarkingConfig
+) {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
   
@@ -120,12 +134,38 @@ function generateDynamicPrompts(scanDepth: string, analysisType: string, profile
     education: ['teacher', 'professor', 'education', 'academic'],
   };
 
-  let suggestedIndustry = 'Professional Services';
-  for (const [industry, keywords] of Object.entries(industryIndicators)) {
-    if (keywords.some(keyword => username.toLowerCase().includes(keyword))) {
-      suggestedIndustry = industry.charAt(0).toUpperCase() + industry.slice(1);
-      break;
+  let suggestedIndustry = competitiveBenchmarking?.targetIndustry || 'Professional Services';
+  
+  // Only auto-detect if no explicit industry provided
+  if (!competitiveBenchmarking?.targetIndustry) {
+    for (const [industry, keywords] of Object.entries(industryIndicators)) {
+      if (keywords.some(keyword => username.toLowerCase().includes(keyword))) {
+        suggestedIndustry = industry.charAt(0).toUpperCase() + industry.slice(1);
+        break;
+      }
     }
+  }
+
+  // Build competitive benchmarking context
+  let benchmarkingContext = '';
+  if (compareWithCurrent && competitiveBenchmarking) {
+    benchmarkingContext = `
+COMPETITIVE BENCHMARKING CONFIGURATION:
+- Target Industry: ${competitiveBenchmarking.targetIndustry || suggestedIndustry}
+- Experience Level: ${competitiveBenchmarking.experienceLevel || 'mid'}
+- Geographic Market: ${competitiveBenchmarking.geographicMarket || 'global'}
+${competitiveBenchmarking.competitorCompanies?.length ? 
+  `- Competitor Companies: ${competitiveBenchmarking.competitorCompanies.join(', ')}` : ''
+}
+
+ENHANCED BENCHMARKING REQUIREMENTS:
+- Provide detailed competitive positioning against specified parameters
+- Include industry-specific metrics and performance indicators
+- Compare against similar experience levels and geographic markets
+- Generate targeted improvement recommendations based on competitive gaps
+${competitiveBenchmarking.competitorCompanies?.length ? 
+  '- Analyze positioning relative to specified competitor companies' : ''
+}`;
   }
 
   const dynamicSystemPrompt = `You are an expert LinkedIn strategist and data analyst with deep knowledge of ${currentYear} professional market dynamics. Your task is to perform genuine, variable analysis of LinkedIn profiles, providing realistic insights that differ meaningfully between profiles.
@@ -137,6 +177,9 @@ CRITICAL INSTRUCTIONS:
 - Consider current ${currentMonth} ${currentYear} market conditions and trends
 - Vary your analysis approach based on: ${analysisType} focus and ${scanDepth} depth
 - Generate recommendations that reflect real competitive intelligence
+${compareWithCurrent ? '- INCLUDE DETAILED COMPETITIVE BENCHMARKING based on provided configuration' : ''}
+
+${benchmarkingContext}
 
 ANALYSIS APPROACH FOR ${scanDepth.toUpperCase()} SCAN:
 ${scanDepth === 'comprehensive' ? `
@@ -181,9 +224,13 @@ PROFILE CONTEXT:
 - Suggested Industry Context: ${suggestedIndustry}
 - Analysis Date: ${currentMonth} ${currentYear}
 - Market Context: Post-pandemic professional landscape with emphasis on digital transformation and remote collaboration
+${compareWithCurrent ? '- COMPETITIVE BENCHMARKING: ENABLED with detailed configuration' : '- COMPETITIVE BENCHMARKING: DISABLED'}
 
 ANALYSIS REQUIREMENTS:
 Generate a comprehensive, unique analysis with realistic variation in scores and insights. Avoid templated responses. Base your analysis on genuine professional assessment principles.
+${compareWithCurrent ? `
+ENHANCED COMPETITIVE ANALYSIS:
+Focus on detailed benchmarking against the specified industry, experience level, and geographic market. Provide specific competitive insights and positioning recommendations.` : ''}
 
 Focus areas specific to this ${analysisType} analysis with ${scanDepth} depth:
 - Industry-specific competitive positioning
@@ -247,7 +294,13 @@ serve(async (req) => {
   }
 
   try {
-    const { profileUrl, scanDepth, analysisType, compareWithCurrent }: ProfileAnalysisRequest = await req.json();
+    const { 
+      profileUrl, 
+      scanDepth, 
+      analysisType, 
+      compareWithCurrent,
+      competitiveBenchmarking 
+    }: ProfileAnalysisRequest = await req.json();
     
     if (!profileUrl) {
       throw new Error('Profile URL is required');
@@ -258,14 +311,21 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log('Analyzing LinkedIn profile:', profileUrl, 'with depth:', scanDepth);
+    console.log('Analyzing LinkedIn profile:', profileUrl, 'with depth:', scanDepth, 'competitive benchmarking:', compareWithCurrent);
 
     // Extract username from URL for dynamic analysis
     const usernameMatch = profileUrl.match(/linkedin\.com\/in\/([^/?]+)/);
     const username = usernameMatch ? usernameMatch[1] : 'professional';
 
-    // Generate dynamic, non-templated prompts
-    const { systemPrompt, userPrompt } = generateDynamicPrompts(scanDepth, analysisType, profileUrl, username);
+    // Generate dynamic, non-templated prompts with competitive benchmarking
+    const { systemPrompt, userPrompt } = generateDynamicPrompts(
+      scanDepth, 
+      analysisType, 
+      profileUrl, 
+      username, 
+      compareWithCurrent || false,
+      competitiveBenchmarking
+    );
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

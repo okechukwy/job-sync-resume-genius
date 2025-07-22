@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, ExternalLink, Search, AlertCircle, CheckCircle2, TrendingUp, Target, Lightbulb, Award } from "lucide-react";
 import { linkedInUrlScanSchema, type LinkedInUrlScan, type ScannedProfile } from "@/schemas/linkedInSchemas";
 import { LinkedInProfileExtractor } from "@/services/linkedInProfileExtractor";
+import { CompetitiveBenchmarkingConfig } from "./CompetitiveBenchmarkingConfig";
 import { toast } from "sonner";
 
 interface LinkedInUrlScannerProps {
@@ -51,9 +52,17 @@ export const LinkedInUrlScanner = ({ onScanComplete }: LinkedInUrlScannerProps) 
       profileUrl: "",
       scanDepth: "detailed",
       analysisType: "personal",
-      compareWithCurrent: true,
+      compareWithCurrent: false,
+      competitiveBenchmarking: {
+        targetIndustry: undefined,
+        experienceLevel: undefined,
+        geographicMarket: undefined,
+        competitorCompanies: [],
+      },
     },
   });
+
+  const watchCompareWithCurrent = form.watch("compareWithCurrent");
 
   const simulateProgress = () => {
     setScanProgress(0);
@@ -81,7 +90,8 @@ export const LinkedInUrlScanner = ({ onScanComplete }: LinkedInUrlScannerProps) 
         data.profileUrl, 
         data.scanDepth,
         data.analysisType,
-        data.compareWithCurrent
+        data.compareWithCurrent,
+        data.competitiveBenchmarking
       );
       
       clearInterval(progressInterval);
@@ -224,12 +234,16 @@ export const LinkedInUrlScanner = ({ onScanComplete }: LinkedInUrlScannerProps) 
                         Include competitive benchmarking
                       </FormLabel>
                       <p className="text-sm text-muted-foreground">
-                        Compare against industry leaders and market trends
+                        Compare against industry leaders and market trends with detailed configuration
                       </p>
                     </div>
                   </FormItem>
                 )}
               />
+
+              {watchCompareWithCurrent && (
+                <CompetitiveBenchmarkingConfig control={form.control} />
+              )}
 
               <Button 
                 type="submit" 

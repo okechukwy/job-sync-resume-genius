@@ -79,6 +79,12 @@ export const linkedInUrlScanSchema = z.object({
   scanDepth: z.enum(["basic", "detailed", "comprehensive"]).default("detailed"),
   analysisType: z.enum(["personal", "competitive", "industry"]).default("personal"),
   compareWithCurrent: z.boolean().default(true),
+  competitiveBenchmarking: z.object({
+    targetIndustry: z.string().optional(),
+    experienceLevel: z.enum(["entry", "mid", "senior", "executive"]).optional(),
+    geographicMarket: z.enum(["global", "regional", "local"]).optional(),
+    competitorCompanies: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 // Enhanced schemas for AI-powered analysis
