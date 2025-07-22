@@ -1,9 +1,10 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UnifiedLayout } from "@/components/resume-layouts/UnifiedLayout";
 import { marketingManagerSample } from "@/data/sampleResumeData";
 import { getStylePresetById, templateConfigs } from "@/config/templateConfig";
-import ResumeBuilderHeader from "../resume-builder/ResumeBuilderHeader";
+import { X } from "lucide-react";
 
 interface TemplatePreviewModalProps {
   templateId: string;
@@ -18,45 +19,56 @@ const TemplatePreviewModal = ({ templateId, onClose, onSelectTemplate }: Templat
     return null;
   }
 
+  const handleSelectTemplate = () => {
+    onSelectTemplate(templateId);
+    onClose();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <ResumeBuilderHeader 
-        onBack={onClose}
-        backLabel="Back to Templates"
-        showHomeLink={false}
-      />
-      
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <Badge variant="secondary" className="mb-4 glass-card">
-            👁️ Template Preview
-          </Badge>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            {template.name} <span className="gradient-text">Preview</span>
-          </h1>
-          <div className="flex justify-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={onClose}
-            >
-              Back to Templates
-            </Button>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-4 bg-gradient-hero rounded-xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-border/20 bg-background/95 backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="glass-card">
+              👁️ Template Preview
+            </Badge>
+            <div>
+              <h2 className="text-2xl font-bold">
+                {template.name} <span className="gradient-text">Preview</span>
+              </h2>
+              <p className="text-muted-foreground">{template.description}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
             <Button 
               variant="hero" 
-              onClick={() => onSelectTemplate(templateId)}
+              onClick={handleSelectTemplate}
             >
               Use This Template
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onClose}
+            >
+              <X className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-8 rounded-lg shadow-xl">
-            <UnifiedLayout 
-              data={marketingManagerSample} 
-              stylePreset={getStylePresetById(template.stylePreset || 'modern-professional')!}
-              formatDate={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-            />
+        {/* Preview Content */}
+        <div className="flex-1 overflow-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white p-8 rounded-lg shadow-xl">
+              <div className="scale-75 origin-top">
+                <UnifiedLayout 
+                  data={marketingManagerSample} 
+                  stylePreset={getStylePresetById(template.stylePreset || 'modern-professional')!}
+                  formatDate={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

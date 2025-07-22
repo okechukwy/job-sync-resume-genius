@@ -1,3 +1,4 @@
+
 import ResumeSteps from "@/components/ResumeSteps";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { AnalysisStep } from "@/components/resume-builder";
@@ -8,11 +9,15 @@ const ResumeBuilder = () => {
     currentStep,
     selectedTemplate,
     uploadedFile,
+    showPreviewModal,
+    previewTemplateId,
     handleFileChange,
     handleStartFromScratch,
     handleContinueFromAnalysis,
     handleReupload,
     handleTemplateSelect,
+    handlePreviewOpen,
+    handlePreviewClose,
     handleBackToTemplates,
     handleBackToStep
   } = useResumeBuilder();
@@ -46,6 +51,10 @@ const ResumeBuilder = () => {
       uploadedFile={uploadedFile}
       onFileChange={handleFileChange}
       onStartFromScratch={handleStartFromScratch}
+      showPreviewModal={showPreviewModal}
+      previewTemplateId={previewTemplateId}
+      onPreviewOpen={handlePreviewOpen}
+      onPreviewClose={handlePreviewClose}
     />
   );
 };

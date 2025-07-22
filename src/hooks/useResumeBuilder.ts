@@ -10,6 +10,8 @@ export const useResumeBuilder = () => {
   const [currentStep, setCurrentStep] = useState<ResumeBuilderStep>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewTemplateId, setPreviewTemplateId] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
 
@@ -99,6 +101,17 @@ export const useResumeBuilder = () => {
     toast.success(`${templateName} selected! Let's build your resume.`);
   };
 
+  const handlePreviewOpen = (templateId: string) => {
+    console.log('👁️ Opening preview for template:', templateId);
+    setPreviewTemplateId(templateId);
+    setShowPreviewModal(true);
+  };
+
+  const handlePreviewClose = () => {
+    setShowPreviewModal(false);
+    setPreviewTemplateId('');
+  };
+
   const handleBackToTemplates = () => {
     setCurrentStep('templates');
     setSelectedTemplate('');
@@ -114,6 +127,8 @@ export const useResumeBuilder = () => {
     selectedTemplate, // This is now always a template ID
     uploadedFile,
     fileInputRef,
+    showPreviewModal,
+    previewTemplateId,
     
     // Actions
     handleFileChange,
@@ -121,6 +136,8 @@ export const useResumeBuilder = () => {
     handleContinueFromAnalysis,
     handleReupload,
     handleTemplateSelect,
+    handlePreviewOpen,
+    handlePreviewClose,
     handleBackToTemplates,
     handleBackToStep,
     setCurrentStep

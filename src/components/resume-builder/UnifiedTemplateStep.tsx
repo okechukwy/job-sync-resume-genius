@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAllCategories, getTemplateById } from "@/config/templateConfig";
 import FileUpload from "@/components/FileUpload";
 import TemplateCard from "@/components/template-preview/TemplateCard";
+import TemplatePreviewModal from "@/components/template-preview/TemplatePreviewModal";
 
 interface UnifiedTemplateStepProps {
   selectedTemplate: string; // This is now always a template ID
@@ -12,6 +13,10 @@ interface UnifiedTemplateStepProps {
   uploadedFile: File | null;
   onFileChange: (file: File | null) => void;
   onStartFromScratch: () => void;
+  showPreviewModal: boolean;
+  previewTemplateId: string;
+  onPreviewOpen: (templateId: string) => void;
+  onPreviewClose: () => void;
 }
 
 const UnifiedTemplateStep = ({
@@ -19,7 +24,11 @@ const UnifiedTemplateStep = ({
   onTemplateSelect,
   uploadedFile,
   onFileChange,
-  onStartFromScratch
+  onStartFromScratch,
+  showPreviewModal,
+  previewTemplateId,
+  onPreviewOpen,
+  onPreviewClose
 }: UnifiedTemplateStepProps) => {
   const categories = getAllCategories();
 
@@ -27,11 +36,6 @@ const UnifiedTemplateStep = ({
   const selectedTemplateName = selectedTemplate ? 
     getTemplateById(selectedTemplate)?.name || selectedTemplate : 
     '';
-
-  const handlePreview = (templateId: string) => {
-    // For now, just select the template (preview functionality can be added later)
-    onTemplateSelect(templateId);
-  };
 
   return (
     <>
@@ -77,7 +81,7 @@ const UnifiedTemplateStep = ({
                   template={template}
                   isSelected={selectedTemplate === template.id}
                   onSelect={onTemplateSelect}
-                  onPreview={handlePreview}
+                  onPreview={onPreviewOpen}
                 />
               ))}
             </div>
@@ -102,6 +106,15 @@ const UnifiedTemplateStep = ({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreviewModal && previewTemplateId && (
+        <TemplatePreviewModal
+          templateId={previewTemplateId}
+          onClose={onPreviewClose}
+          onSelectTemplate={onTemplateSelect}
+        />
       )}
     </>
   );
