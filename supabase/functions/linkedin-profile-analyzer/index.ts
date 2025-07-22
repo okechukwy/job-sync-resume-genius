@@ -62,6 +62,50 @@ interface ProfileAnalysisResult {
   error?: string;
 }
 
+function cleanAndParseJSON(content: string): any {
+  // First, try to parse as direct JSON
+  try {
+    return JSON.parse(content);
+  } catch {
+    // If that fails, try to clean markdown formatting
+    console.log('Direct JSON parse failed, attempting to clean markdown...');
+  }
+
+  // Remove markdown code block syntax
+  let cleanedContent = content.trim();
+  
+  // Remove ```json at the start
+  if (cleanedContent.startsWith('```json')) {
+    cleanedContent = cleanedContent.slice(7);
+  } else if (cleanedContent.startsWith('```')) {
+    cleanedContent = cleanedContent.slice(3);
+  }
+  
+  // Remove ``` at the end
+  if (cleanedContent.endsWith('```')) {
+    cleanedContent = cleanedContent.slice(0, -3);
+  }
+  
+  // Trim whitespace
+  cleanedContent = cleanedContent.trim();
+  
+  try {
+    return JSON.parse(cleanedContent);
+  } catch (parseError) {
+    // Try to extract JSON from mixed content
+    const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch {
+        // If all else fails, throw a descriptive error
+        throw new Error(`Failed to parse JSON. Original content: ${content.substring(0, 200)}...`);
+      }
+    }
+    throw new Error(`No valid JSON found in response: ${content.substring(0, 200)}...`);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -102,7 +146,7 @@ serve(async (req) => {
 
 Provide realistic but optimized scores and insights. Consider current ${new Date().getFullYear()} market trends, AI/digital transformation impact, and post-pandemic professional landscape changes.
 
-Return a detailed JSON analysis following this structure with realistic data based on the profile URL provided.`;
+IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
     } else if (scanDepth === 'detailed') {
       systemPrompt = `You are a LinkedIn optimization expert specializing in profile analysis and improvement recommendations. Analyze the LinkedIn profile and provide:
 
@@ -114,7 +158,7 @@ Return a detailed JSON analysis following this structure with realistic data bas
 
 Focus on practical, actionable insights that can immediately improve profile performance and visibility.
 
-Return a comprehensive JSON analysis with realistic scores and recommendations.`;
+IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
     } else {
       systemPrompt = `You are a LinkedIn profile consultant providing quick profile assessments. Analyze the profile and provide:
 
@@ -125,7 +169,7 @@ Return a comprehensive JSON analysis with realistic scores and recommendations.`
 
 Keep the analysis focused and actionable for busy professionals.
 
-Return a concise JSON analysis with essential metrics and recommendations.`;
+IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
     }
 
     userPrompt = `Analyze this LinkedIn profile: ${profileUrl}
@@ -139,7 +183,7 @@ Profile Analysis Context:
 
 Please provide realistic analysis based on the profile URL structure and username. Generate insights that would be typical for a professional with this profile identifier, considering current market trends and industry standards.
 
-Return your analysis in this JSON format:
+Return your analysis in this exact JSON format (no markdown, no code blocks):
 {
   "extractedData": {
     "headline": "Realistic professional headline based on profile",
@@ -216,13 +260,18 @@ Return your analysis in this JSON format:
     
     console.log('Generated profile analysis:', analysisContent);
 
-    // Parse the JSON response from OpenAI
+    // Parse the JSON response from OpenAI with improved error handling
     let analysisData;
     try {
-      analysisData = JSON.parse(analysisContent);
+      analysisData = cleanAndParseJSON(analysisContent);
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
       throw new Error('Invalid AI response format');
+    }
+
+    // Validate required fields
+    if (!analysisData.extractedData || !analysisData.competitiveMetrics) {
+      throw new Error('AI response missing required data fields');
     }
 
     const result: ProfileAnalysisResult = {
