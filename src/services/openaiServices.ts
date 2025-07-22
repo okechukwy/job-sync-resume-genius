@@ -17,6 +17,8 @@ export interface LinkedInData {
   summary?: string;
   education?: any[];
   includeCallToAction?: boolean;
+  currentProfile?: string;
+  jobDescription?: string;
 }
 
 export interface SkillsAnalysisResult {
@@ -63,23 +65,28 @@ export interface ProfileAnalysisResult {
 }
 
 export interface KeywordTrendsResult {
-  primaryKeywords: string[];
-  longTailKeywords: string[];
-  trendingTerms: string[];
-  seasonalKeywords: string[];
+  currentKeywords: Record<string, {
+    strength: number;
+    context: string;
+  }>;
+  missingKeywords: Array<{
+    keyword: string;
+    priority: 'high' | 'medium' | 'low';
+    impact: number;
+    reason: string;
+    suggestion: string;
+  }>;
+  trendingKeywords: Array<{
+    keyword: string;
+    growth: string;
+    searchVolume: string;
+    context: string;
+  }>;
   optimizationStrategy: {
-    searchVolumeDifficulty?: Record<string, { volume: number | string; difficulty: string }>;
-    competitorAnalysis?: {
-      topProfiles?: string[];
-      gaps?: string[];
-      keywordGaps?: string[];
-      topCompetitorKeywords?: string[];
-    };
-    ATSOptimization?: string[];
-    ATSOptimizationKeywords?: string[];
-    personalBranding?: string[];
-    timingRecommendations?: string[];
-    searchVolumeAndDifficulty?: Record<string, { volume: string; difficulty: string }>;
+    headline: string;
+    summary: string;
+    skills: string;
+    content: string;
   };
 }
 

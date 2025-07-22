@@ -113,6 +113,73 @@ Return a JSON object with "ideas", "calendar", and "strategy" fields. Each idea 
         maxTokens = 2000;
         break;
 
+      case 'keyword-trends':
+        systemPrompt = `You are a LinkedIn SEO expert and job market analyst who provides comprehensive keyword analysis with real-time market insights. Provide detailed keyword analysis that includes:
+
+**CURRENT KEYWORDS PERFORMANCE**: Analyze existing profile keywords with strength scores, context, and improvement recommendations.
+
+**MISSING HIGH-IMPACT KEYWORDS**: Identify crucial missing keywords with priority levels, impact scores, specific reasons why they're important, and actionable suggestions for implementation.
+
+**TRENDING INDUSTRY KEYWORDS**: Current trending keywords in the industry with growth data, search volumes, and strategic context for why they're trending.
+
+**OPTIMIZATION STRATEGY**: Comprehensive strategy including headline optimization, summary enhancement, skills section improvement, and content strategy recommendations.
+
+Return a detailed JSON object with this exact structure:
+{
+  "currentKeywords": {
+    "keyword": {
+      "strength": number (0-100),
+      "context": "detailed explanation of current usage and performance"
+    }
+  },
+  "missingKeywords": [
+    {
+      "keyword": "specific keyword",
+      "priority": "high/medium/low",
+      "impact": number (percentage),
+      "reason": "why this keyword is crucial",
+      "suggestion": "specific implementation advice"
+    }
+  ],
+  "trendingKeywords": [
+    {
+      "keyword": "trending term",
+      "growth": "percentage growth",
+      "searchVolume": "search volume data",
+      "context": "why it's trending and how to leverage it"
+    }
+  ],
+  "optimizationStrategy": {
+    "headline": "specific headline optimization advice",
+    "summary": "summary enhancement recommendations",
+    "skills": "skills section improvement strategy",
+    "content": "content strategy for keyword integration"
+  }
+}
+
+Focus on ${new Date().getFullYear()} market trends, AI/digital transformation, remote work impact, and industry-specific opportunities.`;
+        
+        userPrompt = `Analyze keywords and provide comprehensive market insights for: ${JSON.stringify(data)}.
+        
+        Target Role: ${data.targetRole || 'professional'}
+        Industry: ${data.industry || 'business'}
+        Current Profile Summary: ${data.currentProfile || 'not provided'}
+        Current Skills: ${data.skills?.join(', ') || 'not specified'}
+        Experience Level: ${data.experienceLevel || 'mid-level'}
+        Job Description Context: ${data.jobDescription || 'general role requirements'}
+        
+        Provide real-time analysis of:
+        1. Current keyword performance in their profile
+        2. High-impact missing keywords based on ${new Date().getFullYear()} job market
+        3. Trending keywords in ${data.industry} industry
+        4. ATS optimization recommendations
+        5. Competitive analysis insights
+        6. Seasonal trends and timing strategies
+        
+        Include specific, actionable recommendations with measurable impact predictions.`;
+        maxTokens = 1500;
+        break;
+
       case 'skills-analysis':
         systemPrompt = `You are a career development expert who analyzes skill gaps and market trends. Provide a comprehensive skills analysis that includes:
 - Current market demand for the user's skills
@@ -157,28 +224,6 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         Experience: ${data.experience?.length || 0} positions listed
         Education: ${data.education?.length || 0} entries`;
         maxTokens = 1200;
-        break;
-
-      case 'keyword-trends':
-        systemPrompt = `You are a LinkedIn SEO expert who tracks keyword trends and optimization strategies. Provide current keyword analysis including:
-- Top-performing keywords in the user's industry for ${new Date().getFullYear()}
-- Long-tail keyword opportunities for better ranking
-- Competitor keyword analysis and gaps
-- Search volume and difficulty assessment
-- Seasonal trends and timing recommendations
-- ATS optimization keywords for better recruiter discovery
-- Personal branding keyword strategy
-
-Analyze current job postings, successful profiles, and search trends.
-
-Return a JSON object with "primaryKeywords", "longTailKeywords", "trendingTerms", "seasonalKeywords", and "optimizationStrategy".`;
-        
-        userPrompt = `Analyze keywords for: ${JSON.stringify(data)}.
-        Industry: ${data.industry || 'business'}
-        Target role: ${data.targetRole || 'professional'}
-        Current skills: ${data.skills?.join(', ') || 'various skills'}
-        Geographic focus: ${data.location || 'global'}`;
-        maxTokens = 1000;
         break;
 
       default:

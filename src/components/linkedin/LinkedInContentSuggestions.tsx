@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,17 +45,33 @@ export const LinkedInContentSuggestions = ({
     setIsGenerating(true);
     
     try {
+      // Extract current and target roles from experience data
+      const currentRole = profileData.experience?.[0]?.title || "";
+      const targetRole = profileData.targetRole || currentRole;
+      
+      // Extract achievements from experience descriptions
+      const achievements = profileData.experience?.map(exp => exp.description).filter(Boolean) || [];
+      
+      // Convert experience objects to strings for AI processing
+      const experienceStrings = profileData.experience?.map(exp => 
+        `${exp.title} at ${exp.company}: ${exp.description || ''}`
+      ) || [];
+
       // Prepare enriched data for AI generation
       const enrichedData = {
-        ...profileData,
+        name: profileData.name,
+        headline: profileData.headline,
+        summary: profileData.summary,
+        industry: profileData.industry,
+        experience: experienceStrings,
+        skills: profileData.skills || [],
+        achievements: achievements,
+        currentRole: currentRole,
+        targetRole: targetRole,
         contentType: data.contentType,
         frequency: data.frequency,
         experienceLevel: data.experienceLevel,
         topics: data.topics,
-        currentRole: profileData.currentRole,
-        targetRole: profileData.targetRole,
-        skills: profileData.skills || [],
-        achievements: profileData.achievements || [],
       };
 
       console.log('Generating content suggestions with data:', enrichedData);
