@@ -1,5 +1,6 @@
 
-// Enhanced Template Configuration System - 20 Professional Templates
+
+// Enhanced Template Configuration System - 24 Professional Templates
 // Replaces generic templates with visually distinct, category-specific designs
 
 export interface StylePreset {
@@ -35,9 +36,9 @@ export interface TemplateConfig {
   perfectFor: string[];
 }
 
-// Enhanced Style Presets - 20 Unique Visual Themes
+// Enhanced Style Presets - 24 Unique Visual Themes
 export const stylePresets: StylePreset[] = [
-  // PROFESSIONAL CATEGORY (8 Presets)
+  // PROFESSIONAL CATEGORY (10 Presets)
   {
     id: 'corporate-executive',
     name: 'Corporate Executive',
@@ -190,8 +191,46 @@ export const stylePresets: StylePreset[] = [
       iconAccents: true
     }
   },
+  {
+    id: 'academic-blue',
+    name: 'Academic Blue',
+    primary: '210 70% 45%', // Academic Blue
+    secondary: '210 40% 25%', // Dark Academic Blue
+    accent: '210 70% 85%', // Light Academic Blue
+    headerBg: 'linear-gradient(135deg, hsl(210 70% 45%), hsl(220 70% 50%))',
+    headerText: '0 0% 100%',
+    sectionBorder: '210 70% 45%',
+    layout: 'academic',
+    spacing: 'spacious',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'traditional',
+      decorativeElements: true,
+      gradientHeader: true,
+      iconAccents: true
+    }
+  },
+  {
+    id: 'clean-minimalist',
+    name: 'Clean Minimalist',
+    primary: '0 0% 20%', // Clean Charcoal
+    secondary: '0 0% 40%', // Medium Gray
+    accent: '0 0% 70%', // Light Gray
+    headerBg: 'hsl(0 0% 98%)',
+    headerText: '0 0% 20%',
+    sectionBorder: '0 0% 20%',
+    layout: 'professional',
+    spacing: 'spacious',
+    typography: 'modern',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
 
-  // CREATIVE CATEGORY (6 Presets)
+  // CREATIVE CATEGORY (8 Presets)
   {
     id: 'graphic-designer',
     name: 'Graphic Designer',
@@ -304,6 +343,44 @@ export const stylePresets: StylePreset[] = [
       decorativeElements: false,
       gradientHeader: true,
       iconAccents: false
+    }
+  },
+  {
+    id: 'ux-ui-creative',
+    name: 'UX/UI Creative',
+    primary: '270 100% 65%', // Emma Purple
+    secondary: '270 60% 30%', // Dark Purple
+    accent: '270 80% 85%', // Light Purple
+    headerBg: 'linear-gradient(135deg, hsl(270 100% 65%), hsl(285 100% 70%))',
+    headerText: '0 0% 100%',
+    sectionBorder: '270 100% 65%',
+    layout: 'creative',
+    spacing: 'spacious',
+    typography: 'modern',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: true,
+      gradientHeader: true,
+      iconAccents: true
+    }
+  },
+  {
+    id: 'gradient-creative',
+    name: 'Gradient Creative',
+    primary: '330 100% 60%', // Sarah Pink
+    secondary: '330 60% 30%', // Dark Pink
+    accent: '330 80% 85%', // Light Pink
+    headerBg: 'linear-gradient(135deg, hsl(330 100% 60%), hsl(270 100% 65%))',
+    headerText: '0 0% 100%',
+    sectionBorder: '330 100% 60%',
+    layout: 'creative',
+    spacing: 'standard',
+    typography: 'modern',
+    visualElements: {
+      headerStyle: 'banner',
+      decorativeElements: true,
+      gradientHeader: true,
+      iconAccents: true
     }
   },
 
@@ -424,9 +501,9 @@ export const stylePresets: StylePreset[] = [
   }
 ];
 
-// Template Configurations - 20 Professional Templates
+// Template Configurations - 24 Professional Templates
 export const templateConfigs: TemplateConfig[] = [
-  // PROFESSIONAL CATEGORY (8 Templates)
+  // PROFESSIONAL CATEGORY (10 Templates)
   {
     id: 'corporate-executive',
     name: 'Corporate Executive',
@@ -523,8 +600,32 @@ export const templateConfigs: TemplateConfig[] = [
     features: ['Modern Layout', 'Expert Focus', 'Professional Design', 'Consulting Emphasis'],
     perfectFor: ['Consultants', 'Advisors', 'Strategy Experts', 'Business Analysts']
   },
+  {
+    id: 'academic-blue',
+    name: 'Academic Blue',
+    description: 'Professional blue design for researchers and academic professionals',
+    emoji: '🔬',
+    category: 'professional',
+    stylePreset: 'academic-blue',
+    tags: ['Academic', 'Research', 'Professional', 'Blue'],
+    industries: ['Research', 'Academia', 'Education', 'Science'],
+    features: ['Research Focus', 'Academic Layout', 'Professional Design', 'Publication Emphasis'],
+    perfectFor: ['Research Scientists', 'Academic Researchers', 'PhD Candidates', 'Lab Directors']
+  },
+  {
+    id: 'clean-minimalist',
+    name: 'Clean Minimalist',
+    description: 'Ultra-clean typography and layout perfect for modern professionals',
+    emoji: '✨',
+    category: 'professional',
+    stylePreset: 'clean-minimalist',
+    tags: ['Minimalist', 'Clean', 'Modern', 'Simple'],
+    industries: ['Business', 'Technology', 'Consulting', 'Product Management'],
+    features: ['Minimalist Design', 'Clean Typography', 'Modern Layout', 'Spacious Design'],
+    perfectFor: ['Product Managers', 'Business Analysts', 'Consultants', 'Modern Professionals']
+  },
 
-  // CREATIVE CATEGORY (6 Templates)
+  // CREATIVE CATEGORY (8 Templates)
   {
     id: 'graphic-designer',
     name: 'Graphic Designer',
@@ -596,6 +697,30 @@ export const templateConfigs: TemplateConfig[] = [
     industries: ['Photography', 'Visual Arts', 'Media', 'Creative'],
     features: ['Portfolio Focus', 'Minimalist Design', 'Visual Emphasis', 'Clean Layout'],
     perfectFor: ['Photographers', 'Visual Artists', 'Photo Editors', 'Visual Storytellers']
+  },
+  {
+    id: 'ux-ui-creative',
+    name: 'UX/UI Creative',
+    description: 'Purple creative design inspired by Emma for UX/UI professionals',
+    emoji: '🌟',
+    category: 'creative',
+    stylePreset: 'ux-ui-creative',
+    tags: ['UX/UI', 'Creative', 'Modern', 'Purple'],
+    industries: ['Technology', 'Design', 'Startups', 'Creative'],
+    features: ['Creative Layout', 'UX Focus', 'Modern Design', 'Portfolio Ready'],
+    perfectFor: ['UX/UI Designers', 'Creative Professionals', 'Design Leads', 'Product Designers']
+  },
+  {
+    id: 'gradient-creative',
+    name: 'Gradient Creative',
+    description: 'Pink-purple gradient design inspired by Sarah for creative roles',
+    emoji: '🎆',
+    category: 'creative',
+    stylePreset: 'gradient-creative',
+    tags: ['Gradient', 'Creative', 'Modern', 'Pink'],
+    industries: ['Creative', 'Marketing', 'Design', 'Media'],
+    features: ['Gradient Header', 'Creative Focus', 'Modern Layout', 'Eye-catching Design'],
+    perfectFor: ['Creative Directors', 'Marketing Creatives', 'Brand Designers', 'Visual Artists']
   },
 
   // TECHNICAL CATEGORY (6 Templates)
@@ -705,3 +830,4 @@ export const getAllCategories = (): Array<{ id: string; name: string; templates:
     }
   ];
 };
+

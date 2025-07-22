@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -91,6 +92,11 @@ import PersonalBranding from "./pages/PersonalBranding";
 import WhiteLabelExports from "./pages/WhiteLabelExports";
 import CareerCoaching from "./pages/CareerCoaching";
 import PrioritySupport from "./pages/PrioritySupport";
+// NEW TEMPLATE IMPORTS
+import UxUiCreative from "./pages/templates/UxUiCreative";
+import GradientCreative from "./pages/templates/GradientCreative";
+import AcademicBlue from "./pages/templates/AcademicBlue";
+import CleanMinimalist from "./pages/templates/CleanMinimalist";
 
 const queryClient = new QueryClient();
 
@@ -135,6 +141,7 @@ const App = () => (
             <Route path="/white-label-exports" element={<ProtectedRoute><WhiteLabelExports /></ProtectedRoute>} />
             <Route path="/career-coaching" element={<ProtectedRoute><CareerCoaching /></ProtectedRoute>} />
             <Route path="/priority-support" element={<ProtectedRoute><PrioritySupport /></ProtectedRoute>} />
+            
             {/* Protected Technology Templates */}
             <Route path="/templates/tech-professional" element={<ProtectedRoute><TechProfessional /></ProtectedRoute>} />
             <Route path="/templates/software-engineer-pro" element={<ProtectedRoute><SoftwareEngineerPro /></ProtectedRoute>} />
@@ -202,6 +209,12 @@ const App = () => (
             <Route path="/templates/gradient-modern" element={<ProtectedRoute><GradientModern /></ProtectedRoute>} />
             <Route path="/templates/minimalist-pro" element={<ProtectedRoute><MinimalistPro /></ProtectedRoute>} />
             <Route path="/templates/colorful-fresh" element={<ProtectedRoute><ColorfulFresh /></ProtectedRoute>} />
+            
+            {/* NEW TEMPLATE ROUTES */}
+            <Route path="/templates/ux-ui-creative" element={<ProtectedRoute><UxUiCreative /></ProtectedRoute>} />
+            <Route path="/templates/gradient-creative" element={<ProtectedRoute><GradientCreative /></ProtectedRoute>} />
+            <Route path="/templates/academic-blue" element={<ProtectedRoute><AcademicBlue /></ProtectedRoute>} />
+            <Route path="/templates/clean-minimalist" element={<ProtectedRoute><CleanMinimalist /></ProtectedRoute>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

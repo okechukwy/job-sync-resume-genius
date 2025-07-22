@@ -1,3 +1,4 @@
+
 export interface Template {
   name: string;
   description: string;
@@ -254,7 +255,7 @@ export const allTemplates: Template[] = [
     industries: ["Finance"]
   },
 
-  // Creative Templates (15 total)
+  // Creative Templates (19 total - including 4 new ones)
   {
     name: "Creative Professional",
     description: "Ideal for designers, marketers, and creative roles",
@@ -374,6 +375,39 @@ export const allTemplates: Template[] = [
     tags: ["Leadership", "Creative", "Strategic"],
     route: "/templates/creative-director",
     industries: ["Creative"]
+  },
+  // NEW CREATIVE TEMPLATES
+  {
+    name: "UX/UI Creative",
+    description: "Purple creative design perfect for UX/UI professionals",
+    image: "🌟",
+    tags: ["UX/UI", "Creative", "Purple", "Modern"],
+    route: "/templates/ux-ui-creative",
+    industries: ["Creative", "Technology"]
+  },
+  {
+    name: "Gradient Creative",
+    description: "Pink-purple gradient design for creative roles",
+    image: "🎆",
+    tags: ["Gradient", "Creative", "Modern", "Eye-catching"],
+    route: "/templates/gradient-creative",
+    industries: ["Creative", "Marketing"]
+  },
+  {
+    name: "Academic Blue",
+    description: "Professional blue design for researchers and academics",
+    image: "🔬",
+    tags: ["Academic", "Research", "Professional", "Blue"],
+    route: "/templates/academic-blue",
+    industries: ["Research", "Academia"]
+  },
+  {
+    name: "Clean Minimalist",
+    description: "Ultra-clean typography and layout for modern professionals",
+    image: "✨",
+    tags: ["Minimalist", "Clean", "Modern", "Simple"],
+    route: "/templates/clean-minimalist",
+    industries: ["Business", "Technology", "Consulting"]
   },
 
   // Business Templates (9 total)
