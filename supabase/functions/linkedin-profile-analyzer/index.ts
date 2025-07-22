@@ -106,6 +106,141 @@ function cleanAndParseJSON(content: string): any {
   }
 }
 
+function generateDynamicPrompts(scanDepth: string, analysisType: string, profileUrl: string, username: string) {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
+  
+  // Extract potential industry indicators from username patterns
+  const industryIndicators = {
+    tech: ['dev', 'engineer', 'tech', 'code', 'data', 'ai', 'ml', 'software'],
+    finance: ['finance', 'investment', 'banking', 'analyst', 'portfolio'],
+    consulting: ['consultant', 'advisor', 'strategy', 'business'],
+    marketing: ['marketing', 'brand', 'digital', 'social', 'growth'],
+    healthcare: ['health', 'medical', 'doctor', 'nurse', 'clinical'],
+    education: ['teacher', 'professor', 'education', 'academic'],
+  };
+
+  let suggestedIndustry = 'Professional Services';
+  for (const [industry, keywords] of Object.entries(industryIndicators)) {
+    if (keywords.some(keyword => username.toLowerCase().includes(keyword))) {
+      suggestedIndustry = industry.charAt(0).toUpperCase() + industry.slice(1);
+      break;
+    }
+  }
+
+  const dynamicSystemPrompt = `You are an expert LinkedIn strategist and data analyst with deep knowledge of ${currentYear} professional market dynamics. Your task is to perform genuine, variable analysis of LinkedIn profiles, providing realistic insights that differ meaningfully between profiles.
+
+CRITICAL INSTRUCTIONS:
+- Generate UNIQUE analysis for each profile - avoid templated responses
+- Base scores on realistic professional benchmarks with natural variation
+- Provide industry-specific insights relevant to ${suggestedIndustry} professionals
+- Consider current ${currentMonth} ${currentYear} market conditions and trends
+- Vary your analysis approach based on: ${analysisType} focus and ${scanDepth} depth
+- Generate recommendations that reflect real competitive intelligence
+
+ANALYSIS APPROACH FOR ${scanDepth.toUpperCase()} SCAN:
+${scanDepth === 'comprehensive' ? `
+- Conduct deep competitive analysis against industry leaders
+- Provide strategic positioning recommendations  
+- Analyze market trends and future opportunities
+- Generate 4-6 high-impact improvement areas
+- Include advanced market intelligence insights` : 
+scanDepth === 'detailed' ? `
+- Perform thorough profile optimization analysis
+- Compare against industry standards and best practices
+- Identify 3-4 key improvement opportunities
+- Provide actionable enhancement strategies` : `
+- Focus on immediate optimization wins
+- Highlight 2-3 critical improvement areas
+- Provide quick-impact recommendations`}
+
+COMPETITIVE FOCUS FOR ${analysisType.toUpperCase()} ANALYSIS:
+${analysisType === 'competitive' ? `
+- Benchmark against top performers in ${suggestedIndustry}
+- Identify competitive gaps and advantages
+- Provide strategic positioning insights` :
+analysisType === 'industry' ? `
+- Compare against industry-wide benchmarks
+- Highlight sector-specific optimization opportunities
+- Focus on industry leadership positioning` : `
+- Optimize for personal brand development
+- Focus on individual career advancement
+- Emphasize personal value proposition`}
+
+RESPONSE REQUIREMENTS:
+- Return ONLY valid JSON without markdown formatting
+- Ensure all scores vary realistically between 45-95 range
+- Generate unique, non-templated content for each analysis
+- Base insights on realistic professional assessment
+- Avoid repetitive or cookie-cutter recommendations`;
+
+  const dynamicUserPrompt = `Analyze the LinkedIn profile: ${profileUrl}
+
+PROFILE CONTEXT:
+- Username/Professional ID: ${username}
+- Suggested Industry Context: ${suggestedIndustry}
+- Analysis Date: ${currentMonth} ${currentYear}
+- Market Context: Post-pandemic professional landscape with emphasis on digital transformation and remote collaboration
+
+ANALYSIS REQUIREMENTS:
+Generate a comprehensive, unique analysis with realistic variation in scores and insights. Avoid templated responses. Base your analysis on genuine professional assessment principles.
+
+Focus areas specific to this ${analysisType} analysis with ${scanDepth} depth:
+- Industry-specific competitive positioning
+- Current market relevance of skills and experience
+- Strategic improvement opportunities
+- Realistic performance benchmarking
+
+Provide your analysis in valid JSON format with these required fields:
+{
+  "extractedData": {
+    "headline": "realistic headline analysis",
+    "summary": "professional summary assessment", 
+    "location": "professional location",
+    "industry": "${suggestedIndustry}",
+    "skills": ["skill1", "skill2", "skill3", "skill4", "skill5"],
+    "experience": [{"title": "Role", "company": "Company", "duration": "Period"}],
+    "photo": true,
+    "background": true
+  },
+  "profileStrength": 75,
+  "industryAlignment": 82,
+  "keywordDensity": {
+    "leadership": 2,
+    "innovation": 1,
+    "strategy": 3
+  },
+  "competitiveMetrics": {
+    "headlineOptimization": 78,
+    "summaryLength": 85,
+    "skillsCount": 72,
+    "experienceDetail": 68,
+    "industryRanking": 81,
+    "marketPositioning": 75
+  },
+  "industryBenchmarks": {
+    "averageProfileStrength": 67,
+    "topPerformerGap": ["specific gap 1", "specific gap 2"],
+    "competitiveAdvantage": ["specific advantage 1", "specific advantage 2"]
+  },
+  "improvementRecommendations": [
+    {
+      "area": "specific area",
+      "priority": "high",
+      "impact": "specific measurable impact",
+      "suggestion": "actionable specific suggestion"
+    }
+  ],
+  "marketInsights": {
+    "trendingKeywords": ["current trend 1", "current trend 2"],
+    "emergingSkills": ["emerging skill 1", "emerging skill 2"],
+    "industryGrowthAreas": ["growth area 1", "growth area 2"]
+  }
+}`;
+
+  return { systemPrompt: dynamicSystemPrompt, userPrompt: dynamicUserPrompt };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -125,112 +260,12 @@ serve(async (req) => {
 
     console.log('Analyzing LinkedIn profile:', profileUrl, 'with depth:', scanDepth);
 
-    // Extract username from URL for analysis
+    // Extract username from URL for dynamic analysis
     const usernameMatch = profileUrl.match(/linkedin\.com\/in\/([^/?]+)/);
-    const username = usernameMatch ? usernameMatch[1] : 'unknown';
+    const username = usernameMatch ? usernameMatch[1] : 'professional';
 
-    // Create comprehensive AI prompt based on scan depth
-    let systemPrompt = '';
-    let userPrompt = '';
-
-    if (scanDepth === 'comprehensive') {
-      systemPrompt = `You are an expert LinkedIn profile analyst and career strategist with deep knowledge of industry trends, recruiter behavior, and competitive positioning. Analyze the provided LinkedIn profile URL and generate a comprehensive assessment including:
-
-1. **Profile Content Analysis**: Extract and evaluate headline, summary, experience, skills, and overall presentation
-2. **Competitive Intelligence**: Compare against industry leaders and top performers in the same field
-3. **Market Positioning**: Assess how the profile positions against current market trends and demands
-4. **Optimization Opportunities**: Identify specific areas for improvement with measurable impact
-5. **Industry Benchmarking**: Compare against industry averages and top-tier professionals
-6. **Keyword Strategy**: Analyze keyword usage and suggest trending terms for better visibility
-7. **Strategic Recommendations**: Provide actionable insights for career advancement
-
-Provide realistic but optimized scores and insights. Consider current ${new Date().getFullYear()} market trends, AI/digital transformation impact, and post-pandemic professional landscape changes.
-
-IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
-    } else if (scanDepth === 'detailed') {
-      systemPrompt = `You are a LinkedIn optimization expert specializing in profile analysis and improvement recommendations. Analyze the LinkedIn profile and provide:
-
-1. **Profile Strength Assessment**: Overall optimization score and key metrics
-2. **Content Quality Analysis**: Headline, summary, and experience evaluation
-3. **Skills Gap Analysis**: Missing skills and trending capabilities in the industry
-4. **Competitive Comparison**: How the profile compares to successful professionals
-5. **Improvement Roadmap**: Prioritized suggestions for optimization
-
-Focus on practical, actionable insights that can immediately improve profile performance and visibility.
-
-IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
-    } else {
-      systemPrompt = `You are a LinkedIn profile consultant providing quick profile assessments. Analyze the profile and provide:
-
-1. **Basic Profile Metrics**: Completeness and optimization scores
-2. **Key Strengths**: What's working well in the current profile
-3. **Priority Improvements**: Top 3-5 areas that need immediate attention
-4. **Quick Wins**: Simple changes that can have immediate impact
-
-Keep the analysis focused and actionable for busy professionals.
-
-IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. Do not wrap the response in \`\`\`json or any other formatting.`;
-    }
-
-    userPrompt = `Analyze this LinkedIn profile: ${profileUrl}
-
-Profile Analysis Context:
-- Username/Identifier: ${username}
-- Analysis Type: ${analysisType}
-- Scan Depth: ${scanDepth}
-- Include Competitive Comparison: ${compareWithCurrent}
-- Current Year: ${new Date().getFullYear()}
-
-Please provide realistic analysis based on the profile URL structure and username. Generate insights that would be typical for a professional with this profile identifier, considering current market trends and industry standards.
-
-Return your analysis in this exact JSON format (no markdown, no code blocks):
-{
-  "extractedData": {
-    "headline": "Realistic professional headline based on profile",
-    "summary": "Professional summary analysis",
-    "location": "Professional location",
-    "industry": "Industry sector",
-    "skills": ["skill1", "skill2", "skill3", "skill4", "skill5"],
-    "experience": [{"title": "Role", "company": "Company", "duration": "Duration"}],
-    "photo": true,
-    "background": true
-  },
-  "profileStrength": 85,
-  "industryAlignment": 78,
-  "keywordDensity": {
-    "leadership": 3,
-    "management": 2,
-    "strategy": 4,
-    "innovation": 1,
-    "technology": 2
-  },
-  "competitiveMetrics": {
-    "headlineOptimization": 82,
-    "summaryLength": 75,
-    "skillsCount": 88,
-    "experienceDetail": 79,
-    "industryRanking": 73,
-    "marketPositioning": 81
-  },
-  "industryBenchmarks": {
-    "averageProfileStrength": 65,
-    "topPerformerGap": ["Missing industry certifications", "Limited thought leadership content"],
-    "competitiveAdvantage": ["Strong technical background", "Diverse industry experience"]
-  },
-  "improvementRecommendations": [
-    {
-      "area": "Headline Optimization",
-      "priority": "high",
-      "impact": "30% increase in profile views",
-      "suggestion": "Include target keywords and value proposition"
-    }
-  ],
-  "marketInsights": {
-    "trendingKeywords": ["AI/ML", "Digital Transformation", "Remote Leadership"],
-    "emergingSkills": ["Prompt Engineering", "Sustainable Business", "Data Privacy"],
-    "industryGrowthAreas": ["Clean Technology", "Healthcare Innovation", "EdTech"]
-  }
-}`;
+    // Generate dynamic, non-templated prompts
+    const { systemPrompt, userPrompt } = generateDynamicPrompts(scanDepth, analysisType, profileUrl, username);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -244,8 +279,10 @@ Return your analysis in this exact JSON format (no markdown, no code blocks):
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
-        max_tokens: 2000,
+        temperature: 0.8, // Increased for more variability
+        max_tokens: 2500,
+        presence_penalty: 0.6, // Reduce repetitive content
+        frequency_penalty: 0.3, // Encourage variation
       }),
     });
 
@@ -258,7 +295,7 @@ Return your analysis in this exact JSON format (no markdown, no code blocks):
     const responseData = await response.json();
     const analysisContent = responseData.choices[0].message.content;
     
-    console.log('Generated profile analysis:', analysisContent);
+    console.log('Generated dynamic profile analysis:', analysisContent);
 
     // Parse the JSON response from OpenAI with improved error handling
     let analysisData;
