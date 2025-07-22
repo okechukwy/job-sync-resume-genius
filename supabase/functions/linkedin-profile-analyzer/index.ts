@@ -279,10 +279,10 @@ serve(async (req) => {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.8, // Increased for more variability
-        max_tokens: 2500,
-        presence_penalty: 0.6, // Reduce repetitive content
-        frequency_penalty: 0.3, // Encourage variation
+        temperature: 0.7,
+        max_tokens: 4000, // Increased to prevent truncation
+        presence_penalty: 0.5,
+        frequency_penalty: 0.3
       }),
     });
 
