@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, Menu } from "lucide-react";
 import { 
   Breadcrumb,
   BreadcrumbList,
@@ -71,7 +71,12 @@ export const DashboardHeader = () => {
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center gap-4 px-6">
-        <SidebarTrigger />
+        <SidebarTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-2">
+            <Menu className="h-4 w-4" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+        </SidebarTrigger>
         
         <div className="flex-1">
           <Breadcrumb>
