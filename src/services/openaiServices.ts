@@ -9,6 +9,72 @@ export interface LinkedInData {
   experience?: string[];
   skills?: string[];
   achievements?: string[];
+  targetRole?: string;
+  experienceLevel?: string;
+  tone?: string;
+  location?: string;
+  headline?: string;
+  summary?: string;
+  education?: any[];
+}
+
+export interface SkillsAnalysisResult {
+  currentSkillsAssessment: {
+    strong: string[];
+    developing: string[];
+    marketDemand: string;
+  };
+  trendingSkills: string[];
+  skillGaps: string[];
+  recommendations: string[];
+  learningPaths: Array<{
+    skill: string;
+    resources: string[];
+    timeline: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+}
+
+export interface ProfileAnalysisResult {
+  overallScore: number;
+  strengths: string[];
+  improvementAreas: Array<{
+    area: string;
+    impact: 'high' | 'medium' | 'low';
+    recommendation: string;
+  }>;
+  keywordOptimization: {
+    currentKeywords: string[];
+    missingKeywords: string[];
+    optimization: string;
+  };
+  benchmarkAnalysis: {
+    industryAverage: number;
+    topPerformerGap: string[];
+    competitiveAdvantage: string[];
+  };
+  actionPlan: Array<{
+    action: string;
+    priority: number;
+    timeframe: string;
+    expectedImpact: string;
+  }>;
+}
+
+export interface KeywordTrendsResult {
+  primaryKeywords: string[];
+  longTailKeywords: string[];
+  trendingTerms: string[];
+  seasonalKeywords: Array<{
+    keyword: string;
+    season: string;
+    searchVolume: string;
+  }>;
+  optimizationStrategy: {
+    immediate: string[];
+    quarterly: string[];
+    annual: string[];
+  };
 }
 
 export interface ATSOptimizationResult {
@@ -129,9 +195,9 @@ export const analyzeCVWithAI = async (
 };
 
 export const generateLinkedInContent = async (
-  type: 'headline' | 'summary' | 'content-suggestions',
+  type: 'headline' | 'summary' | 'content-suggestions' | 'skills-analysis' | 'profile-analysis' | 'keyword-trends',
   data: LinkedInData
-): Promise<{ content: string[] | string | Array<{title: string; content: string}> }> => {
+): Promise<{ content: any }> => {
   try {
     const { data: result, error } = await supabase.functions.invoke('linkedin-generator', {
       body: { type, data }
@@ -145,6 +211,36 @@ export const generateLinkedInContent = async (
     return result;
   } catch (error) {
     console.error('Error calling LinkedIn generator service:', error);
+    throw error;
+  }
+};
+
+export const analyzeLinkedInProfile = async (profileData: LinkedInData): Promise<ProfileAnalysisResult> => {
+  try {
+    const result = await generateLinkedInContent('profile-analysis', profileData);
+    return result.content as ProfileAnalysisResult;
+  } catch (error) {
+    console.error('Error analyzing LinkedIn profile:', error);
+    throw error;
+  }
+};
+
+export const analyzeSkillsGap = async (profileData: LinkedInData): Promise<SkillsAnalysisResult> => {
+  try {
+    const result = await generateLinkedInContent('skills-analysis', profileData);
+    return result.content as SkillsAnalysisResult;
+  } catch (error) {
+    console.error('Error analyzing skills gap:', error);
+    throw error;
+  }
+};
+
+export const getKeywordTrends = async (profileData: LinkedInData): Promise<KeywordTrendsResult> => {
+  try {
+    const result = await generateLinkedInContent('keyword-trends', profileData);
+    return result.content as KeywordTrendsResult;
+  } catch (error) {
+    console.error('Error getting keyword trends:', error);
     throw error;
   }
 };

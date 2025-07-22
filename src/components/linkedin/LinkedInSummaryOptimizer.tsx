@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Copy, RefreshCw, FileText, Plus, X } from "lucide-react";
+import { Copy, RefreshCw, FileText, Plus, X, TrendingUp } from "lucide-react";
 import { linkedInSummaryOptimizerSchema, type LinkedInSummaryOptimizer as LinkedInSummaryOptimizerType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { generateLinkedInContent } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInSummaryOptimizerProps {
@@ -54,48 +55,40 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
   const optimizeSummary = async (data: LinkedInSummaryOptimizerType) => {
     setIsOptimizing(true);
     
-    // Simulate summary optimization - In a real app, this would call an AI API
-    const templates = getSummaryTemplates(data);
-    
-    setTimeout(() => {
-      setOptimizedSummaries(templates);
+    try {
+      const result = await generateLinkedInContent('summary', {
+        targetRole: data.targetRole,
+        industry: data.industry,
+        achievements: data.achievements,
+        skills: data.skills,
+        tone: data.tone,
+        summary: data.currentSummary,
+        // Add the includeCallToAction flag
+        includeCallToAction: data.includeCallToAction,
+      });
+      
+      // Handle different response formats
+      if (typeof result.content === 'string') {
+        // If API returns a single summary, create variations
+        setOptimizedSummaries([result.content]);
+      } else if (Array.isArray(result.content)) {
+        setOptimizedSummaries(result.content);
+      } else {
+        setOptimizedSummaries([String(result.content)]);
+      }
+      
+      toast.success("AI-optimized summary generated successfully!");
+    } catch (error) {
+      console.error('Error optimizing summary:', error);
+      toast.error("Failed to optimize summary. Please try again.");
+    } finally {
       setIsOptimizing(false);
-      toast.success("Summaries optimized successfully!");
-    }, 2000);
+    }
   };
 
   const copyToClipboard = (summary: string) => {
     navigator.clipboard.writeText(summary);
     toast.success("Summary copied to clipboard!");
-  };
-
-  const getSummaryTemplates = (data: LinkedInSummaryOptimizerType) => {
-    const { tone, targetRole, industry, achievements, skills, includeCallToAction } = data;
-    
-    const skillsText = skills.slice(0, 5).join(", ");
-    const achievementsText = achievements.slice(0, 3).map(a => `• ${a}`).join("\n");
-    const cta = includeCallToAction ? "\n\nLet's connect and explore how I can contribute to your team's success!" : "";
-
-    const templates = {
-      professional: [
-        `Results-driven ${targetRole} with expertise in ${skillsText}. Passionate about delivering excellence in ${industry} and driving meaningful impact through innovative solutions.\n\n${achievementsText}\n\nCommitted to continuous learning and professional growth in the evolving ${industry} landscape.${cta}`,
-        `Experienced ${targetRole} specializing in ${skillsText}. Proven track record of success in ${industry} with a focus on strategic thinking and execution.\n\n${achievementsText}\n\nDedicated to building strong relationships and delivering value that exceeds expectations.${cta}`,
-      ],
-      conversational: [
-        `Hi! I'm a passionate ${targetRole} who loves working with ${skillsText}. I've been making waves in ${industry} by focusing on what really matters - delivering results that make a difference.\n\n${achievementsText}\n\nI believe in the power of collaboration and am always excited to connect with like-minded professionals.${cta}`,
-        `Welcome to my profile! As a ${targetRole}, I bring together ${skillsText} to create meaningful impact in ${industry}. My journey has been all about turning challenges into opportunities.\n\n${achievementsText}\n\nI'm always open to new connections and conversations about the future of ${industry}.${cta}`,
-      ],
-      authoritative: [
-        `Senior ${targetRole} with deep expertise in ${skillsText}. Leading innovation and transformation in ${industry} through strategic vision and execution excellence.\n\n${achievementsText}\n\nRecognized thought leader driving industry best practices and setting new standards for performance.${cta}`,
-        `Accomplished ${targetRole} with proven leadership in ${skillsText}. Transforming ${industry} operations through data-driven decision making and strategic implementation.\n\n${achievementsText}\n\nCommitted to mentoring the next generation of professionals and advancing industry standards.${cta}`,
-      ],
-      creative: [
-        `🚀 Creative ${targetRole} who brings fresh perspectives to ${skillsText}. Passionate about pushing boundaries in ${industry} and creating experiences that inspire.\n\n${achievementsText}\n\n✨ Always exploring new ways to blend creativity with strategy to deliver extraordinary results.${cta}`,
-        `💡 Innovative ${targetRole} with a flair for ${skillsText}. Transforming the ${industry} landscape one creative solution at a time.\n\n${achievementsText}\n\n🌟 Believer in the magic that happens when creativity meets purpose.${cta}`,
-      ],
-    };
-
-    return templates[tone] || templates.professional;
   };
 
   return (
@@ -104,7 +97,11 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            LinkedIn Summary Optimizer
+            AI-Powered LinkedIn Summary Optimizer
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              Live AI Analysis
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -118,7 +115,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                     <FormLabel>Current Summary (Optional)</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Paste your current LinkedIn summary here for optimization..."
+                        placeholder="Paste your current LinkedIn summary here for AI optimization..."
                         className="min-h-32 glass-card"
                         {...field}
                       />
@@ -153,22 +150,13 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Industry *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="glass-card">
-                            <SelectValue placeholder="Select industry" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Technology">Technology</SelectItem>
-                          <SelectItem value="Finance">Finance</SelectItem>
-                          <SelectItem value="Healthcare">Healthcare</SelectItem>
-                          <SelectItem value="Marketing">Marketing</SelectItem>
-                          <SelectItem value="Sales">Sales</SelectItem>
-                          <SelectItem value="Education">Education</SelectItem>
-                          <SelectItem value="Consulting">Consulting</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., Technology, Healthcare, Finance"
+                          {...field} 
+                          className="glass-card"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -181,19 +169,13 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Writing Tone</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="glass-card">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="professional">Professional</SelectItem>
-                        <SelectItem value="conversational">Conversational</SelectItem>
-                        <SelectItem value="authoritative">Authoritative</SelectItem>
-                        <SelectItem value="creative">Creative</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g., professional, conversational, authoritative, creative"
+                        {...field} 
+                        className="glass-card"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -206,7 +188,7 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                   <Input
                     value={newAchievement}
                     onChange={(e) => setNewAchievement(e.target.value)}
-                    placeholder="Add a key achievement..."
+                    placeholder="Add a key achievement with metrics..."
                     className="glass-card"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAchievement())}
                   />
@@ -258,12 +240,12 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                 {isOptimizing ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Optimizing Summary...
+                    AI Optimizing Summary...
                   </>
                 ) : (
                   <>
                     <FileText className="mr-2 h-4 w-4" />
-                    Optimize Summary
+                    Generate AI Summary
                   </>
                 )}
               </Button>
@@ -276,14 +258,18 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
       {optimizedSummaries.length > 0 && (
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Optimized Summaries</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              AI-Optimized Summaries
+              <Badge variant="outline">Industry Trends Applied</Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {optimizedSummaries.map((summary, index) => (
                 <div key={index} className="p-4 border rounded-lg glass-card">
                   <div className="flex items-start justify-between gap-4 mb-4">
-                    <Badge variant="outline">Version {index + 1}</Badge>
+                    <Badge variant="outline">AI Optimized Version {index + 1}</Badge>
                     <Button
                       variant="outline"
                       size="sm"
@@ -298,6 +284,9 @@ export const LinkedInSummaryOptimizer = ({ profileData }: LinkedInSummaryOptimiz
                     <Badge variant={summary.length <= 2600 ? "default" : "destructive"}>
                       {summary.length <= 2600 ? "Perfect Length" : "Too Long"}
                     </Badge>
+                    {summary.includes("📧") || summary.includes("connect") && (
+                      <Badge variant="secondary">CTA Included</Badge>
+                    )}
                   </div>
                 </div>
               ))}

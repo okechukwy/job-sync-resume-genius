@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, RefreshCw, Sparkles } from "lucide-react";
+import { Copy, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import { linkedInHeadlineGeneratorSchema, type LinkedInHeadlineGenerator as LinkedInHeadlineGeneratorType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
+import { generateLinkedInContent } from "@/services/openaiServices";
 import { toast } from "sonner";
 
 interface LinkedInHeadlineGeneratorProps {
@@ -34,62 +36,34 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
   const generateHeadlines = async (data: LinkedInHeadlineGeneratorType) => {
     setIsGenerating(true);
     
-    // Simulate headline generation - In a real app, this would call an AI API
-    const templates = getHeadlineTemplates(data);
-    const headlines = templates.map(template => 
-      template
-        .replace('{role}', data.targetRole)
-        .replace('{skills}', data.keySkills.slice(0, 2).join(' & '))
-        .replace('{industry}', data.industry)
-    );
-    
-    setTimeout(() => {
-      setGeneratedHeadlines(headlines);
+    try {
+      const result = await generateLinkedInContent('headline', {
+        targetRole: data.targetRole,
+        industry: data.industry,
+        skills: data.keySkills,
+        experienceLevel: data.experienceLevel,
+        tone: data.tone,
+      });
+      
+      if (Array.isArray(result.content)) {
+        setGeneratedHeadlines(result.content);
+        toast.success("AI-powered headlines generated successfully!");
+      } else {
+        // Fallback if API returns different format
+        setGeneratedHeadlines([result.content as string]);
+        toast.success("Headlines generated successfully!");
+      }
+    } catch (error) {
+      console.error('Error generating headlines:', error);
+      toast.error("Failed to generate headlines. Please try again.");
+    } finally {
       setIsGenerating(false);
-      toast.success("Headlines generated successfully!");
-    }, 1500);
+    }
   };
 
   const copyToClipboard = (headline: string) => {
     navigator.clipboard.writeText(headline);
     toast.success("Headline copied to clipboard!");
-  };
-
-  const getHeadlineTemplates = (data: LinkedInHeadlineGeneratorType) => {
-    const { tone, experienceLevel } = data;
-    
-    const templates = {
-      professional: [
-        "{role} | {skills} Expert | Driving Results in {industry}",
-        "Experienced {role} | {skills} Specialist | {industry} Professional",
-        "{role} | {skills} Leader | Transforming {industry} Operations",
-        "Senior {role} | {skills} Expert | Building Scalable {industry} Solutions",
-        "{role} Professional | {skills} & Strategy | {industry} Innovation",
-      ],
-      creative: [
-        "🚀 {role} | {skills} Innovator | Revolutionizing {industry}",
-        "✨ Creative {role} | {skills} Enthusiast | {industry} Storyteller",
-        "🎯 {role} | {skills} Strategist | Crafting {industry} Experiences",
-        "💡 Visionary {role} | {skills} Expert | {industry} Game-Changer",
-        "🌟 {role} | {skills} Pioneer | Shaping the Future of {industry}",
-      ],
-      technical: [
-        "{role} | {skills} & System Architecture | {industry} Tech Lead",
-        "Technical {role} | {skills} Development | {industry} Engineering",
-        "{role} | {skills} & Cloud Solutions | {industry} Infrastructure",
-        "Senior {role} | {skills} & DevOps | {industry} Technology",
-        "{role} | {skills} & Machine Learning | {industry} Innovation",
-      ],
-      leadership: [
-        "{role} Leader | {skills} Strategy | Transforming {industry} Teams",
-        "Executive {role} | {skills} & Leadership | {industry} Growth",
-        "{role} Director | {skills} Operations | {industry} Excellence",
-        "VP of {role} | {skills} & Strategy | {industry} Innovation Leader",
-        "Chief {role} | {skills} Visionary | {industry} Transformation",
-      ],
-    };
-
-    return templates[tone] || templates.professional;
   };
 
   return (
@@ -98,7 +72,11 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            LinkedIn Headline Generator
+            AI-Powered LinkedIn Headline Generator
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              Live AI Analysis
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -129,22 +107,13 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Industry *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="glass-card">
-                            <SelectValue placeholder="Select industry" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Technology">Technology</SelectItem>
-                          <SelectItem value="Finance">Finance</SelectItem>
-                          <SelectItem value="Healthcare">Healthcare</SelectItem>
-                          <SelectItem value="Marketing">Marketing</SelectItem>
-                          <SelectItem value="Sales">Sales</SelectItem>
-                          <SelectItem value="Education">Education</SelectItem>
-                          <SelectItem value="Consulting">Consulting</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., Technology, Healthcare, Finance"
+                          {...field} 
+                          className="glass-card"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -228,12 +197,12 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
                 {isGenerating ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Headlines...
+                    AI Generating Headlines...
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Headlines
+                    Generate AI Headlines
                   </>
                 )}
               </Button>
@@ -246,7 +215,11 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
       {generatedHeadlines.length > 0 && (
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Generated Headlines</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              AI-Generated Headlines
+              <Badge variant="outline">Optimized for {new Date().getFullYear()}</Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -257,9 +230,12 @@ export const LinkedInHeadlineGenerator = ({ profileData }: LinkedInHeadlineGener
                       <p className="font-medium">{headline}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline">{headline.length} characters</Badge>
-                        <Badge variant={headline.length <= 120 ? "default" : "destructive"}>
-                          {headline.length <= 120 ? "Perfect Length" : "Too Long"}
+                        <Badge variant={headline.length <= 220 ? "default" : "destructive"}>
+                          {headline.length <= 220 ? "Perfect Length" : "Too Long"}
                         </Badge>
+                        {headline.length <= 180 && (
+                          <Badge variant="secondary">Mobile Optimized</Badge>
+                        )}
                       </div>
                     </div>
                     <Button
