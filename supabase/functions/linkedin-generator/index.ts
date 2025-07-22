@@ -9,17 +9,23 @@ const corsHeaders = {
 
 // Helper function to extract JSON from markdown-wrapped responses
 const extractJsonFromResponse = (content: string): any => {
+  console.log('Raw AI response content:', content.substring(0, 500) + '...');
+  
   try {
     // First, try parsing as-is
     return JSON.parse(content);
   } catch (e) {
-    // If that fails, try to extract JSON from markdown code blocks
+    console.log('Direct JSON parsing failed, trying extraction methods...');
+    
+    // Try to extract JSON from markdown code blocks
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
       try {
-        return JSON.parse(jsonMatch[1]);
+        const extracted = JSON.parse(jsonMatch[1]);
+        console.log('Successfully extracted JSON from markdown blocks');
+        return extracted;
       } catch (e) {
-        console.error('Failed to parse extracted JSON:', e);
+        console.error('Failed to parse extracted JSON from markdown:', e);
       }
     }
     
@@ -27,7 +33,9 @@ const extractJsonFromResponse = (content: string): any => {
     const objectMatch = content.match(/\{[\s\S]*\}/);
     if (objectMatch) {
       try {
-        return JSON.parse(objectMatch[0]);
+        const extracted = JSON.parse(objectMatch[0]);
+        console.log('Successfully extracted JSON from object pattern');
+        return extracted;
       } catch (e) {
         console.error('Failed to parse object pattern:', e);
       }
@@ -41,70 +49,86 @@ const extractJsonFromResponse = (content: string): any => {
       .trim();
     
     try {
-      return JSON.parse(cleaned);
+      const extracted = JSON.parse(cleaned);
+      console.log('Successfully parsed cleaned content');
+      return extracted;
     } catch (e) {
       console.error('All JSON parsing attempts failed:', e);
-      throw new Error('Unable to parse JSON response from OpenAI');
+      throw new Error(`Unable to parse JSON response from OpenAI. Raw content: ${content.substring(0, 200)}...`);
     }
   }
 };
 
-// Helper function to validate and transform content suggestions data
+// Enhanced function to validate and transform content suggestions data
 const validateContentSuggestions = (data: any): any => {
+  console.log('Validating content suggestions data:', JSON.stringify(data, null, 2));
+  
   if (!data || typeof data !== 'object') {
+    console.error('Invalid content suggestions data structure');
     throw new Error('Invalid content suggestions data structure');
   }
 
-  // Ensure ideas array exists and has proper structure
+  // Enhanced ideas validation and transformation
   const ideas = Array.isArray(data.ideas) ? data.ideas : [];
-  const validatedIdeas = ideas.map((idea: any, index: number) => ({
-    title: idea.title || `Content Idea ${index + 1}`,
-    content: idea.content || 'Sample content description',
-    contentType: idea.contentType || 'Thought Leadership',
-    hashtags: Array.isArray(idea.hashtags) ? idea.hashtags : ['#LinkedIn', '#Professional'],
-    engagementStrategy: idea.engagementStrategy || 'Encourage engagement through questions',
-    difficulty: ['easy', 'medium', 'hard'].includes(idea.difficulty) ? idea.difficulty : 'medium',
-    engagement: ['high', 'medium', 'low'].includes(idea.engagement) ? idea.engagement : 'medium',
-    type: idea.type || 'insight'
-  }));
+  const validatedIdeas = ideas.map((idea: any, index: number) => {
+    const validatedIdea = {
+      title: idea.title || `Thought Leadership Post ${index + 1}`,
+      content: idea.content || idea.description || `Share insights about ${idea.topic || 'industry trends'} based on your professional experience.`,
+      contentType: idea.contentType || idea.type || 'Thought Leadership',
+      hashtags: Array.isArray(idea.hashtags) ? idea.hashtags : ['#LinkedIn', '#Professional', '#Leadership'],
+      engagementStrategy: idea.engagementStrategy || idea.strategy || 'Ask a thought-provoking question to encourage discussion and comments',
+      difficulty: ['easy', 'medium', 'hard'].includes(idea.difficulty) ? idea.difficulty : 'medium',
+      engagement: ['high', 'medium', 'low'].includes(idea.engagement) ? idea.engagement : 'medium',
+      type: idea.type || 'insight'
+    };
+    console.log(`Validated idea ${index + 1}:`, validatedIdea);
+    return validatedIdea;
+  });
 
-  // Ensure calendar array exists and has proper structure
+  // Enhanced calendar validation with more detailed data
   const calendar = Array.isArray(data.calendar) ? data.calendar : [];
-  const validatedCalendar = calendar.map((item: any, index: number) => ({
-    week: typeof item.week === 'number' ? item.week : index + 1,
-    contentType: item.contentType || item.type || 'Thought Leadership',
-    topic: item.topic || item.post || item.title || `Week ${index + 1} Content`,
-    status: item.status || 'planned',
-    optimalTiming: item.optimalTiming || item.time || 'Tuesday 10:00 AM',
-    expectedEngagement: item.expectedEngagement || 'medium'
-  }));
+  const validatedCalendar = calendar.map((item: any, index: number) => {
+    const validatedItem = {
+      week: typeof item.week === 'number' ? item.week : index + 1,
+      contentType: item.contentType || item.type || 'Thought Leadership',
+      topic: item.topic || item.post || item.title || item.content || `Week ${index + 1}: Industry insights and professional development`,
+      status: item.status || 'planned',
+      optimalTiming: item.optimalTiming || item.timing || item.time || item.bestTime || 'Tuesday 10:00 AM',
+      expectedEngagement: item.expectedEngagement || item.engagement || 'medium'
+    };
+    console.log(`Validated calendar item ${index + 1}:`, validatedItem);
+    return validatedItem;
+  });
 
-  // Ensure strategy object exists and has proper structure
+  // Enhanced strategy validation with comprehensive data
   const strategy = data.strategy || {};
   const validatedStrategy = {
-    postingFrequency: strategy.postingFrequency || strategy.contentStrategyRecommendations?.[0] || 'Weekly posting recommended',
+    postingFrequency: strategy.postingFrequency || strategy.frequency || strategy.contentStrategyRecommendations?.[0] || 'Post 2-3 times per week for optimal engagement',
     bestTimes: Array.isArray(strategy.bestTimes) 
       ? strategy.bestTimes 
       : Array.isArray(strategy.bestPostingTimes?.times) 
       ? strategy.bestPostingTimes.times 
-      : ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 10:30 AM'],
-    contentMix: strategy.contentMix || strategy.contentMixRecommendations || {
-      'thought-leadership': 30,
+      : strategy.optimalTimes || ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 2:00 PM'],
+    contentMix: strategy.contentMix || strategy.contentMixRecommendations || strategy.recommendedMix || {
+      'thought-leadership': 35,
       'industry-insights': 25,
       'career-tips': 20,
-      'personal-stories': 15,
-      'polls-questions': 10
+      'personal-stories': 12,
+      'polls-questions': 8
     },
     trendingTopics: Array.isArray(strategy.trendingTopics) 
       ? strategy.trendingTopics 
-      : ['AI and Automation', 'Remote Work', 'Digital Transformation', 'Sustainability', 'Career Development']
+      : strategy.trending || strategy.topics || ['AI and Automation', 'Remote Work Best Practices', 'Digital Transformation', 'Professional Development', 'Industry Innovation']
   };
 
-  return {
+  const result = {
     ideas: validatedIdeas,
     calendar: validatedCalendar,
     strategy: validatedStrategy
   };
+
+  console.log('Final validated content suggestions:', JSON.stringify(result, null, 2));
+  return result;
 };
 
 serve(async (req) => {
@@ -126,6 +150,7 @@ serve(async (req) => {
     }
 
     console.log('Generating LinkedIn content for type:', type);
+    console.log('Input data:', JSON.stringify(data, null, 2));
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -180,16 +205,16 @@ Return only the summary text, no additional formatting or quotes.`;
         break;
 
       case 'content-suggestions':
-        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. Generate EXACTLY this JSON structure with NO markdown formatting or code blocks:
+        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. You MUST generate EXACTLY this JSON structure with NO markdown formatting, NO code blocks, NO additional text - ONLY the raw JSON:
 
 {
   "ideas": [
     {
-      "title": "Content title here",
-      "content": "Content description here",
+      "title": "Specific, engaging content title",
+      "content": "Detailed content description with specific examples and actionable insights",
       "contentType": "Thought Leadership",
-      "hashtags": ["#hashtag1", "#hashtag2"],
-      "engagementStrategy": "Strategy description",
+      "hashtags": ["#RelevantHashtag1", "#RelevantHashtag2", "#RelevantHashtag3"],
+      "engagementStrategy": "Specific strategy to drive comments, likes, and shares",
       "difficulty": "easy|medium|hard",
       "engagement": "high|medium|low",
       "type": "insight|tips|story|question"
@@ -199,39 +224,61 @@ Return only the summary text, no additional formatting or quotes.`;
     {
       "week": 1,
       "contentType": "Thought Leadership",
-      "topic": "Topic description",
+      "topic": "Detailed, specific topic with actionable advice or insights",
       "status": "planned",
       "optimalTiming": "Tuesday 10:00 AM",
       "expectedEngagement": "high|medium|low"
     }
   ],
   "strategy": {
-    "postingFrequency": "Frequency recommendation",
-    "bestTimes": ["Tuesday 10:00 AM", "Wednesday 11:00 AM"],
+    "postingFrequency": "Specific frequency recommendation with reasoning",
+    "bestTimes": ["Tuesday 10:00 AM", "Wednesday 11:00 AM", "Thursday 2:00 PM"],
     "contentMix": {
-      "thought-leadership": 30,
+      "thought-leadership": 35,
       "industry-insights": 25,
       "career-tips": 20,
-      "personal-stories": 15,
-      "polls-questions": 10
+      "personal-stories": 12,
+      "polls-questions": 8
     },
-    "trendingTopics": ["Topic 1", "Topic 2", "Topic 3"]
+    "trendingTopics": ["Specific Topic 1", "Specific Topic 2", "Specific Topic 3", "Specific Topic 4", "Specific Topic 5"]
   }
 }
 
-Generate 8-10 content ideas that are highly relevant to current industry trends and encourage maximum engagement. Include a 4-week content calendar and comprehensive strategy recommendations.`;
+CRITICAL REQUIREMENTS:
+- Generate 8-10 detailed content ideas with specific, actionable topics
+- Create a comprehensive 4-week content calendar with meaningful, detailed topics
+- Each calendar entry must have a specific, descriptive topic (not generic)
+- Include specific timing recommendations based on industry best practices
+- Provide trending topics that are current and relevant to the user's industry
+- All content must be highly relevant to current industry trends and encourage maximum engagement
+- Topics should be specific enough to be immediately actionable
+
+RETURN ONLY THE JSON OBJECT - NO MARKDOWN, NO EXPLANATIONS, NO CODE BLOCKS.`;
         
-        userPrompt = `Generate comprehensive LinkedIn content strategy for: ${JSON.stringify(data)}.
-        Industry: ${data.industry || 'business'}
-        Role focus: ${data.targetRole || data.currentRole || 'professional'}
-        Experience level: ${data.experienceLevel || 'mid-level'}
-        Content type preference: ${data.contentType || 'thought-leadership'}
-        Posting frequency: ${data.frequency || 'weekly'}
-        Expertise areas: ${data.skills?.join(', ') || 'professional skills'}
-        Achievements to leverage: ${data.achievements?.join(', ') || 'career accomplishments'}
-        Target audience: ${data.industry} professionals, recruiters, potential clients, industry leaders
-        Current trends to leverage: AI transformation, remote work, sustainability, digital innovation, economic changes`;
-        maxTokens = 2500;
+        userPrompt = `Generate comprehensive LinkedIn content strategy for professional in ${data.industry || 'business'} industry.
+
+Profile Context:
+- Role: ${data.targetRole || data.currentRole || 'Professional'}
+- Industry: ${data.industry || 'Business'}
+- Experience Level: ${data.experienceLevel || 'Mid-level'}
+- Content Preference: ${data.contentType || 'Thought Leadership'}
+- Posting Frequency: ${data.frequency || 'Weekly'}
+- Key Skills: ${data.skills?.join(', ') || 'Professional skills'}
+- Achievements: ${data.achievements?.join(', ') || 'Career accomplishments'}
+- Experience Background: ${data.experience?.join('; ') || 'Professional background'}
+
+Requirements:
+- Generate 8-10 specific, actionable content ideas
+- Create 4-week calendar with detailed topics for each week
+- Focus on ${data.industry} industry trends and challenges
+- Include current topics like AI impact, remote work, digital transformation
+- Provide specific timing recommendations
+- Target audience: ${data.industry} professionals, recruiters, industry leaders
+- Make each calendar topic specific and immediately actionable
+- Include trending topics relevant to ${data.industry} in ${new Date().getFullYear()}
+
+Return ONLY the JSON object with no additional formatting.`;
+        maxTokens = 3000;
         break;
 
       case 'keyword-trends':
@@ -351,6 +398,9 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         throw new Error('Invalid type specified');
     }
 
+    console.log('Sending request to OpenAI with system prompt length:', systemPrompt.length);
+    console.log('User prompt:', userPrompt.substring(0, 200) + '...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -371,13 +421,13 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
     if (!response.ok) {
       const errorData = await response.text();
       console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
     }
 
     const responseData = await response.json();
     const generatedContent = responseData.choices[0].message.content;
     
-    console.log('Generated LinkedIn content:', generatedContent);
+    console.log('Generated LinkedIn content (first 500 chars):', generatedContent.substring(0, 500));
 
     // For JSON responses, parse and return structured data
     if (['headline', 'content-suggestions', 'skills-analysis', 'profile-analysis', 'keyword-trends'].includes(type)) {
@@ -387,7 +437,7 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         // Special handling for content-suggestions to ensure proper structure
         if (type === 'content-suggestions') {
           const validatedContent = validateContentSuggestions(parsedContent);
-          console.log('Validated content suggestions:', JSON.stringify(validatedContent, null, 2));
+          console.log('Final validated content suggestions being returned:', JSON.stringify(validatedContent, null, 2));
           return new Response(JSON.stringify({ content: validatedContent }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -398,13 +448,14 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
         });
       } catch (parseError) {
         console.error('Failed to parse JSON response:', parseError);
-        console.error('Raw content:', generatedContent);
+        console.error('Raw content that failed to parse:', generatedContent);
         
         // Return error with details for debugging
         return new Response(JSON.stringify({ 
           error: 'Failed to parse AI response',
           details: parseError.message,
-          rawContent: generatedContent.substring(0, 500) + '...' // Truncate for logging
+          rawContent: generatedContent.substring(0, 1000),
+          type: type
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -422,7 +473,8 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Failed to generate LinkedIn content. Please try again.'
+        details: 'Failed to generate LinkedIn content. Please try again.',
+        timestamp: new Date().toISOString()
       }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

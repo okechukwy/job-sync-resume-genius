@@ -87,17 +87,28 @@ export const LinkedInContentSuggestions = ({
         throw new Error('Invalid response structure from content generation');
       }
 
-      // Ensure all required fields exist
+      // Enhanced validation and fallback data
       const validatedResult = {
-        ideas: Array.isArray(result.ideas) ? result.ideas : [],
-        calendar: Array.isArray(result.calendar) ? result.calendar : [],
-        strategy: result.strategy || {
-          postingFrequency: 'Weekly posting recommended',
-          bestTimes: ['Tuesday 10:00 AM', 'Wednesday 11:00 AM'],
-          contentMix: { 'thought-leadership': 40, 'industry-insights': 30, 'career-tips': 30 },
-          trendingTopics: ['Digital Transformation', 'Remote Work', 'AI Innovation']
+        ideas: Array.isArray(result.ideas) && result.ideas.length > 0 ? result.ideas : [],
+        calendar: Array.isArray(result.calendar) && result.calendar.length > 0 ? result.calendar : [],
+        strategy: result.strategy && typeof result.strategy === 'object' ? result.strategy : {
+          postingFrequency: 'Post 2-3 times per week for optimal engagement',
+          bestTimes: ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 2:00 PM'],
+          contentMix: { 
+            'thought-leadership': 35, 
+            'industry-insights': 25, 
+            'career-tips': 20, 
+            'personal-stories': 12,
+            'polls-questions': 8
+          },
+          trendingTopics: ['AI and Automation', 'Remote Work Best Practices', 'Digital Transformation', 'Professional Development', 'Industry Innovation']
         }
       };
+
+      // Log the data being passed to the component
+      console.log('Final validated result for component:', validatedResult);
+      console.log('Calendar data:', validatedResult.calendar);
+      console.log('Strategy data:', validatedResult.strategy);
       
       onContentSuggestionsUpdate(validatedResult);
       toast.success("Content suggestions generated successfully!");
@@ -141,6 +152,10 @@ export const LinkedInContentSuggestions = ({
   };
 
   const hasExistingSuggestions = contentSuggestions !== null;
+
+  // Debug logging for contentSuggestions
+  console.log('Current contentSuggestions in component:', contentSuggestions);
+  console.log('Has existing suggestions:', hasExistingSuggestions);
 
   return (
     <div className="space-y-6">
@@ -307,11 +322,11 @@ export const LinkedInContentSuggestions = ({
           <TabsList className="grid w-full grid-cols-3 glass-card">
             <TabsTrigger value="ideas" className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
-              Content Ideas ({contentSuggestions.ideas?.length || 0})
+              Content Ideas ({contentSuggestions?.ideas?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="calendar" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Content Calendar ({contentSuggestions.calendar?.length || 0})
+              Content Calendar ({contentSuggestions?.calendar?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="strategy" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -320,32 +335,36 @@ export const LinkedInContentSuggestions = ({
           </TabsList>
 
           <TabsContent value="ideas">
-            {contentSuggestions.ideas && contentSuggestions.ideas.length > 0 ? (
+            {contentSuggestions?.ideas && contentSuggestions.ideas.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {contentSuggestions.ideas.map((idea: ContentIdea, index: number) => (
                   <Card key={index} className="glass-card">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
-                        <CardTitle className="text-lg">{idea.title}</CardTitle>
+                        <CardTitle className="text-lg">{idea.title || `Content Idea ${index + 1}`}</CardTitle>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => copyContent(`${idea.title}\n\n${idea.content}\n\n${idea.hashtags?.join(' ') || ''}`)}
+                          onClick={() => copyContent(`${idea.title || `Content Idea ${index + 1}`}\n\n${idea.content || ''}\n\n${idea.hashtags?.join(' ') || ''}`)}
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4">{idea.content}</p>
+                      <p className="text-sm text-muted-foreground mb-4">{idea.content || 'Content description not available'}</p>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge variant="outline">{idea.contentType}</Badge>
-                        <Badge className={getEngagementColor(idea.engagement)}>
-                          {idea.engagement} engagement
-                        </Badge>
-                        <Badge className={getDifficultyColor(idea.difficulty)}>
-                          {idea.difficulty} difficulty
-                        </Badge>
+                        <Badge variant="outline">{idea.contentType || 'Content'}</Badge>
+                        {idea.engagement && (
+                          <Badge className={getEngagementColor(idea.engagement)}>
+                            {idea.engagement} engagement
+                          </Badge>
+                        )}
+                        {idea.difficulty && (
+                          <Badge className={getDifficultyColor(idea.difficulty)}>
+                            {idea.difficulty} difficulty
+                          </Badge>
+                        )}
                       </div>
                       {idea.hashtags && idea.hashtags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-3">
@@ -386,31 +405,41 @@ export const LinkedInContentSuggestions = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {contentSuggestions.calendar && contentSuggestions.calendar.length > 0 ? (
+                {contentSuggestions?.calendar && contentSuggestions.calendar.length > 0 ? (
                   <div className="space-y-4">
-                    {contentSuggestions.calendar.map((item: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg glass-card">
-                        <div>
-                          <h4 className="font-medium">{item.topic}</h4>
-                          <p className="text-sm text-muted-foreground">Week {item.week}</p>
-                          {item.optimalTiming && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Clock className="h-3 w-3" />
-                              {item.optimalTiming}
-                            </p>
-                          )}
+                    {contentSuggestions.calendar.map((item: any, index: number) => {
+                      console.log(`Rendering calendar item ${index}:`, item);
+                      return (
+                        <div key={index} className="flex items-start justify-between p-4 border rounded-lg glass-card">
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-1">
+                              {item.topic || item.title || `Week ${item.week || index + 1} Content`}
+                            </h4>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                              <span>Week {item.week || index + 1}</span>
+                              {item.optimalTiming && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {item.optimalTiming}
+                                </span>
+                              )}
+                            </div>
+                            {item.description && (
+                              <p className="text-sm text-muted-foreground mt-2">{item.description}</p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-2 ml-4">
+                            <Badge variant="outline">{item.contentType || 'Content'}</Badge>
+                            <Badge variant="secondary">{item.status || 'planned'}</Badge>
+                            {item.expectedEngagement && (
+                              <Badge className={getEngagementColor(item.expectedEngagement)}>
+                                {item.expectedEngagement}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">{item.contentType}</Badge>
-                          <Badge variant="secondary">{item.status}</Badge>
-                          {item.expectedEngagement && (
-                            <Badge className={getEngagementColor(item.expectedEngagement)}>
-                              {item.expectedEngagement}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -435,12 +464,14 @@ export const LinkedInContentSuggestions = ({
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">Posting Frequency</h4>
-                      <p className="text-sm text-muted-foreground">{contentSuggestions.strategy?.postingFrequency || 'Weekly posting recommended'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {contentSuggestions?.strategy?.postingFrequency || 'Post 2-3 times per week for optimal engagement'}
+                      </p>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Best Posting Times</h4>
                       <div className="flex flex-wrap gap-2">
-                        {(contentSuggestions.strategy?.bestTimes || ['Tuesday 10:00 AM', 'Wednesday 11:00 AM']).map((time, index) => (
+                        {(contentSuggestions?.strategy?.bestTimes || ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 2:00 PM']).map((time, index) => (
                           <Badge key={index} variant="outline">{time}</Badge>
                         ))}
                       </div>
@@ -448,12 +479,16 @@ export const LinkedInContentSuggestions = ({
                     <div>
                       <h4 className="font-medium mb-2">Content Mix</h4>
                       <div className="space-y-2">
-                        {contentSuggestions.strategy?.contentMix && Object.entries(contentSuggestions.strategy.contentMix).map(([type, percentage]) => (
-                          <div key={type} className="flex justify-between text-sm">
-                            <span className="capitalize">{type.replace('-', ' ')}</span>
-                            <span>{percentage}%</span>
-                          </div>
-                        ))}
+                        {contentSuggestions?.strategy?.contentMix ? 
+                          Object.entries(contentSuggestions.strategy.contentMix).map(([type, percentage]) => (
+                            <div key={type} className="flex justify-between text-sm">
+                              <span className="capitalize">{type.replace('-', ' ')}</span>
+                              <span>{percentage}%</span>
+                            </div>
+                          )) : (
+                            <div className="text-sm text-muted-foreground">Content mix recommendations will appear here</div>
+                          )
+                        }
                       </div>
                     </div>
                   </div>
@@ -469,10 +504,17 @@ export const LinkedInContentSuggestions = ({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {(contentSuggestions.strategy?.trendingTopics || ['Digital Transformation', 'Remote Work', 'AI Innovation']).map((topic, index) => (
+                    {(contentSuggestions?.strategy?.trendingTopics || ['AI and Automation', 'Remote Work Best Practices', 'Digital Transformation', 'Professional Development', 'Industry Innovation']).map((topic, index) => (
                       <Badge key={index} variant="secondary">{topic}</Badge>
                     ))}
                   </div>
+                  {contentSuggestions?.strategy?.additionalRecommendations && (
+                    <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Additional Recommendations:</strong> {contentSuggestions.strategy.additionalRecommendations}
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
