@@ -52,6 +52,7 @@ import SampleAnswerSection from "@/components/interview/SampleAnswerSection";
 import { useSessionHistory } from "@/hooks/useSessionHistory";
 import { SessionHistoryFilters } from "@/components/interview/SessionHistoryFilters";
 import { SessionHistoryItem } from "@/components/interview/SessionHistoryItem";
+import { PageLayout } from "@/components/common/PageLayout";
 
 const AIInterviewPrep = () => {
   const { toast } = useToast();
@@ -456,8 +457,7 @@ const AIInterviewPrep = () => {
   }, [sessions]);
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <PageLayout>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold gradient-text mb-4">AI Interview Preparation</h1>
           <p className="text-xl text-muted-foreground">
@@ -1125,8 +1125,7 @@ const AIInterviewPrep = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

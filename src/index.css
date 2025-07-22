@@ -303,19 +303,49 @@
 
   /* Enhanced Spacing System */
   .spacing-section {
-    @apply py-16 md:py-24;
+    @apply py-8 md:py-16 lg:py-24;
   }
 
   .spacing-container {
-    @apply px-4 sm:px-6 lg:px-8;
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
   }
 
   .spacing-content {
-    @apply space-y-8 md:space-y-12;
+    @apply space-y-6 md:space-y-8 lg:space-y-12;
   }
 
   .spacing-grid {
-    @apply gap-6 md:gap-8 lg:gap-12;
+    @apply gap-4 md:gap-6 lg:gap-8 xl:gap-12;
+  }
+
+  /* Full width utilities for dashboard */
+  .dashboard-content {
+    @apply w-full h-full min-h-[calc(100vh-4rem)];
+  }
+
+  .dashboard-page {
+    @apply w-full h-full p-4 sm:p-6 lg:p-8;
+  }
+
+  .dashboard-container {
+    @apply max-w-7xl mx-auto h-full;
+  }
+
+  /* Responsive content containers */
+  .content-narrow {
+    @apply max-w-3xl mx-auto;
+  }
+
+  .content-standard {
+    @apply max-w-5xl mx-auto;
+  }
+
+  .content-wide {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .content-full {
+    @apply w-full;
   }
 
   /* Improved Contrast and Readability */

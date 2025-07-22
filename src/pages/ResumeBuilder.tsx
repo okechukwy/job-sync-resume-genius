@@ -3,6 +3,7 @@ import ResumeSteps from "@/components/ResumeSteps";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { AnalysisStep } from "@/components/resume-builder";
 import UnifiedTemplateStep from "@/components/resume-builder/UnifiedTemplateStep";
+import { FullWidthLayout } from "@/components/common/FullWidthLayout";
 
 const ResumeBuilder = () => {
   const {
@@ -25,37 +26,43 @@ const ResumeBuilder = () => {
   // Build step - render the full resume creation flow
   if (currentStep === 'build') {
     return (
-      <ResumeSteps 
-        selectedTemplate={selectedTemplate} 
-        onBack={() => handleBackToStep('templates')} 
-      />
+      <FullWidthLayout innerPadding={false}>
+        <ResumeSteps 
+          selectedTemplate={selectedTemplate} 
+          onBack={() => handleBackToStep('templates')} 
+        />
+      </FullWidthLayout>
     );
   }
 
   // Analysis step - show CV analysis for uploaded files
   if (currentStep === 'analysis' && uploadedFile) {
     return (
-      <AnalysisStep
-        uploadedFile={uploadedFile}
-        onContinue={handleContinueFromAnalysis}
-        onReupload={handleReupload}
-      />
+      <FullWidthLayout>
+        <AnalysisStep
+          uploadedFile={uploadedFile}
+          onContinue={handleContinueFromAnalysis}
+          onReupload={handleReupload}
+        />
+      </FullWidthLayout>
     );
   }
 
   // Template selection step (default)
   return (
-    <UnifiedTemplateStep
-      selectedTemplate={selectedTemplate}
-      onTemplateSelect={handleTemplateSelect}
-      uploadedFile={uploadedFile}
-      onFileChange={handleFileChange}
-      onStartFromScratch={handleStartFromScratch}
-      showPreviewModal={showPreviewModal}
-      previewTemplateId={previewTemplateId}
-      onPreviewOpen={handlePreviewOpen}
-      onPreviewClose={handlePreviewClose}
-    />
+    <FullWidthLayout>
+      <UnifiedTemplateStep
+        selectedTemplate={selectedTemplate}
+        onTemplateSelect={handleTemplateSelect}
+        uploadedFile={uploadedFile}
+        onFileChange={handleFileChange}
+        onStartFromScratch={handleStartFromScratch}
+        showPreviewModal={showPreviewModal}
+        previewTemplateId={previewTemplateId}
+        onPreviewOpen={handlePreviewOpen}
+        onPreviewClose={handlePreviewClose}
+      />
+    </FullWidthLayout>
   );
 };
 

@@ -15,6 +15,7 @@ import { LinkedInKeywordAnalyzer } from "@/components/linkedin/LinkedInKeywordAn
 import { LinkedInContentSuggestions } from "@/components/linkedin/LinkedInContentSuggestions";
 import { LinkedInUrlScanner } from "@/components/linkedin/LinkedInUrlScanner";
 import { type ContentSuggestionsResult } from "@/services/openaiServices";
+import { PageLayout } from "@/components/common/PageLayout";
 
 const LinkedInOptimization = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -53,9 +54,7 @@ const LinkedInOptimization = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
+    <PageLayout>
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
@@ -194,8 +193,7 @@ const LinkedInOptimization = () => {
             <LinkedInUrlScanner onScanComplete={handleScanComplete} />
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

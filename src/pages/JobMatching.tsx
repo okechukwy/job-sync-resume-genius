@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { analyzeJobMatch, JobMatchingResult } from "@/utils/jobMatchingAnalyzer";
 import { FileReadResult } from "@/utils/fileReader";
 import FileProcessingResults from "@/components/FileProcessingResults";
+import { PageLayout } from "@/components/common/PageLayout";
 
 const JobMatching = () => {
   const [jobDescription, setJobDescription] = useState("");
@@ -98,10 +99,7 @@ const JobMatching = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <PageHeader />
-
-      <div className="max-w-6xl mx-auto px-4 py-12">
+    <PageLayout maxWidth="6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             Match Your Resume to{" "}
@@ -729,8 +727,7 @@ const JobMatching = () => {
             </Card>
           </div>
         )}
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

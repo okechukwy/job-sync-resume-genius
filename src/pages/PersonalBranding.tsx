@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { downloadFile } from "@/utils/downloadUtils";
+import { PageLayout } from "@/components/common/PageLayout";
 
 const personalBrandSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -648,9 +649,7 @@ Resume/CV Headlines:
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
+    <PageLayout maxWidth="6xl">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
@@ -1268,8 +1267,7 @@ Resume/CV Headlines:
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

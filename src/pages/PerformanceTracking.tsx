@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageLayout } from "@/components/common/PageLayout";
 
 interface AIInsights {
   working_well: string[];
@@ -199,10 +200,7 @@ const PerformanceTracking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <PageHeader />
-
-      <div className="max-w-7xl mx-auto px-4 py-12">
+    <PageLayout>
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             Track Your Job Search{" "}
@@ -396,7 +394,6 @@ const PerformanceTracking = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <ApplicationForm
         open={showApplicationForm}
@@ -430,7 +427,7 @@ const PerformanceTracking = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 };
 
