@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 interface LinkedInHeadlineGeneratorProps {
   profileData: LinkedInProfile | null;
-  generatedHeadlines: string[];
+  generatedHeadlines: string[] | null;
   onHeadlinesUpdate: (headlines: string[]) => void;
 }
 
@@ -75,7 +75,7 @@ export const LinkedInHeadlineGenerator = ({
     toast.success("Headline copied to clipboard!");
   };
 
-  const hasExistingHeadlines = generatedHeadlines.length > 0;
+  const hasExistingHeadlines = generatedHeadlines && generatedHeadlines.length > 0;
 
   return (
     <div className="space-y-6">
@@ -242,7 +242,7 @@ export const LinkedInHeadlineGenerator = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {generatedHeadlines.map((headline, index) => (
+              {(generatedHeadlines || []).map((headline, index) => (
                 <div key={index} className="p-4 border rounded-lg glass-card">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
