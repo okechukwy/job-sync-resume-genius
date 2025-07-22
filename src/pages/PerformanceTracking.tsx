@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Plus, Calendar, TrendingUp, Target, Users } from "lucide-react";
+import { Plus, Calendar, TrendingUp, Target, Users, RefreshCw, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useJobApplications } from "@/hooks/useJobApplications";
 import { ApplicationForm } from "@/components/ApplicationForm";
@@ -25,11 +26,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AIInsights {
   working_well: string[];
   improvements: string[];
   recommendations: string[];
+}
+
+interface InsightsResponse {
+  insights: AIInsights;
+  success: boolean;
+  generated_at: string;
+  source: 'ai_generated' | 'fallback_generated';
+  error?: string;
 }
 
 const PerformanceTracking = () => {
@@ -39,6 +49,9 @@ const PerformanceTracking = () => {
   const [editingApplication, setEditingApplication] = useState(null);
   const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsSource, setInsightsSource] = useState<'ai_generated' | 'fallback_generated' | null>(null);
+  const [insightsTimestamp, setInsightsTimestamp] = useState<string | null>(null);
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
@@ -111,18 +124,42 @@ const PerformanceTracking = () => {
   };
 
   const generateAIInsights = async () => {
-    if (!user || applications.length === 0) return;
+    if (!user || applications.length === 0) {
+      toast.error('No applications data available for insights generation');
+      return;
+    }
     
     setInsightsLoading(true);
+    setInsightsError(null);
+    
     try {
+      console.log('Generating AI insights for', applications.length, 'applications');
+      
       const { data, error } = await supabase.functions.invoke('performance-insights', {
         body: { userId: user.id }
       });
 
-      if (error) throw error;
-      setAiInsights(data.insights);
+      if (error) {
+        console.error('Insights generation error:', error);
+        throw error;
+      }
+
+      const response = data as InsightsResponse;
+      
+      setAiInsights(response.insights);
+      setInsightsSource(response.source);
+      setInsightsTimestamp(response.generated_at);
+      
+      if (response.source === 'fallback_generated') {
+        setInsightsError('AI generation failed - showing general recommendations');
+        toast.warning('Using general insights due to AI service issue');
+      } else {
+        toast.success('AI insights generated successfully');
+      }
+      
     } catch (error) {
       console.error('Error generating AI insights:', error);
+      setInsightsError(error.message || 'Failed to generate AI insights');
       toast.error('Failed to generate AI insights');
     } finally {
       setInsightsLoading(false);
@@ -130,7 +167,7 @@ const PerformanceTracking = () => {
   };
 
   useEffect(() => {
-    if (applications.length > 0 && !aiInsights) {
+    if (applications.length > 0 && !aiInsights && !insightsLoading) {
       generateAIInsights();
     }
   }, [applications.length, user]);
@@ -149,6 +186,16 @@ const PerformanceTracking = () => {
     interviewRate: metrics?.interview_rate || 0,
     offerRate: metrics?.offer_rate || 0,
     avgAtsScore: metrics?.avg_ats_score || 0
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   return (
@@ -262,7 +309,18 @@ const PerformanceTracking = () => {
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>AI-Powered Insights</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                AI-Powered Insights
+                {insightsSource && (
+                  <Badge variant={insightsSource === 'ai_generated' ? 'default' : 'secondary'} className="text-xs">
+                    {insightsSource === 'ai_generated' ? (
+                      <><CheckCircle className="w-3 h-3 mr-1" />AI Generated</>
+                    ) : (
+                      <><AlertCircle className="w-3 h-3 mr-1" />Fallback</>
+                    )}
+                  </Badge>
+                )}
+              </CardTitle>
               {applications.length > 0 && (
                 <Button 
                   size="sm" 
@@ -270,11 +328,19 @@ const PerformanceTracking = () => {
                   onClick={generateAIInsights}
                   disabled={insightsLoading}
                 >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${insightsLoading ? 'animate-spin' : ''}`} />
                   {insightsLoading ? 'Analyzing...' : 'Refresh Insights'}
                 </Button>
               )}
             </CardHeader>
             <CardContent>
+              {insightsError && (
+                <Alert className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{insightsError}</AlertDescription>
+                </Alert>
+              )}
+
               {insightsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <LoadingSpinner />
@@ -286,6 +352,13 @@ const PerformanceTracking = () => {
                 </div>
               ) : aiInsights ? (
                 <div className="space-y-4">
+                  {insightsTimestamp && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+                      <Clock className="w-3 h-3" />
+                      <span>Generated: {formatTimestamp(insightsTimestamp)}</span>
+                    </div>
+                  )}
+
                   <div className="p-4 glass-card rounded-lg">
                     <h4 className="font-medium text-success mb-2">✅ What's Working</h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
