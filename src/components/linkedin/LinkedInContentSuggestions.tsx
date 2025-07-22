@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users, Trash2, Clock } from "lucide-react";
+import { Copy, RefreshCw, Lightbulb, Calendar, TrendingUp, Users, Trash2, Clock, AlertTriangle } from "lucide-react";
 import { linkedInContentSuggestionSchema, type LinkedInContentSuggestion as LinkedInContentSuggestionType, type LinkedInProfile } from "@/schemas/linkedInSchemas";
 import { generateContentSuggestions, type ContentSuggestionsResult, type ContentIdea } from "@/services/openaiServices";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ export const LinkedInContentSuggestions = ({
   onContentSuggestionsUpdate 
 }: LinkedInContentSuggestionsProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LinkedInContentSuggestionType>({
     resolver: zodResolver(linkedInContentSuggestionSchema),
@@ -43,6 +45,7 @@ export const LinkedInContentSuggestions = ({
     }
 
     setIsGenerating(true);
+    setError(null);
     
     try {
       // Extract current role from experience data
@@ -79,11 +82,30 @@ export const LinkedInContentSuggestions = ({
       const result = await generateContentSuggestions(enrichedData);
       console.log('Generated content suggestions:', result);
       
-      onContentSuggestionsUpdate(result);
+      // Validate the result structure
+      if (!result || typeof result !== 'object') {
+        throw new Error('Invalid response structure from content generation');
+      }
+
+      // Ensure all required fields exist
+      const validatedResult = {
+        ideas: Array.isArray(result.ideas) ? result.ideas : [],
+        calendar: Array.isArray(result.calendar) ? result.calendar : [],
+        strategy: result.strategy || {
+          postingFrequency: 'Weekly posting recommended',
+          bestTimes: ['Tuesday 10:00 AM', 'Wednesday 11:00 AM'],
+          contentMix: { 'thought-leadership': 40, 'industry-insights': 30, 'career-tips': 30 },
+          trendingTopics: ['Digital Transformation', 'Remote Work', 'AI Innovation']
+        }
+      };
+      
+      onContentSuggestionsUpdate(validatedResult);
       toast.success("Content suggestions generated successfully!");
     } catch (error) {
       console.error('Error generating content suggestions:', error);
-      toast.error("Failed to generate content suggestions. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate content suggestions';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -91,6 +113,7 @@ export const LinkedInContentSuggestions = ({
 
   const clearSuggestions = () => {
     onContentSuggestionsUpdate(null);
+    setError(null);
     toast.success("Content suggestions cleared successfully!");
   };
 
@@ -137,6 +160,17 @@ export const LinkedInContentSuggestions = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-red-800">Generation Error</h4>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+                <p className="text-xs text-red-600 mt-2">Please try again or contact support if the issue persists.</p>
+              </div>
+            </div>
+          )}
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(generateContent)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -273,11 +307,11 @@ export const LinkedInContentSuggestions = ({
           <TabsList className="grid w-full grid-cols-3 glass-card">
             <TabsTrigger value="ideas" className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
-              Content Ideas
+              Content Ideas ({contentSuggestions.ideas?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="calendar" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Content Calendar
+              Content Calendar ({contentSuggestions.calendar?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="strategy" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -286,52 +320,61 @@ export const LinkedInContentSuggestions = ({
           </TabsList>
 
           <TabsContent value="ideas">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {contentSuggestions.ideas?.map((idea: ContentIdea, index: number) => (
-                <Card key={index} className="glass-card">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-4">
-                      <CardTitle className="text-lg">{idea.title}</CardTitle>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copyContent(`${idea.title}\n\n${idea.content}\n\n${idea.hashtags?.join(' ')}`)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">{idea.content}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline">{idea.contentType}</Badge>
-                      <Badge className={getEngagementColor(idea.engagement)}>
-                        {idea.engagement} engagement
-                      </Badge>
-                      <Badge className={getDifficultyColor(idea.difficulty)}>
-                        {idea.difficulty} difficulty
-                      </Badge>
-                    </div>
-                    {idea.hashtags && idea.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {idea.hashtags.map((hashtag, hashIndex) => (
-                          <Badge key={hashIndex} variant="secondary" className="text-xs">
-                            {hashtag}
-                          </Badge>
-                        ))}
+            {contentSuggestions.ideas && contentSuggestions.ideas.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {contentSuggestions.ideas.map((idea: ContentIdea, index: number) => (
+                  <Card key={index} className="glass-card">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <CardTitle className="text-lg">{idea.title}</CardTitle>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyContent(`${idea.title}\n\n${idea.content}\n\n${idea.hashtags?.join(' ') || ''}`)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
-                    {idea.engagementStrategy && (
-                      <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">
-                          <strong>Engagement Strategy:</strong> {idea.engagementStrategy}
-                        </p>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">{idea.content}</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <Badge variant="outline">{idea.contentType}</Badge>
+                        <Badge className={getEngagementColor(idea.engagement)}>
+                          {idea.engagement} engagement
+                        </Badge>
+                        <Badge className={getDifficultyColor(idea.difficulty)}>
+                          {idea.difficulty} difficulty
+                        </Badge>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      {idea.hashtags && idea.hashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {idea.hashtags.map((hashtag, hashIndex) => (
+                            <Badge key={hashIndex} variant="secondary" className="text-xs">
+                              {hashtag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      {idea.engagementStrategy && (
+                        <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                          <p className="text-xs text-muted-foreground">
+                            <strong>Engagement Strategy:</strong> {idea.engagementStrategy}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="glass-card">
+                <CardContent className="text-center py-8">
+                  <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No content ideas available. Please generate content suggestions first.</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="calendar">
@@ -343,31 +386,38 @@ export const LinkedInContentSuggestions = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {contentSuggestions.calendar?.map((item: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg glass-card">
-                      <div>
-                        <h4 className="font-medium">{item.topic}</h4>
-                        <p className="text-sm text-muted-foreground">Week {item.week}</p>
-                        {item.optimalTiming && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <Clock className="h-3 w-3" />
-                            {item.optimalTiming}
-                          </p>
-                        )}
+                {contentSuggestions.calendar && contentSuggestions.calendar.length > 0 ? (
+                  <div className="space-y-4">
+                    {contentSuggestions.calendar.map((item: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg glass-card">
+                        <div>
+                          <h4 className="font-medium">{item.topic}</h4>
+                          <p className="text-sm text-muted-foreground">Week {item.week}</p>
+                          {item.optimalTiming && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Clock className="h-3 w-3" />
+                              {item.optimalTiming}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{item.contentType}</Badge>
+                          <Badge variant="secondary">{item.status}</Badge>
+                          {item.expectedEngagement && (
+                            <Badge className={getEngagementColor(item.expectedEngagement)}>
+                              {item.expectedEngagement}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">{item.contentType}</Badge>
-                        <Badge variant="secondary">{item.status}</Badge>
-                        {item.expectedEngagement && (
-                          <Badge className={getEngagementColor(item.expectedEngagement)}>
-                            {item.expectedEngagement}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No calendar data available. Please generate content suggestions first.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -385,12 +435,12 @@ export const LinkedInContentSuggestions = ({
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">Posting Frequency</h4>
-                      <p className="text-sm text-muted-foreground">{contentSuggestions.strategy?.postingFrequency}</p>
+                      <p className="text-sm text-muted-foreground">{contentSuggestions.strategy?.postingFrequency || 'Weekly posting recommended'}</p>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Best Posting Times</h4>
                       <div className="flex flex-wrap gap-2">
-                        {contentSuggestions.strategy?.bestTimes?.map((time, index) => (
+                        {(contentSuggestions.strategy?.bestTimes || ['Tuesday 10:00 AM', 'Wednesday 11:00 AM']).map((time, index) => (
                           <Badge key={index} variant="outline">{time}</Badge>
                         ))}
                       </div>
@@ -419,7 +469,7 @@ export const LinkedInContentSuggestions = ({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {contentSuggestions.strategy?.trendingTopics?.map((topic, index) => (
+                    {(contentSuggestions.strategy?.trendingTopics || ['Digital Transformation', 'Remote Work', 'AI Innovation']).map((topic, index) => (
                       <Badge key={index} variant="secondary">{topic}</Badge>
                     ))}
                   </div>

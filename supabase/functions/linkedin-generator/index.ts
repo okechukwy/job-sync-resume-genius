@@ -1,9 +1,110 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Helper function to extract JSON from markdown-wrapped responses
+const extractJsonFromResponse = (content: string): any => {
+  try {
+    // First, try parsing as-is
+    return JSON.parse(content);
+  } catch (e) {
+    // If that fails, try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1]);
+      } catch (e) {
+        console.error('Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Try to find JSON object pattern
+    const objectMatch = content.match(/\{[\s\S]*\}/);
+    if (objectMatch) {
+      try {
+        return JSON.parse(objectMatch[0]);
+      } catch (e) {
+        console.error('Failed to parse object pattern:', e);
+      }
+    }
+    
+    // Last resort: clean the content and try again
+    const cleaned = content
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .replace(/^\s+|\s+$/g, '')
+      .trim();
+    
+    try {
+      return JSON.parse(cleaned);
+    } catch (e) {
+      console.error('All JSON parsing attempts failed:', e);
+      throw new Error('Unable to parse JSON response from OpenAI');
+    }
+  }
+};
+
+// Helper function to validate and transform content suggestions data
+const validateContentSuggestions = (data: any): any => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid content suggestions data structure');
+  }
+
+  // Ensure ideas array exists and has proper structure
+  const ideas = Array.isArray(data.ideas) ? data.ideas : [];
+  const validatedIdeas = ideas.map((idea: any, index: number) => ({
+    title: idea.title || `Content Idea ${index + 1}`,
+    content: idea.content || 'Sample content description',
+    contentType: idea.contentType || 'Thought Leadership',
+    hashtags: Array.isArray(idea.hashtags) ? idea.hashtags : ['#LinkedIn', '#Professional'],
+    engagementStrategy: idea.engagementStrategy || 'Encourage engagement through questions',
+    difficulty: ['easy', 'medium', 'hard'].includes(idea.difficulty) ? idea.difficulty : 'medium',
+    engagement: ['high', 'medium', 'low'].includes(idea.engagement) ? idea.engagement : 'medium',
+    type: idea.type || 'insight'
+  }));
+
+  // Ensure calendar array exists and has proper structure
+  const calendar = Array.isArray(data.calendar) ? data.calendar : [];
+  const validatedCalendar = calendar.map((item: any, index: number) => ({
+    week: typeof item.week === 'number' ? item.week : index + 1,
+    contentType: item.contentType || item.type || 'Thought Leadership',
+    topic: item.topic || item.post || item.title || `Week ${index + 1} Content`,
+    status: item.status || 'planned',
+    optimalTiming: item.optimalTiming || item.time || 'Tuesday 10:00 AM',
+    expectedEngagement: item.expectedEngagement || 'medium'
+  }));
+
+  // Ensure strategy object exists and has proper structure
+  const strategy = data.strategy || {};
+  const validatedStrategy = {
+    postingFrequency: strategy.postingFrequency || strategy.contentStrategyRecommendations?.[0] || 'Weekly posting recommended',
+    bestTimes: Array.isArray(strategy.bestTimes) 
+      ? strategy.bestTimes 
+      : Array.isArray(strategy.bestPostingTimes?.times) 
+      ? strategy.bestPostingTimes.times 
+      : ['Tuesday 10:00 AM', 'Wednesday 11:00 AM', 'Thursday 10:30 AM'],
+    contentMix: strategy.contentMix || strategy.contentMixRecommendations || {
+      'thought-leadership': 30,
+      'industry-insights': 25,
+      'career-tips': 20,
+      'personal-stories': 15,
+      'polls-questions': 10
+    },
+    trendingTopics: Array.isArray(strategy.trendingTopics) 
+      ? strategy.trendingTopics 
+      : ['AI and Automation', 'Remote Work', 'Digital Transformation', 'Sustainability', 'Career Development']
+  };
+
+  return {
+    ideas: validatedIdeas,
+    calendar: validatedCalendar,
+    strategy: validatedStrategy
+  };
 };
 
 serve(async (req) => {
@@ -79,26 +180,46 @@ Return only the summary text, no additional formatting or quotes.`;
         break;
 
       case 'content-suggestions':
-        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. Generate a comprehensive content strategy with 8-10 strategic post ideas that:
-- Are highly relevant to current industry trends (${new Date().getFullYear()})
-- Encourage maximum engagement (likes, comments, shares, saves)
-- Mix content types: insights, tips, stories, questions, industry analysis, personal experiences
-- Are authentic and establish thought leadership
-- Include trending hashtags and optimal posting strategies
-- Target the user's specific audience and industry
-- Leverage psychological triggers for viral potential
-- Align with LinkedIn's algorithm preferences
-- Include practical engagement strategies
-- Consider current market conditions and remote work trends
+        systemPrompt = `You are a LinkedIn content strategist who creates viral, engaging content. Generate EXACTLY this JSON structure with NO markdown formatting or code blocks:
 
-Also provide:
-- A 4-week content calendar with optimal timing
-- Content strategy recommendations
-- Best posting times for their industry
-- Content mix recommendations
-- Trending topics to leverage
+{
+  "ideas": [
+    {
+      "title": "Content title here",
+      "content": "Content description here",
+      "contentType": "Thought Leadership",
+      "hashtags": ["#hashtag1", "#hashtag2"],
+      "engagementStrategy": "Strategy description",
+      "difficulty": "easy|medium|hard",
+      "engagement": "high|medium|low",
+      "type": "insight|tips|story|question"
+    }
+  ],
+  "calendar": [
+    {
+      "week": 1,
+      "contentType": "Thought Leadership",
+      "topic": "Topic description",
+      "status": "planned",
+      "optimalTiming": "Tuesday 10:00 AM",
+      "expectedEngagement": "high|medium|low"
+    }
+  ],
+  "strategy": {
+    "postingFrequency": "Frequency recommendation",
+    "bestTimes": ["Tuesday 10:00 AM", "Wednesday 11:00 AM"],
+    "contentMix": {
+      "thought-leadership": 30,
+      "industry-insights": 25,
+      "career-tips": 20,
+      "personal-stories": 15,
+      "polls-questions": 10
+    },
+    "trendingTopics": ["Topic 1", "Topic 2", "Topic 3"]
+  }
+}
 
-Return a JSON object with "ideas", "calendar", and "strategy" fields. Each idea should have: "title", "content", "contentType", "hashtags", "engagementStrategy", "difficulty", "engagement", and "type".`;
+Generate 8-10 content ideas that are highly relevant to current industry trends and encourage maximum engagement. Include a 4-week content calendar and comprehensive strategy recommendations.`;
         
         userPrompt = `Generate comprehensive LinkedIn content strategy for: ${JSON.stringify(data)}.
         Industry: ${data.industry || 'business'}
@@ -110,7 +231,7 @@ Return a JSON object with "ideas", "calendar", and "strategy" fields. Each idea 
         Achievements to leverage: ${data.achievements?.join(', ') || 'career accomplishments'}
         Target audience: ${data.industry} professionals, recruiters, potential clients, industry leaders
         Current trends to leverage: AI transformation, remote work, sustainability, digital innovation, economic changes`;
-        maxTokens = 2000;
+        maxTokens = 2500;
         break;
 
       case 'keyword-trends':
@@ -261,14 +382,31 @@ Return a JSON object with "overallScore", "strengths", "improvementAreas", "keyw
     // For JSON responses, parse and return structured data
     if (['headline', 'content-suggestions', 'skills-analysis', 'profile-analysis', 'keyword-trends'].includes(type)) {
       try {
-        const parsedContent = JSON.parse(generatedContent);
+        const parsedContent = extractJsonFromResponse(generatedContent);
+        
+        // Special handling for content-suggestions to ensure proper structure
+        if (type === 'content-suggestions') {
+          const validatedContent = validateContentSuggestions(parsedContent);
+          console.log('Validated content suggestions:', JSON.stringify(validatedContent, null, 2));
+          return new Response(JSON.stringify({ content: validatedContent }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         return new Response(JSON.stringify({ content: parsedContent }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (parseError) {
         console.error('Failed to parse JSON response:', parseError);
-        // Fallback: return as text if JSON parsing fails
-        return new Response(JSON.stringify({ content: generatedContent }), {
+        console.error('Raw content:', generatedContent);
+        
+        // Return error with details for debugging
+        return new Response(JSON.stringify({ 
+          error: 'Failed to parse AI response',
+          details: parseError.message,
+          rawContent: generatedContent.substring(0, 500) + '...' // Truncate for logging
+        }), {
+          status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
