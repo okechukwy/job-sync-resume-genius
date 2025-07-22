@@ -92,10 +92,10 @@ export const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar className="border-r border-border">
-      <SidebarHeader className="p-4">
+    <Sidebar className="sidebar-glass">
+      <SidebarHeader className="sidebar-header-glass p-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg glass-card">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
           {state === "expanded" && (
@@ -112,7 +112,14 @@ export const DashboardSidebar = () => {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
+              <SidebarMenuButton 
+                asChild 
+                isActive={isActive("/dashboard")}
+                className={`
+                  smooth-transition
+                  ${isActive("/dashboard") ? "sidebar-menu-item-active" : "sidebar-menu-item-hover"}
+                `}
+              >
                 <NavLink to="/dashboard" className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   <span>Dashboard</span>
@@ -125,12 +132,21 @@ export const DashboardSidebar = () => {
         {/* Navigation Groups */}
         {navigationItems.slice(1).map((group, index) => (
           <SidebarGroup key={index}>
-            <SidebarGroupLabel>{group.groupLabel}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-sidebar-foreground/70 font-medium">
+              {group.groupLabel}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items?.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive(item.url)}
+                      className={`
+                        smooth-transition
+                        ${isActive(item.url) ? "sidebar-menu-item-active" : "sidebar-menu-item-hover"}
+                      `}
+                    >
                       <NavLink to={item.url} className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
