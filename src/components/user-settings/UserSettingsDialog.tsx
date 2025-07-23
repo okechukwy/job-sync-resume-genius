@@ -1,11 +1,15 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileSettings } from "./ProfileSettings";
-import { PreferencesSettings } from "./PreferencesSettings";
-import { AccountSecurity } from "./AccountSecurity";
-import { HelpSupport } from "./HelpSupport";
-import { User, Settings, Shield, HelpCircle } from "lucide-react";
+import { PersonalInfo } from "./PersonalInfo";
+import { ProfessionalInfo } from "./ProfessionalInfo";
+import { PrivacySettings } from "./PrivacySettings";
+import { ApplicationSettings } from "./ApplicationSettings";
+import { NotificationSettings } from "./NotificationSettings";
+import { JobSearchSettings } from "./JobSearchSettings";
+import { SecuritySettings } from "./SecuritySettings";
+import { HelpSettings } from "./HelpSettings";
+import { User, Briefcase, Shield, Settings, Bell, Search, Lock, HelpCircle } from "lucide-react";
 
 interface UserSettingsDialogProps {
   open: boolean;
@@ -13,48 +17,80 @@ interface UserSettingsDialogProps {
   defaultTab?: string;
 }
 
-export const UserSettingsDialog = ({ open, onOpenChange, defaultTab = "profile" }: UserSettingsDialogProps) => {
+export const UserSettingsDialog = ({ open, onOpenChange, defaultTab = "personal" }: UserSettingsDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Profile
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
+            <TabsTrigger value="personal" className="flex items-center gap-1 text-xs">
+              <User className="w-3 h-3" />
+              <span className="hidden sm:inline">Personal</span>
             </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Preferences
+            <TabsTrigger value="professional" className="flex items-center gap-1 text-xs">
+              <Briefcase className="w-3 h-3" />
+              <span className="hidden sm:inline">Professional</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              Security
+            <TabsTrigger value="privacy" className="flex items-center gap-1 text-xs">
+              <Shield className="w-3 h-3" />
+              <span className="hidden sm:inline">Privacy</span>
             </TabsTrigger>
-            <TabsTrigger value="help" className="flex items-center gap-2">
-              <HelpCircle className="w-4 h-4" />
-              Help
+            <TabsTrigger value="application" className="flex items-center gap-1 text-xs">
+              <Settings className="w-3 h-3" />
+              <span className="hidden sm:inline">App</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs">
+              <Bell className="w-3 h-3" />
+              <span className="hidden sm:inline">Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger value="job-search" className="flex items-center gap-1 text-xs">
+              <Search className="w-3 h-3" />
+              <span className="hidden sm:inline">Job Search</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-1 text-xs">
+              <Lock className="w-3 h-3" />
+              <span className="hidden sm:inline">Security</span>
+            </TabsTrigger>
+            <TabsTrigger value="help" className="flex items-center gap-1 text-xs">
+              <HelpCircle className="w-3 h-3" />
+              <span className="hidden sm:inline">Help</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-6">
-            <ProfileSettings />
+          <TabsContent value="personal" className="mt-6">
+            <PersonalInfo />
           </TabsContent>
 
-          <TabsContent value="preferences" className="mt-6">
-            <PreferencesSettings />
+          <TabsContent value="professional" className="mt-6">
+            <ProfessionalInfo />
+          </TabsContent>
+
+          <TabsContent value="privacy" className="mt-6">
+            <PrivacySettings />
+          </TabsContent>
+
+          <TabsContent value="application" className="mt-6">
+            <ApplicationSettings />
+          </TabsContent>
+
+          <TabsContent value="notifications" className="mt-6">
+            <NotificationSettings />
+          </TabsContent>
+
+          <TabsContent value="job-search" className="mt-6">
+            <JobSearchSettings />
           </TabsContent>
 
           <TabsContent value="security" className="mt-6">
-            <AccountSecurity />
+            <SecuritySettings />
           </TabsContent>
 
           <TabsContent value="help" className="mt-6">
-            <HelpSupport />
+            <HelpSettings />
           </TabsContent>
         </Tabs>
       </DialogContent>
