@@ -92,6 +92,7 @@ const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
                 data={resumeData}
                 template={selectedTemplate}
                 className="h-full min-h-[600px]"
+                onDataUpdate={handleDataUpdate}
               />
             </CardContent>
           </Card>
@@ -105,6 +106,7 @@ const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
                 data={resumeData}
                 template={selectedTemplate}
                 className="h-96"
+                onDataUpdate={handleDataUpdate}
               />
             </CardContent>
           </Card>
