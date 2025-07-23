@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -71,19 +72,19 @@ const FeaturesSection = () => {
             const getFeatureLink = (title: string) => {
               switch (title) {
                 case "Smart Resume Builder":
-                  return "/get-started";
+                  return "/dashboard/resume/builder";
                 case "Job Description Matching":
-                  return "/job-matching";
+                  return "/dashboard/job-search/matching";
                 case "ATS Score Optimization":
-                  return "/ats-analysis";
+                  return "/dashboard/resume/ats-analysis";
                 case "AI Cover Letter Generator":
-                  return "/cover-letter";
+                  return "/dashboard/job-search/cover-letter";
                 case "Performance Tracking":
-                  return "/performance";
+                  return "/dashboard/job-search/performance";
                 case "Version Management":
-                  return "/versions";
+                  return "/dashboard/resume/versions";
                 default:
-                  return "/get-started";
+                  return "/dashboard/resume/builder";
               }
             };
 

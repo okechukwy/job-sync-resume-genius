@@ -1,3 +1,4 @@
+
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -30,10 +31,10 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/get-started" className="hover:text-primary transition-colors">Resume Builder</Link></li>
-                <li><Link to="/ats-analysis" className="hover:text-primary transition-colors">ATS Optimization</Link></li>
-                <li><Link to="/cover-letter" className="hover:text-primary transition-colors">Cover Letters</Link></li>
-                <li><Link to="/templates" className="hover:text-primary transition-colors">Templates</Link></li>
+                <li><Link to="/dashboard/resume/builder" className="hover:text-primary transition-colors">Resume Builder</Link></li>
+                <li><Link to="/dashboard/resume/ats-analysis" className="hover:text-primary transition-colors">ATS Optimization</Link></li>
+                <li><Link to="/dashboard/job-search/cover-letter" className="hover:text-primary transition-colors">Cover Letters</Link></li>
+                <li><Link to="/dashboard/resume/templates" className="hover:text-primary transition-colors">Templates</Link></li>
               </ul>
             </div>
             
@@ -50,9 +51,9 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/help-center" className="hover:text-primary transition-colors">Help Center</Link></li>
-                <li><Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link to="/dashboard/help" className="hover:text-primary transition-colors">Help Center</Link></li>
+                <li><Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
                 <li><Link to="/gdpr" className="hover:text-primary transition-colors">GDPR</Link></li>
               </ul>
             </div>

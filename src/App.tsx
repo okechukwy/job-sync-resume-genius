@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -90,6 +91,13 @@ function App() {
               <Route path="/ai-interview-prep" element={<Navigate to="/dashboard/career/interview-prep" replace />} />
               <Route path="/linkedin-optimization" element={<Navigate to="/dashboard/career/linkedin" replace />} />
               <Route path="/performance-tracking" element={<Navigate to="/dashboard/job-search/performance" replace />} />
+              
+              {/* Additional feature redirects */}
+              <Route path="/job-matching" element={<Navigate to="/dashboard/job-search/matching" replace />} />
+              <Route path="/performance" element={<Navigate to="/dashboard/job-search/performance" replace />} />
+              <Route path="/versions" element={<Navigate to="/dashboard/resume/versions" replace />} />
+              <Route path="/cover-letter" element={<Navigate to="/dashboard/job-search/cover-letter" replace />} />
+              <Route path="/ats-analysis" element={<Navigate to="/dashboard/resume/ats-analysis" replace />} />
 
               {/* Protected dashboard routes */}
               <Route path="/dashboard" element={
