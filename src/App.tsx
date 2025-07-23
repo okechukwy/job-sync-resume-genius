@@ -18,6 +18,7 @@ import AIInterviewPrep from "./pages/AIInterviewPrep";
 import LinkedInOptimization from "./pages/LinkedInOptimization";
 import PerformanceTracking from "./pages/PerformanceTracking";
 import VersionManagement from "./pages/VersionManagement";
+import ResumePreview from "./pages/ResumePreview";
 import JobMatching from "./pages/JobMatching";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import ATSAnalysis from "./pages/ATSAnalysis";
@@ -112,6 +113,7 @@ function App() {
                 <Route path="resume/templates" element={<Templates />} />
                 <Route path="resume/ats-analysis" element={<ATSAnalysis />} />
                 <Route path="resume/versions" element={<VersionManagement />} />
+                <Route path="resume/preview/:id" element={<ResumePreview />} />
                 
                 {/* Job Search */}
                 <Route path="job-search/matching" element={<JobMatching />} />

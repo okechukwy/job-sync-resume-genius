@@ -83,7 +83,7 @@ const VersionManagement = () => {
   };
 
   const handleView = (version: any) => {
-    navigate(`/dashboard/resume/builder?preview=true&resumeId=${version.id}`);
+    navigate(`/dashboard/resume/preview/${version.id}`);
   };
 
   const handleUse = (version: any) => {
