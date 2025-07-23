@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -34,12 +35,32 @@ export const DashboardHeader = () => {
     setSettingsOpen(true);
   };
 
+  // Define routes that actually exist in the application
+  const existingRoutes = new Set([
+    '/dashboard',
+    '/dashboard/resume/builder',
+    '/dashboard/resume/templates',
+    '/dashboard/resume/ats-analysis',
+    '/dashboard/resume/versions',
+    '/dashboard/job-search/matching',
+    '/dashboard/job-search/performance',
+    '/dashboard/job-search/cover-letter',
+    '/dashboard/career/interview-prep',
+    '/dashboard/career/linkedin',
+    '/dashboard/career/branding',
+    '/dashboard/career/coaching',
+    '/dashboard/resources',
+    '/dashboard/support',
+    '/dashboard/help',
+    '/dashboard/exports'
+  ]);
+
   const generateBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const breadcrumbs = [];
 
     if (pathSegments.length === 1 && pathSegments[0] === 'dashboard') {
-      return [{ label: 'Dashboard', href: '/dashboard', isActive: true }];
+      return [{ label: 'Dashboard', href: '/dashboard', isActive: true, isClickable: true }];
     }
 
     // Build breadcrumb trail
@@ -66,10 +87,14 @@ export const DashboardHeader = () => {
       else if (segment === 'branding') label = 'Personal Branding';
       else if (segment === 'coaching') label = 'Career Coaching';
 
+      const isActive = index === pathSegments.length - 1;
+      const isClickable = existingRoutes.has(currentPath);
+
       breadcrumbs.push({
         label,
         href: currentPath,
-        isActive: index === pathSegments.length - 1
+        isActive,
+        isClickable: isClickable || isActive // Active page is always "clickable" (but rendered as BreadcrumbPage)
       });
     });
 
@@ -95,8 +120,10 @@ export const DashboardHeader = () => {
                     {index > 0 && <BreadcrumbSeparator />}
                     {crumb.isActive ? (
                       <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                    ) : (
+                    ) : crumb.isClickable ? (
                       <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                    ) : (
+                      <span className="text-muted-foreground">{crumb.label}</span>
                     )}
                   </BreadcrumbItem>
                 ))}
