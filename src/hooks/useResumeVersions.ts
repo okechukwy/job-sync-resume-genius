@@ -53,29 +53,48 @@ export const useResumeVersions = () => {
 
       if (resumeError) throw resumeError;
 
-      // Fetch metrics for each version
+      // Fetch metrics for each version with proper error handling
       const versionsWithMetrics = await Promise.all(
         (resumeData || []).map(async (resume) => {
-          const { data: metricsData, error: metricsError } = await supabase
-            .rpc('get_resume_version_metrics', { resume_id: resume.id });
+          try {
+            const { data: metricsData, error: metricsError } = await supabase
+              .rpc('get_resume_version_metrics', { resume_id: resume.id });
 
-          if (metricsError) {
-            console.warn('Error fetching metrics for resume', resume.id, metricsError);
-          }
-
-          return {
-            ...resume,
-            metrics: metricsData?.[0] || {
-              total_applications: 0,
-              responses_received: 0,
-              interviews_scheduled: 0,
-              offers_received: 0,
-              avg_ats_score: 0,
-              response_rate: 0,
-              interview_rate: 0,
-              offer_rate: 0,
+            if (metricsError) {
+              console.warn('Error fetching metrics for resume', resume.id, metricsError);
+              throw metricsError;
             }
-          };
+
+            return {
+              ...resume,
+              metrics: metricsData?.[0] || {
+                total_applications: 0,
+                responses_received: 0,
+                interviews_scheduled: 0,
+                offers_received: 0,
+                avg_ats_score: 0,
+                response_rate: 0,
+                interview_rate: 0,
+                offer_rate: 0,
+              }
+            };
+          } catch (error) {
+            console.warn('Failed to fetch metrics for resume', resume.id, error);
+            // Return resume with default metrics if fetching fails
+            return {
+              ...resume,
+              metrics: {
+                total_applications: 0,
+                responses_received: 0,
+                interviews_scheduled: 0,
+                offers_received: 0,
+                avg_ats_score: 0,
+                response_rate: 0,
+                interview_rate: 0,
+                offer_rate: 0,
+              }
+            };
+          }
         })
       );
 

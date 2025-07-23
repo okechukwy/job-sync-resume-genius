@@ -40,15 +40,15 @@ const VersionManagement = () => {
     return 'text-destructive';
   };
 
-  const formatMetricValue = (value: number | undefined, isPercentage = false) => {
-    if (value === undefined || value === 0) {
+  const formatMetricValue = (value: number | undefined | null, isPercentage = false) => {
+    if (value === undefined || value === null || value === 0) {
       return isPercentage ? "0%" : "0";
     }
     return isPercentage ? `${Math.round(value)}%` : value.toString();
   };
 
-  const getMetricDisplay = (value: number | undefined, isPercentage = false) => {
-    if (value === undefined || value === 0) {
+  const getMetricDisplay = (value: number | undefined | null, isPercentage = false) => {
+    if (value === undefined || value === null || value === 0) {
       return {
         value: isPercentage ? "0%" : "0",
         className: "text-muted-foreground"
