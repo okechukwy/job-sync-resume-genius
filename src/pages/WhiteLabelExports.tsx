@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Package, 
   Download, 
@@ -30,6 +31,7 @@ import {
   Briefcase
 } from "lucide-react";
 import { toast } from "sonner";
+import { useWhiteLabelConfig, useExportJobs, useExportHistory, useWhiteLabelStats } from '@/hooks/useWhiteLabel';
 
 const whiteLabelSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -50,7 +52,12 @@ type WhiteLabelData = z.infer<typeof whiteLabelSchema>;
 const WhiteLabelExports = () => {
   const [activeTab, setActiveTab] = useState("branding");
   const [previewMode, setPreviewMode] = useState(false);
-  const [exportQueue, setExportQueue] = useState<any[]>([]);
+  
+  // Use dynamic data hooks
+  const { activeConfig, configs, loading: configLoading, saveConfig, setActive } = useWhiteLabelConfig();
+  const { jobs, loading: jobsLoading, createJob, updateJob } = useExportJobs();
+  const { history, loading: historyLoading } = useExportHistory();
+  const { stats, loading: statsLoading } = useWhiteLabelStats();
 
   const form = useForm<WhiteLabelData>({
     resolver: zodResolver(whiteLabelSchema),
@@ -127,59 +134,59 @@ const WhiteLabelExports = () => {
     }
   ];
 
-  const exportHistory = [
-    {
-      id: 1,
-      clientName: "John Smith",
-      format: "PDF",
-      timestamp: "2024-01-15 14:30",
-      status: "completed",
-      downloads: 3
-    },
-    {
-      id: 2,
-      clientName: "Sarah Johnson",
-      format: "Web Page",
-      timestamp: "2024-01-15 12:15",
-      status: "processing",
-      downloads: 0
-    },
-    {
-      id: 3,
-      clientName: "Mike Chen",
-      format: "Word Document",
-      timestamp: "2024-01-15 09:45",
-      status: "completed",
-      downloads: 1
+  // Load active config into form when available
+  useEffect(() => {
+    if (activeConfig) {
+      form.setValue("companyName", activeConfig.company_name || "");
+      form.setValue("primaryColor", activeConfig.primary_color || "#3B82F6");
+      form.setValue("secondaryColor", activeConfig.secondary_color || "#64748B");
+      form.setValue("brandFont", activeConfig.font_family || "inter");
+      form.setValue("contactEmail", activeConfig.email_signature || "");
+      form.setValue("footerText", activeConfig.footer_text || "");
+      form.setValue("watermarkType", activeConfig.watermark_enabled ? "subtle" : "none");
     }
-  ];
+  }, [activeConfig, form]);
 
-  const onSubmit = (data: WhiteLabelData) => {
-    toast.success("White-label configuration saved!");
-    console.log("White-label config:", data);
+  const onSubmit = async (data: WhiteLabelData) => {
+    const configData = {
+      config_name: "Default Config",
+      company_name: data.companyName,
+      primary_color: data.primaryColor,
+      secondary_color: data.secondaryColor,
+      font_family: data.brandFont,
+      footer_text: data.footerText,
+      watermark_enabled: data.watermarkType !== "none",
+      watermark_text: data.watermarkType === "prominent" ? data.companyName : "",
+      email_signature: data.contactEmail,
+      is_active: true,
+    };
+
+    const saved = await saveConfig(configData);
+    if (saved) {
+      toast.success("White-label configuration saved!");
+    }
   };
 
-  const handleExportResume = (format: string) => {
-    const newExport = {
-      id: Date.now(),
-      format,
-      timestamp: new Date().toISOString(),
-      status: "processing"
+  const handleExportResume = async (format: string) => {
+    const jobData = {
+      export_format: format.toLowerCase(),
+      status: 'pending' as const,
+      metadata: { format, timestamp: new Date().toISOString() },
     };
-    setExportQueue(prev => [...prev, newExport]);
-    toast.success(`${format} export started!`);
-    
-    // Simulate processing
-    setTimeout(() => {
-      setExportQueue(prev => 
-        prev.map(item => 
-          item.id === newExport.id 
-            ? { ...item, status: "completed" }
-            : item
-        )
-      );
-      toast.success(`${format} export ready for download!`);
-    }, 3000);
+
+    const job = await createJob(jobData);
+    if (job) {
+      toast.success(`${format} export started!`);
+      
+      // Simulate processing
+      setTimeout(async () => {
+        await updateJob(job.id!, { 
+          status: 'completed',
+          completed_at: new Date().toISOString() 
+        });
+        toast.success(`${format} export ready for download!`);
+      }, 3000);
+    }
   };
 
   const applyPreset = (preset: any) => {
@@ -209,13 +216,21 @@ const WhiteLabelExports = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">127</div>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-2" />
+              ) : (
+                <div className="text-2xl font-bold text-primary">{stats.total_exports}</div>
+              )}
               <div className="text-sm text-muted-foreground">Total Exports</div>
             </CardContent>
           </Card>
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">8</div>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-2" />
+              ) : (
+                <div className="text-2xl font-bold text-primary">{stats.active_clients}</div>
+              )}
               <div className="text-sm text-muted-foreground">Active Clients</div>
             </CardContent>
           </Card>
@@ -227,7 +242,11 @@ const WhiteLabelExports = () => {
           </Card>
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">99.2%</div>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-2" />
+              ) : (
+                <div className="text-2xl font-bold text-primary">{stats.success_rate}%</div>
+              )}
               <div className="text-sm text-muted-foreground">Success Rate</div>
             </CardContent>
           </Card>
@@ -498,42 +517,53 @@ const WhiteLabelExports = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-semibold">Export Center</h3>
-                <Badge variant="outline">{exportQueue.length} in queue</Badge>
+                <Badge variant="outline">
+                  {jobsLoading ? "Loading..." : `${jobs.filter(job => job.status === 'pending' || job.status === 'processing').length} in queue`}
+                </Badge>
               </div>
 
               {/* Export Queue */}
-              {exportQueue.length > 0 && (
+              {jobs.filter(job => job.status === 'pending' || job.status === 'processing').length > 0 && (
                 <Card className="glass-card">
                   <CardHeader>
                     <CardTitle>Current Exports</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {exportQueue.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded">
-                              <FileText className="h-4 w-4" />
+                    {jobsLoading ? (
+                      <div className="space-y-3">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {jobs.filter(job => job.status === 'pending' || job.status === 'processing').map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded">
+                                <FileText className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{item.export_format} Export</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {item.created_at ? new Date(item.created_at).toLocaleString() : ''}
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="font-medium">{item.format} Export</div>
-                              <div className="text-xs text-muted-foreground">{item.timestamp}</div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={item.status === "completed" ? "default" : "secondary"}>
+                                {item.status}
+                              </Badge>
+                              {item.status === "completed" && (
+                                <Button size="sm">
+                                  <Download className="h-3 w-3 mr-1" />
+                                  Download
+                                </Button>
+                              )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={item.status === "completed" ? "default" : "secondary"}>
-                              {item.status}
-                            </Badge>
-                            {item.status === "completed" && (
-                              <Button size="sm">
-                                <Download className="h-3 w-3 mr-1" />
-                                Download
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -598,34 +628,46 @@ const WhiteLabelExports = () => {
                   <CardTitle>Recent Exports</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {exportHistory.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded">
-                            <Briefcase className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{item.clientName}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {item.format} • {item.timestamp}
+                  {historyLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {history.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No export history yet. Start your first export to see it here.
+                        </div>
+                      ) : (
+                        history.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded">
+                                <Briefcase className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{item.client_name || 'Unknown Client'}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {item.format} • {item.created_at ? new Date(item.created_at).toLocaleString() : ''}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="default">completed</Badge>
+                              <div className="text-xs text-muted-foreground">
+                                {item.download_count} downloads
+                              </div>
+                              <Button size="sm" variant="outline">
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={item.status === "completed" ? "default" : "secondary"}>
-                            {item.status}
-                          </Badge>
-                          <div className="text-xs text-muted-foreground">
-                            {item.downloads} downloads
-                          </div>
-                          <Button size="sm" variant="outline">
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

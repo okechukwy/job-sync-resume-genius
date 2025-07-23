@@ -145,6 +145,106 @@ export type Database = {
         }
         Relationships: []
       }
+      export_history: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          download_count: number | null
+          export_type: string
+          file_size: number | null
+          format: string
+          id: string
+          job_id: string | null
+          last_downloaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          download_count?: number | null
+          export_type: string
+          file_size?: number | null
+          format: string
+          id?: string
+          job_id?: string | null
+          last_downloaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          download_count?: number | null
+          export_type?: string
+          file_size?: number | null
+          format?: string
+          id?: string
+          job_id?: string | null
+          last_downloaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "export_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      export_jobs: {
+        Row: {
+          client_name: string | null
+          completed_at: string | null
+          config_id: string | null
+          created_at: string
+          error_message: string | null
+          export_format: string
+          file_url: string | null
+          id: string
+          metadata: Json | null
+          resume_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          completed_at?: string | null
+          config_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_format: string
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          resume_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          client_name?: string | null
+          completed_at?: string | null
+          config_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_format?: string
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          resume_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_jobs_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "white_label_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_sessions: {
         Row: {
           completed: boolean | null
@@ -518,6 +618,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      white_label_configs: {
+        Row: {
+          accent_color: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          config_name: string
+          created_at: string
+          email_signature: string | null
+          font_family: string | null
+          footer_text: string | null
+          id: string
+          is_active: boolean | null
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+          user_id: string
+          watermark_enabled: boolean | null
+          watermark_text: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          config_name?: string
+          created_at?: string
+          email_signature?: string | null
+          font_family?: string | null
+          footer_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+          user_id: string
+          watermark_enabled?: boolean | null
+          watermark_text?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          config_name?: string
+          created_at?: string
+          email_signature?: string | null
+          font_family?: string | null
+          footer_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+          user_id?: string
+          watermark_enabled?: boolean | null
+          watermark_text?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
