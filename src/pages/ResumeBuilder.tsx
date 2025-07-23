@@ -4,8 +4,13 @@ import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { AnalysisStep } from "@/components/resume-builder";
 import UnifiedTemplateStep from "@/components/resume-builder/UnifiedTemplateStep";
 import { FullWidthLayout } from "@/components/common/FullWidthLayout";
+import { useSearchParams } from "react-router-dom";
 
 const ResumeBuilder = () => {
+  const [searchParams] = useSearchParams();
+  const resumeId = searchParams.get('resumeId');
+  const isPreview = searchParams.get('preview') === 'true';
+  
   const {
     currentStep,
     selectedTemplate,
@@ -29,7 +34,9 @@ const ResumeBuilder = () => {
       <FullWidthLayout innerPadding={false}>
         <ResumeSteps 
           selectedTemplate={selectedTemplate} 
-          onBack={() => handleBackToStep('templates')} 
+          onBack={() => handleBackToStep('templates')}
+          resumeId={resumeId}
+          isPreview={isPreview}
         />
       </FullWidthLayout>
     );

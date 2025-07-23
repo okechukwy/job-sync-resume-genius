@@ -8,7 +8,7 @@ import { resumeService } from "@/services/resumeService";
 
 export type { ResumeData } from "@/types/resumeTypes";
 
-export const useResumeSteps = () => {
+export const useResumeSteps = (resumeId?: string | null) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formValidation, setFormValidation] = useState<FormValidationState>(getInitialValidationState());
   const [resumeData, setResumeData] = useState<ResumeData>(getInitialResumeData());
@@ -17,12 +17,27 @@ export const useResumeSteps = () => {
 
   // Load existing resume data on mount
   useEffect(() => {
-    const loadActiveResume = async () => {
+    const loadResume = async () => {
       try {
-        const activeResume = await resumeService.getActiveResume();
-        if (activeResume) {
-          setResumeData(activeResume.data);
-          setCurrentResumeId(activeResume.id);
+        let targetResume;
+        
+        if (resumeId) {
+          // Load specific resume by ID - we need to modify this to match the return format
+          try {
+            const resumeData = await resumeService.loadResume(resumeId);
+            targetResume = { id: resumeId, data: resumeData };
+          } catch (error) {
+            toast.error("Resume not found, loading default resume");
+            targetResume = await resumeService.getActiveResume();
+          }
+        } else {
+          // Load active resume
+          targetResume = await resumeService.getActiveResume();
+        }
+        
+        if (targetResume) {
+          setResumeData(targetResume.data);
+          setCurrentResumeId(targetResume.id);
           toast.success("Resume loaded successfully!");
         }
       } catch (error) {
@@ -33,8 +48,8 @@ export const useResumeSteps = () => {
       }
     };
 
-    loadActiveResume();
-  }, []);
+    loadResume();
+  }, [resumeId]);
 
   const handleNext = () => {
     if (!isStepValid(currentStep, formValidation)) {

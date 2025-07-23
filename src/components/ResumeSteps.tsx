@@ -9,15 +9,19 @@ import NavigationButtons from "@/components/resume-steps/NavigationButtons";
 import StepContent from "@/components/resume-steps/StepContent";
 import { LivePreview } from "@/components/live-preview";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { FormValidationState } from "@/types/resumeTypes";
 
 interface ResumeStepsProps {
   selectedTemplate: string;
   onBack: () => void;
+  resumeId?: string | null;
+  isPreview?: boolean;
 }
 
-const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
+const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeStepsProps) => {
   const {
     currentStep,
+    formValidation,
     resumeData,
     steps,
     progress,
@@ -26,7 +30,7 @@ const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
     handlePrevious,
     handleDataUpdate,
     handleValidationChange,
-  } = useResumeSteps();
+  } = useResumeSteps(resumeId);
 
   if (isLoading) {
     return (
@@ -112,12 +116,14 @@ const ResumeSteps = ({ selectedTemplate, onBack }: ResumeStepsProps) => {
           </Card>
         </div>
 
-        {/* Navigation Buttons */}
-        <NavigationButtons
-          currentStep={currentStep}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-        />
+        {/* Navigation Buttons - only show if not in preview mode */}
+        {!isPreview && (
+          <NavigationButtons
+            currentStep={currentStep}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+          />
+        )}
       </div>
     </div>
   );

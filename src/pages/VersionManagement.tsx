@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreateVersionDialog } from "@/components/version-management/CreateVersionDialog";
 import { getTemplateDisplayName, getTemplateIcon } from "@/utils/templateUtils";
+import { downloadFile } from "@/utils/downloadUtils";
 
 const VersionManagement = () => {
   const {
@@ -27,6 +29,7 @@ const VersionManagement = () => {
 
   const [createVersionDialogOpen, setCreateVersionDialogOpen] = useState(false);
   const [isCreatingVersion, setIsCreatingVersion] = useState(false);
+  const navigate = useNavigate();
 
   const getStatusColor = (isActive: boolean, archivedAt?: string) => {
     if (archivedAt) return 'bg-secondary text-secondary-foreground';
@@ -60,8 +63,31 @@ const VersionManagement = () => {
     };
   };
 
-  const handleDownload = (version: any) => {
-    toast.success(`Downloaded ${version.title}`);
+  const handleDownload = async (version: any) => {
+    try {
+      toast.info(`Preparing download for ${version.title}...`);
+      // Use the downloadFile utility to generate and download PDF
+      await downloadFile(
+        JSON.stringify(version.data || {}), 
+        `${version.title}-v${version.version_number}`, 
+        'pdf',
+        false,
+        'resume',
+        version.template_id
+      );
+      toast.success(`Downloaded ${version.title} successfully!`);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error(`Failed to download ${version.title}`);
+    }
+  };
+
+  const handleView = (version: any) => {
+    navigate(`/dashboard/resume/builder?preview=true&resumeId=${version.id}`);
+  };
+
+  const handleUse = (version: any) => {
+    navigate(`/dashboard/resume/builder?resumeId=${version.id}`);
   };
 
   const handleDuplicate = async (version: any) => {
@@ -254,7 +280,7 @@ const VersionManagement = () => {
                             <Download className="h-4 w-4 mr-2" />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleView(version)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Preview
                           </DropdownMenuItem>
@@ -310,11 +336,11 @@ const VersionManagement = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleView(version)}>
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="hero" size="sm" className="flex-1">
+                      <Button variant="hero" size="sm" className="flex-1" onClick={() => handleUse(version)}>
                         <Download className="h-4 w-4 mr-2" />
                         Use
                       </Button>
@@ -383,7 +409,7 @@ const VersionManagement = () => {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => handleView(version)}>
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => handleDownload(version)}>
