@@ -11,6 +11,7 @@ import { useResumeVersions } from "@/hooks/useResumeVersions";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreateVersionDialog } from "@/components/version-management/CreateVersionDialog";
+import { getTemplateDisplayName, getTemplateIcon } from "@/utils/templateUtils";
 
 const VersionManagement = () => {
   const {
@@ -37,6 +38,26 @@ const VersionManagement = () => {
     if (rate >= 70) return 'text-success';
     if (rate >= 50) return 'text-warning';
     return 'text-destructive';
+  };
+
+  const formatMetricValue = (value: number | undefined, isPercentage = false) => {
+    if (value === undefined || value === 0) {
+      return isPercentage ? "0%" : "0";
+    }
+    return isPercentage ? `${Math.round(value)}%` : value.toString();
+  };
+
+  const getMetricDisplay = (value: number | undefined, isPercentage = false) => {
+    if (value === undefined || value === 0) {
+      return {
+        value: isPercentage ? "0%" : "0",
+        className: "text-muted-foreground"
+      };
+    }
+    return {
+      value: isPercentage ? `${Math.round(value)}%` : value.toString(),
+      className: isPercentage ? getSuccessRateColor(value) : "font-medium"
+    };
   };
 
   const handleDownload = (version: any) => {
@@ -79,8 +100,8 @@ const VersionManagement = () => {
   const totalVersions = versions.length;
   const totalActiveVersions = activeVersions.length;
   const totalApplications = versions.reduce((sum, v) => sum + (v.metrics?.total_applications || 0), 0);
-  const avgSuccessRate = versions.length > 0 
-    ? versions.reduce((sum, v) => sum + (v.metrics?.offer_rate || 0), 0) / versions.length 
+  const avgSuccessRate = activeVersions.length > 0 
+    ? activeVersions.reduce((sum, v) => sum + (v.metrics?.offer_rate || 0), 0) / activeVersions.length 
     : 0;
 
   return (
@@ -175,8 +196,8 @@ const VersionManagement = () => {
           </Card>
           <Card className="glass-card">
             <CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-primary">
-                {Math.round(avgSuccessRate)}%
+              <div className={`text-3xl font-bold ${getSuccessRateColor(avgSuccessRate)}`}>
+                {formatMetricValue(avgSuccessRate, true)}
               </div>
               <div className="text-sm text-muted-foreground">Avg Success Rate</div>
             </CardContent>
@@ -194,11 +215,22 @@ const VersionManagement = () => {
           </div>
           
           {activeVersions.length === 0 ? (
-            <Alert className="glass-card">
-              <AlertDescription>
-                No active resume versions found. Create your first resume to get started!
-              </AlertDescription>
-            </Alert>
+            <Card className="glass-card">
+              <CardContent className="pt-6 text-center">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="font-semibold mb-2">No Active Resume Versions</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {versions.length === 0 
+                    ? "Create your first resume to get started with version management."
+                    : "All your resumes are archived. Restore a version or create a new one to get started."
+                  }
+                </p>
+                <Button onClick={() => setCreateVersionDialogOpen(true)} disabled={versions.length === 0}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {versions.length === 0 ? "Create First Resume" : "Create New Version"}
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeVersions.map((version) => (
@@ -246,21 +278,28 @@ const VersionManagement = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Template:</span>
-                        <Badge variant="outline">{version.template_id}</Badge>
+                        <Badge variant="outline" className="max-w-[150px] truncate">
+                          <span className="mr-1">{getTemplateIcon(version.template_id)}</span>
+                          {getTemplateDisplayName(version.template_id)}
+                        </Badge>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Applications:</span>
-                        <span className="font-medium">{version.metrics?.total_applications || 0}</span>
+                        <span className={getMetricDisplay(version.metrics?.total_applications).className}>
+                          {getMetricDisplay(version.metrics?.total_applications).value}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Success Rate:</span>
-                        <span className={`font-medium ${getSuccessRateColor(version.metrics?.offer_rate || 0)}`}>
-                          {Math.round(version.metrics?.offer_rate || 0)}%
+                        <span className={getMetricDisplay(version.metrics?.offer_rate, true).className}>
+                          {getMetricDisplay(version.metrics?.offer_rate, true).value}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>ATS Score:</span>
-                        <span className="font-medium">{Math.round(version.metrics?.avg_ats_score || 0)}</span>
+                        <span className={getMetricDisplay(version.metrics?.avg_ats_score).className}>
+                          {getMetricDisplay(version.metrics?.avg_ats_score).value}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Last Modified:</span>
@@ -319,15 +358,22 @@ const VersionManagement = () => {
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <Badge variant="outline">{version.template_id}</Badge>
+                          <Badge variant="outline" className="max-w-[120px] truncate">
+                            <span className="mr-1">{getTemplateIcon(version.template_id)}</span>
+                            {getTemplateDisplayName(version.template_id)}
+                          </Badge>
                         </td>
                         <td className="py-4 px-6 text-muted-foreground">
                           {new Date(version.created_at).toLocaleDateString()}
                         </td>
-                        <td className="py-4 px-6 font-medium">{version.metrics?.total_applications || 0}</td>
                         <td className="py-4 px-6">
-                          <span className={`font-medium ${getSuccessRateColor(version.metrics?.offer_rate || 0)}`}>
-                            {Math.round(version.metrics?.offer_rate || 0)}%
+                          <span className={getMetricDisplay(version.metrics?.total_applications).className}>
+                            {getMetricDisplay(version.metrics?.total_applications).value}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={getMetricDisplay(version.metrics?.offer_rate, true).className}>
+                            {getMetricDisplay(version.metrics?.offer_rate, true).value}
                           </span>
                         </td>
                         <td className="py-4 px-6">

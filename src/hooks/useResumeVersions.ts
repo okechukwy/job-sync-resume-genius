@@ -45,12 +45,11 @@ export const useResumeVersions = () => {
     try {
       setLoading(true);
       
-      // Fetch all user resume versions
+      // Fetch ALL user resume versions (both active and archived)
       const { data: resumeData, error: resumeError } = await supabase
         .from('user_resumes')
         .select('*')
-        .eq('is_active', true)
-        .order('version_number', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (resumeError) throw resumeError;
 

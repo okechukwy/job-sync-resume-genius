@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ResumeVersion } from '@/hooks/useResumeVersions';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { FileText, Copy } from 'lucide-react';
+import { getTemplateDisplayName, getTemplateIcon } from '@/utils/templateUtils';
 
 interface CreateVersionDialogProps {
   open: boolean;
@@ -117,7 +118,10 @@ export const CreateVersionDialog: React.FC<CreateVersionDialogProps> = ({
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Template:</span>
-                      <Badge variant="outline">{selectedVersion.template_id}</Badge>
+                      <Badge variant="outline" className="max-w-[200px] truncate">
+                        <span className="mr-1">{getTemplateIcon(selectedVersion.template_id)}</span>
+                        {getTemplateDisplayName(selectedVersion.template_id)}
+                      </Badge>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Applications:</span>
