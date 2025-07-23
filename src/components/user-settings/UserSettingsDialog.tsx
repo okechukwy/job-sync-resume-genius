@@ -1,6 +1,6 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonalInfo } from "./PersonalInfo";
 import { ProfessionalInfo } from "./ProfessionalInfo";
 import { PrivacySettings } from "./PrivacySettings";
@@ -9,7 +9,8 @@ import { NotificationSettings } from "./NotificationSettings";
 import { JobSearchSettings } from "./JobSearchSettings";
 import { SecuritySettings } from "./SecuritySettings";
 import { HelpSettings } from "./HelpSettings";
-import { User, Briefcase, Shield, Settings, Bell, Search, Lock, HelpCircle } from "lucide-react";
+import { User, Briefcase, Shield, Settings, Bell, Search, Lock, HelpCircle, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 interface UserSettingsDialogProps {
   open: boolean;
@@ -17,110 +18,146 @@ interface UserSettingsDialogProps {
   defaultTab?: string;
 }
 
+const settingsCategories = [
+  {
+    id: "personal",
+    title: "Personal Info",
+    description: "Manage your basic profile information and preferences",
+    icon: User,
+    component: PersonalInfo
+  },
+  {
+    id: "professional",
+    title: "Professional",
+    description: "Update your career details and work experience",
+    icon: Briefcase,
+    component: ProfessionalInfo
+  },
+  {
+    id: "privacy",
+    title: "Privacy",
+    description: "Control your privacy settings and data visibility",
+    icon: Shield,
+    component: PrivacySettings
+  },
+  {
+    id: "application",
+    title: "Application",
+    description: "Customize app behavior and display preferences",
+    icon: Settings,
+    component: ApplicationSettings
+  },
+  {
+    id: "notifications",
+    title: "Notifications",
+    description: "Manage email alerts and notification preferences",
+    icon: Bell,
+    component: NotificationSettings
+  },
+  {
+    id: "job-search",
+    title: "Job Search",
+    description: "Configure job matching and search preferences",
+    icon: Search,
+    component: JobSearchSettings
+  },
+  {
+    id: "security",
+    title: "Security",
+    description: "Manage passwords, 2FA, and account security",
+    icon: Lock,
+    component: SecuritySettings
+  },
+  {
+    id: "help",
+    title: "Help & Support",
+    description: "Get assistance and access support resources",
+    icon: HelpCircle,
+    component: HelpSettings
+  }
+];
+
 export const UserSettingsDialog = ({ open, onOpenChange, defaultTab = "personal" }: UserSettingsDialogProps) => {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState(defaultTab);
+
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setActiveSection(categoryId);
+  };
+
+  const handleBackToGrid = () => {
+    setActiveSection(null);
+  };
+
+  const ActiveComponent = activeSection 
+    ? settingsCategories.find(cat => cat.id === activeSection)?.component 
+    : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[95vh] glass-card border-white/10 backdrop-blur-xl bg-gradient-to-br from-background/95 to-background/90 shadow-2xl animate-scale-in">
-        <DialogHeader className="pb-6 border-b border-white/10">
-          <DialogTitle className="typography-heading text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Settings
-          </DialogTitle>
+      <DialogContent className="max-w-5xl max-h-[90vh] bg-background/95 backdrop-blur-sm border shadow-xl animate-scale-in">
+        <DialogHeader className="pb-6 border-b">
+          <div className="flex items-center gap-4">
+            {activeSection && (
+              <button
+                onClick={handleBackToGrid}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronRight className="w-4 h-4 rotate-180" />
+                Back to Settings
+              </button>
+            )}
+            <DialogTitle className="text-2xl font-semibold">
+              {activeSection 
+                ? settingsCategories.find(cat => cat.id === activeSection)?.title 
+                : "Settings"
+              }
+            </DialogTitle>
+          </div>
         </DialogHeader>
         
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-2 bg-white/5 backdrop-blur-sm border border-white/10 p-2 rounded-xl mb-8">
-            <TabsTrigger 
-              value="personal" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Personal</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="professional" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Briefcase className="w-4 h-4" />
-              <span className="hidden sm:inline">Professional</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="privacy" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Privacy</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="application" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">App</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notifications" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="hidden sm:inline">Notifications</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="job-search" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Job Search</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="security" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <Lock className="w-4 h-4" />
-              <span className="hidden sm:inline">Security</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="help" 
-              className="flex items-center gap-2 text-xs lg:text-sm px-3 py-2.5 rounded-lg transition-all duration-300 hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-accent/20 data-[state=active]:text-primary data-[state=active]:shadow-lg"
-            >
-              <HelpCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Help</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="overflow-hidden">
-            <TabsContent value="personal" className="mt-0 animate-fade-in">
-              <PersonalInfo />
-            </TabsContent>
-
-            <TabsContent value="professional" className="mt-0 animate-fade-in">
-              <ProfessionalInfo />
-            </TabsContent>
-
-            <TabsContent value="privacy" className="mt-0 animate-fade-in">
-              <PrivacySettings />
-            </TabsContent>
-
-            <TabsContent value="application" className="mt-0 animate-fade-in">
-              <ApplicationSettings />
-            </TabsContent>
-
-            <TabsContent value="notifications" className="mt-0 animate-fade-in">
-              <NotificationSettings />
-            </TabsContent>
-
-            <TabsContent value="job-search" className="mt-0 animate-fade-in">
-              <JobSearchSettings />
-            </TabsContent>
-
-            <TabsContent value="security" className="mt-0 animate-fade-in">
-              <SecuritySettings />
-            </TabsContent>
-
-            <TabsContent value="help" className="mt-0 animate-fade-in">
-              <HelpSettings />
-            </TabsContent>
-          </div>
-        </Tabs>
+        <div className="overflow-auto max-h-[calc(90vh-120px)]">
+          {!activeSection ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
+              {settingsCategories.map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <Card
+                    key={category.id}
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] bg-card border"
+                    onClick={() => handleCategoryClick(category.id)}
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <IconComponent className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg font-medium">
+                              {category.title}
+                            </CardTitle>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <CardDescription className="text-sm text-muted-foreground">
+                        {category.description}
+                      </CardDescription>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="animate-fade-in">
+              {ActiveComponent && <ActiveComponent />}
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
