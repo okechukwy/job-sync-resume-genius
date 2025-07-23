@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -30,7 +31,7 @@ export const PageHeader = ({
   };
 
   return (
-    <div className="glass-card border-b border-border/5 sticky top-0 z-50 rounded-b-lg">
+    <div className="glass-card border-b border-border/1 sticky top-0 z-50 rounded-lg">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
           {showBackButton && (
