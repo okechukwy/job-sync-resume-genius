@@ -103,7 +103,7 @@ const Navigation = () => {
                       <span>{user.user_metadata?.full_name || user.email}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 glass-card rounded-xl border-0 backdrop-blur-lg">
+                  <DropdownMenuContent align="end" className="w-56 bg-popover rounded-xl border border-border/10">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
@@ -169,7 +169,7 @@ const Navigation = () => {
           {/* Mobile Navigation Menu */}
           {isMenuOpen && (
             <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 glass-card mt-2 rounded-xl border-0 backdrop-blur-lg shadow-lg">
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-popover/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 mt-2 rounded-xl border border-border/10 shadow-lg">
                 {navItems.map((item) => (
                   item.type === "link" ? (
                     <Link
