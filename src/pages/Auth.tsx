@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,60 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle, Mail, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [cooldownTime, setCooldownTime] = useState(0);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   const from = location.state?.from?.pathname || "/get-started";
+
+  // Handle cooldown timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (cooldownTime > 0) {
+      interval = setInterval(() => {
+        setCooldownTime((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [cooldownTime]);
+
+  // Email validation function
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError("Email is required");
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  // Handle email input change for real-time validation
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    setResetEmail(email);
+    if (email) {
+      validateEmail(email);
+    } else {
+      setEmailError("");
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -89,11 +130,17 @@ const Auth = () => {
 
   const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
+    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
+
+    // Validate email before sending
+    if (!validateEmail(email)) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth`,
@@ -107,14 +154,53 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
+      setResetSuccess(true);
+      setResetEmail(email);
+      setCooldownTime(60); // 60 second cooldown
       toast({
         title: "Reset email sent!",
         description: "Please check your email for password reset instructions.",
       });
-      setShowForgotPassword(false);
     }
 
     setIsLoading(false);
+  };
+
+  const handleResendEmail = async () => {
+    if (cooldownTime > 0 || !resetEmail) return;
+    
+    setIsLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+
+    if (error) {
+      setError(error.message);
+      toast({
+        title: "Error resending email",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setCooldownTime(60); // Reset cooldown
+      toast({
+        title: "Email resent!",
+        description: "Please check your email again.",
+      });
+    }
+
+    setIsLoading(false);
+  };
+
+  const resetForgotPasswordState = () => {
+    setShowForgotPassword(false);
+    setResetSuccess(false);
+    setResetEmail("");
+    setEmailError("");
+    setError(null);
+    setCooldownTime(0);
   };
 
   return (
@@ -191,18 +277,24 @@ const Auth = () => {
                     </Button>
                   </div>
                 </form>
-              ) : (
+              ) : !resetSuccess ? (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email">Email</Label>
+                    <Label htmlFor="reset-email">Email Address</Label>
                     <Input
                       id="reset-email"
                       name="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="Enter your email address"
+                      value={resetEmail}
+                      onChange={handleEmailChange}
                       required
                       disabled={isLoading}
+                      className={emailError ? "border-destructive" : ""}
                     />
+                    {emailError && (
+                      <p className="text-sm text-destructive">{emailError}</p>
+                    )}
                   </div>
                   
                   {error && (
@@ -211,14 +303,21 @@ const Auth = () => {
                     </Alert>
                   )}
                   
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading || !!emailError || !resetEmail}
+                  >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Sending reset email...
                       </>
                     ) : (
-                      "Send Reset Email"
+                      <>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Send Reset Email
+                      </>
                     )}
                   </Button>
                   
@@ -227,12 +326,64 @@ const Auth = () => {
                       type="button"
                       variant="link"
                       className="text-sm text-muted-foreground"
-                      onClick={() => setShowForgotPassword(false)}
+                      onClick={resetForgotPasswordState}
                     >
                       Back to Sign In
                     </Button>
                   </div>
                 </form>
+              ) : (
+                <div className="space-y-4 text-center">
+                  <div className="flex flex-col items-center space-y-2">
+                    <CheckCircle className="h-12 w-12 text-green-500" />
+                    <h3 className="text-lg font-semibold">Check Your Email</h3>
+                    <p className="text-sm text-muted-foreground">
+                      We've sent password reset instructions to:
+                    </p>
+                    <p className="text-sm font-medium text-primary">{resetEmail}</p>
+                  </div>
+
+                  <Alert>
+                    <Mail className="h-4 w-4" />
+                    <AlertDescription>
+                      If you don't see the email, check your spam folder. The link will expire in 1 hour.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleResendEmail}
+                      disabled={cooldownTime > 0 || isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Resending...
+                        </>
+                      ) : cooldownTime > 0 ? (
+                        <>
+                          <Clock className="mr-2 h-4 w-4" />
+                          Resend in {cooldownTime}s
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Resend Email
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="link"
+                      className="w-full text-sm text-muted-foreground"
+                      onClick={resetForgotPasswordState}
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
+                </div>
               )}
             </TabsContent>
             
