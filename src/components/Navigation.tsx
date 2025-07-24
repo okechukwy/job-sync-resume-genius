@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User, Settings, Shield, HelpCircle } from "lucide-react";
+import { LogOut, User, Settings, Shield, HelpCircle, Rocket } from "lucide-react";
 import { UserSettingsDialog } from "./user-settings/UserSettingsDialog";
 
 const Navigation = () => {
@@ -52,7 +52,10 @@ const Navigation = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg glass-card">
+                <Rocket className="h-6 w-6 text-primary" />
+              </div>
               <div className="text-2xl font-bold gradient-text">
                 ResumeAI
               </div>
@@ -100,7 +103,7 @@ const Navigation = () => {
                       <span>{user.user_metadata?.full_name || user.email}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-popover">
+                  <DropdownMenuContent align="end" className="w-56 glass-card rounded-xl border-0 backdrop-blur-lg">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
@@ -166,7 +169,7 @@ const Navigation = () => {
           {/* Mobile Navigation Menu */}
           {isMenuOpen && (
             <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 glass-card mt-2 rounded-lg border border-border/20">
+              <div className="px-2 pt-2 pb-3 space-y-1 glass-card mt-2 rounded-xl border-0 backdrop-blur-lg shadow-lg">
                 {navItems.map((item) => (
                   item.type === "link" ? (
                     <Link
