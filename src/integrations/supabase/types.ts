@@ -472,24 +472,36 @@ export type Database = {
       }
       profiles: {
         Row: {
+          city: string | null
+          country: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
+          phone: string | null
+          profile_picture: string | null
           updated_at: string | null
         }
         Insert: {
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
+          phone?: string | null
+          profile_picture?: string | null
           updated_at?: string | null
         }
         Update: {
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
+          profile_picture?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -526,6 +538,126 @@ export type Database = {
           metadata?: Json | null
           purpose?: string
           storage_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_job_preferences: {
+        Row: {
+          actively_searching: boolean
+          created_at: string
+          id: string
+          job_types: string[] | null
+          max_commute_distance: number | null
+          max_salary: number | null
+          min_salary: number | null
+          open_to_relocate: boolean
+          preferred_locations: string[] | null
+          updated_at: string
+          user_id: string
+          work_location: string | null
+        }
+        Insert: {
+          actively_searching?: boolean
+          created_at?: string
+          id?: string
+          job_types?: string[] | null
+          max_commute_distance?: number | null
+          max_salary?: number | null
+          min_salary?: number | null
+          open_to_relocate?: boolean
+          preferred_locations?: string[] | null
+          updated_at?: string
+          user_id: string
+          work_location?: string | null
+        }
+        Update: {
+          actively_searching?: boolean
+          created_at?: string
+          id?: string
+          job_types?: string[] | null
+          max_commute_distance?: number | null
+          max_salary?: number | null
+          min_salary?: number | null
+          open_to_relocate?: boolean
+          preferred_locations?: string[] | null
+          updated_at?: string
+          user_id?: string
+          work_location?: string | null
+        }
+        Relationships: []
+      }
+      user_privacy_settings: {
+        Row: {
+          activity_status_visible: boolean
+          analytics_tracking: boolean
+          created_at: string
+          data_collection: boolean
+          id: string
+          profile_searchable: boolean
+          profile_visibility: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_status_visible?: boolean
+          analytics_tracking?: boolean
+          created_at?: string
+          data_collection?: boolean
+          id?: string
+          profile_searchable?: boolean
+          profile_visibility?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_status_visible?: boolean
+          analytics_tracking?: boolean
+          created_at?: string
+          data_collection?: boolean
+          id?: string
+          profile_searchable?: boolean
+          profile_visibility?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_professional_info: {
+        Row: {
+          company: string | null
+          created_at: string
+          experience_years: string | null
+          id: string
+          industry: string | null
+          job_title: string | null
+          linkedin_url: string | null
+          professional_summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          experience_years?: string | null
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          linkedin_url?: string | null
+          professional_summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          experience_years?: string | null
+          id?: string
+          industry?: string | null
+          job_title?: string | null
+          linkedin_url?: string | null
+          professional_summary?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -618,6 +750,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_settings: {
+        Row: {
+          application_status_updates: boolean
+          auto_save: boolean
+          created_at: string
+          date_format: string
+          email_notifications: boolean
+          id: string
+          job_match_alerts: boolean
+          keyboard_shortcuts: boolean
+          language: string
+          marketing_emails: boolean
+          notification_frequency: string
+          resume_view_notifications: boolean
+          theme: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          weekly_progress_reports: boolean
+        }
+        Insert: {
+          application_status_updates?: boolean
+          auto_save?: boolean
+          created_at?: string
+          date_format?: string
+          email_notifications?: boolean
+          id?: string
+          job_match_alerts?: boolean
+          keyboard_shortcuts?: boolean
+          language?: string
+          marketing_emails?: boolean
+          notification_frequency?: string
+          resume_view_notifications?: boolean
+          theme?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          weekly_progress_reports?: boolean
+        }
+        Update: {
+          application_status_updates?: boolean
+          auto_save?: boolean
+          created_at?: string
+          date_format?: string
+          email_notifications?: boolean
+          id?: string
+          job_match_alerts?: boolean
+          keyboard_shortcuts?: boolean
+          language?: string
+          marketing_emails?: boolean
+          notification_frequency?: string
+          resume_view_notifications?: boolean
+          theme?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          weekly_progress_reports?: boolean
+        }
+        Relationships: []
       }
       white_label_configs: {
         Row: {

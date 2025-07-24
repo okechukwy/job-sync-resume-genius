@@ -1,23 +1,124 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Upload } from "lucide-react";
 
 export const PersonalInfo = () => {
   const { user } = useAuth();
-  const [profilePicture, setProfilePicture] = useState('');
+  const { toast } = useToast();
+  const [profilePicture, setProfilePicture] = useState("");
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    city: "",
+    country: "",
+  });
+  const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    fetchProfile();
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setFormData({
+        full_name: data.full_name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        city: data.city || "",
+        country: data.country || "",
+      });
+      setProfilePicture(data.profile_picture || "");
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfilePicture(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file || !user) return;
+
+    try {
+      setLoading(true);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}.${fileExt}`;
+      const filePath = `profile-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+
+      setProfilePicture(publicUrl);
+      
+      toast({
+        title: "Success",
+        description: "Profile picture uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          ...formData,
+          profile_picture: profilePicture,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Personal information updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update personal information",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,40 +133,36 @@ export const PersonalInfo = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-start gap-6">
-            <div className="relative group">
-              <Avatar className="h-20 w-20 border-2 border-border">
-                <AvatarImage src={profilePicture || user?.user_metadata?.avatar_url} />
-                <AvatarFallback className="bg-muted text-muted-foreground text-lg font-medium">
-                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
-                <label htmlFor="profile-picture" className="cursor-pointer text-white">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </label>
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={profilePicture || ""} alt="Profile" />
+              <AvatarFallback>{formData.full_name?.charAt(0) || "U"}</AvatarFallback>
+            </Avatar>
+            <div>
+              <Label htmlFor="picture" className="text-sm font-medium text-foreground">
+                Profile Picture
+              </Label>
+              <div className="mt-1">
+                <input
+                  id="picture"
+                  name="picture"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="sr-only"
+                  disabled={loading}
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => document.getElementById('picture')?.click()}
+                  disabled={loading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {loading ? "Uploading..." : "Upload New Picture"}
+                </Button>
               </div>
-              <input
-                id="profile-picture"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-            <div className="flex-1 space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Recommended: Square image, at least 400x400px
-              </p>
-              <p className="text-xs text-muted-foreground">
-                JPG, PNG, or GIF (max 5MB)
-              </p>
-              <Button variant="outline" size="sm">
-                Change Photo
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -80,31 +177,30 @@ export const PersonalInfo = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                defaultValue={user?.user_metadata?.full_name?.split(' ')[0] || ''}
-                placeholder="Enter your first name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                defaultValue={user?.user_metadata?.full_name?.split(' ')[1] || ''}
-                placeholder="Enter your last name"
-              />
-            </div>
+          <div>
+            <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+              Full Name
+            </Label>
+            <Input 
+              id="fullName"
+              value={formData.full_name}
+              onChange={(e) => handleInputChange('full_name', e.target.value)}
+              className="mt-1"
+              placeholder="Enter your full name"
+            />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
+
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium text-foreground">
+              Email Address
+            </Label>
+            <Input 
               id="email"
               type="email"
-              defaultValue={user?.email || ''}
-              placeholder="Enter your email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              className="mt-1"
+              placeholder="Enter your email address"
             />
           </div>
         </CardContent>
@@ -119,27 +215,43 @@ export const PersonalInfo = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
+          <div>
+            <Label htmlFor="phone" className="text-sm font-medium text-foreground">
+              Phone Number
+            </Label>
+            <Input 
               id="phone"
               type="tel"
-              placeholder="+1 (555) 123-4567"
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              className="mt-1"
+              placeholder="Enter your phone number"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city" className="text-sm font-medium text-foreground">
+                City
+              </Label>
+              <Input 
                 id="city"
-                placeholder="New York"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                className="mt-1"
+                placeholder="Enter your city"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Input
+            <div>
+              <Label htmlFor="country" className="text-sm font-medium text-foreground">
+                Country
+              </Label>
+              <Input 
                 id="country"
-                placeholder="United States"
+                value={formData.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                className="mt-1"
+                placeholder="Enter your country"
               />
             </div>
           </div>
@@ -148,8 +260,8 @@ export const PersonalInfo = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button>
-          Save Changes
+        <Button onClick={handleSave} disabled={loading}>
+          {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>
