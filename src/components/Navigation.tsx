@@ -48,7 +48,7 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 glass-card border-b border-border/20">
+      <nav className="fixed top-0 w-full z-50 glass-card border-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -103,7 +103,7 @@ const Navigation = () => {
                       <span>{user.user_metadata?.full_name || user.email}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-popover rounded-xl border border-border/10">
+                  <DropdownMenuContent align="end" className="w-56 bg-popover rounded-xl border-0">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
@@ -169,7 +169,7 @@ const Navigation = () => {
           {/* Mobile Navigation Menu */}
           {isMenuOpen && (
             <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 bg-popover/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 mt-2 rounded-xl border border-border/10 shadow-lg">
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-popover/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 mt-2 rounded-xl border-0 shadow-lg">
                 {navItems.map((item) => (
                   item.type === "link" ? (
                     <Link
@@ -194,7 +194,7 @@ const Navigation = () => {
                     </a>
                   )
                 ))}
-                <div className="pt-4 border-t border-border/20 space-y-2">
+                <div className="pt-4 border-0 space-y-2">
                   {user ? (
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 px-3 py-2">
