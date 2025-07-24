@@ -33,6 +33,34 @@ const FeaturesSection = () => {
       highlights: ["Context-Aware Writing", "Tone Customization", "Company Research Integration"]
     },
     {
+      icon: "🎙️",
+      title: "AI Interview Preparation",
+      description: "AI-powered mock interviews with real-time feedback and personalized question banks for your industry.",
+      badge: "AI-Powered",
+      highlights: ["Mock Interview Sessions", "Real-time Feedback", "Industry-Specific Questions"]
+    },
+    {
+      icon: "💼",
+      title: "LinkedIn Optimization",
+      description: "Complete LinkedIn profile optimization with AI-powered headline and summary generation.",
+      badge: "Professional",
+      highlights: ["Profile Scoring", "Keyword Optimization", "Headline Generator"]
+    },
+    {
+      icon: "⭐",
+      title: "Personal Branding",
+      description: "Build a compelling personal brand with AI-generated content and strategy guidance.",
+      badge: "Premium",
+      highlights: ["Brand Strategy", "Content Generation", "Audience Analysis"]
+    },
+    {
+      icon: "🎓",
+      title: "Career Coaching",
+      description: "Personalized career development plans with AI-powered coaching insights and roadmaps.",
+      badge: "Growth",
+      highlights: ["Career Roadmaps", "Skill Gap Analysis", "Goal Setting"]
+    },
+    {
       icon: "📈",
       title: "Performance Tracking",
       description: "Track application success rates and optimize your documents based on real performance data.",
@@ -45,6 +73,20 @@ const FeaturesSection = () => {
       description: "Keep track of different resume versions and easily switch between them for different applications.",
       badge: "Productivity",
       highlights: ["Version History", "Easy Rollback", "Bulk Export Options"]
+    },
+    {
+      icon: "🏢",
+      title: "White Label Exports",
+      description: "Professional white-label resume exports with custom branding for agencies and consultants.",
+      badge: "Enterprise",
+      highlights: ["Custom Branding", "Bulk Export", "API Integration"]
+    },
+    {
+      icon: "🛟",
+      title: "Priority Support",
+      description: "24/7 priority support with dedicated account management and instant resolution.",
+      badge: "Support",
+      highlights: ["24/7 Availability", "Priority Queue", "Dedicated Support"]
     }
   ];
 
@@ -67,7 +109,7 @@ const FeaturesSection = () => {
         </div>
 
         {/* Features grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, index) => {
             const getFeatureLink = (title: string) => {
               switch (title) {
@@ -79,10 +121,22 @@ const FeaturesSection = () => {
                   return "/dashboard/resume/ats-analysis";
                 case "AI Cover Letter Generator":
                   return "/dashboard/job-search/cover-letter";
+                case "AI Interview Preparation":
+                  return "/dashboard/career/interview-prep";
+                case "LinkedIn Optimization":
+                  return "/dashboard/career/linkedin";
+                case "Personal Branding":
+                  return "/dashboard/career/branding";
+                case "Career Coaching":
+                  return "/dashboard/career/coaching";
                 case "Performance Tracking":
                   return "/dashboard/job-search/performance";
                 case "Version Management":
                   return "/dashboard/resume/versions";
+                case "White Label Exports":
+                  return "/dashboard/exports";
+                case "Priority Support":
+                  return "/dashboard/support";
                 default:
                   return "/dashboard/resume/builder";
               }
