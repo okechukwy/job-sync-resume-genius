@@ -10,7 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { LogOut, User, Settings, Shield, HelpCircle, Rocket } from "lucide-react";
 import { UserSettingsDialog } from "./user-settings/UserSettingsDialog";
 
@@ -18,6 +19,7 @@ const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("profile");
+  const [profilePicture, setProfilePicture] = useState("");
   const location = useLocation();
   const { user, signOut } = useAuth();
 
@@ -25,6 +27,24 @@ const Navigation = () => {
     setSettingsTab(tab);
     setSettingsOpen(true);
   };
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_picture')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (data?.profile_picture) {
+        setProfilePicture(data.profile_picture);
+      }
+    };
+
+    fetchProfilePicture();
+  }, [user]);
 
   // Redirect authenticated users from homepage to dashboard
   useEffect(() => {
@@ -96,6 +116,7 @@ const Navigation = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="space-x-2">
                       <Avatar className="h-6 w-6">
+                        <AvatarImage src={profilePicture || ""} alt="Profile" />
                         <AvatarFallback className="text-xs">
                           {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
                         </AvatarFallback>
@@ -199,6 +220,7 @@ const Navigation = () => {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 px-3 py-2">
                         <Avatar className="h-6 w-6">
+                          <AvatarImage src={profilePicture || ""} alt="Profile" />
                           <AvatarFallback className="text-xs">
                             {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
                           </AvatarFallback>

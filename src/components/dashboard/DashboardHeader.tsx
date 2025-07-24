@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { LogOut, Settings, User, Menu, Shield, HelpCircle } from "lucide-react";
 import { 
   Breadcrumb,
@@ -29,6 +30,25 @@ export const DashboardHeader = () => {
   const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("profile");
+  const [profilePicture, setProfilePicture] = useState("");
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_picture')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (data?.profile_picture) {
+        setProfilePicture(data.profile_picture);
+      }
+    };
+
+    fetchProfilePicture();
+  }, [user]);
 
   const handleSettingsClick = (tab: string) => {
     setSettingsTab(tab);
@@ -136,6 +156,7 @@ export const DashboardHeader = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <Avatar className="h-6 w-6">
+                    <AvatarImage src={profilePicture || ""} alt="Profile" />
                     <AvatarFallback className="text-xs">
                       {user?.user_metadata?.full_name?.charAt(0)?.toUpperCase() || 
                        user?.email?.charAt(0)?.toUpperCase() || 'U'}
