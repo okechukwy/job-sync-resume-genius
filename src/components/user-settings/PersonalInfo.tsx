@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
+import { fileStorageService } from "@/services/fileStorageService";
 
 export const PersonalInfo = () => {
   const { user } = useAuth();
@@ -58,21 +59,30 @@ export const PersonalInfo = () => {
     try {
       setLoading(true);
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = `profile-images/${fileName}`;
+      // Validate file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select a JPEG, PNG, GIF, or WebP image.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(filePath, file, { upsert: true });
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(filePath);
-
-      setProfilePicture(publicUrl);
+      // Use the file storage service for proper upload
+      const { url } = await fileStorageService.uploadFile(file, 'profile_picture', 'profile');
+      
+      setProfilePicture(url);
       
       toast({
         title: "Success",
@@ -82,12 +92,20 @@ export const PersonalInfo = () => {
       console.error('Error uploading image:', error);
       toast({
         title: "Error",
-        description: "Failed to upload profile picture",
+        description: error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+      // Clear the input to allow re-uploading the same file if needed
+      if (event.target) {
+        event.target.value = '';
+      }
     }
+  };
+
+  const removeProfilePicture = () => {
+    setProfilePicture('');
   };
 
   const handleSave = async () => {
@@ -138,16 +156,16 @@ export const PersonalInfo = () => {
               <AvatarImage src={profilePicture || ""} alt="Profile" />
               <AvatarFallback>{formData.full_name?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <Label htmlFor="picture" className="text-sm font-medium text-foreground">
                 Profile Picture
               </Label>
-              <div className="mt-1">
+              <div className="mt-1 flex gap-2">
                 <input
                   id="picture"
                   name="picture"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
                   onChange={handleImageUpload}
                   className="sr-only"
                   disabled={loading}
@@ -162,7 +180,22 @@ export const PersonalInfo = () => {
                   <Upload className="h-4 w-4 mr-2" />
                   {loading ? "Uploading..." : "Upload New Picture"}
                 </Button>
+                {profilePicture && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={removeProfilePicture}
+                    disabled={loading}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Remove
+                  </Button>
+                )}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Supported formats: JPEG, PNG, GIF, WebP. Max size: 5MB.
+              </p>
             </div>
           </div>
         </CardContent>
