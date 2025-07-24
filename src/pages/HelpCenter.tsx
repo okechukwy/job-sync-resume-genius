@@ -12,64 +12,102 @@ const HelpCenter = () => {
       title: "Getting Started",
       icon: Zap,
       articles: [
-        "How to create your first resume",
-        "Understanding ATS optimization",
-        "Choosing the right template"
+        "Complete Platform Tour: From Resume to Career Success",
+        "Choosing Your First Template from 58+ Options",
+        "Setting Up Your Profile for Maximum ATS Optimization",
+        "Understanding Your Dashboard: Resume, Job Search & Career Tools",
+        "First Steps: Building Your Resume in 5 Minutes",
+        "Industry-Specific Getting Started Guides"
       ]
     },
     {
       title: "Account Management",
       icon: Users,
       articles: [
-        "Managing your subscription",
-        "Updating billing information",
-        "Canceling your account"
+        "Managing Your Subscription and Billing",
+        "Understanding Free vs Premium Features",
+        "Profile Settings and Data Management",
+        "Notification Preferences and Alerts",
+        "Account Security and Privacy Settings",
+        "Upgrading to Premium: What You Get"
       ]
     },
     {
       title: "Features & Tools",
       icon: FileText,
       articles: [
-        "Using the resume builder",
-        "AI optimization features",
-        "Export and download options"
+        "Resume Builder: Complete Guide to 58+ Templates",
+        "AI Interview Prep: Mock Interviews & Feedback",
+        "LinkedIn Optimization: Profile Scoring & Enhancement",
+        "ATS Analysis: Understanding Your Score",
+        "Job Matching: Optimize for Specific Roles",
+        "Cover Letter Generator: AI-Powered Personalization",
+        "Performance Tracking: Monitor Your Success",
+        "Version Management: Multiple Resume Strategies",
+        "Personal Branding: Build Your Professional Identity",
+        "Career Coaching: AI-Powered Career Guidance",
+        "White Label Exports: Enterprise Solutions",
+        "Priority Support: 24/7 Assistance"
       ]
     },
     {
       title: "Privacy & Security",
       icon: Shield,
       articles: [
-        "Data protection policies",
-        "Account security settings",
-        "GDPR compliance"
+        "Data Protection: How We Secure Your Information",
+        "GDPR Compliance and Your Rights",
+        "Account Security: Two-Factor Authentication",
+        "Data Export and Deletion Options",
+        "Privacy Settings: Control Your Information",
+        "Third-Party Integrations and Data Sharing"
+      ]
+    },
+    {
+      title: "Template & Industry Guides",
+      icon: FileText,
+      articles: [
+        "Technology Templates: 12 Specialized Options",
+        "Healthcare Templates: 8 Medical Professional Designs",
+        "Finance Templates: 10 Banking & Accounting Layouts",
+        "Creative Templates: 19 Design & Marketing Options",
+        "Business Templates: 9 Management & Operations Designs",
+        "Research Templates: 7 Academic & Scientific Layouts"
       ]
     }
   ];
 
   const faqs = [
     {
-      question: "How does the AI resume optimization work?",
-      answer: "Our AI analyzes your resume content, compares it against job market trends and ATS requirements, then provides specific recommendations to improve keyword density, formatting, and overall effectiveness."
+      question: "Which of the 58+ templates should I choose for my industry?",
+      answer: "Our templates are organized by industry and role type. Use our template selector to filter by your field - we have specialized templates for Technology (12), Healthcare (8), Finance (10), Creative (19), Business (9), and Research (7) fields."
     },
     {
-      question: "Can I use ResumeAI for free?",
-      answer: "Yes! We offer a free tier that includes basic resume building features. Premium plans unlock advanced AI optimization, unlimited downloads, and additional templates."
+      question: "How does the AI interview preparation work?",
+      answer: "Our AI conducts mock interviews tailored to your role and industry, provides real-time feedback on your answers, analyzes your speech patterns, and suggests improvements for better performance in actual interviews."
     },
     {
-      question: "Is my personal information secure?",
-      answer: "Absolutely. We use enterprise-grade encryption and follow strict data protection protocols. Your personal information is never shared with third parties without your consent."
+      question: "What's included in LinkedIn optimization?",
+      answer: "LinkedIn optimization includes profile scoring, headline generation, summary optimization, keyword analysis, content suggestions, and competitive benchmarking to maximize your professional visibility."
     },
     {
-      question: "How do I cancel my subscription?",
-      answer: "You can cancel your subscription anytime from your account settings. Your access will continue until the end of your current billing period."
+      question: "How do I track my job application performance?",
+      answer: "Our performance tracking monitors your application success rates, provides insights on which resume versions perform best, tracks interview conversion rates, and offers data-driven recommendations for improvement."
     },
     {
-      question: "Do you offer refunds?",
-      answer: "Contact our support team if you're not satisfied with our service and we'll work with you to find a solution."
+      question: "What's the difference between free and premium features?",
+      answer: "Free users get basic resume building with limited templates. Premium unlocks all 58+ templates, AI optimization, interview prep, LinkedIn tools, performance tracking, unlimited downloads, and priority support."
     },
     {
-      question: "Can I download my resume in different formats?",
-      answer: "Yes, premium users can download their resumes in PDF, Word, and other formats. Free users have access to PDF downloads."
+      question: "How do I create multiple resume versions?",
+      answer: "Use our version management system to create tailored resumes for different roles. Each version can have customized content, keywords, and formatting while maintaining your core professional information."
+    },
+    {
+      question: "Can I export my resume in different formats?",
+      answer: "Yes! Export options include PDF, Word (.docx), RTF, and plain text formats. Premium users also get access to white-label exports and custom formatting options."
+    },
+    {
+      question: "How does the ATS score calculation work?",
+      answer: "Our ATS analysis examines keyword density, formatting compatibility, section organization, and content structure against modern ATS systems, providing a comprehensive score with specific improvement recommendations."
     }
   ];
 
@@ -97,7 +135,7 @@ const HelpCenter = () => {
         </div>
 
         {/* Help Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-12">
           {categories.map((category, index) => (
             <Card key={index} className="glass-card hover:shadow-glow transition-all duration-300 cursor-pointer">
               <CardHeader className="text-center">
