@@ -1,27 +1,35 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { professionalInfoSchema, type ProfessionalInfoFormData } from "@/schemas/userSettingsSchemas";
+import { useToast } from "@/hooks/use-toast";
 
 export const ProfessionalInfo = () => {
   const { professionalInfo, updateProfessionalInfo, loading } = useUserSettings();
-  const [formData, setFormData] = useState({
-    job_title: "",
-    company: "",
-    industry: "",
-    experience_years: "",
-    linkedin_url: "",
-    professional_summary: "",
+  const { toast } = useToast();
+
+  const form = useForm<ProfessionalInfoFormData>({
+    resolver: zodResolver(professionalInfoSchema),
+    defaultValues: {
+      job_title: "",
+      company: "",
+      industry: "",
+      experience_years: "",
+      linkedin_url: "",
+      professional_summary: "",
+    },
   });
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (professionalInfo) {
-      setFormData({
+      form.reset({
         job_title: professionalInfo.job_title || "",
         company: professionalInfo.company || "",
         industry: professionalInfo.industry || "",
@@ -30,16 +38,22 @@ export const ProfessionalInfo = () => {
         professional_summary: professionalInfo.professional_summary || "",
       });
     }
-  }, [professionalInfo]);
+  }, [professionalInfo, form]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    await updateProfessionalInfo(formData);
-    setSaving(false);
+  const onSubmit = async (data: ProfessionalInfoFormData) => {
+    try {
+      await updateProfessionalInfo(data);
+      toast({
+        title: "Success",
+        description: "Professional information updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update professional information",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -47,105 +61,137 @@ export const ProfessionalInfo = () => {
       <CardHeader>
         <CardTitle>Professional Information</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="jobTitle" className="text-sm font-medium text-foreground">
-            Current Job Title
-          </Label>
-          <Input 
-            id="jobTitle"
-            value={formData.job_title}
-            onChange={(e) => handleInputChange('job_title', e.target.value)}
-            className="mt-1"
-            placeholder="Enter your current job title"
-          />
-        </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="job_title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Job Title *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your current job title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="company" className="text-sm font-medium text-foreground">
-            Company
-          </Label>
-          <Input 
-            id="company"
-            value={formData.company}
-            onChange={(e) => handleInputChange('company', e.target.value)}
-            className="mt-1"
-            placeholder="Enter your company name"
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="company"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your company name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="industry" className="text-sm font-medium text-foreground">
-            Industry
-          </Label>
-          <Select value={formData.industry} onValueChange={(value) => handleInputChange('industry', value)}>
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Select industry" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="technology">Technology</SelectItem>
-              <SelectItem value="healthcare">Healthcare</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
-              <SelectItem value="education">Education</SelectItem>
-              <SelectItem value="retail">Retail</SelectItem>
-              <SelectItem value="manufacturing">Manufacturing</SelectItem>
-              <SelectItem value="consulting">Consulting</SelectItem>
-              <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="sales">Sales</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <FormField
+              control={form.control}
+              name="industry"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Industry *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="consulting">Consulting</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="experience" className="text-sm font-medium text-foreground">
-            Years of Experience
-          </Label>
-          <Select value={formData.experience_years} onValueChange={(value) => handleInputChange('experience_years', value)}>
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Select experience" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0-1">0-1 years</SelectItem>
-              <SelectItem value="2-5">2-5 years</SelectItem>
-              <SelectItem value="6-10">6-10 years</SelectItem>
-              <SelectItem value="11-15">11-15 years</SelectItem>
-              <SelectItem value="16+">16+ years</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <FormField
+              control={form.control}
+              name="experience_years"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Years of Experience *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select experience" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="0-1">0-1 years</SelectItem>
+                      <SelectItem value="2-5">2-5 years</SelectItem>
+                      <SelectItem value="6-10">6-10 years</SelectItem>
+                      <SelectItem value="11-15">11-15 years</SelectItem>
+                      <SelectItem value="16+">16+ years</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="linkedin" className="text-sm font-medium text-foreground">
-            LinkedIn Profile URL
-          </Label>
-          <Input 
-            id="linkedin"
-            type="url"
-            value={formData.linkedin_url}
-            onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
-            className="mt-1"
-            placeholder="https://linkedin.com/in/yourname"
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="linkedin_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>LinkedIn Profile URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="url" 
+                      placeholder="https://linkedin.com/in/yourname" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div>
-          <Label htmlFor="summary" className="text-sm font-medium text-foreground">
-            Professional Summary
-          </Label>
-          <Textarea 
-            id="summary"
-            value={formData.professional_summary}
-            onChange={(e) => handleInputChange('professional_summary', e.target.value)}
-            className="mt-1"
-            rows={4}
-            placeholder="Brief description of your professional background..."
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="professional_summary"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Professional Summary</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      rows={4}
+                      placeholder="Brief description of your professional background..."
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button className="w-full" onClick={handleSave} disabled={loading || saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
