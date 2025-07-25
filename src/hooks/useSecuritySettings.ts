@@ -242,18 +242,42 @@ export const useSecuritySettings = () => {
 
     setLoading(true);
     try {
-      await logSecurityEvent('data_export_requested', 'User requested data export');
+      // Call the data export edge function
+      const { data, error } = await supabase.functions.invoke('data-export', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      // Create and download the file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { 
+        type: 'application/json' 
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `user_data_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      await logSecurityEvent('data_export_requested', 'User successfully exported their data');
 
       toast({
-        title: "Export Requested",
-        description: "Your data export will be emailed to you within 24 hours"
+        title: "Export Complete",
+        description: "Your data has been downloaded successfully"
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error requesting data export:', error);
       toast({
-        title: "Error",
-        description: "Failed to request data export",
+        title: "Export Failed",
+        description: error.message || "Failed to export data. Please try again.",
         variant: "destructive"
       });
       return false;
