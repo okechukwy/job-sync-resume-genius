@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
-import { Shield, Key, Download, Trash2, ExternalLink } from "lucide-react";
+import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const SecuritySettings = () => {
@@ -26,6 +26,12 @@ export const SecuritySettings = () => {
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
+  });
+
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
   });
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -92,35 +98,83 @@ export const SecuritySettings = () => {
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
-              <Input 
-                id="currentPassword" 
-                type="password" 
-                value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                required
-              />
+              <div className="relative">
+                <Input 
+                  id="currentPassword" 
+                  type={showPasswords.current ? "text" : "password"} 
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  required
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
-              <Input 
-                id="newPassword" 
-                type="password" 
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                required
-                minLength={8}
-              />
+              <div className="relative">
+                <Input 
+                  id="newPassword" 
+                  type={showPasswords.new ? "text" : "password"} 
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                  required
+                  minLength={8}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                >
+                  {showPasswords.new ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input 
-                id="confirmPassword" 
-                type="password" 
-                value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                required
-                minLength={8}
-              />
+              <div className="relative">
+                <Input 
+                  id="confirmPassword" 
+                  type={showPasswords.confirm ? "text" : "password"} 
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  required
+                  minLength={8}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div className="flex justify-end pt-2">
               <Button type="submit" disabled={loading}>
