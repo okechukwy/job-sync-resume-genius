@@ -97,6 +97,48 @@ export type Database = {
           },
         ]
       }
+      connected_accounts: {
+        Row: {
+          connected_at: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          metadata: Json | null
+          provider: string
+          provider_account_email: string | null
+          provider_account_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connected_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          metadata?: Json | null
+          provider: string
+          provider_account_email?: string | null
+          provider_account_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connected_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          metadata?: Json | null
+          provider?: string
+          provider_account_email?: string | null
+          provider_account_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cv_analyses: {
         Row: {
           analysis_type: string | null
@@ -506,6 +548,39 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          event_description: string | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_description?: string | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_description?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_files: {
         Row: {
           created_at: string | null
@@ -750,6 +825,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_security_settings: {
+        Row: {
+          backup_codes: Json | null
+          created_at: string
+          id: string
+          last_security_review: string | null
+          login_notifications: boolean
+          password_changed_at: string | null
+          security_questions: Json | null
+          suspicious_activity_alerts: boolean
+          two_factor_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          backup_codes?: Json | null
+          created_at?: string
+          id?: string
+          last_security_review?: string | null
+          login_notifications?: boolean
+          password_changed_at?: string | null
+          security_questions?: Json | null
+          suspicious_activity_alerts?: boolean
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          backup_codes?: Json | null
+          created_at?: string
+          id?: string
+          last_security_review?: string | null
+          login_notifications?: boolean
+          password_changed_at?: string | null
+          security_questions?: Json | null
+          suspicious_activity_alerts?: boolean
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_settings: {
         Row: {
