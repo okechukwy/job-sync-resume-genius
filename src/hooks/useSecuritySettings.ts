@@ -424,6 +424,44 @@ export const useSecuritySettings = () => {
     }
   };
 
+  // Account Deletion
+  const deleteAccount = async () => {
+    if (!user) return false;
+
+    try {
+      // Call the account deletion edge function
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        body: { confirmed: true },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account and all data have been permanently deleted"
+      });
+
+      // Sign out the user
+      await supabase.auth.signOut();
+      
+      // Redirect to home page
+      window.location.href = '/';
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: "Deletion Failed",
+        description: error.message || "Failed to delete account. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   const disconnectAccount = async (accountId: string) => {
     if (!user) return false;
 
@@ -472,6 +510,7 @@ export const useSecuritySettings = () => {
     logSecurityEvent,
     requestDataExport,
     disconnectAccount,
+    deleteAccount,
     refresh: fetchAllSecurityData
   };
 };

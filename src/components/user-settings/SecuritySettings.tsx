@@ -12,6 +12,7 @@ import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff, Github, Chrom
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 import { MFAEnrollmentDialog } from "./MFAEnrollmentDialog";
+import { AccountDeletionDialog } from "./AccountDeletionDialog";
 import { cn } from "@/lib/utils";
 
 export const SecuritySettings = () => {
@@ -27,6 +28,7 @@ export const SecuritySettings = () => {
     changePassword,
     connectOAuthProvider,
     disconnectAccount,
+    deleteAccount,
     requestDataExport
   } = useSecuritySettings();
   
@@ -43,6 +45,7 @@ export const SecuritySettings = () => {
   });
 
   const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
+  const [deletionDialogOpen, setDeletionDialogOpen] = useState(false);
 
   // Real-time password validation
   const passwordValidation = useMemo(() => {
@@ -107,6 +110,10 @@ export const SecuritySettings = () => {
     if (confirm(`Are you sure you want to disconnect your ${provider} account?`)) {
       await disconnectAccount(accountId);
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    return await deleteAccount();
   };
 
   return (
@@ -482,24 +489,22 @@ export const SecuritySettings = () => {
             </Button>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label className="text-destructive">Delete Account</Label>
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+            <div className="space-y-1">
+              <Label className="text-base font-medium text-destructive">Delete Account</Label>
               <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
             </div>
-            <Button variant="destructive" size="sm" disabled>
-              <Trash2 className="w-4 h-4 mr-2" />
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={() => setDeletionDialogOpen(true)}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
               Delete
             </Button>
           </div>
-          
-          <Alert>
-            <Trash2 className="h-4 w-4" />
-            <AlertDescription>
-              Account deletion is currently handled by our support team for security reasons. 
-              Please contact support if you wish to delete your account.
-            </AlertDescription>
-          </Alert>
         </CardContent>
       </Card>
 
@@ -509,6 +514,13 @@ export const SecuritySettings = () => {
         onOpenChange={setMfaDialogOpen}
         onEnroll={enrollMFA}
         onVerify={verifyMFAEnrollment}
+      />
+
+      {/* Account Deletion Dialog */}
+      <AccountDeletionDialog
+        open={deletionDialogOpen}
+        onOpenChange={setDeletionDialogOpen}
+        onConfirm={handleDeleteAccount}
       />
     </div>
   );
