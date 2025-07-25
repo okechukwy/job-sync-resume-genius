@@ -20,7 +20,7 @@ export const AccountDeletionDialog = ({ open, onOpenChange, onConfirm, userEmail
   const [loading, setLoading] = useState(false);
 
   const expectedText = "DELETE MY ACCOUNT";
-  const isConfirmationValid = confirmationText.toUpperCase() === expectedText && agreedToTerms;
+  const isConfirmationValid = confirmationText === expectedText && agreedToTerms;
 
   const handleConfirm = async () => {
     if (!isConfirmationValid) return;
@@ -81,26 +81,15 @@ export const AccountDeletionDialog = ({ open, onOpenChange, onConfirm, userEmail
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="confirmation">
-                Type <strong>{expectedText}</strong> to confirm deletion (case insensitive):
+                Type <strong>{expectedText}</strong> to confirm deletion:
               </Label>
               <Input
                 id="confirmation"
                 value={confirmationText}
                 onChange={(e) => setConfirmationText(e.target.value)}
                 placeholder={expectedText}
-                className={`font-mono ${
-                  confirmationText.length > 0 
-                    ? confirmationText.toUpperCase() === expectedText 
-                      ? "border-green-500 focus-visible:ring-green-500" 
-                      : "border-red-500 focus-visible:ring-red-500"
-                    : ""
-                }`}
+                className="font-mono"
               />
-              {confirmationText.length > 0 && confirmationText.toUpperCase() !== expectedText && (
-                <p className="text-sm text-red-600">
-                  Text must match exactly: "{expectedText}"
-                </p>
-              )}
             </div>
 
             <div className="flex items-center space-x-2">
