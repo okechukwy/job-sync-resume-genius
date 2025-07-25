@@ -22,13 +22,13 @@ export const NotificationSettings = () => {
   useEffect(() => {
     if (settings) {
       setFormData({
-        email_notifications: settings.email_notifications,
-        marketing_emails: settings.marketing_emails,
-        job_match_alerts: settings.job_match_alerts,
-        application_status_updates: settings.application_status_updates,
-        resume_view_notifications: settings.resume_view_notifications,
-        notification_frequency: settings.notification_frequency,
-        weekly_progress_reports: settings.weekly_progress_reports,
+        email_notifications: settings.email_notifications !== null ? settings.email_notifications : true,
+        marketing_emails: settings.marketing_emails !== null ? settings.marketing_emails : false,
+        job_match_alerts: settings.job_match_alerts !== null ? settings.job_match_alerts : true,
+        application_status_updates: settings.application_status_updates !== null ? settings.application_status_updates : true,
+        resume_view_notifications: settings.resume_view_notifications !== null ? settings.resume_view_notifications : true,
+        notification_frequency: settings.notification_frequency || "immediate",
+        weekly_progress_reports: settings.weekly_progress_reports !== null ? settings.weekly_progress_reports : true,
       });
     }
   }, [settings]);
