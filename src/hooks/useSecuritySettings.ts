@@ -262,39 +262,6 @@ export const useSecuritySettings = () => {
     }
   };
 
-  const disconnectAccount = async (accountId: string) => {
-    if (!user) return false;
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('connected_accounts')
-        .update({ is_active: false })
-        .eq('id', accountId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      await logSecurityEvent('account_disconnected', 'User disconnected an external account');
-      await fetchConnectedAccounts();
-
-      toast({
-        title: "Success",
-        description: "Account disconnected successfully"
-      });
-
-      return true;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to disconnect account",
-        variant: "destructive"
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Two-Factor Authentication Functions
   const enrollMFA = async () => {
@@ -398,6 +365,75 @@ export const useSecuritySettings = () => {
     }
   };
 
+  // OAuth Provider Connection
+  const connectOAuthProvider = async (provider: 'google' | 'github' | 'linkedin_oidc') => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      });
+
+      if (error) throw error;
+
+      await logSecurityEvent('oauth_connection_initiated', `User initiated ${provider} connection`);
+      
+      toast({
+        title: "Redirecting",
+        description: `Redirecting to ${provider} for authentication...`
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error(`Error connecting ${provider}:`, error);
+      toast({
+        title: "Error",
+        description: error.message || `Failed to connect ${provider}`,
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const disconnectAccount = async (accountId: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('connected_accounts')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', accountId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      await logSecurityEvent('account_disconnected', `Connected account ${accountId} disconnected`);
+      
+      toast({
+        title: "Success",
+        description: "Account disconnected successfully"
+      });
+      
+      // Refresh data
+      await fetchAllSecurityData();
+      
+      return true;
+    } catch (error) {
+      console.error('Error disconnecting account:', error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect account",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return {
     loading,
     settings,
@@ -408,6 +444,7 @@ export const useSecuritySettings = () => {
     verifyMFAEnrollment,
     disableMFA,
     changePassword,
+    connectOAuthProvider,
     logSecurityEvent,
     requestDataExport,
     disconnectAccount,

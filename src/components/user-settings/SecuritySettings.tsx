@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
-import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff, Github, Chrome, Linkedin, Plus } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 import { MFAEnrollmentDialog } from "./MFAEnrollmentDialog";
@@ -25,6 +25,8 @@ export const SecuritySettings = () => {
     verifyMFAEnrollment,
     disableMFA,
     changePassword,
+    connectOAuthProvider,
+    disconnectAccount,
     requestDataExport
   } = useSecuritySettings();
   
@@ -95,6 +97,16 @@ export const SecuritySettings = () => {
 
   const handleDataExport = async () => {
     await requestDataExport();
+  };
+
+  const handleConnectProvider = async (provider: 'google' | 'github' | 'linkedin_oidc') => {
+    await connectOAuthProvider(provider);
+  };
+
+  const handleDisconnectAccount = async (accountId: string, provider: string) => {
+    if (confirm(`Are you sure you want to disconnect your ${provider} account?`)) {
+      await disconnectAccount(accountId);
+    }
   };
 
   return (
@@ -358,38 +370,95 @@ export const SecuritySettings = () => {
             Manage your connected third-party accounts
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           {connectedAccounts.length > 0 ? (
-            connectedAccounts.map((account) => (
-              <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <Label className="text-base font-medium capitalize">{account.provider}</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {account.provider_account_email || "Connected"} • 
-                    Connected {new Date(account.connected_at).toLocaleDateString()}
-                  </p>
+            <div className="space-y-4">
+              {connectedAccounts.map((account) => (
+                <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center">
+                      {account.provider === 'google' && <Chrome className="w-5 h-5 text-blue-600" />}
+                      {account.provider === 'github' && <Github className="w-5 h-5 text-gray-800" />}
+                      {account.provider === 'linkedin_oidc' && <Linkedin className="w-5 h-5 text-blue-700" />}
+                      {!['google', 'github', 'linkedin_oidc'].includes(account.provider) && (
+                        <ExternalLink className="w-5 h-5 text-gray-600" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-base font-medium capitalize flex items-center gap-2">
+                        {account.provider === 'linkedin_oidc' ? 'LinkedIn' : account.provider}
+                        <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                          ✓ Connected
+                        </Badge>
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {account.provider_account_email || "Connected account"} • 
+                        Connected {new Date(account.connected_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDisconnectAccount(account.id, account.provider)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Disconnect
+                  </Button>
                 </div>
-                <Badge variant="outline" className="text-green-600 border-green-600">
-                  Connected
-                </Badge>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">No connected accounts</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Connect external accounts for easier sign-in
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <ExternalLink className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground mb-2">No connected accounts</p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Connect external accounts for easier sign-in and enhanced security
               </p>
             </div>
           )}
           
-          <Alert>
-            <ExternalLink className="h-4 w-4" />
-            <AlertDescription>
-              Account connections are managed through your authentication provider. 
-              Contact support for assistance with connecting or disconnecting accounts.
-            </AlertDescription>
-          </Alert>
+          {/* Connect New Accounts */}
+          <div className="space-y-4">
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-base font-medium flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Connect New Account
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => handleConnectProvider('google')}
+                  disabled={loading || connectedAccounts.some(acc => acc.provider === 'google')}
+                  className="flex items-center gap-2 h-12"
+                >
+                  <Chrome className="w-5 h-5 text-blue-600" />
+                  <span>Google</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleConnectProvider('github')}
+                  disabled={loading || connectedAccounts.some(acc => acc.provider === 'github')}
+                  className="flex items-center gap-2 h-12"
+                >
+                  <Github className="w-5 h-5 text-gray-800" />
+                  <span>GitHub</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleConnectProvider('linkedin_oidc')}
+                  disabled={loading || connectedAccounts.some(acc => acc.provider === 'linkedin_oidc')}
+                  className="flex items-center gap-2 h-12"
+                >
+                  <Linkedin className="w-5 h-5 text-blue-700" />
+                  <span>LinkedIn</span>
+                </Button>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
