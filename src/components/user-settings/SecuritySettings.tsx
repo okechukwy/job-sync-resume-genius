@@ -11,6 +11,7 @@ import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
+import { MFAEnrollmentDialog } from "./MFAEnrollmentDialog";
 import { cn } from "@/lib/utils";
 
 export const SecuritySettings = () => {
@@ -20,6 +21,9 @@ export const SecuritySettings = () => {
     settings,
     connectedAccounts,
     updateSecuritySetting,
+    enrollMFA,
+    verifyMFAEnrollment,
+    disableMFA,
     changePassword,
     requestDataExport
   } = useSecuritySettings();
@@ -35,6 +39,8 @@ export const SecuritySettings = () => {
     new: false,
     confirm: false
   });
+
+  const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
 
   // Real-time password validation
   const passwordValidation = useMemo(() => {
@@ -76,6 +82,14 @@ export const SecuritySettings = () => {
         newPassword: "",
         confirmPassword: ""
       });
+    }
+  };
+
+  const handleMFAToggle = async (enabled: boolean) => {
+    if (enabled) {
+      setMfaDialogOpen(true);
+    } else {
+      await disableMFA();
     }
   };
 
@@ -239,7 +253,8 @@ export const SecuritySettings = () => {
               </Badge>
               <Switch 
                 checked={settings.two_factor_enabled}
-                onCheckedChange={(checked) => updateSecuritySetting('two_factor_enabled', checked)}
+                onCheckedChange={handleMFAToggle}
+                disabled={loading}
               />
             </div>
           </div>
@@ -247,12 +262,10 @@ export const SecuritySettings = () => {
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              Two-factor authentication is currently managed through Supabase Auth. 
-              <Button variant="link" className="p-0 h-auto" asChild>
-                <a href="https://supabase.com/docs/guides/auth/auth-mfa" target="_blank" rel="noopener noreferrer">
-                  Learn more <ExternalLink className="w-3 h-3 ml-1" />
-                </a>
-              </Button>
+              {settings.two_factor_enabled 
+                ? "Two-factor authentication is protecting your account. Disable it only if you have an alternative authenticator app set up."
+                : "Enable two-factor authentication to add an extra layer of security to your account using an authenticator app."
+              }
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -374,6 +387,14 @@ export const SecuritySettings = () => {
           </Alert>
         </CardContent>
       </Card>
+
+      {/* MFA Enrollment Dialog */}
+      <MFAEnrollmentDialog
+        open={mfaDialogOpen}
+        onOpenChange={setMfaDialogOpen}
+        onEnroll={enrollMFA}
+        onVerify={verifyMFAEnrollment}
+      />
     </div>
   );
 };

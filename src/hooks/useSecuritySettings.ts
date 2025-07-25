@@ -296,12 +296,117 @@ export const useSecuritySettings = () => {
     }
   };
 
+  // Two-Factor Authentication Functions
+  const enrollMFA = async () => {
+    if (!user) return { success: false, error: 'User not authenticated' };
+
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        friendlyName: 'TOTP'
+      });
+
+      if (error) throw error;
+
+      return { 
+        success: true, 
+        qrCode: data.totp.qr_code,
+        secret: data.totp.secret,
+        factorId: data.id
+      };
+    } catch (error: any) {
+      console.error('Error enrolling MFA:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to enroll MFA",
+        variant: "destructive"
+      });
+      return { success: false, error: error.message };
+    }
+  };
+
+  const verifyMFAEnrollment = async (factorId: string, code: string) => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: '', // For enrollment verification, challengeId is empty
+        code
+      });
+
+      if (error) throw error;
+
+      // Update our local settings
+      await updateSecuritySetting('two_factor_enabled', true);
+      
+      await logSecurityEvent('mfa_enabled', 'Two-factor authentication enabled');
+      
+      toast({
+        title: "Success",
+        description: "Two-factor authentication enabled successfully"
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error verifying MFA enrollment:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to verify MFA code",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const disableMFA = async () => {
+    if (!user) return false;
+
+    try {
+      // Get all factors
+      const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+      
+      if (factorsError) throw factorsError;
+
+      // Unenroll all factors
+      for (const factor of factors.totp) {
+        const { error } = await supabase.auth.mfa.unenroll({
+          factorId: factor.id
+        });
+        if (error) throw error;
+      }
+
+      // Update our local settings
+      await updateSecuritySetting('two_factor_enabled', false);
+      
+      await logSecurityEvent('mfa_disabled', 'Two-factor authentication disabled');
+      
+      toast({
+        title: "Success",
+        description: "Two-factor authentication disabled successfully"
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error disabling MFA:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to disable MFA",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return {
     loading,
     settings,
     connectedAccounts,
     securityEvents,
     updateSecuritySetting,
+    enrollMFA,
+    verifyMFAEnrollment,
+    disableMFA,
     changePassword,
     logSecurityEvent,
     requestDataExport,
