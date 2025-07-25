@@ -4,7 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { cn } from "@/lib/utils";
 
 export const PrivacySettings = () => {
   const { privacySettings, updatePrivacySettings, loading } = useUserSettings();
@@ -65,61 +68,122 @@ export const PrivacySettings = () => {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-sm font-medium text-foreground">Profile Searchable</Label>
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+          <div className="space-y-1">
+            <Label className="text-base font-medium">Profile Searchable</Label>
             <p className="text-sm text-muted-foreground">
               Allow your profile to be found in search results
             </p>
           </div>
-          <Switch 
-            checked={formData.profile_searchable}
-            onCheckedChange={(checked) => handleSwitchChange('profile_searchable', checked)}
-          />
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "px-3 py-1 font-medium",
+                formData.profile_searchable 
+                  ? "text-green-700 border-green-300 bg-green-50" 
+                  : "text-gray-700 border-gray-300 bg-gray-50"
+              )}
+            >
+              {formData.profile_searchable ? "✓ On" : "○ Off"}
+            </Badge>
+            <Switch 
+              checked={formData.profile_searchable}
+              onCheckedChange={(checked) => handleSwitchChange('profile_searchable', checked)}
+              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-sm font-medium text-foreground">Activity Status Visible</Label>
+        <Separator />
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+          <div className="space-y-1">
+            <Label className="text-base font-medium">Activity Status Visible</Label>
             <p className="text-sm text-muted-foreground">
               Show when you're online or recently active
             </p>
           </div>
-          <Switch 
-            checked={formData.activity_status_visible}
-            onCheckedChange={(checked) => handleSwitchChange('activity_status_visible', checked)}
-          />
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "px-3 py-1 font-medium",
+                formData.activity_status_visible 
+                  ? "text-green-700 border-green-300 bg-green-50" 
+                  : "text-gray-700 border-gray-300 bg-gray-50"
+              )}
+            >
+              {formData.activity_status_visible ? "✓ On" : "○ Off"}
+            </Badge>
+            <Switch 
+              checked={formData.activity_status_visible}
+              onCheckedChange={(checked) => handleSwitchChange('activity_status_visible', checked)}
+              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-sm font-medium text-foreground">Data Collection</Label>
+        <Separator />
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+          <div className="space-y-1">
+            <Label className="text-base font-medium">Data Collection</Label>
             <p className="text-sm text-muted-foreground">
               Allow collection of usage data to improve our services
             </p>
           </div>
-          <Switch 
-            checked={formData.data_collection}
-            onCheckedChange={(checked) => handleSwitchChange('data_collection', checked)}
-          />
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "px-3 py-1 font-medium",
+                formData.data_collection 
+                  ? "text-green-700 border-green-300 bg-green-50" 
+                  : "text-gray-700 border-gray-300 bg-gray-50"
+              )}
+            >
+              {formData.data_collection ? "✓ On" : "○ Off"}
+            </Badge>
+            <Switch 
+              checked={formData.data_collection}
+              onCheckedChange={(checked) => handleSwitchChange('data_collection', checked)}
+              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-sm font-medium text-foreground">Analytics Tracking</Label>
+        <Separator />
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+          <div className="space-y-1">
+            <Label className="text-base font-medium">Analytics Tracking</Label>
             <p className="text-sm text-muted-foreground">
               Help us understand how you use our platform
             </p>
           </div>
-          <Switch 
-            checked={formData.analytics_tracking}
-            onCheckedChange={(checked) => handleSwitchChange('analytics_tracking', checked)}
-          />
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "px-3 py-1 font-medium",
+                formData.analytics_tracking 
+                  ? "text-green-700 border-green-300 bg-green-50" 
+                  : "text-gray-700 border-gray-300 bg-gray-50"
+              )}
+            >
+              {formData.analytics_tracking ? "✓ On" : "○ Off"}
+            </Badge>
+            <Switch 
+              checked={formData.analytics_tracking}
+              onCheckedChange={(checked) => handleSwitchChange('analytics_tracking', checked)}
+              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+            />
+          </div>
         </div>
 
-        <Button className="w-full" onClick={handleSave} disabled={loading || saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
+        <div className="pt-4">
+          <Button className="w-full" onClick={handleSave} disabled={loading || saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
