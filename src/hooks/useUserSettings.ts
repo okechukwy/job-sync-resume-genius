@@ -93,19 +93,33 @@ export const useUserSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
+      console.log('📧 Updating notification settings:', newSettings);
+
+      const { data, error } = await supabase
         .from('user_settings')
-        .upsert({ user_id: user.id, ...newSettings });
+        .upsert({ 
+          user_id: user.id, 
+          ...newSettings,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setSettings(prev => prev ? { ...prev, ...newSettings } : null);
+      console.log('📧 Settings updated successfully:', data);
+      
+      // Update local state with the exact data from the database
+      setSettings(data);
+      
       toast({
         title: "Success",
         description: "Settings updated successfully",
       });
     } catch (error) {
-      console.error('Error updating settings:', error);
+      console.error('❌ Error updating settings:', error);
       toast({
         title: "Error",
         description: "Failed to update settings",
