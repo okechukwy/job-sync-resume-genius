@@ -236,26 +236,44 @@ export const SecuritySettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
             <div className="space-y-1">
-              <Label className="text-base font-medium">Two-factor authentication</Label>
-              <p className="text-sm text-muted-foreground">Secure your account with 2FA</p>
+              <Label className="text-base font-medium flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Two-factor authentication
+              </Label>
+              <p className="text-sm text-muted-foreground">Secure your account with 2FA using an authenticator app</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Badge 
                 variant="outline" 
-                className={settings.two_factor_enabled 
-                  ? "text-green-600 border-green-600" 
-                  : "text-orange-600 border-orange-600"
-                }
+                className={cn(
+                  "px-3 py-1 font-medium",
+                  settings.two_factor_enabled 
+                    ? "text-green-700 border-green-300 bg-green-50" 
+                    : "text-orange-700 border-orange-300 bg-orange-50"
+                )}
               >
-                {settings.two_factor_enabled ? "Enabled" : "Disabled"}
+                {settings.two_factor_enabled ? "✓ Enabled" : "⚠ Disabled"}
               </Badge>
-              <Switch 
-                checked={settings.two_factor_enabled}
-                onCheckedChange={handleMFAToggle}
-                disabled={loading}
-              />
+              <div className="flex items-center gap-2">
+                <Label 
+                  htmlFor="mfa-toggle" 
+                  className={cn(
+                    "text-sm font-medium cursor-pointer",
+                    settings.two_factor_enabled ? "text-green-700" : "text-orange-700"
+                  )}
+                >
+                  {settings.two_factor_enabled ? "On" : "Off"}
+                </Label>
+                <Switch 
+                  id="mfa-toggle"
+                  checked={settings.two_factor_enabled}
+                  onCheckedChange={handleMFAToggle}
+                  disabled={loading}
+                  className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+                />
+              </div>
             </div>
           </div>
           
@@ -279,27 +297,55 @@ export const SecuritySettings = () => {
             Configure how you receive security-related notifications
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Login Notifications</Label>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+            <div className="space-y-1">
+              <Label className="text-base font-medium">Login Notifications</Label>
               <p className="text-sm text-muted-foreground">Get notified when someone logs into your account</p>
             </div>
-            <Switch 
-              checked={settings.login_notifications}
-              onCheckedChange={(checked) => updateSecuritySetting('login_notifications', checked)}
-            />
+            <div className="flex items-center gap-3">
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "px-3 py-1 font-medium",
+                  settings.login_notifications 
+                    ? "text-green-700 border-green-300 bg-green-50" 
+                    : "text-gray-700 border-gray-300 bg-gray-50"
+                )}
+              >
+                {settings.login_notifications ? "✓ On" : "○ Off"}
+              </Badge>
+              <Switch 
+                checked={settings.login_notifications}
+                onCheckedChange={(checked) => updateSecuritySetting('login_notifications', checked)}
+                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+              />
+            </div>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Suspicious Activity Alerts</Label>
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+            <div className="space-y-1">
+              <Label className="text-base font-medium">Suspicious Activity Alerts</Label>
               <p className="text-sm text-muted-foreground">Get alerted about unusual account activity</p>
             </div>
-            <Switch 
-              checked={settings.suspicious_activity_alerts}
-              onCheckedChange={(checked) => updateSecuritySetting('suspicious_activity_alerts', checked)}
-            />
+            <div className="flex items-center gap-3">
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "px-3 py-1 font-medium",
+                  settings.suspicious_activity_alerts 
+                    ? "text-green-700 border-green-300 bg-green-50" 
+                    : "text-gray-700 border-gray-300 bg-gray-50"
+                )}
+              >
+                {settings.suspicious_activity_alerts ? "✓ On" : "○ Off"}
+              </Badge>
+              <Switch 
+                checked={settings.suspicious_activity_alerts}
+                onCheckedChange={(checked) => updateSecuritySetting('suspicious_activity_alerts', checked)}
+                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 h-6 w-11"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
