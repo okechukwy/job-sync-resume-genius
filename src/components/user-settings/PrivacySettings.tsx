@@ -23,11 +23,11 @@ export const PrivacySettings = () => {
   useEffect(() => {
     if (privacySettings) {
       setFormData({
-        profile_visibility: privacySettings.profile_visibility,
-        profile_searchable: privacySettings.profile_searchable,
-        activity_status_visible: privacySettings.activity_status_visible,
-        data_collection: privacySettings.data_collection,
-        analytics_tracking: privacySettings.analytics_tracking,
+        profile_visibility: privacySettings.profile_visibility || 'public',
+        profile_searchable: privacySettings.profile_searchable ?? true,
+        activity_status_visible: privacySettings.activity_status_visible ?? true,
+        data_collection: privacySettings.data_collection ?? true,
+        analytics_tracking: privacySettings.analytics_tracking ?? true,
       });
     }
   }, [privacySettings]);

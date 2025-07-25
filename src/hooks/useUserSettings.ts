@@ -67,7 +67,7 @@ export const useUserSettings = () => {
         supabase.from('user_settings').select('*').eq('user_id', user.id).maybeSingle(),
         supabase.from('user_professional_info').select('*').eq('user_id', user.id).maybeSingle(),
         supabase.from('user_job_preferences').select('*').eq('user_id', user.id).maybeSingle(),
-        supabase.from('user_privacy_settings').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_privacy_settings').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).maybeSingle(),
       ]);
 
       setSettings(settingsRes.data);
