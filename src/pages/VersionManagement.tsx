@@ -14,8 +14,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreateVersionDialog } from "@/components/version-management/CreateVersionDialog";
 import { getTemplateDisplayName, getTemplateIcon } from "@/utils/templateUtils";
 import { downloadFile } from "@/utils/downloadUtils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const VersionManagement = () => {
+  const { user, loading: authLoading } = useAuth();
   const {
     versions,
     insights,
@@ -111,10 +113,28 @@ const VersionManagement = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <Card className="glass-card max-w-md">
+          <CardContent className="pt-6 text-center">
+            <h3 className="font-semibold mb-2">Authentication Required</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Please log in to access your resume versions.
+            </p>
+            <Button onClick={() => navigate('/auth')}>
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

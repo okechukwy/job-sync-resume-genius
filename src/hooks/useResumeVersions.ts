@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ResumeVersion {
   id: string;
@@ -40,15 +41,24 @@ export const useResumeVersions = () => {
   const [loading, setLoading] = useState(true);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchVersions = async () => {
     try {
       setLoading(true);
       
-      // Fetch ALL user resume versions (both active and archived)
+      // Check if user is authenticated
+      if (!user) {
+        setVersions([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch user's resume versions with proper authentication
       const { data: resumeData, error: resumeError } = await supabase
         .from('user_resumes')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (resumeError) throw resumeError;
@@ -258,8 +268,13 @@ export const useResumeVersions = () => {
   };
 
   useEffect(() => {
-    fetchVersions();
-  }, []);
+    if (user) {
+      fetchVersions();
+    } else {
+      setVersions([]);
+      setLoading(false);
+    }
+  }, [user]);
 
   return {
     versions,
