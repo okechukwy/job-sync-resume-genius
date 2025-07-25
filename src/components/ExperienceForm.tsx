@@ -232,13 +232,16 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange }: ExperienceFormPr
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={parseDate(experience.startDate)}
-                      onSelect={(date) => handleDateChange(experience.id, 'startDate', date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        fromYear={1950}
+                        toYear={2030}
+                        selected={parseDate(experience.startDate)}
+                        onSelect={(date) => handleDateChange(experience.id, 'startDate', date)}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -265,14 +268,17 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange }: ExperienceFormPr
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={parseDate(experience.endDate)}
-                      onSelect={(date) => handleDateChange(experience.id, 'endDate', date)}
-                      disabled={experience.current}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                        <Calendar
+                          mode="single"
+                          captionLayout="dropdown"
+                          fromYear={1950}
+                          toYear={2030}
+                          selected={parseDate(experience.endDate)}
+                          onSelect={(date) => handleDateChange(experience.id, 'endDate', date)}
+                          disabled={experience.current}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
                   </PopoverContent>
                 </Popover>
                 {getDateValidationError(experience) && (

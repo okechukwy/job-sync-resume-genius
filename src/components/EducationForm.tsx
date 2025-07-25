@@ -190,6 +190,9 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
+                      captionLayout="dropdown"
+                      fromYear={1950}
+                      toYear={2030}
                       selected={education.startDate ? new Date(education.startDate + '-01') : undefined}
                       onSelect={(date) => handleDateChange(education.id, 'startDate', date)}
                       className="pointer-events-auto"
@@ -217,6 +220,9 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
+                      captionLayout="dropdown"
+                      fromYear={1950}
+                      toYear={2030}
                       selected={education.endDate ? new Date(education.endDate + '-01') : undefined}
                       onSelect={(date) => handleDateChange(education.id, 'endDate', date)}
                       className="pointer-events-auto"
