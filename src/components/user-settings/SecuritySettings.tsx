@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { Shield, Key, Download, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
+import { cn } from "@/lib/utils";
 
 export const SecuritySettings = () => {
   const { toast } = useToast();
@@ -34,34 +36,34 @@ export const SecuritySettings = () => {
     confirm: false
   });
 
+  // Real-time password validation
+  const passwordValidation = useMemo(() => {
+    const requirements = {
+      minLength: passwordForm.newPassword.length >= 8,
+      hasUppercase: /[A-Z]/.test(passwordForm.newPassword),
+      hasNumber: /\d/.test(passwordForm.newPassword),
+      hasSpecialChar: /[@$!%*?&]/.test(passwordForm.newPassword)
+    };
+    
+    const allRequirementsMet = Object.values(requirements).every(Boolean);
+    const passwordsMatch = passwordForm.newPassword === passwordForm.confirmPassword && passwordForm.newPassword.length > 0;
+    
+    return {
+      requirements,
+      allRequirementsMet,
+      passwordsMatch,
+      isValid: allRequirementsMet && passwordsMatch && passwordForm.currentPassword.length > 0
+    };
+  }, [passwordForm]);
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    // Validation is now handled by real-time validation
+    if (!passwordValidation.isValid) {
       toast({
         title: "Error",
-        description: "New passwords do not match",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Password strength validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
-    if (passwordForm.newPassword.length < 8) {
-      toast({
-        title: "Error", 
-        description: "Password must be at least 8 characters long",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!passwordRegex.test(passwordForm.newPassword)) {
-      toast({
-        title: "Error",
-        description: "Password must include at least 1 uppercase letter, 1 number, and 1 special character",
+        description: "Please fix all password requirements before submitting",
         variant: "destructive"
       });
       return;
@@ -132,7 +134,11 @@ export const SecuritySettings = () => {
                   onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
                   required
                   minLength={8}
-                  className="pr-10"
+                  className={cn(
+                    "pr-10",
+                    passwordForm.newPassword.length > 0 && !passwordValidation.allRequirementsMet && "border-destructive focus-visible:ring-destructive",
+                    passwordForm.newPassword.length > 0 && passwordValidation.allRequirementsMet && "border-green-500 focus-visible:ring-green-500"
+                  )}
                 />
                 <Button
                   type="button"
@@ -148,6 +154,9 @@ export const SecuritySettings = () => {
                   )}
                 </Button>
               </div>
+              {passwordForm.newPassword.length > 0 && (
+                <PasswordStrengthIndicator password={passwordForm.newPassword} />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm New Password</Label>
@@ -159,7 +168,11 @@ export const SecuritySettings = () => {
                   onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   required
                   minLength={8}
-                  className="pr-10"
+                  className={cn(
+                    "pr-10",
+                    passwordForm.confirmPassword.length > 0 && !passwordValidation.passwordsMatch && "border-destructive focus-visible:ring-destructive",
+                    passwordForm.confirmPassword.length > 0 && passwordValidation.passwordsMatch && "border-green-500 focus-visible:ring-green-500"
+                  )}
                 />
                 <Button
                   type="button"
@@ -175,9 +188,21 @@ export const SecuritySettings = () => {
                   )}
                 </Button>
               </div>
+              {passwordForm.confirmPassword.length > 0 && (
+                <PasswordStrengthIndicator 
+                  password={passwordForm.newPassword} 
+                  confirmPassword={passwordForm.confirmPassword}
+                />
+              )}
             </div>
             <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading || !passwordValidation.isValid}
+                className={cn(
+                  passwordValidation.isValid && "bg-green-600 hover:bg-green-700"
+                )}
+              >
                 {loading ? "Updating..." : "Update Password"}
               </Button>
             </div>
