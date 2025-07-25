@@ -70,6 +70,8 @@ export const useUserSettings = () => {
         supabase.from('user_privacy_settings').select('*').eq('user_id', user.id).order('updated_at', { ascending: false }).maybeSingle(),
       ]);
 
+      console.log('🔒 Fetched privacy settings from DB:', privacyRes.data);
+      
       setSettings(settingsRes.data);
       setProfessionalInfo(professionalRes.data);
       setJobPreferences(jobPrefRes.data);
@@ -169,19 +171,33 @@ export const useUserSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
+      console.log('🔒 Saving privacy settings:', newSettings);
+      
+      const { data, error } = await supabase
         .from('user_privacy_settings')
-        .upsert({ user_id: user.id, ...newSettings });
+        .upsert({
+          user_id: user.id,
+          ...newSettings,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      
+      console.log('🔒 Privacy settings saved successfully:', data);
 
-      setPrivacySettings(prev => prev ? { ...prev, ...newSettings } : null);
+      // Update local state with the exact data from the database
+      setPrivacySettings(data);
+      
       toast({
         title: "Success",
         description: "Privacy settings updated successfully",
       });
     } catch (error) {
-      console.error('Error updating privacy settings:', error);
+      console.error('❌ Error updating privacy settings:', error);
       toast({
         title: "Error",
         description: "Failed to update privacy settings",

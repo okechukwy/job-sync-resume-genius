@@ -21,14 +21,19 @@ export const PrivacySettings = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    console.log('🔒 Privacy settings from hook:', privacySettings);
+    
     if (privacySettings) {
-      setFormData({
+      const newFormData = {
         profile_visibility: privacySettings.profile_visibility || 'public',
-        profile_searchable: privacySettings.profile_searchable ?? true,
-        activity_status_visible: privacySettings.activity_status_visible ?? true,
-        data_collection: privacySettings.data_collection ?? true,
-        analytics_tracking: privacySettings.analytics_tracking ?? true,
-      });
+        profile_searchable: privacySettings.profile_searchable !== null ? privacySettings.profile_searchable : true,
+        activity_status_visible: privacySettings.activity_status_visible !== null ? privacySettings.activity_status_visible : true,
+        data_collection: privacySettings.data_collection !== null ? privacySettings.data_collection : true,
+        analytics_tracking: privacySettings.analytics_tracking !== null ? privacySettings.analytics_tracking : true,
+      };
+      
+      console.log('🔒 Setting form data to:', newFormData);
+      setFormData(newFormData);
     }
   }, [privacySettings]);
 
@@ -42,7 +47,15 @@ export const PrivacySettings = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    await updatePrivacySettings(formData);
+    console.log('🔒 Saving form data:', formData);
+    
+    try {
+      await updatePrivacySettings(formData);
+      console.log('🔒 Save completed successfully');
+    } catch (error) {
+      console.error('❌ Save failed:', error);
+    }
+    
     setSaving(false);
   };
 
