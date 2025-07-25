@@ -40,10 +40,22 @@ export const SecuritySettings = () => {
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
+    // Password strength validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    if (passwordForm.newPassword.length < 8) {
       toast({
         title: "Error", 
-        description: "Password must be at least 6 characters long",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!passwordRegex.test(passwordForm.newPassword)) {
+      toast({
+        title: "Error",
+        description: "Password must include at least 1 uppercase letter, 1 number, and 1 special character",
         variant: "destructive"
       });
       return;
@@ -96,7 +108,7 @@ export const SecuritySettings = () => {
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
             <div className="space-y-2">
@@ -107,7 +119,7 @@ export const SecuritySettings = () => {
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
             <div className="flex justify-end pt-2">
