@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, Mail, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -223,6 +224,7 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
+              <SocialAuthButtons onSuccess={() => navigate(from, { replace: true })} />
               {!showForgotPassword ? (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
@@ -388,6 +390,8 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              <SocialAuthButtons onSuccess={() => navigate(from, { replace: true })} />
+              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-fullname">Full Name</Label>
