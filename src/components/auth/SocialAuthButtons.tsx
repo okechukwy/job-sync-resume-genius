@@ -20,22 +20,31 @@ export const SocialAuthButtons = ({ onSuccess }: SocialAuthButtonsProps) => {
       const { error } = await signInWithOAuth(provider);
       
       if (error) {
-        toast({
-          title: "Authentication Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        // Handle specific provider configuration errors
+        if (error.message.includes('provider is not enabled') || error.message.includes('Unsupported provider')) {
+          toast({
+            title: "Provider Not Available",
+            description: `${provider === 'linkedin_oidc' ? 'LinkedIn' : provider.charAt(0).toUpperCase() + provider.slice(1)} authentication is currently being configured. Please try email authentication or contact support.`,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Authentication Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Redirecting...",
-          description: `Signing in with ${provider === 'linkedin_oidc' ? 'LinkedIn' : provider}`,
+          description: `Signing in with ${provider === 'linkedin_oidc' ? 'LinkedIn' : provider.charAt(0).toUpperCase() + provider.slice(1)}`,
         });
         onSuccess?.();
       }
     } catch (error) {
       toast({
         title: "Unexpected Error",
-        description: "Something went wrong. Please try again.",
+        description: "Something went wrong. Please try again or use email authentication.",
         variant: "destructive",
       });
     }
