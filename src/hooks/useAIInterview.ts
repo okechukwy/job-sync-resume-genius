@@ -219,6 +219,38 @@ export const useAIInterview = () => {
     }
   }, [toast]);
 
+  const startSessionWithQuestion = useCallback(async (
+    question: InterviewQuestion,
+    sessionType: string,
+    roleFocus: string
+  ) => {
+    try {
+      const newSession: InterviewSession = {
+        id: crypto.randomUUID(),
+        questions: [question],
+        responses: [],
+        sessionType,
+        roleFocus,
+        completed: false,
+        totalScore: 0,
+        createdAt: new Date().toISOString(),
+        questionCount: 1,
+      };
+
+      setCurrentSession(newSession);
+      
+      toast({
+        title: "Specific Question Practice",
+        description: `Starting practice with your selected question.`,
+      });
+
+      return newSession;
+    } catch (error) {
+      console.error('Error starting session with specific question:', error);
+      throw error;
+    }
+  }, [toast]);
+
   const startSession = useCallback(async (
     sessionType: string,
     roleFocus: string,
@@ -482,6 +514,7 @@ export const useAIInterview = () => {
     analyzeResponse,
     generateSampleAnswer,
     startSession,
+    startSessionWithQuestion,
     addResponse,
     completeSession,
     getSessionHistory,

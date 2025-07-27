@@ -47,7 +47,7 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAIInterview, InterviewQuestion, InterviewAnalysis } from "@/hooks/useAIInterview";
+import { useAIInterview, InterviewQuestion, InterviewAnalysis, InterviewSession } from "@/hooks/useAIInterview";
 import SampleAnswerSection from "@/components/interview/SampleAnswerSection";
 import { useSessionHistory } from "@/hooks/useSessionHistory";
 import { SessionHistoryFilters } from "@/components/interview/SessionHistoryFilters";
@@ -104,6 +104,21 @@ const AIInterviewPrep = () => {
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'limited'>('online');
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [activeTab, setActiveTab] = useState("practice");
+
+  // Define the Question type to match QuestionBankSection
+  interface Question {
+    id: string;
+    text: string;
+    category: string;
+    difficulty: string;
+    industry: string[];
+    role: string[];
+    tags: string[];
+    tips: string;
+    sampleAnswer?: string;
+    trending?: boolean;
+    bookmarked?: boolean;
+  }
 
   // Speech recognition setup
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
@@ -222,6 +237,51 @@ const AIInterviewPrep = () => {
   const handleRetrySession = async () => {
     retryLastAction();
     await handleStartSession();
+  };
+
+  const handleStartSpecificQuestionPractice = async (question: any) => {
+    try {
+      // Convert the Question Bank question to InterviewQuestion format
+      const interviewQuestion: InterviewQuestion = {
+        id: question.id,
+        text: question.text,
+        category: question.category,
+        difficulty: question.difficulty,
+        tips: question.tips,
+        expectedElements: question.tags || []
+      };
+
+      // Create a session with just this specific question
+      const newSession: InterviewSession = {
+        id: crypto.randomUUID(),
+        questions: [interviewQuestion],
+        responses: [],
+        sessionType: question.category,
+        roleFocus: selectedRole,
+        completed: false,
+        totalScore: 0,
+        createdAt: new Date().toISOString(),
+        questionCount: 1,
+      };
+
+      setCurrentSession(newSession);
+      setCurrentQuestionIndex(0);
+      setTranscript("");
+      setLastAnalysis(null);
+      setLastAnsweredQuestionId(null);
+      
+      toast({
+        title: "Practicing Specific Question",
+        description: `Starting practice session with your selected question.`,
+      });
+    } catch (error) {
+      console.error('Error starting specific question practice:', error);
+      toast({
+        title: "Practice Start Failed",
+        description: "Failed to start practice with the selected question.",
+        variant: "destructive",
+      });
+    }
   };
 
   const startRecording = () => {
@@ -494,10 +554,13 @@ const AIInterviewPrep = () => {
 
           <TabsContent value="questions" className="space-y-6">
             <QuestionBankSection 
-              onStartPractice={(sessionType, roleFocus) => {
+              onStartPractice={(sessionType, roleFocus, specificQuestion) => {
                 setSelectedType(sessionType);
                 setSelectedRole(roleFocus);
                 setActiveTab("practice");
+                if (specificQuestion) {
+                  handleStartSpecificQuestionPractice(specificQuestion);
+                }
               }}
             />
           </TabsContent>

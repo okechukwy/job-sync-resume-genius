@@ -35,7 +35,7 @@ interface Question {
 }
 
 interface QuestionBankSectionProps {
-  onStartPractice: (sessionType: string, roleFocus: string) => void;
+  onStartPractice: (sessionType: string, roleFocus: string, specificQuestion?: Question) => void;
 }
 
 const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
@@ -329,7 +329,7 @@ const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
 
                       <Button
                         size="sm"
-                        onClick={() => onStartPractice(question.category, 'Business')}
+                        onClick={() => onStartPractice(question.category, 'Business', question)}
                       >
                         <PlayCircle className="w-4 h-4 mr-2" />
                         Practice
@@ -380,7 +380,7 @@ const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
 
                       <Button
                         size="sm"
-                        onClick={() => onStartPractice(question.category, 'Business')}
+                        onClick={() => onStartPractice(question.category, 'Business', question)}
                       >
                         <PlayCircle className="w-4 h-4 mr-2" />
                         Practice
@@ -415,13 +415,13 @@ const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
                           </div>
                         </div>
 
-                        <Button
-                          size="sm"
-                          onClick={() => onStartPractice(question.category, 'Business')}
-                        >
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                          Practice
-                        </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => onStartPractice(question.category, 'Business', question)}
+                          >
+                            <PlayCircle className="w-4 h-4 mr-2" />
+                            Practice
+                          </Button>
                       </div>
                     </CardContent>
                   </Card>
