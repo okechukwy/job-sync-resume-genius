@@ -53,6 +53,8 @@ import { useSessionHistory } from "@/hooks/useSessionHistory";
 import { SessionHistoryFilters } from "@/components/interview/SessionHistoryFilters";
 import { SessionHistoryItem } from "@/components/interview/SessionHistoryItem";
 import { PageLayout } from "@/components/common/PageLayout";
+import InterviewGuideSection from "@/components/interview/InterviewGuideSection";
+import QuestionBankSection from "@/components/interview/QuestionBankSection";
 
 const AIInterviewPrep = () => {
   const { toast } = useToast();
@@ -472,11 +474,33 @@ const AIInterviewPrep = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="practice">Practice Session</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="guide">Study Guide</TabsTrigger>
+            <TabsTrigger value="questions">Question Bank</TabsTrigger>
+            <TabsTrigger value="practice">AI Practice</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="history">Session History</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="guide" className="space-y-6">
+            <InterviewGuideSection 
+              onStartPractice={(sessionType, roleFocus) => {
+                setSelectedType(sessionType);
+                setSelectedRole(roleFocus);
+                setActiveTab("practice");
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="questions" className="space-y-6">
+            <QuestionBankSection 
+              onStartPractice={(sessionType, roleFocus) => {
+                setSelectedType(sessionType);
+                setSelectedRole(roleFocus);
+                setActiveTab("practice");
+              }}
+            />
+          </TabsContent>
 
           <TabsContent value="practice" className="space-y-6">
             {!currentSession ? (
