@@ -31,7 +31,7 @@ export const PageHeader = ({
   };
 
   return (
-    <div className="glass-card border-b border-border/1 sticky top-0 z-50 rounded-lg">
+    <div className="glass-card sticky top-0 z-50 rounded-xl">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
           {showBackButton && (
