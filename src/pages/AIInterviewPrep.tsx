@@ -1157,8 +1157,8 @@ const AIInterviewPrep = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                            <SelectItem value="created_at-asc">Date (Newest)</SelectItem>
-                            <SelectItem value="created_at-desc">Date (Oldest)</SelectItem>
+                        <SelectItem value="created_at-desc">Date (Newest)</SelectItem>
+                        <SelectItem value="created_at-asc">Date (Oldest)</SelectItem>
                         <SelectItem value="scores-desc">Score (Highest)</SelectItem>
                         <SelectItem value="scores-asc">Score (Lowest)</SelectItem>
                         <SelectItem value="session_type-asc">Type (A-Z)</SelectItem>
