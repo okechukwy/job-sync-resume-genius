@@ -104,7 +104,7 @@ export const useSessionHistory = () => {
 
       // Apply sorting
       const orderColumn = sort.field === 'scores' ? 'scores->overall' : sort.field;
-      query = query.order(orderColumn, { ascending: sort.order === 'asc' });
+      query = query.order(orderColumn, { ascending: sort.order === 'desc' });
 
       // Apply pagination
       const from = (pagination.page - 1) * pagination.pageSize;
