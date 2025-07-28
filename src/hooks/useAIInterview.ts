@@ -283,7 +283,7 @@ export const useAIInterview = () => {
       console.error('Error starting session with specific question:', error);
       throw error;
     }
-  }, [toast, saveIncompleteSession]);
+  }, [toast]);
 
   const startSessionWithMultipleQuestions = useCallback(async (
     questions: InterviewQuestion[],
@@ -318,7 +318,7 @@ export const useAIInterview = () => {
       console.error('Error starting session with multiple questions:', error);
       throw error;
     }
-  }, [toast, saveIncompleteSession]);
+  }, [toast]);
 
   const startSession = useCallback(async (
     sessionType: string,
@@ -362,7 +362,7 @@ export const useAIInterview = () => {
       console.error('Error starting session:', error);
       throw error;
     }
-  }, [generateQuestions, toast, saveIncompleteSession]);
+  }, [generateQuestions, toast]);
 
   const addResponse = useCallback(async (
     questionId: string,
