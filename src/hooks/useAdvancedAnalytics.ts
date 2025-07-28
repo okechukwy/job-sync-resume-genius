@@ -146,7 +146,9 @@ export const useAdvancedAnalytics = (period: string) => {
         },
       marketInsights: generateMarketInsights(),
       industryTrends: generateIndustryTrends(),
-      skillGaps: Array.isArray(gapData?.[0]?.skill_gaps) ? gapData[0].skill_gaps : [],
+      skillGaps: Array.isArray(gapData?.[0]?.skill_gaps) 
+        ? (gapData[0].skill_gaps as Array<{ skill: string; currentLevel: number; targetLevel: number; priority: string }>)
+        : [],
       };
 
       setAnalytics(analyticsData);
