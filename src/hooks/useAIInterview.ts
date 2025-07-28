@@ -219,6 +219,37 @@ export const useAIInterview = () => {
     }
   }, [toast]);
 
+  const saveIncompleteSession = useCallback(async (session: InterviewSession) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        throw new Error('User not authenticated');
+      }
+
+      const sessionData = {
+        id: session.id,
+        user_id: userData.user.id,
+        session_type: session.sessionType,
+        role_focus: session.roleFocus,
+        questions: session.questions as any,
+        responses: session.responses as any,
+        completed: false,
+        scores: { overall: 0 } as any,
+        feedback: {} as any
+      };
+
+      const { error } = await supabase.from('interview_sessions').insert(sessionData);
+
+      if (error) {
+        console.error('Error saving incomplete session:', error);
+        // Don't throw error here - session can still work locally
+      }
+    } catch (error) {
+      console.error('Error saving incomplete session:', error);
+      // Don't throw error here - session can still work locally
+    }
+  }, []);
+
   const startSessionWithQuestion = useCallback(async (
     question: InterviewQuestion,
     sessionType: string,
@@ -237,6 +268,9 @@ export const useAIInterview = () => {
         questionCount: 1,
       };
 
+      // Save incomplete session to database immediately
+      await saveIncompleteSession(newSession);
+
       setCurrentSession(newSession);
       
       toast({
@@ -249,7 +283,7 @@ export const useAIInterview = () => {
       console.error('Error starting session with specific question:', error);
       throw error;
     }
-  }, [toast]);
+  }, [toast, saveIncompleteSession]);
 
   const startSessionWithMultipleQuestions = useCallback(async (
     questions: InterviewQuestion[],
@@ -269,6 +303,9 @@ export const useAIInterview = () => {
         questionCount: questions.length,
       };
 
+      // Save incomplete session to database immediately
+      await saveIncompleteSession(newSession);
+
       setCurrentSession(newSession);
       
       toast({
@@ -281,7 +318,7 @@ export const useAIInterview = () => {
       console.error('Error starting session with multiple questions:', error);
       throw error;
     }
-  }, [toast]);
+  }, [toast, saveIncompleteSession]);
 
   const startSession = useCallback(async (
     sessionType: string,
@@ -308,6 +345,9 @@ export const useAIInterview = () => {
         questionCount: questionsData.questions.length,
       };
 
+      // Save incomplete session to database immediately
+      await saveIncompleteSession(newSession);
+
       setCurrentSession(newSession);
       
       const isOfflineMode = questionsData.sessionInfo?.focus?.includes('offline mode');
@@ -322,7 +362,7 @@ export const useAIInterview = () => {
       console.error('Error starting session:', error);
       throw error;
     }
-  }, [generateQuestions, toast]);
+  }, [generateQuestions, toast, saveIncompleteSession]);
 
   const addResponse = useCallback(async (
     questionId: string,
@@ -397,9 +437,23 @@ export const useAIInterview = () => {
       questionCount: sessionForCompletion.questions.length
     });
 
-    // Only complete sessions that have actual responses
+    // Handle sessions with no responses - delete from database and mark as completed locally
     if (sessionForCompletion.responses.length === 0) {
-      console.log('Session has no responses, not saving to database');
+      console.log('Session has no responses, removing from database');
+      
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await supabase
+            .from('interview_sessions')
+            .delete()
+            .eq('id', sessionForCompletion.id)
+            .eq('user_id', userData.user.id);
+        }
+      } catch (error) {
+        console.error('Error deleting empty session:', error);
+      }
+
       toast({
         title: "Session Not Saved",
         description: "Session had no responses and was not saved.",
@@ -418,11 +472,10 @@ export const useAIInterview = () => {
       }
 
       const sessionData = {
-        user_id: userData.user.id,
         session_type: sessionForCompletion.sessionType,
         role_focus: sessionForCompletion.roleFocus,
-        questions: sessionForCompletion.questions,
-        responses: sessionForCompletion.responses,
+        questions: sessionForCompletion.questions as any,
+        responses: sessionForCompletion.responses as any,
         completed: true,
         scores: {
           overall: sessionForCompletion.totalScore,
@@ -442,20 +495,25 @@ export const useAIInterview = () => {
             sessionForCompletion.responses.reduce((sum, r) => sum + r.analysis.scores.impact, 0) / 
             sessionForCompletion.responses.length
           )
-        },
+        } as any,
         feedback: {
           strengths: [...new Set(sessionForCompletion.responses.flatMap(r => r.analysis.strengths))],
           improvements: sessionForCompletion.responses.flatMap(r => r.analysis.improvements),
           summary: sessionForCompletion.responses[sessionForCompletion.responses.length - 1]?.analysis.summary || ''
-        }
-      } as any;
+        } as any
+      };
 
-      console.log('Saving session to database:', sessionData);
+      console.log('Updating session to completed:', sessionData);
 
-      const { error } = await supabase.from('interview_sessions').insert(sessionData);
+      // Update the existing session instead of inserting a new one
+      const { error } = await supabase
+        .from('interview_sessions')
+        .update(sessionData)
+        .eq('id', sessionForCompletion.id)
+        .eq('user_id', userData.user.id);
 
       if (error) {
-        console.error('Error saving session:', error);
+        console.error('Error updating session:', error);
         throw error;
       }
 
