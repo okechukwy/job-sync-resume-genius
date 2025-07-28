@@ -48,6 +48,62 @@ const QuestionBankSection = ({ onStartPractice, onStartBookmarkedPractice }: Que
   const [activeView, setActiveView] = useState("browse");
 
   const questionBank: Question[] = [
+    // Essential Interview Questions
+    {
+      id: 'essential-1',
+      text: 'Tell me about yourself.',
+      category: 'behavioral',
+      difficulty: 'easy',
+      industry: ['Technology', 'Business', 'Healthcare', 'Finance', 'Marketing', 'Operations'],
+      role: ['All Roles'],
+      tags: ['introduction', 'personal pitch', 'elevator pitch', 'essential'],
+      tips: 'Create a 2-3 minute elevator pitch covering your background, current situation, and career goals. Use the Present-Past-Future structure: where you are now, relevant experience, and what you\'re looking for next.',
+      trending: true
+    },
+    {
+      id: 'essential-2',
+      text: 'Why do you want to work here?',
+      category: 'behavioral',
+      difficulty: 'easy',
+      industry: ['Technology', 'Business', 'Healthcare', 'Finance', 'Marketing', 'Operations'],
+      role: ['All Roles'],
+      tags: ['company research', 'motivation', 'cultural fit', 'essential'],
+      tips: 'Research the company thoroughly. Connect your values and career goals to the company\'s mission, values, and opportunities. Be specific about what excites you about this role and organization.',
+      trending: true
+    },
+    {
+      id: 'essential-3',
+      text: 'What are your strengths and weaknesses?',
+      category: 'behavioral',
+      difficulty: 'medium',
+      industry: ['Technology', 'Business', 'Healthcare', 'Finance', 'Marketing', 'Operations'],
+      role: ['All Roles'],
+      tags: ['self-awareness', 'personal development', 'honest reflection', 'essential'],
+      tips: 'For strengths: Choose 2-3 relevant to the role with specific examples. For weaknesses: Pick a real weakness you\'re actively working to improve and explain your development plan.',
+      trending: true
+    },
+    {
+      id: 'essential-4',
+      text: 'Where do you see yourself in 5 years?',
+      category: 'behavioral',
+      difficulty: 'medium',
+      industry: ['Technology', 'Business', 'Healthcare', 'Finance', 'Marketing', 'Operations'],
+      role: ['All Roles'],
+      tags: ['career goals', 'ambition', 'growth mindset', 'essential'],
+      tips: 'Show ambition but be realistic. Align your goals with potential growth paths at the company. Focus on skills you want to develop and impact you want to make rather than specific titles.',
+      trending: true
+    },
+    {
+      id: 'essential-5',
+      text: 'Describe a challenge you overcame.',
+      category: 'behavioral',
+      difficulty: 'medium',
+      industry: ['Technology', 'Business', 'Healthcare', 'Finance', 'Marketing', 'Operations'],
+      role: ['All Roles'],
+      tags: ['problem solving', 'resilience', 'STAR method', 'essential'],
+      tips: 'Use the STAR method: Situation, Task, Action, Result. Choose a meaningful challenge that demonstrates problem-solving skills, resilience, and learning. Focus on your specific actions and measurable outcomes.',
+      trending: true
+    },
     {
       id: '1',
       text: 'Tell me about a time when you had to work with a difficult team member.',
