@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_items: {
+        Row: {
+          category: string
+          completed_at: string | null
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          estimated_time_minutes: number | null
+          id: string
+          priority: string
+          related_goal_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          priority?: string
+          related_goal_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          priority?: string
+          related_goal_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_items_related_goal_id_fkey"
+            columns: ["related_goal_id"]
+            isOneToOne: false
+            referencedRelation: "career_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_generations: {
         Row: {
           created_at: string | null
@@ -96,6 +155,198 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      career_certifications: {
+        Row: {
+          badge_image_url: string | null
+          certification_name: string
+          created_at: string
+          description: string | null
+          earned_at: string
+          expires_at: string | null
+          id: string
+          is_featured: boolean
+          issuing_organization: string
+          skills_validated: string[]
+          updated_at: string
+          user_id: string
+          verification_url: string | null
+        }
+        Insert: {
+          badge_image_url?: string | null
+          certification_name: string
+          created_at?: string
+          description?: string | null
+          earned_at?: string
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean
+          issuing_organization: string
+          skills_validated?: string[]
+          updated_at?: string
+          user_id: string
+          verification_url?: string | null
+        }
+        Update: {
+          badge_image_url?: string | null
+          certification_name?: string
+          created_at?: string
+          description?: string | null
+          earned_at?: string
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean
+          issuing_organization?: string
+          skills_validated?: string[]
+          updated_at?: string
+          user_id?: string
+          verification_url?: string | null
+        }
+        Relationships: []
+      }
+      career_goals: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          milestones: Json
+          priority: string
+          progress_percentage: number
+          status: string
+          success_metrics: Json
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          milestones?: Json
+          priority?: string
+          progress_percentage?: number
+          status?: string
+          success_metrics?: Json
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          milestones?: Json
+          priority?: string
+          progress_percentage?: number
+          status?: string
+          success_metrics?: Json
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coaching_programs: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          difficulty_level: string
+          estimated_duration_weeks: number
+          id: string
+          is_active: boolean
+          is_premium: boolean
+          prerequisites: string[]
+          skills_covered: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          difficulty_level?: string
+          estimated_duration_weeks?: number
+          id?: string
+          is_active?: boolean
+          is_premium?: boolean
+          prerequisites?: string[]
+          skills_covered?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty_level?: string
+          estimated_duration_weeks?: number
+          id?: string
+          is_active?: boolean
+          is_premium?: boolean
+          prerequisites?: string[]
+          skills_covered?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coaching_sessions: {
+        Row: {
+          action_items: Json
+          coach_notes: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          feedback_comments: string | null
+          feedback_score: number | null
+          id: string
+          scheduled_at: string
+          session_type: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_items?: Json
+          coach_notes?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          feedback_comments?: string | null
+          feedback_score?: number | null
+          id?: string
+          scheduled_at: string
+          session_type: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_items?: Json
+          coach_notes?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          feedback_comments?: string | null
+          feedback_score?: number | null
+          id?: string
+          scheduled_at?: string
+          session_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       connected_accounts: {
         Row: {
@@ -287,6 +538,51 @@ export type Database = {
           },
         ]
       }
+      industry_benchmarks: {
+        Row: {
+          benchmark_level: number
+          created_at: string
+          data_source: string | null
+          growth_projection: number | null
+          id: string
+          industry: string
+          job_role: string
+          last_updated: string
+          market_demand: string | null
+          salary_range_max: number | null
+          salary_range_min: number | null
+          skill_name: string
+        }
+        Insert: {
+          benchmark_level: number
+          created_at?: string
+          data_source?: string | null
+          growth_projection?: number | null
+          id?: string
+          industry: string
+          job_role: string
+          last_updated?: string
+          market_demand?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          skill_name: string
+        }
+        Update: {
+          benchmark_level?: number
+          created_at?: string
+          data_source?: string | null
+          growth_projection?: number | null
+          id?: string
+          industry?: string
+          job_role?: string
+          last_updated?: string
+          market_demand?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          skill_name?: string
+        }
+        Relationships: []
+      }
       interview_sessions: {
         Row: {
           completed: boolean | null
@@ -395,6 +691,113 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      learning_modules: {
+        Row: {
+          content_type: string
+          content_url: string | null
+          created_at: string
+          description: string
+          duration_minutes: number
+          id: string
+          is_interactive: boolean
+          learning_objectives: string[]
+          order_index: number
+          prerequisites: string[]
+          program_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description: string
+          duration_minutes?: number
+          id?: string
+          is_interactive?: boolean
+          learning_objectives?: string[]
+          order_index?: number
+          prerequisites?: string[]
+          program_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          is_interactive?: boolean
+          learning_objectives?: string[]
+          order_index?: number
+          prerequisites?: string[]
+          program_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_modules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_resources: {
+        Row: {
+          cost_type: string
+          created_at: string
+          description: string
+          difficulty_level: string
+          estimated_time_minutes: number | null
+          id: string
+          is_recommended: boolean
+          provider: string | null
+          rating: number | null
+          resource_type: string
+          resource_url: string | null
+          skill_areas: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cost_type?: string
+          created_at?: string
+          description: string
+          difficulty_level?: string
+          estimated_time_minutes?: number | null
+          id?: string
+          is_recommended?: boolean
+          provider?: string | null
+          rating?: number | null
+          resource_type: string
+          resource_url?: string | null
+          skill_areas?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cost_type?: string
+          created_at?: string
+          description?: string
+          difficulty_level?: string
+          estimated_time_minutes?: number | null
+          id?: string
+          is_recommended?: boolean
+          provider?: string | null
+          rating?: number | null
+          resource_type?: string
+          resource_url?: string | null
+          skill_areas?: string[]
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -512,6 +915,51 @@ export type Database = {
         }
         Relationships: []
       }
+      personalized_insights: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          insight_type: string
+          is_read: boolean
+          metadata: Json
+          priority: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          insight_type: string
+          is_read?: boolean
+          metadata?: Json
+          priority?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          insight_type?: string
+          is_read?: boolean
+          metadata?: Json
+          priority?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           city: string | null
@@ -580,6 +1028,98 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      skills_assessments: {
+        Row: {
+          assessment_date: string
+          category: string
+          created_at: string
+          current_level: number
+          id: string
+          improvement_recommendations: string[] | null
+          learning_resources: string[] | null
+          next_assessment_date: string | null
+          skill_name: string
+          target_level: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assessment_date?: string
+          category: string
+          created_at?: string
+          current_level: number
+          id?: string
+          improvement_recommendations?: string[] | null
+          learning_resources?: string[] | null
+          next_assessment_date?: string | null
+          skill_name: string
+          target_level: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assessment_date?: string
+          category?: string
+          created_at?: string
+          current_level?: number
+          id?: string
+          improvement_recommendations?: string[] | null
+          learning_resources?: string[] | null
+          next_assessment_date?: string | null
+          skill_name?: string
+          target_level?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_coaching_enrollments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          last_accessed_at: string | null
+          program_id: string
+          progress_percentage: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          program_id: string
+          progress_percentage?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          last_accessed_at?: string | null
+          program_id?: string
+          progress_percentage?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_coaching_enrollments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_files: {
         Row: {
@@ -661,6 +1201,66 @@ export type Database = {
           work_location?: string | null
         }
         Relationships: []
+      }
+      user_module_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          enrollment_id: string
+          id: string
+          last_accessed_at: string | null
+          module_id: string
+          progress_percentage: number
+          started_at: string | null
+          status: string
+          time_spent_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          last_accessed_at?: string | null
+          module_id: string
+          progress_percentage?: number
+          started_at?: string | null
+          status?: string
+          time_spent_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          last_accessed_at?: string | null
+          module_id?: string
+          progress_percentage?: number
+          started_at?: string | null
+          status?: string
+          time_spent_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_module_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "user_coaching_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learning_modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_privacy_settings: {
         Row: {

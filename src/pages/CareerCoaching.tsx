@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   GraduationCap, 
   Target, 
@@ -22,177 +23,149 @@ import {
   ArrowRight,
   PlayCircle,
   FileText,
-  Brain
+  Brain,
+  Plus,
+  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCoaching } from "@/hooks/useCoaching";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
 
 const CareerCoaching = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [careerStage, setCareerStage] = useState("mid-level");
-  const [completedAssessments, setCompletedAssessments] = useState(2);
+  const { user } = useAuth();
+  
+  // Get coaching data using the hook
+  const {
+    coachingPrograms,
+    userEnrollments,
+    careerGoals,
+    personalizedInsights,
+    actionItems,
+    coachingSessions,
+    learningResources,
+    overallProgress,
+    careerStageAnalytics,
+    isLoading,
+    enrollInProgram,
+    createGoal,
+    createActionItem,
+    completeActionItem,
+    markInsightAsRead,
+    isEnrolling,
+    isCreatingGoal,
+    isCreatingAction,
+    isCompletingAction
+  } = useCoaching(user?.id);
 
-  const coachingAreas = [
-    {
-      title: "Career Path Planning",
-      description: "Define your career goals and create a roadmap",
-      progress: 75,
-      status: "in-progress",
-      lessons: 8,
-      timeToComplete: "2 weeks"
-    },
-    {
-      title: "Leadership Development",
-      description: "Build essential leadership and management skills",
-      progress: 45,
-      status: "in-progress", 
-      lessons: 12,
-      timeToComplete: "4 weeks"
-    },
-    {
-      title: "Personal Branding",
-      description: "Establish your professional brand and online presence",
-      progress: 90,
-      status: "complete",
-      lessons: 6,
-      timeToComplete: "1 week"
-    },
-    {
-      title: "Networking Mastery",
-      description: "Build meaningful professional relationships",
-      progress: 30,
-      status: "not-started",
-      lessons: 10,
-      timeToComplete: "3 weeks"
+  // Helper functions for icons
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'strengths':
+        return <Award className="h-5 w-5 text-yellow-500" />;
+      case 'growth areas':
+        return <TrendingUp className="h-5 w-5 text-blue-500" />;
+      case 'opportunities':
+        return <Lightbulb className="h-5 w-5 text-green-500" />;
+      case 'market trends':
+        return <BarChart3 className="h-5 w-5 text-purple-500" />;
+      default:
+        return <Brain className="h-5 w-5 text-primary" />;
     }
-  ];
-
-  const personalizedInsights = [
-    {
-      category: "Strengths",
-      insight: "Your analytical skills and attention to detail are exceptional",
-      action: "Consider roles that leverage data analysis and strategic planning",
-      impact: "High",
-      icon: <Award className="h-5 w-5 text-yellow-500" />
-    },
-    {
-      category: "Growth Areas",
-      insight: "Developing public speaking skills could accelerate your career",
-      action: "Join Toastmasters or take a presentation skills course",
-      impact: "Medium",
-      icon: <TrendingUp className="h-5 w-5 text-blue-500" />
-    },
-    {
-      category: "Opportunities",
-      insight: "Your industry is growing rapidly in the AI/ML space",
-      action: "Consider upskilling in machine learning or data science",
-      impact: "High",
-      icon: <Lightbulb className="h-5 w-5 text-green-500" />
-    },
-    {
-      category: "Market Trends",
-      insight: "Remote work expertise is increasingly valuable",
-      action: "Highlight your remote collaboration and management experience",
-      impact: "Medium",
-      icon: <BarChart3 className="h-5 w-5 text-purple-500" />
-    }
-  ];
-
-  const upcomingSessions = [
-    {
-      title: "1:1 Career Strategy Session",
-      coach: "Sarah Johnson",
-      date: "Jan 18, 2024",
-      time: "2:00 PM",
-      duration: "60 min",
-      type: "video"
-    },
-    {
-      title: "Resume Review & Optimization",
-      coach: "Mike Chen",
-      date: "Jan 22, 2024", 
-      time: "10:00 AM",
-      duration: "45 min",
-      type: "video"
-    },
-    {
-      title: "Interview Preparation Workshop",
-      coach: "Lisa Rodriguez",
-      date: "Jan 25, 2024",
-      time: "3:00 PM", 
-      duration: "90 min",
-      type: "group"
-    }
-  ];
-
-  const learningModules = [
-    {
-      title: "Executive Presence Masterclass",
-      description: "Develop the presence and confidence of a senior leader",
-      instructor: "Dr. Amanda Williams",
-      rating: 4.9,
-      students: 1250,
-      duration: "3.5 hours",
-      level: "Advanced",
-      topics: ["Executive Communication", "Influence & Persuasion", "Board Presentations"]
-    },
-    {
-      title: "Negotiation Skills for Career Growth",
-      description: "Master salary, promotion, and business negotiations",
-      instructor: "Robert Kim",
-      rating: 4.8,
-      students: 980,
-      duration: "2.5 hours", 
-      level: "Intermediate",
-      topics: ["Salary Negotiation", "Deal Making", "Conflict Resolution"]
-    },
-    {
-      title: "Building High-Performance Teams",
-      description: "Learn to build, lead, and motivate exceptional teams",
-      instructor: "Jennifer Park", 
-      rating: 4.7,
-      students: 750,
-      duration: "4 hours",
-      level: "Advanced", 
-      topics: ["Team Dynamics", "Performance Management", "Culture Building"]
-    }
-  ];
-
-  const actionItems = [
-    {
-      task: "Complete skills assessment for leadership track",
-      priority: "High",
-      dueDate: "Jan 20, 2024",
-      category: "Assessment",
-      completed: false
-    },
-    {
-      task: "Update LinkedIn profile with new certifications",
-      priority: "Medium", 
-      dueDate: "Jan 22, 2024",
-      category: "Personal Branding",
-      completed: false
-    },
-    {
-      task: "Schedule coffee chat with industry mentor",
-      priority: "High",
-      dueDate: "Jan 25, 2024", 
-      category: "Networking",
-      completed: false
-    },
-    {
-      task: "Review and practice elevator pitch",
-      priority: "Low",
-      dueDate: "Jan 18, 2024",
-      category: "Communication", 
-      completed: true
-    }
-  ];
-
-  const handleCompleteAction = (index: number) => {
-    const newActions = [...actionItems];
-    newActions[index].completed = !newActions[index].completed;
-    toast.success(newActions[index].completed ? "Action completed!" : "Action marked as incomplete");
   };
+
+  const getPriorityVariant = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'complete':
+        return 'default';
+      case 'active':
+      case 'in-progress':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
+
+  const handleCompleteAction = async (actionId: string) => {
+    try {
+      await completeActionItem({ actionId });
+    } catch (error) {
+      toast.error('Failed to complete action item');
+    }
+  };
+
+  const handleEnrollInProgram = async (programId: string) => {
+    try {
+      await enrollInProgram({ programId });
+    } catch (error) {
+      toast.error('Failed to enroll in program');
+    }
+  };
+
+  const handleCreateGoal = async () => {
+    try {
+      await createGoal({
+        title: "New Career Goal",
+        category: "career_development",
+        description: "Set a meaningful career goal"
+      });
+    } catch (error) {
+      toast.error('Failed to create goal');
+    }
+  };
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <GraduationCap className="h-8 w-8 text-primary" />
+              </div>
+              <h1 className="text-4xl font-bold gradient-text">Career Coaching Hub</h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Get personalized career guidance, professional development insights, and strategic advice to accelerate your career growth
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="glass-card text-center">
+                <CardContent className="p-6">
+                  <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-20 mx-auto" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <LoadingSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
@@ -214,26 +187,26 @@ const CareerCoaching = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">68%</div>
+              <div className="text-2xl font-bold text-primary">{overallProgress?.overallProgress || 0}%</div>
               <div className="text-sm text-muted-foreground">Career Goals Progress</div>
             </CardContent>
           </Card>
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">12</div>
+              <div className="text-2xl font-bold text-primary">{coachingSessions?.length || 0}</div>
               <div className="text-sm text-muted-foreground">Coaching Sessions</div>
             </CardContent>
           </Card>
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">5</div>
-              <div className="text-sm text-muted-foreground">Modules Completed</div>
+              <div className="text-2xl font-bold text-primary">{overallProgress?.completedPrograms || 0}</div>
+              <div className="text-sm text-muted-foreground">Programs Completed</div>
             </CardContent>
           </Card>
           <Card className="glass-card text-center">
             <CardContent className="p-6">
-              <div className="text-2xl font-bold text-primary">4.9★</div>
-              <div className="text-sm text-muted-foreground">Satisfaction Rating</div>
+              <div className="text-2xl font-bold text-primary">{careerStageAnalytics?.activeGoals || 0}</div>
+              <div className="text-sm text-muted-foreground">Active Goals</div>
             </CardContent>
           </Card>
         </div>
@@ -276,26 +249,31 @@ const CareerCoaching = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {coachingAreas.map((area, index) => (
+                    {userEnrollments?.slice(0, 4).map((enrollment, index) => (
                       <div key={index} className="space-y-2">
                         <div className="flex justify-between items-center">
                           <div>
-                            <span className="font-medium">{area.title}</span>
+                            <span className="font-medium">{enrollment.coaching_programs?.title}</span>
                             <div className="text-xs text-muted-foreground">
-                              {area.lessons} lessons • {area.timeToComplete}
+                              {enrollment.coaching_programs?.estimated_duration_weeks} weeks • {enrollment.coaching_programs?.difficulty_level}
                             </div>
                           </div>
-                          <Badge 
-                            variant={area.status === "complete" ? "default" : 
-                                   area.status === "in-progress" ? "secondary" : "outline"}
-                          >
-                            {area.status}
+                          <Badge variant={getStatusVariant(enrollment.status)}>
+                            {enrollment.status}
                           </Badge>
                         </div>
-                        <Progress value={area.progress} className="h-2" />
-                        <p className="text-xs text-muted-foreground">{area.description}</p>
+                        <Progress value={enrollment.progress_percentage || 0} className="h-2" />
+                        <p className="text-xs text-muted-foreground">{enrollment.coaching_programs?.description}</p>
                       </div>
-                    ))}
+                    )) || (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <BookOpen className="h-8 w-8 mx-auto mb-2" />
+                        <p>No active coaching programs yet.</p>
+                        <Button onClick={handleCreateGoal} className="mt-2" size="sm">
+                          Explore Programs
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -338,35 +316,35 @@ const CareerCoaching = () => {
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Professional Coaching Areas</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {coachingAreas.map((area, index) => (
+                {coachingPrograms?.map((program, index) => (
                   <Card key={index} className="glass-card hover:shadow-lg transition-all">
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg">{area.title}</CardTitle>
-                          <p className="text-muted-foreground mt-1">{area.description}</p>
+                          <CardTitle className="text-lg">{program.title}</CardTitle>
+                          <p className="text-muted-foreground mt-1">{program.description}</p>
                         </div>
-                        <Badge 
-                          variant={area.status === "complete" ? "default" : 
-                                 area.status === "in-progress" ? "secondary" : "outline"}
-                        >
-                          {area.progress}%
+                        <Badge variant="outline">
+                          {program.difficulty_level}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <Progress value={area.progress} className="mb-4" />
                       <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
-                        <span>{area.lessons} lessons</span>
-                        <span>{area.timeToComplete}</span>
+                        <span>{program.estimated_duration_weeks} weeks</span>
+                        <span>{program.is_premium ? 'Premium' : 'Free'}</span>
                       </div>
-                      <Button className="w-full">
-                        {area.status === "not-started" ? "Start Learning" : "Continue"}
+                      <Button 
+                        className="w-full" 
+                        onClick={() => handleEnrollInProgram(program.id)}
+                        disabled={isEnrolling}
+                      >
+                        {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </CardContent>
                   </Card>
-                ))}
+                )) || <div>No programs available</div>}
               </div>
             </div>
           </TabsContent>
@@ -375,31 +353,30 @@ const CareerCoaching = () => {
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Learning Modules</h3>
               <div className="space-y-6">
-                {learningModules.map((module, index) => (
+                {learningResources?.slice(0, 5).map((resource, index) => (
                   <Card key={index} className="glass-card">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
-                          <h4 className="text-lg font-semibold mb-2">{module.title}</h4>
-                          <p className="text-muted-foreground mb-3">{module.description}</p>
+                          <h4 className="text-lg font-semibold mb-2">{resource.title}</h4>
+                          <p className="text-muted-foreground mb-3">{resource.description}</p>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>by {module.instructor}</span>
+                            <span>by {resource.provider}</span>
                             <div className="flex items-center gap-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{module.rating}</span>
+                              <span>{resource.rating || 4.5}</span>
                             </div>
-                            <span>{module.students} students</span>
-                            <span>{module.duration}</span>
+                            <span>{resource.estimated_time_minutes ? `${resource.estimated_time_minutes} min` : 'Self-paced'}</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <Badge variant="outline">{module.level}</Badge>
+                          <Badge variant="outline">{resource.difficulty_level}</Badge>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {module.topics.map((topic, topicIndex) => (
-                          <Badge key={topicIndex} variant="secondary" className="text-xs">
-                            {topic}
+                        {resource.skill_areas?.map((skill, skillIndex) => (
+                          <Badge key={skillIndex} variant="secondary" className="text-xs">
+                            {skill}
                           </Badge>
                         ))}
                       </div>
@@ -457,7 +434,7 @@ const CareerCoaching = () => {
               </div>
               
               <div className="space-y-4">
-                {upcomingSessions.map((session, index) => (
+                {coachingSessions?.slice(0, 5).map((session, index) => (
                   <Card key={index} className="glass-card">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start">
@@ -467,23 +444,23 @@ const CareerCoaching = () => {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">{session.title}</h4>
-                            <p className="text-muted-foreground text-sm mb-2">with {session.coach}</p>
+                            <p className="text-muted-foreground text-sm mb-2">{session.session_type}</p>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {session.date}
+                                {format(new Date(session.scheduled_at), 'MMM dd, yyyy')}
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {session.time}
+                                {format(new Date(session.scheduled_at), 'h:mm a')}
                               </div>
-                              <span>{session.duration}</span>
+                              <span>{session.duration_minutes} min</span>
                             </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Badge variant="outline">
-                            {session.type}
+                          <Badge variant={getStatusVariant(session.status)}>
+                            {session.status}
                           </Badge>
                           <Button size="sm">Join Session</Button>
                         </div>
@@ -505,40 +482,37 @@ const CareerCoaching = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {actionItems.map((item, index) => (
+                    {actionItems?.map((item, index) => (
                       <div 
                         key={index} 
                         className={`flex items-center justify-between p-3 border rounded-lg ${
-                          item.completed ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' : ''
+                          item.status === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' : ''
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleCompleteAction(index)}
+                            onClick={() => handleCompleteAction(item.id)}
                             className="p-1"
                           >
                             <CheckCircle2 
                               className={`h-4 w-4 ${
-                                item.completed ? 'text-green-500' : 'text-muted-foreground'
+                                item.status === 'completed' ? 'text-green-500' : 'text-muted-foreground'
                               }`} 
                             />
                           </Button>
                           <div>
-                            <div className={`font-medium ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
-                              {item.task}
+                            <div className={`font-medium ${item.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                              {item.title}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Due: {item.dueDate} • {item.category}
+                              Due: {item.due_date ? format(new Date(item.due_date), 'MMM dd, yyyy') : 'No due date'} • {item.category}
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={item.priority === "High" ? "destructive" : 
-                                   item.priority === "Medium" ? "secondary" : "outline"}
-                          >
+                          <Badge variant={getPriorityVariant(item.priority)}>
                             {item.priority}
                           </Badge>
                         </div>
