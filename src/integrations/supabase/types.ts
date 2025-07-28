@@ -112,6 +112,66 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_recommendations: {
+        Row: {
+          category: string
+          confidence_score: number
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          is_dismissed: boolean
+          is_implemented: boolean
+          metadata: Json
+          priority: string
+          reasoning: string
+          recommendation_type: string
+          recommended_actions: Json
+          source_data: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          confidence_score: number
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_implemented?: boolean
+          metadata?: Json
+          priority?: string
+          reasoning: string
+          recommendation_type: string
+          recommended_actions?: Json
+          source_data?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          confidence_score?: number
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_implemented?: boolean
+          metadata?: Json
+          priority?: string
+          reasoning?: string
+          recommendation_type?: string
+          recommended_actions?: Json
+          source_data?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       application_stages: {
         Row: {
           application_id: string
@@ -252,6 +312,80 @@ export type Database = {
         }
         Relationships: []
       }
+      career_transition_recommendations: {
+        Row: {
+          action_plan: Json
+          created_at: string
+          estimated_timeline_months: number
+          experience_requirements: Json
+          from_role: string
+          id: string
+          market_trends: Json
+          networking_strategy: Json
+          recommendation_id: string
+          required_skills: Json
+          salary_impact: Json
+          skill_development_plan: Json
+          success_probability: number
+          to_role: string
+          transferable_skills: Json
+          transition_difficulty: string
+          transition_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_plan?: Json
+          created_at?: string
+          estimated_timeline_months: number
+          experience_requirements?: Json
+          from_role: string
+          id?: string
+          market_trends?: Json
+          networking_strategy?: Json
+          recommendation_id: string
+          required_skills?: Json
+          salary_impact?: Json
+          skill_development_plan?: Json
+          success_probability: number
+          to_role: string
+          transferable_skills?: Json
+          transition_difficulty: string
+          transition_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_plan?: Json
+          created_at?: string
+          estimated_timeline_months?: number
+          experience_requirements?: Json
+          from_role?: string
+          id?: string
+          market_trends?: Json
+          networking_strategy?: Json
+          recommendation_id?: string
+          required_skills?: Json
+          salary_impact?: Json
+          skill_development_plan?: Json
+          success_probability?: number
+          to_role?: string
+          transferable_skills?: Json
+          transition_difficulty?: string
+          transition_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_transition_recommendations_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coaching_programs: {
         Row: {
           category: string
@@ -389,6 +523,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      content_recommendations: {
+        Row: {
+          content_type: string
+          cost_type: string
+          created_at: string
+          description: string | null
+          difficulty_level: string
+          estimated_time_minutes: number | null
+          goal_alignment: Json
+          id: string
+          learning_objectives: string[]
+          prerequisites: string[]
+          provider: string | null
+          quality_score: number
+          recency_score: number
+          recommendation_id: string
+          relevance_score: number
+          skill_alignment: Json
+          tags: string[]
+          title: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          content_type: string
+          cost_type?: string
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          estimated_time_minutes?: number | null
+          goal_alignment?: Json
+          id?: string
+          learning_objectives?: string[]
+          prerequisites?: string[]
+          provider?: string | null
+          quality_score: number
+          recency_score: number
+          recommendation_id: string
+          relevance_score: number
+          skill_alignment?: Json
+          tags?: string[]
+          title: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          content_type?: string
+          cost_type?: string
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string
+          estimated_time_minutes?: number | null
+          goal_alignment?: Json
+          id?: string
+          learning_objectives?: string[]
+          prerequisites?: string[]
+          provider?: string | null
+          quality_score?: number
+          recency_score?: number
+          recommendation_id?: string
+          relevance_score?: number
+          skill_alignment?: Json
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_recommendations_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cv_analyses: {
         Row: {
@@ -750,6 +964,74 @@ export type Database = {
           },
         ]
       }
+      learning_path_recommendations: {
+        Row: {
+          created_at: string
+          current_level: number
+          difficulty_progression: string
+          estimated_duration_weeks: number
+          id: string
+          industry_relevance_score: number
+          learning_modules: Json
+          market_demand_score: number
+          milestones: Json
+          path_name: string
+          prerequisites: Json
+          recommendation_id: string
+          success_metrics: Json
+          target_level: number
+          target_skill: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level: number
+          difficulty_progression?: string
+          estimated_duration_weeks: number
+          id?: string
+          industry_relevance_score?: number
+          learning_modules?: Json
+          market_demand_score?: number
+          milestones?: Json
+          path_name: string
+          prerequisites?: Json
+          recommendation_id: string
+          success_metrics?: Json
+          target_level: number
+          target_skill: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          difficulty_progression?: string
+          estimated_duration_weeks?: number
+          id?: string
+          industry_relevance_score?: number
+          learning_modules?: Json
+          market_demand_score?: number
+          milestones?: Json
+          path_name?: string
+          prerequisites?: Json
+          recommendation_id?: string
+          success_metrics?: Json
+          target_level?: number
+          target_skill?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_recommendations_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_resources: {
         Row: {
           cost_type: string
@@ -857,6 +1139,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      mentor_match_recommendations: {
+        Row: {
+          availability_requirements: Json
+          communication_style: string
+          created_at: string
+          duration_expectations: string
+          focus_areas: string[]
+          id: string
+          interaction_frequency: string
+          matching_criteria: Json
+          matching_score: number
+          mentor_profile: Json
+          mentorship_type: string
+          recommendation_id: string
+          success_metrics: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability_requirements?: Json
+          communication_style?: string
+          created_at?: string
+          duration_expectations?: string
+          focus_areas?: string[]
+          id?: string
+          interaction_frequency?: string
+          matching_criteria?: Json
+          matching_score?: number
+          mentor_profile?: Json
+          mentorship_type: string
+          recommendation_id: string
+          success_metrics?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability_requirements?: Json
+          communication_style?: string
+          created_at?: string
+          duration_expectations?: string
+          focus_areas?: string[]
+          id?: string
+          interaction_frequency?: string
+          matching_criteria?: Json
+          matching_score?: number
+          mentor_profile?: Json
+          mentorship_type?: string
+          recommendation_id?: string
+          success_metrics?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_match_recommendations_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       performance_metrics: {
         Row: {
@@ -996,6 +1340,161 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_feedback: {
+        Row: {
+          accuracy_score: number | null
+          created_at: string
+          feedback_type: string
+          id: string
+          implementation_notes: string | null
+          implementation_status: string | null
+          improvement_suggestions: string | null
+          outcome_achieved: boolean | null
+          outcome_description: string | null
+          rating: number | null
+          recommendation_id: string
+          relevance_score: number | null
+          updated_at: string
+          usefulness_score: number | null
+          user_id: string
+          would_recommend: boolean | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          created_at?: string
+          feedback_type: string
+          id?: string
+          implementation_notes?: string | null
+          implementation_status?: string | null
+          improvement_suggestions?: string | null
+          outcome_achieved?: boolean | null
+          outcome_description?: string | null
+          rating?: number | null
+          recommendation_id: string
+          relevance_score?: number | null
+          updated_at?: string
+          usefulness_score?: number | null
+          user_id: string
+          would_recommend?: boolean | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          implementation_notes?: string | null
+          implementation_status?: string | null
+          improvement_suggestions?: string | null
+          outcome_achieved?: boolean | null
+          outcome_description?: string | null
+          rating?: number | null
+          recommendation_id?: string
+          relevance_score?: number | null
+          updated_at?: string
+          usefulness_score?: number | null
+          user_id?: string
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_feedback_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recommendation_preferences: {
+        Row: {
+          auto_implement_low_risk: boolean
+          career_ambition_level: string
+          created_at: string
+          feedback_frequency: string
+          id: string
+          industry_interests: string[]
+          learning_style: string
+          notification_frequency: string
+          preferred_recommendation_types: string[]
+          risk_tolerance: string
+          skill_priorities: string[]
+          time_commitment: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_implement_low_risk?: boolean
+          career_ambition_level?: string
+          created_at?: string
+          feedback_frequency?: string
+          id?: string
+          industry_interests?: string[]
+          learning_style?: string
+          notification_frequency?: string
+          preferred_recommendation_types?: string[]
+          risk_tolerance?: string
+          skill_priorities?: string[]
+          time_commitment?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_implement_low_risk?: boolean
+          career_ambition_level?: string
+          created_at?: string
+          feedback_frequency?: string
+          id?: string
+          industry_interests?: string[]
+          learning_style?: string
+          notification_frequency?: string
+          preferred_recommendation_types?: string[]
+          risk_tolerance?: string
+          skill_priorities?: string[]
+          time_commitment?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recommendation_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          priority_weight: number
+          prompt_template: string
+          target_audience: string[]
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          name: string
+          priority_weight?: number
+          prompt_template: string
+          target_audience?: string[]
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority_weight?: number
+          prompt_template?: string
+          target_audience?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string
@@ -1069,6 +1568,63 @@ export type Database = {
           next_assessment_date?: string | null
           skill_name?: string
           target_level?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      skills_gap_analysis: {
+        Row: {
+          ai_insights: string | null
+          analysis_date: string
+          competitiveness_score: number
+          created_at: string
+          current_skills: Json
+          id: string
+          improvement_timeline: Json
+          market_alignment_score: number
+          priority_skills: Json
+          recommended_resources: Json
+          required_skills: Json
+          skill_gaps: Json
+          target_industry: string
+          target_role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_insights?: string | null
+          analysis_date?: string
+          competitiveness_score?: number
+          created_at?: string
+          current_skills?: Json
+          id?: string
+          improvement_timeline?: Json
+          market_alignment_score?: number
+          priority_skills?: Json
+          recommended_resources?: Json
+          required_skills?: Json
+          skill_gaps?: Json
+          target_industry: string
+          target_role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_insights?: string | null
+          analysis_date?: string
+          competitiveness_score?: number
+          created_at?: string
+          current_skills?: Json
+          id?: string
+          improvement_timeline?: Json
+          market_alignment_score?: number
+          priority_skills?: Json
+          recommended_resources?: Json
+          required_skills?: Json
+          skill_gaps?: Json
+          target_industry?: string
+          target_role?: string
           updated_at?: string
           user_id?: string
         }
