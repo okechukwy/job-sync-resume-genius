@@ -36,9 +36,10 @@ interface Question {
 
 interface QuestionBankSectionProps {
   onStartPractice: (sessionType: string, roleFocus: string, specificQuestion?: Question) => void;
+  onStartBookmarkedPractice: (bookmarkedQuestions: Question[]) => void;
 }
 
-const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
+const QuestionBankSection = ({ onStartPractice, onStartBookmarkedPractice }: QuestionBankSectionProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
@@ -395,6 +396,30 @@ const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
           <TabsContent value="bookmarked" className="space-y-4">
             {bookmarkedQuestions.size > 0 ? (
               <div className="space-y-4">
+                {/* Practice All Bookmarked Button */}
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-lg">Practice All Bookmarked Questions</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Start a comprehensive session with all {bookmarkedQuestions.size} bookmarked questions
+                        </p>
+                      </div>
+                      <Button
+                        size="default"
+                        onClick={() => {
+                          const bookmarked = questionBank.filter(q => bookmarkedQuestions.has(q.id));
+                          onStartBookmarkedPractice(bookmarked);
+                        }}
+                        className="ml-4"
+                      >
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Practice All ({bookmarkedQuestions.size})
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
                 {questionBank.filter(q => bookmarkedQuestions.has(q.id)).map(question => (
                   <Card key={question.id} className="hover:shadow-md transition-all">
                     <CardContent className="p-4">
@@ -417,10 +442,11 @@ const QuestionBankSection = ({ onStartPractice }: QuestionBankSectionProps) => {
 
                           <Button
                             size="sm"
+                            variant="outline"
                             onClick={() => onStartPractice(question.category, 'Business', question)}
                           >
                             <PlayCircle className="w-4 h-4 mr-2" />
-                            Practice
+                            Practice This Question
                           </Button>
                       </div>
                     </CardContent>

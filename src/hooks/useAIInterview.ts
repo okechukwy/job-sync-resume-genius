@@ -251,6 +251,38 @@ export const useAIInterview = () => {
     }
   }, [toast]);
 
+  const startSessionWithMultipleQuestions = useCallback(async (
+    questions: InterviewQuestion[],
+    sessionType: string,
+    roleFocus: string
+  ) => {
+    try {
+      const newSession: InterviewSession = {
+        id: crypto.randomUUID(),
+        questions,
+        responses: [],
+        sessionType,
+        roleFocus,
+        completed: false,
+        totalScore: 0,
+        createdAt: new Date().toISOString(),
+        questionCount: questions.length,
+      };
+
+      setCurrentSession(newSession);
+      
+      toast({
+        title: "Bookmarked Questions Practice",
+        description: `Starting practice session with ${questions.length} bookmarked questions.`,
+      });
+
+      return newSession;
+    } catch (error) {
+      console.error('Error starting session with multiple questions:', error);
+      throw error;
+    }
+  }, [toast]);
+
   const startSession = useCallback(async (
     sessionType: string,
     roleFocus: string,
@@ -515,6 +547,7 @@ export const useAIInterview = () => {
     generateSampleAnswer,
     startSession,
     startSessionWithQuestion,
+    startSessionWithMultipleQuestions,
     addResponse,
     completeSession,
     getSessionHistory,

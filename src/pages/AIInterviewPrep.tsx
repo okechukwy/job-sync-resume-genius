@@ -65,6 +65,7 @@ const AIInterviewPrep = () => {
     currentSession,
     retryCount,
     startSession,
+    startSessionWithMultipleQuestions,
     addResponse,
     completeSession,
     retryLastAction,
@@ -279,6 +280,45 @@ const AIInterviewPrep = () => {
       toast({
         title: "Practice Start Failed",
         description: "Failed to start practice with the selected question.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStartBookmarkedQuestionsPractice = async (bookmarkedQuestions: Question[]) => {
+    try {
+      // Convert all bookmarked questions to InterviewQuestion format
+      const interviewQuestions: InterviewQuestion[] = bookmarkedQuestions.map(question => ({
+        id: question.id,
+        text: question.text,
+        category: question.category,
+        difficulty: question.difficulty,
+        tips: question.tips,
+        expectedElements: question.tags || []
+      }));
+
+      // Start session with all bookmarked questions
+      await startSessionWithMultipleQuestions(
+        interviewQuestions,
+        'bookmarked',
+        selectedRole
+      );
+      
+      setCurrentQuestionIndex(0);
+      setTranscript("");
+      setLastAnalysis(null);
+      setLastAnsweredQuestionId(null);
+      setActiveTab("practice"); // Switch to practice tab
+      
+      toast({
+        title: "Bookmarked Questions Practice",
+        description: `Starting practice session with ${bookmarkedQuestions.length} bookmarked questions.`,
+      });
+    } catch (error) {
+      console.error('Error starting bookmarked questions practice:', error);
+      toast({
+        title: "Practice Start Failed",
+        description: "Failed to start practice with bookmarked questions.",
         variant: "destructive",
       });
     }
@@ -562,6 +602,7 @@ const AIInterviewPrep = () => {
                   handleStartSpecificQuestionPractice(specificQuestion);
                 }
               }}
+              onStartBookmarkedPractice={handleStartBookmarkedQuestionsPractice}
             />
           </TabsContent>
 
