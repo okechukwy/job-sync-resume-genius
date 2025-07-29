@@ -59,21 +59,41 @@ serve(async (req) => {
 
     console.log(`Generating ${recommendationType} recommendation for user ${userId}`);
 
-    // Get recommendation template
-    const { data: template, error: templateError } = await supabase
+    // Get recommendation template - improved logic for personal_branding
+    let templateCategory = recommendationType;
+    if (recommendationType === 'skill_gap') {
+      templateCategory = 'skill_development';
+    }
+
+    console.log(`Looking for template with category: ${templateCategory}`);
+
+    const { data: templates, error: templateError } = await supabase
       .from('recommendation_templates')
       .select('*')
-      .eq('category', recommendationType === 'skill_gap' ? 'skill_development' : recommendationType)
-      .eq('is_active', true)
-      .maybeSingle();
+      .eq('category', templateCategory)
+      .eq('is_active', true);
 
     if (templateError) {
+      console.error('Template error:', templateError);
       throw new Error(`Template not found: ${templateError.message}`);
     }
 
-    if (!template) {
-      throw new Error(`No active template found for category: ${recommendationType}`);
+    if (!templates || templates.length === 0) {
+      console.error(`No templates found for category: ${templateCategory}`);
+      throw new Error(`No active template found for category: ${templateCategory}`);
     }
+
+    // For personal_branding, select the most appropriate template or use the first one
+    let template = templates[0];
+    if (recommendationType === 'personal_branding' && templates.length > 1) {
+      // Try to find the most general personal branding template
+      const generalTemplate = templates.find(t => t.name === 'Personal Branding Strategy');
+      if (generalTemplate) {
+        template = generalTemplate;
+      }
+    }
+
+    console.log(`Using template: ${template.name} for category: ${templateCategory}`);
 
     // Get user data for context
     const [profileData, goalsData, skillsData, preferencesData] = await Promise.all([

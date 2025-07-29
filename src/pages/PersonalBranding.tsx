@@ -399,19 +399,26 @@ Let's connect: your.email@email.com`,
       
       // Generate AI-powered branding strategies
       if (user?.id) {
-        await generatePersonalBrandingStrategies({
-          fullName: data.fullName,
-          currentRole: data.currentRole,
-          targetRole: data.targetRole,
-          industry: data.industry,
-          keySkills: data.keySkills,
-          achievements: data.achievements,
-          uniqueValue: data.uniqueValue,
-          personalStory: data.personalStory,
-          targetAudience: data.targetAudience,
-          communicationStyle: data.communicationStyle,
-          experienceLevel: 'mid_level' // Could be determined from form data
-        });
+        try {
+          console.log('Generating personal branding strategies...');
+          await generatePersonalBrandingStrategies({
+            fullName: data.fullName,
+            currentRole: data.currentRole,
+            targetRole: data.targetRole,
+            industry: data.industry,
+            keySkills: data.keySkills,
+            achievements: data.achievements,
+            uniqueValue: data.uniqueValue,
+            personalStory: data.personalStory,
+            targetAudience: data.targetAudience,
+            communicationStyle: data.communicationStyle,
+            experienceLevel: 'mid_level' // Could be determined from form data
+          });
+          console.log('Personal branding strategies generated successfully');
+        } catch (strategyError) {
+          console.error('Error generating personal branding strategies:', strategyError);
+          // Don't fail the entire form submission
+        }
       }
       
       toast.success("Personal brand analysis complete!");
@@ -1244,11 +1251,19 @@ Resume/CV Headlines:
 
           <TabsContent value="strategy">
             <PersonalBrandingStrategies
-              strategies={brandingStrategies}
+              strategies={personalBrandingRecommendations || []}
               isLoading={personalBrandingLoading || isGenerating}
               onStartStrategy={handleStartStrategy}
               onDismissStrategy={handleDismissStrategy}
             />
+            {/* Debug info */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-4 bg-muted rounded text-xs">
+                <div>Strategies count: {personalBrandingRecommendations?.length || 0}</div>
+                <div>Loading: {personalBrandingLoading ? 'true' : 'false'}</div>
+                <div>Generating: {isGenerating ? 'true' : 'false'}</div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="analytics">
