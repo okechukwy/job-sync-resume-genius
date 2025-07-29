@@ -14,7 +14,7 @@ export class AIRecommendationService {
   // Generate AI Recommendations
   static async generateRecommendation(
     userId: string,
-    recommendationType: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content',
+    recommendationType: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content' | 'personal_branding',
     context: {
       currentRole?: string;
       targetRole?: string;
@@ -29,6 +29,12 @@ export class AIRecommendationService {
       timeCommitment?: 'minimal' | 'moderate' | 'intensive';
       targetIndustry?: string;
       transferableSkills?: Record<string, number>;
+      keySkills?: string[];
+      achievements?: string[];
+      uniqueValue?: string;
+      personalStory?: string;
+      targetAudience?: string;
+      communicationStyle?: string;
     }
   ) {
     const { data, error } = await supabase.functions.invoke('ai-recommendations', {
@@ -340,6 +346,51 @@ export class AIRecommendationService {
       timeCommitment,
       preferences
     });
+  }
+
+  // Generate Personal Branding Strategies
+  static async generatePersonalBrandingStrategies(
+    userId: string,
+    brandingData: {
+      fullName: string;
+      currentRole: string;
+      targetRole: string;
+      industry: string;
+      keySkills: string[];
+      achievements: string[];
+      uniqueValue: string;
+      personalStory: string;
+      targetAudience: string;
+      communicationStyle?: string;
+      experienceLevel?: string;
+    }
+  ) {
+    return this.generateRecommendation(userId, 'personal_branding', {
+      currentRole: brandingData.currentRole,
+      targetRole: brandingData.targetRole,
+      industry: brandingData.industry,
+      keySkills: brandingData.keySkills,
+      achievements: brandingData.achievements,
+      uniqueValue: brandingData.uniqueValue,
+      personalStory: brandingData.personalStory,
+      targetAudience: brandingData.targetAudience,
+      communicationStyle: brandingData.communicationStyle,
+      experienceLevel: brandingData.experienceLevel
+    });
+  }
+
+  // Get Personal Branding Recommendations
+  static async getPersonalBrandingRecommendations(userId: string) {
+    const { data, error } = await supabase
+      .from('ai_recommendations')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('recommendation_type', 'personal_branding')
+      .eq('is_dismissed', false)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
   }
 
   // Get Recommendation Analytics

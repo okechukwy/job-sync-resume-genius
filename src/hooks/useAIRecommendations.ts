@@ -90,13 +90,23 @@ export const useAIRecommendations = (userId?: string) => {
     enabled: !!userId,
   });
 
+  // Get Personal Branding Recommendations
+  const {
+    data: personalBrandingRecommendations,
+    isLoading: personalBrandingLoading
+  } = useQuery({
+    queryKey: ['personal-branding-recommendations', userId],
+    queryFn: () => userId ? AIRecommendationService.getPersonalBrandingRecommendations(userId) : Promise.resolve([]),
+    enabled: !!userId,
+  });
+
   // Generate AI Recommendation Mutation
   const generateRecommendationMutation = useMutation({
     mutationFn: ({ 
       type, 
       context 
     }: { 
-      type: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content';
+      type: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content' | 'personal_branding';
       context: any;
     }) => {
       if (!userId) throw new Error('User ID required');
@@ -247,6 +257,33 @@ export const useAIRecommendations = (userId?: string) => {
     }
   }, [userId, queryClient]);
 
+  const generatePersonalBrandingStrategies = useCallback(async (brandingData: {
+    fullName: string;
+    currentRole: string;
+    targetRole: string;
+    industry: string;
+    keySkills: string[];
+    achievements: string[];
+    uniqueValue: string;
+    personalStory: string;
+    targetAudience: string;
+    communicationStyle?: string;
+    experienceLevel?: string;
+  }) => {
+    if (!userId) return;
+    try {
+      setIsGenerating(true);
+      await AIRecommendationService.generatePersonalBrandingStrategies(userId, brandingData);
+      queryClient.invalidateQueries({ queryKey: ['personal-branding-recommendations', userId] });
+      queryClient.invalidateQueries({ queryKey: ['ai-recommendations', userId] });
+      toast.success('Personal branding strategies generated!');
+    } catch (error: any) {
+      toast.error('Failed to generate personal branding strategies: ' + error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [userId, queryClient]);
+
   // Real-time subscriptions
   useEffect(() => {
     if (!userId) return;
@@ -281,13 +318,14 @@ export const useAIRecommendations = (userId?: string) => {
     careerTransitions,
     mentorMatches,
     contentRecommendations,
+    personalBrandingRecommendations,
     userPreferences,
     analytics,
 
     // Loading states
     isLoading: recommendationsLoading || learningPathsLoading || skillsGapLoading || 
                careerTransitionsLoading || mentorMatchesLoading || contentLoading ||
-               preferencesLoading || analyticsLoading,
+               personalBrandingLoading || preferencesLoading || analyticsLoading,
     isGenerating,
 
     // Individual loading states
@@ -297,6 +335,7 @@ export const useAIRecommendations = (userId?: string) => {
     careerTransitionsLoading,
     mentorMatchesLoading,
     contentLoading,
+    personalBrandingLoading,
     preferencesLoading,
     analyticsLoading,
 
@@ -315,6 +354,7 @@ export const useAIRecommendations = (userId?: string) => {
     generateLearningPath,
     generateCareerTransition,
     generateContentRecommendations,
+    generatePersonalBrandingStrategies,
 
     // Mutation states
     isGeneratingRecommendation: generateRecommendationMutation.isPending,

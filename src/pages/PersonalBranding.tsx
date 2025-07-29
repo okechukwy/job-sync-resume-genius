@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAIRecommendations } from "@/hooks/useAIRecommendations";
+import { supabase } from "@/integrations/supabase/client";
+import { PersonalBrandingStrategies } from "@/components/personal-branding/PersonalBrandingStrategies";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,6 +59,26 @@ const PersonalBranding = () => {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [newSkill, setNewSkill] = useState("");
   const [newAchievement, setNewAchievement] = useState("");
+  
+  const [user, setUser] = useState<any>(null);
+  
+  // Get current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  const { 
+    personalBrandingRecommendations, 
+    personalBrandingLoading,
+    generatePersonalBrandingStrategies,
+    dismissRecommendation,
+    implementRecommendation,
+    isGenerating
+  } = useAIRecommendations(user?.id);
 
   const form = useForm<PersonalBrandData>({
     resolver: zodResolver(personalBrandSchema),
@@ -258,31 +281,31 @@ Let's connect: your.email@email.com`,
 
   const contentTemplates = generateContentTemplates();
 
-  const brandingStrategies = [
-    {
-      strategy: "Thought Leadership",
-      description: "Position yourself as an industry expert through content creation",
-      tactics: ["Write industry insights", "Share case studies", "Comment on trends"],
-      timeline: "3-6 months",
-      difficulty: "Medium"
-    },
-    {
-      strategy: "Network Building",
-      description: "Expand your professional network strategically",
-      tactics: ["Engage with industry leaders", "Join professional groups", "Attend events"],
-      timeline: "Ongoing",
-      difficulty: "Easy"
-    },
-    {
-      strategy: "Content Creator",
-      description: "Build audience through valuable content sharing",
-      tactics: ["Regular posting schedule", "Video content", "Industry newsletters"],
-      timeline: "6-12 months",
-      difficulty: "Hard"
+  // Transform AI recommendations into strategy format
+  const brandingStrategies = personalBrandingRecommendations?.map(rec => ({
+    id: rec.id,
+    title: rec.title,
+    description: rec.description,
+    reasoning: rec.reasoning,
+    recommended_actions: rec.recommended_actions as Array<{
+      action: string;
+      timeline: string;
+      difficulty: string;
+      success_metrics?: string[];
+    }>,
+    priority: rec.priority as 'high' | 'medium' | 'low',
+    confidence_score: rec.confidence_score,
+    metadata: rec.metadata as {
+      timeline?: string;
+      difficulty?: string;
+      industry_specific?: boolean;
+      networking_opportunities?: string[];
+      content_ideas?: string[];
+      platforms?: string[];
     }
-  ];
+  })) || [];
 
-  const onSubmit = (data: PersonalBrandData) => {
+  const onSubmit = async (data: PersonalBrandData) => {
     // Simulate brand analysis
     const score = Math.floor(Math.random() * 20) + 80;
     setBrandScore(score);
@@ -294,6 +317,23 @@ Let's connect: your.email@email.com`,
       linkedin_headline: `${data.currentRole} | ${data.keySkills.slice(0, 3).join(' • ')} | ${data.targetRole}`,
       bio: `Award-winning ${data.currentRole} with proven expertise in ${data.keySkills.join(', ')}. ${data.uniqueValue}`
     });
+    
+    // Generate AI-powered branding strategies
+    if (user?.id) {
+      await generatePersonalBrandingStrategies({
+        fullName: data.fullName,
+        currentRole: data.currentRole,
+        targetRole: data.targetRole,
+        industry: data.industry,
+        keySkills: data.keySkills,
+        achievements: data.achievements,
+        uniqueValue: data.uniqueValue,
+        personalStory: data.personalStory,
+        targetAudience: data.targetAudience,
+        communicationStyle: data.communicationStyle,
+        experienceLevel: 'mid_level' // Could be determined from form data
+      });
+    }
     
     toast.success("Personal brand analysis complete!");
   };
@@ -646,6 +686,23 @@ Resume/CV Headlines:
   const removeAchievement = (achievementToRemove: string) => {
     const currentAchievements = form.getValues("achievements");
     form.setValue("achievements", currentAchievements.filter(achievement => achievement !== achievementToRemove));
+  };
+
+  const handleStartStrategy = async (strategyId: string) => {
+    try {
+      await implementRecommendation(strategyId);
+      // Future: Create action items from strategy
+    } catch (error) {
+      console.error('Failed to start strategy:', error);
+    }
+  };
+
+  const handleDismissStrategy = async (strategyId: string) => {
+    try {
+      await dismissRecommendation(strategyId);
+    } catch (error) {
+      console.error('Failed to dismiss strategy:', error);
+    }
   };
 
   return (
@@ -1103,38 +1160,12 @@ Resume/CV Headlines:
           </TabsContent>
 
           <TabsContent value="strategy">
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold">Personal Branding Strategies</h3>
-              <div className="space-y-6">
-                {brandingStrategies.map((strategy, index) => (
-                  <Card key={index} className="glass-card">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{strategy.strategy}</CardTitle>
-                          <p className="text-muted-foreground mt-1">{strategy.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant="outline">{strategy.timeline}</Badge>
-                          <div className="text-xs text-muted-foreground mt-1">{strategy.difficulty}</div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <span className="text-sm font-medium">Key Tactics:</span>
-                        <ul className="list-disc list-inside space-y-1">
-                          {strategy.tactics.map((tactic, tacticIndex) => (
-                            <li key={tacticIndex} className="text-sm text-muted-foreground">{tactic}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <Button className="w-full mt-4">Start This Strategy</Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <PersonalBrandingStrategies
+              strategies={brandingStrategies}
+              isLoading={personalBrandingLoading || isGenerating}
+              onStartStrategy={handleStartStrategy}
+              onDismissStrategy={handleDismissStrategy}
+            />
           </TabsContent>
 
           <TabsContent value="analytics">
