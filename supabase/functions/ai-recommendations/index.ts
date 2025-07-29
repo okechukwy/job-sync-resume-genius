@@ -9,7 +9,7 @@ const corsHeaders = {
 
 interface RecommendationRequest {
   userId: string;
-  recommendationType: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content';
+  recommendationType: 'learning_path' | 'skill_gap' | 'career_transition' | 'mentor_match' | 'content' | 'personal_branding';
   context: {
     currentRole?: string;
     targetRole?: string;
@@ -18,6 +18,14 @@ interface RecommendationRequest {
     industry?: string;
     experienceLevel?: string;
     preferences?: any;
+    // Personal branding specific context
+    fullName?: string;
+    keySkills?: string[];
+    achievements?: string[];
+    uniqueValue?: string;
+    personalStory?: string;
+    targetAudience?: string;
+    communicationStyle?: string;
   };
 }
 
@@ -57,10 +65,14 @@ serve(async (req) => {
       .select('*')
       .eq('category', recommendationType === 'skill_gap' ? 'skill_development' : recommendationType)
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
 
     if (templateError) {
       throw new Error(`Template not found: ${templateError.message}`);
+    }
+
+    if (!template) {
+      throw new Error(`No active template found for category: ${recommendationType}`);
     }
 
     // Get user data for context
@@ -192,10 +204,14 @@ function generatePrompt(template: any, context: any, type: string): string {
   // Replace template variables with actual data
   const replacements = {
     '{current_role}': context.currentRole || context.profile?.job_title || 'Not specified',
+    '{{currentRole}}': context.currentRole || context.profile?.job_title || 'Not specified',
     '{target_role}': context.targetRole || context.goals?.[0]?.title || 'Not specified',
+    '{{targetRole}}': context.targetRole || context.goals?.[0]?.title || 'Not specified',
     '{current_skills}': JSON.stringify(context.currentSkills || {}),
+    '{{keySkills}}': context.keySkills?.join(', ') || 'Not specified',
     '{career_goals}': context.careerGoals?.join(', ') || context.goals?.map((g: any) => g.title).join(', ') || 'Not specified',
     '{industry}': context.industry || context.profile?.industry || 'Not specified',
+    '{{industry}}': context.industry || context.profile?.industry || 'Not specified',
     '{current_industry}': context.industry || 'Not specified',
     '{target_industry}': context.targetIndustry || context.industry || 'Not specified',
     '{transferable_skills}': JSON.stringify(context.transferableSkills || {}),
@@ -203,7 +219,14 @@ function generatePrompt(template: any, context: any, type: string): string {
     '{mentorship_style}': context.preferences?.learning_style || 'collaborative',
     '{goals}': context.careerGoals?.join(', ') || 'Professional development',
     '{time_commitment}': context.preferences?.time_commitment || 'moderate',
-    '{learning_style}': context.preferences?.learning_style || 'balanced'
+    '{learning_style}': context.preferences?.learning_style || 'balanced',
+    // Personal branding replacements
+    '{{achievements}}': context.achievements?.join(', ') || 'Not specified',
+    '{{uniqueValue}}': context.uniqueValue || 'Not specified',
+    '{{personalStory}}': context.personalStory || 'Not specified',
+    '{{targetAudience}}': context.targetAudience || 'Not specified',
+    '{{communicationStyle}}': context.communicationStyle || 'professional',
+    '{{experienceLevel}}': context.experienceLevel || 'mid-level'
   };
 
   for (const [key, value] of Object.entries(replacements)) {
@@ -261,6 +284,12 @@ Additional requirements:
 Additional requirements:
 - List specific learning resources in recommended_actions
 - Include resource types and time commitment in metadata`;
+
+    case 'personal_branding':
+      return baseFormat + `
+Additional requirements:
+- Include specific branding tactics and strategies in recommended_actions
+- Metadata should include timeline, difficulty, platforms, networking_opportunities, content_ideas`;
 
     default:
       return baseFormat;
@@ -341,6 +370,11 @@ async function generateSpecificRecommendation(supabase: any, recommendationId: s
         }));
 
         await supabase.from('content_recommendations').insert(contentRecommendations);
+        break;
+
+      case 'personal_branding':
+        // Personal branding recommendations are stored in the main ai_recommendations table
+        // No additional specific table needed for this type
         break;
     }
   } catch (error) {

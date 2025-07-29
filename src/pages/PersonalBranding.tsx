@@ -162,16 +162,48 @@ const PersonalBranding = () => {
 
   const generateContentTemplates = () => {
     const formData = form.getValues();
+    const style = formData.communicationStyle || 'professional';
+    
+    // Style-specific content variations
+    const styleContent = {
+      professional: {
+        linkedInPrefix: "🚀 Just completed a challenging project that taught me",
+        bioPrefix: "Award-winning",
+        tone: "professional and measured"
+      },
+      conversational: {
+        linkedInPrefix: "Hey everyone! 👋 Just wrapped up an amazing project and learned",
+        bioPrefix: "Passionate",
+        tone: "friendly and approachable"
+      },
+      "thought-leader": {
+        linkedInPrefix: "💡 Recent project insights:",
+        bioPrefix: "Visionary",
+        tone: "authoritative and insightful"
+      },
+      technical: {
+        linkedInPrefix: "📊 Technical deep-dive: Recently completed a project focusing on",
+        bioPrefix: "Technical expert",
+        tone: "detailed and precise"
+      },
+      creative: {
+        linkedInPrefix: "✨ Creative breakthrough! Just finished a project that reimagined",
+        bioPrefix: "Creative innovator",
+        tone: "imaginative and inspiring"
+      }
+    };
+
+    const currentStyle = styleContent[style] || styleContent.professional;
     
     return [
       {
         type: "LinkedIn Post",
         template: "Thought Leadership",
         preview: formData.achievements.length > 0 
-          ? `🚀 Just completed a challenging project that taught me ${formData.achievements[0].toLowerCase()}...`
-          : "🚀 Just completed a challenging project that taught me...",
+          ? `${currentStyle.linkedInPrefix} ${formData.achievements[0].toLowerCase()}...`
+          : `${currentStyle.linkedInPrefix} [key lesson]...`,
         fullContent: formData.achievements.length > 0 && formData.keySkills.length > 0
-          ? `🚀 Just completed a challenging project that taught me the importance of ${formData.achievements[0].toLowerCase()}.
+          ? `${currentStyle.linkedInPrefix} the importance of ${formData.achievements[0].toLowerCase()}.
 
 Key takeaways:
 • ${formData.keySkills[0]} is crucial for success
@@ -181,7 +213,7 @@ Key takeaways:
 What's one lesson you've learned recently that changed your perspective?
 
 #${formData.industry?.replace(/\s+/g, '') || 'ProfessionalGrowth'} #ThoughtLeadership #Learning`
-          : `🚀 Just completed a challenging project that taught me [key lesson].
+          : `${currentStyle.linkedInPrefix} [key lesson].
 
 Key takeaways:
 • [Skill/insight 1] is crucial for success
@@ -197,17 +229,17 @@ What's one lesson you've learned recently that changed your perspective?
         type: "Bio Template", 
         template: "Professional Bio",
         preview: formData.currentRole && formData.keySkills.length > 0
-          ? `Award-winning ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 2).join(' and ')}...`
-          : "Award-winning [role] with [X] years of experience in...",
+          ? `${currentStyle.bioPrefix} ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 2).join(' and ')}...`
+          : `${currentStyle.bioPrefix} [role] with expertise in...`,
         fullContent: formData.fullName && formData.currentRole && formData.keySkills.length > 0
-          ? `${formData.fullName} is an award-winning ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 3).join(', ')}.
+          ? `${formData.fullName} is ${currentStyle.bioPrefix.toLowerCase()} ${formData.currentRole} with expertise in ${formData.keySkills.slice(0, 3).join(', ')}.
 
 ${formData.personalStory || `With a passion for driving innovation and delivering exceptional results, ${formData.fullName.split(' ')[0]} has helped organizations achieve their strategic objectives through creative problem-solving and strategic thinking.`}
 
 ${formData.achievements.length > 0 ? `Notable achievements include ${formData.achievements.slice(0, 2).join(' and ')}.` : 'Notable achievements include leading cross-functional teams and delivering high-impact projects.'}
 
 ${formData.fullName.split(' ')[0]} is currently focused on ${formData.targetRole || 'advancing their career'} and is passionate about ${formData.uniqueValue || 'creating meaningful impact through their work'}.`
-          : `[Your Name] is an award-winning [Current Role] with expertise in [skill 1], [skill 2], and [skill 3].
+          : `[Your Name] is ${currentStyle.bioPrefix.toLowerCase()} [Current Role] with expertise in [skill 1], [skill 2], and [skill 3].
 
 [Personal story - 2-3 sentences about your journey, passion, and what drives you professionally.]
 
@@ -281,6 +313,57 @@ Let's connect: your.email@email.com`,
 
   const contentTemplates = generateContentTemplates();
 
+  // Watch for communication style changes and update content
+  const communicationStyle = form.watch("communicationStyle");
+  useEffect(() => {
+    if (communicationStyle && generatedContent) {
+      // Update generated content when communication style changes
+      const formData = form.getValues();
+      updateGeneratedContent(formData);
+    }
+  }, [communicationStyle]);
+
+  const updateGeneratedContent = (data: PersonalBrandData) => {
+    const style = data.communicationStyle || 'professional';
+    
+    // Style-specific variations for generated content
+    const styleVariations = {
+      professional: {
+        tagline: `${data.currentRole} → ${data.targetRole} | ${data.uniqueValue}`,
+        elevator_pitch: `Hello, I'm ${data.fullName}, a ${data.currentRole} specializing in ${data.industry}. ${data.personalStory?.substring(0, 100)}...`,
+        linkedin_headline: `${data.currentRole} | ${data.keySkills.slice(0, 3).join(' • ')} | ${data.targetRole}`,
+        bio: `Award-winning ${data.currentRole} with proven expertise in ${data.keySkills.join(', ')}. ${data.uniqueValue}`
+      },
+      conversational: {
+        tagline: `Hey! I'm transitioning from ${data.currentRole} to ${data.targetRole} 🚀`,
+        elevator_pitch: `Hi there! I'm ${data.fullName}, and I love working in ${data.industry}. ${data.personalStory?.substring(0, 100)}...`,
+        linkedin_headline: `${data.currentRole} → ${data.targetRole} | ${data.keySkills.slice(0, 2).join(' & ')} enthusiast`,
+        bio: `Passionate ${data.currentRole} who's all about ${data.keySkills.join(', ')} and ${data.uniqueValue.toLowerCase()}`
+      },
+      "thought-leader": {
+        tagline: `Transforming ${data.industry} through ${data.uniqueValue}`,
+        elevator_pitch: `I'm ${data.fullName}, a thought leader in ${data.industry}. ${data.personalStory?.substring(0, 100)}...`,
+        linkedin_headline: `${data.currentRole} & Industry Visionary | ${data.keySkills.slice(0, 3).join(' • ')}`,
+        bio: `Visionary ${data.currentRole} reshaping ${data.industry} through ${data.keySkills.join(', ')}. ${data.uniqueValue}`
+      },
+      technical: {
+        tagline: `${data.currentRole} | ${data.keySkills.slice(0, 3).join(' + ')} Specialist`,
+        elevator_pitch: `I'm ${data.fullName}, a technical ${data.currentRole} with deep expertise in ${data.industry}. ${data.personalStory?.substring(0, 100)}...`,
+        linkedin_headline: `Senior ${data.currentRole} | ${data.keySkills.slice(0, 3).join(' | ')} Expert`,
+        bio: `Technical expert and ${data.currentRole} with advanced skills in ${data.keySkills.join(', ')}. ${data.uniqueValue}`
+      },
+      creative: {
+        tagline: `✨ Creative ${data.currentRole} bringing innovation to ${data.industry}`,
+        elevator_pitch: `Hi! I'm ${data.fullName}, a creative professional who loves pushing boundaries in ${data.industry}. ${data.personalStory?.substring(0, 100)}...`,
+        linkedin_headline: `Creative ${data.currentRole} ✨ ${data.keySkills.slice(0, 2).join(' & ')} innovator`,
+        bio: `Creative innovator and ${data.currentRole} blending ${data.keySkills.join(', ')} to deliver ${data.uniqueValue.toLowerCase()}`
+      }
+    };
+
+    const currentVariation = styleVariations[style] || styleVariations.professional;
+    setGeneratedContent(currentVariation);
+  };
+
   // Transform AI recommendations into strategy format
   const brandingStrategies = personalBrandingRecommendations?.map(rec => ({
     id: rec.id,
@@ -306,36 +389,36 @@ Let's connect: your.email@email.com`,
   })) || [];
 
   const onSubmit = async (data: PersonalBrandData) => {
-    // Simulate brand analysis
-    const score = Math.floor(Math.random() * 20) + 80;
-    setBrandScore(score);
-    
-    // Generate content based on form data
-    setGeneratedContent({
-      tagline: `${data.currentRole} → ${data.targetRole} | ${data.uniqueValue}`,
-      elevator_pitch: `Hi, I'm ${data.fullName}, a ${data.currentRole} passionate about ${data.industry}. ${data.personalStory.substring(0, 100)}...`,
-      linkedin_headline: `${data.currentRole} | ${data.keySkills.slice(0, 3).join(' • ')} | ${data.targetRole}`,
-      bio: `Award-winning ${data.currentRole} with proven expertise in ${data.keySkills.join(', ')}. ${data.uniqueValue}`
-    });
-    
-    // Generate AI-powered branding strategies
-    if (user?.id) {
-      await generatePersonalBrandingStrategies({
-        fullName: data.fullName,
-        currentRole: data.currentRole,
-        targetRole: data.targetRole,
-        industry: data.industry,
-        keySkills: data.keySkills,
-        achievements: data.achievements,
-        uniqueValue: data.uniqueValue,
-        personalStory: data.personalStory,
-        targetAudience: data.targetAudience,
-        communicationStyle: data.communicationStyle,
-        experienceLevel: 'mid_level' // Could be determined from form data
-      });
+    try {
+      // Simulate brand analysis
+      const score = Math.floor(Math.random() * 20) + 80;
+      setBrandScore(score);
+      
+      // Generate content based on form data and communication style
+      updateGeneratedContent(data);
+      
+      // Generate AI-powered branding strategies
+      if (user?.id) {
+        await generatePersonalBrandingStrategies({
+          fullName: data.fullName,
+          currentRole: data.currentRole,
+          targetRole: data.targetRole,
+          industry: data.industry,
+          keySkills: data.keySkills,
+          achievements: data.achievements,
+          uniqueValue: data.uniqueValue,
+          personalStory: data.personalStory,
+          targetAudience: data.targetAudience,
+          communicationStyle: data.communicationStyle,
+          experienceLevel: 'mid_level' // Could be determined from form data
+        });
+      }
+      
+      toast.success("Personal brand analysis complete!");
+    } catch (error) {
+      console.error('Error generating personal brand:', error);
+      toast.error("Failed to generate AI recommendations. Brand assets still generated!");
     }
-    
-    toast.success("Personal brand analysis complete!");
   };
 
   const copyToClipboard = (text: string) => {
