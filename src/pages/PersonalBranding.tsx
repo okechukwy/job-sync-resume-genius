@@ -60,7 +60,7 @@ const PersonalBranding = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newAchievement, setNewAchievement] = useState("");
   
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null); // Current authenticated user
   
   // Get current user
   useEffect(() => {
