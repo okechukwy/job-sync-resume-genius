@@ -1,9 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Lightbulb, Target, CheckCircle2, Clock, TrendingUp, Users } from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Lightbulb, Sparkles, TrendingUp } from "lucide-react";
+import { StrategyDashboard } from "./StrategyDashboard";
+import { StrategyCard } from "./StrategyCard";
+import { StrategyFilters } from "./StrategyFilters";
 
 interface BrandingStrategy {
   id: string;
@@ -41,47 +43,123 @@ export const PersonalBrandingStrategies = ({
   onStartStrategy, 
   onDismissStrategy 
 }: PersonalBrandingStrategiesProps) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
-      default: return 'default';
-    }
+  // Filter and search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("priority");
+  
+  // Action completion tracking
+  const [actionCompletions, setActionCompletions] = useState<Record<string, Set<number>>>({});
+
+  // Filter and sort strategies
+  const filteredAndSortedStrategies = useMemo(() => {
+    let filtered = strategies.filter(strategy => {
+      const matchesSearch = strategy.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           strategy.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPriority = priorityFilter === "all" || strategy.priority === priorityFilter;
+      const matchesDifficulty = difficultyFilter === "all" || strategy.metadata?.difficulty === difficultyFilter;
+      
+      return matchesSearch && matchesPriority && matchesDifficulty;
+    });
+
+    // Sort strategies
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "priority":
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          return priorityOrder[b.priority as keyof typeof priorityOrder] - priorityOrder[a.priority as keyof typeof priorityOrder];
+        case "confidence":
+          return b.confidence_score - a.confidence_score;
+        case "timeline":
+          return (a.metadata?.timeline || "").localeCompare(b.metadata?.timeline || "");
+        case "difficulty":
+          const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
+          const aDiff = difficultyOrder[a.metadata?.difficulty as keyof typeof difficultyOrder] || 2;
+          const bDiff = difficultyOrder[b.metadata?.difficulty as keyof typeof difficultyOrder] || 2;
+          return aDiff - bDiff;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [strategies, searchQuery, priorityFilter, difficultyFilter, sortBy]);
+
+  // Calculate metrics
+  const totalActions = strategies.reduce((sum, strategy) => sum + (strategy.recommended_actions?.length || 0), 0);
+  const completedActions = Object.values(actionCompletions).reduce((sum, set) => sum + set.size, 0);
+  const overallProgress = totalActions > 0 ? Math.round((completedActions / totalActions) * 100) : 0;
+
+  const hasActiveFilters = searchQuery !== "" || priorityFilter !== "all" || difficultyFilter !== "all";
+
+  const handleActionComplete = (strategyId: string, actionIndex: number, completed: boolean) => {
+    setActionCompletions(prev => {
+      const newCompletions = { ...prev };
+      if (!newCompletions[strategyId]) {
+        newCompletions[strategyId] = new Set();
+      }
+      
+      if (completed) {
+        newCompletions[strategyId].add(actionIndex);
+      } else {
+        newCompletions[strategyId].delete(actionIndex);
+      }
+      
+      return newCompletions;
+    });
   };
 
-  const getDifficultyIcon = (difficulty: string) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'medium': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'hard': return <TrendingUp className="h-4 w-4 text-red-500" />;
-      default: return <Target className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const handleStartStrategy = (strategyId: string, strategyTitle: string) => {
-    onStartStrategy(strategyId);
-    toast.success(`Started strategy: ${strategyTitle}`);
+  const clearFilters = () => {
+    setSearchQuery("");
+    setPriorityFilter("all");
+    setDifficultyFilter("all");
   };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h3 className="text-xl font-semibold">Personal Branding Strategies</h3>
-        <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-6">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h3 className="text-2xl font-bold">Personal Branding Strategies</h3>
+        </div>
+        
+        {/* Loading dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-card p-6">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="h-2 w-full" />
+            </div>
+          ))}
+        </div>
+        
+        {/* Loading strategies */}
+        <div className="space-y-6">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="glass-card animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
-                  <div className="h-16 bg-muted rounded"></div>
+            <div key={i} className="glass-card p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-2 w-48" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32 mb-2" />
+                {[1, 2, 3].map((j) => (
+                  <div key={j} className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -91,163 +169,100 @@ export const PersonalBrandingStrategies = ({
   if (!strategies || strategies.length === 0) {
     return (
       <div className="space-y-6">
-        <h3 className="text-xl font-semibold">Personal Branding Strategies</h3>
-        <Alert>
-          <Lightbulb className="h-4 w-4" />
-          <AlertDescription>
-            Complete your brand builder form and submit it to generate personalized branding strategies based on your unique profile and career goals.
-          </AlertDescription>
-        </Alert>
+        <div className="flex items-center gap-2 mb-6">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h3 className="text-2xl font-bold">Personal Branding Strategies</h3>
+        </div>
+        
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lightbulb className="h-8 w-8 text-primary" />
+          </div>
+          <h4 className="text-lg font-semibold mb-2">No Strategies Generated Yet</h4>
+          <Alert className="max-w-md mx-auto">
+            <AlertDescription>
+              Complete your brand builder form and submit it to generate personalized branding strategies based on your unique profile and career goals.
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Personal Branding Strategies</h3>
-        <Badge variant="outline">{strategies.length} Strategies Generated</Badge>
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h3 className="text-2xl font-bold">Personal Branding Strategies</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" />
+            {strategies.length} Strategies Generated
+          </Badge>
+          {overallProgress > 0 && (
+            <Badge variant="secondary">
+              {overallProgress}% Complete
+            </Badge>
+          )}
+        </div>
       </div>
-      
-      <div className="space-y-6">
-        {strategies.map((strategy) => (
-          <Card key={strategy.id} className="glass-card">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{strategy.title}</CardTitle>
-                    <Badge variant={getPriorityColor(strategy.priority)}>
-                      {strategy.priority}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground">{strategy.description}</p>
-                  {strategy.reasoning && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                      <p className="text-sm">
-                        <strong>Why this strategy:</strong> {strategy.reasoning}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="text-right ml-4">
-                  <div className="flex items-center gap-1 mb-1">
-                    {getDifficultyIcon(strategy.metadata?.difficulty)}
-                    <span className="text-xs text-muted-foreground">
-                      {strategy.metadata?.difficulty || 'Medium'}
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {strategy.metadata?.timeline || '3-6 months'}
-                  </Badge>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {Math.round(strategy.confidence_score * 100)}% confidence
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              {/* Recommended Actions */}
-              <div>
-                <span className="text-sm font-medium flex items-center gap-2 mb-2">
-                  <Target className="h-4 w-4" />
-                  Action Plan
-                </span>
-                <div className="space-y-2">
-                  {strategy.recommended_actions?.map((action, index) => (
-                    <div key={index} className="border-l-2 border-primary/20 pl-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">{action.action}</p>
-                        <div className="flex items-center gap-2">
-                          {getDifficultyIcon(action.difficulty)}
-                          <Badge variant="outline" className="text-xs">
-                            {action.timeline}
-                          </Badge>
-                        </div>
-                      </div>
-                      {action.success_metrics && action.success_metrics.length > 0 && (
-                        <div className="mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            Success metrics: {action.success_metrics.join(', ')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Additional Strategy Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {strategy.metadata?.networking_opportunities && (
-                  <div>
-                    <span className="text-sm font-medium flex items-center gap-2 mb-2">
-                      <Users className="h-4 w-4" />
-                      Networking
-                    </span>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      {strategy.metadata.networking_opportunities.map((opportunity, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          {opportunity}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+      {/* Dashboard Overview */}
+      <StrategyDashboard
+        strategies={strategies}
+        completedActions={completedActions}
+        totalActions={totalActions}
+        overallProgress={overallProgress}
+      />
 
-                {strategy.metadata?.content_ideas && (
-                  <div>
-                    <span className="text-sm font-medium flex items-center gap-2 mb-2">
-                      <Lightbulb className="h-4 w-4" />
-                      Content Ideas
-                    </span>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      {strategy.metadata.content_ideas.map((idea, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          {idea}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+      {/* Filters */}
+      <StrategyFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        priorityFilter={priorityFilter}
+        onPriorityChange={setPriorityFilter}
+        difficultyFilter={difficultyFilter}
+        onDifficultyChange={setDifficultyFilter}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
 
-              {strategy.metadata?.platforms && (
-                <div>
-                  <span className="text-sm font-medium mb-2 block">Recommended Platforms:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {strategy.metadata.platforms.map((platform, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {platform}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  className="flex-1" 
-                  onClick={() => handleStartStrategy(strategy.id, strategy.title)}
-                >
-                  Start This Strategy
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onDismissStrategy(strategy.id)}
-                >
-                  Dismiss
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Strategy Cards */}
+      {filteredAndSortedStrategies.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lightbulb className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h4 className="text-lg font-semibold mb-2">No strategies match your filters</h4>
+          <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
+          {hasActiveFilters && (
+            <Badge 
+              variant="outline" 
+              className="cursor-pointer hover:bg-muted"
+              onClick={clearFilters}
+            >
+              Clear all filters
+            </Badge>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {filteredAndSortedStrategies.map((strategy) => (
+            <StrategyCard
+              key={strategy.id}
+              strategy={strategy}
+              onStartStrategy={onStartStrategy}
+              onDismissStrategy={onDismissStrategy}
+              onActionComplete={handleActionComplete}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
