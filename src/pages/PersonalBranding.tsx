@@ -3,8 +3,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAIRecommendations } from "@/hooks/useAIRecommendations";
+import { usePersonalBrandingAnalytics } from "@/hooks/usePersonalBrandingAnalytics";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalBrandingStrategies } from "@/components/personal-branding/PersonalBrandingStrategies";
+import { BrandAnalyticsCards } from "@/components/personal-branding/BrandAnalyticsCards";
+import { BrandAchievements } from "@/components/personal-branding/BrandAchievements";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,6 +82,13 @@ const PersonalBranding = () => {
     implementRecommendation,
     isGenerating
   } = useAIRecommendations(user?.id);
+
+  // Get brand analytics data
+  const { 
+    data: brandAnalytics, 
+    isLoading: analyticsLoading,
+    refetch: refetchAnalytics
+  } = usePersonalBrandingAnalytics(user?.id);
 
   const form = useForm<PersonalBrandData>({
     resolver: zodResolver(personalBrandSchema),
@@ -1270,77 +1280,23 @@ Resume/CV Headlines:
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Brand Performance Analytics</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Eye className="h-5 w-5" />
-                      Visibility Score
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">78%</div>
-                      <div className="text-sm text-muted-foreground">+12% this month</div>
-                      <Progress value={78} className="mt-2" />
-                    </div>
-                  </CardContent>
-                </Card>
+              <BrandAnalyticsCards 
+                analytics={brandAnalytics || {
+                  visibilityScore: 0,
+                  networkGrowth: 0,
+                  engagementRate: 0,
+                  profileCompletion: 0,
+                  contentOptimization: 0,
+                  achievements: [],
+                  trends: { visibility: 0, network: 0, engagement: 0 }
+                }}
+                isLoading={analyticsLoading}
+              />
 
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Network Growth
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">+245</div>
-                      <div className="text-sm text-muted-foreground">New connections</div>
-                      <Progress value={85} className="mt-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5" />
-                      Engagement Rate
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">6.8%</div>
-                      <div className="text-sm text-muted-foreground">Above average</div>
-                      <Progress value={68} className="mt-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>Recent Achievements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Alert>
-                      <Award className="h-4 w-4" />
-                      <AlertDescription>
-                        Your LinkedIn post about industry trends received 150+ likes and 25 comments!
-                      </AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>
-                        You appeared in 3 new search results for your target keywords this week.
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                </CardContent>
-              </Card>
+              <BrandAchievements 
+                achievements={brandAnalytics?.achievements || []}
+                isLoading={analyticsLoading}
+              />
             </div>
           </TabsContent>
 
