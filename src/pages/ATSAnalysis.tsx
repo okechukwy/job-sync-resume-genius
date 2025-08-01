@@ -28,24 +28,9 @@ const ATSAnalysis = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const fileName = file.name.toLowerCase();
-    const fileType = file.type.toLowerCase();
-
-    // Check for .doc files specifically
-    if (fileName.endsWith('.doc') && !fileName.endsWith('.docx')) {
-      toast.error('Legacy .doc files are not supported. Please convert to .docx or PDF format for better compatibility.');
-      return;
-    }
-
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    const allowedExtensions = ['.pdf', '.docx'];
-    
-    const hasValidType = allowedTypes.includes(fileType);
-    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
-    
-    if (!hasValidType && !hasValidExtension) {
-      toast.error('Please upload a PDF or DOCX file. Legacy DOC files are not supported.');
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PDF, DOC, or DOCX file');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -230,7 +215,7 @@ const ATSAnalysis = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <input ref={fileInputRef} type="file" accept=".pdf,.docx" onChange={handleResumeUpload} className="hidden" disabled={isAnalyzing} />
+            <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={isAnalyzing} />
             
             {uploadedResume ? <div className={`glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4 ${isAnalyzing ? 'opacity-75' : ''}`}>
                 <div className="flex items-center justify-between">
@@ -273,9 +258,7 @@ const ATSAnalysis = () => {
                 <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium mb-2">Upload your resume for comprehensive ATS analysis</p>
                 <p className="text-muted-foreground mb-6">
-                  Supported formats: PDF, DOCX (max 5MB)
-                  <br />
-                  <span className="text-destructive text-xs">Note: Legacy .doc files are not supported - please save as .docx</span>
+                  Supported formats: PDF, DOC, DOCX (max 5MB)
                 </p>
                 <Button onClick={() => fileInputRef.current?.click()} disabled={isAnalyzing}>
                   Choose File

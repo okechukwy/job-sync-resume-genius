@@ -2,6 +2,7 @@
 import { readTextFile } from './fileReaders/textFileReader';
 import { readPdfFile } from './fileReaders/pdfFileReader';
 import { readDocxFile } from './fileReaders/docxFileReader';
+import { readDocFile } from './fileReaders/docFileReader';
 
 export interface FileReadResult {
   content: string;
@@ -36,7 +37,8 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
       content = await readDocxFile(file);
       processingMethod = 'Microsoft Word document extraction';
     } else if (fileType === 'application/msword' || fileName.endsWith('.doc')) {
-      throw new Error('Legacy .doc files are not supported. Please save your document as .docx or PDF format for optimal text extraction and analysis.');
+      content = await readDocFile(file);
+      processingMethod = 'Legacy DOC file extraction';
     } else {
       throw new Error(`Unsupported file format: ${fileType}`);
     }
