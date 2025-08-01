@@ -20,10 +20,24 @@ const FileUpload = ({ uploadedFile, onFileChange, onStartFromScratch }: FileUplo
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+
+    // Check for .doc files specifically
+    if (fileName.endsWith('.doc') && !fileName.endsWith('.docx')) {
+      toast.error('Legacy .doc files are not supported. Please convert to .docx or PDF format for better compatibility.');
+      return;
+    }
+
     // Validate file type
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Please upload a PDF, DOC, or DOCX file');
+    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const allowedExtensions = ['.pdf', '.docx'];
+    
+    const hasValidType = allowedTypes.includes(fileType);
+    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!hasValidType && !hasValidExtension) {
+      toast.error('Please upload a PDF or DOCX file. Legacy DOC files are not supported.');
       return;
     }
 
@@ -56,7 +70,7 @@ const FileUpload = ({ uploadedFile, onFileChange, onStartFromScratch }: FileUplo
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf,.docx"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -97,7 +111,9 @@ const FileUpload = ({ uploadedFile, onFileChange, onStartFromScratch }: FileUplo
         )}
         
         <p className="text-xs text-muted-foreground">
-          Supported formats: PDF, DOC, DOCX (max 5MB)
+          Supported formats: PDF, DOCX (max 5MB)
+          <br />
+          <span className="text-destructive">Note: Legacy .doc files are not supported - please save as .docx</span>
         </p>
       </div>
     </div>

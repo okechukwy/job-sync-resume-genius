@@ -32,11 +32,11 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
       content = await readPdfFile(file);
       processingMethod = 'PDF parsing with layout preservation';
     } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
-               fileType === 'application/msword' || 
-               fileName.endsWith('.docx') || 
-               fileName.endsWith('.doc')) {
+               fileName.endsWith('.docx')) {
       content = await readDocxFile(file);
       processingMethod = 'Microsoft Word document extraction';
+    } else if (fileType === 'application/msword' || fileName.endsWith('.doc')) {
+      throw new Error('Legacy .doc files are not supported. Please save your document as .docx or PDF format for optimal text extraction and analysis.');
     } else {
       throw new Error(`Unsupported file format: ${fileType}`);
     }
