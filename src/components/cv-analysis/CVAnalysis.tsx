@@ -8,11 +8,13 @@ import { readFileContent } from "@/utils/fileReader";
 import { useState, useEffect } from "react";
 import { cvAnalysisService } from "@/services/cvAnalysisService";
 import { validateAnalysisData } from "./utils/dataValidation";
+import { saveEnhancementHistory, performProgressiveAnalysis } from "@/services/progressiveAnalysisService";
 import EnhancedOverallScores from "./components/EnhancedOverallScores";
 import EnhancedSectionBreakdown from "./components/EnhancedSectionBreakdown";
 import StreamlinedKeywordAnalysis from "./components/StreamlinedKeywordAnalysis";
 import ActionableImprovements from "./components/ActionableImprovements";
 import ApplyRecommendations from "./components/ApplyRecommendations";
+import ProgressiveAnalysisStatus from "./components/ProgressiveAnalysisStatus";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { validateAIImprovements, ImprovementValidationResult } from "./services/improvementValidation";
 import { calculateOptimizationCompleteness } from "./utils/optimizationUtils";
@@ -23,6 +25,8 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
   const [manuallyCompletedItems, setManuallyCompletedItems] = useState<number[]>([]);
   const [aiOptimizationResult, setAIOptimizationResult] = useState<EnhancedCVResult | null>(null);
   const [improvementValidation, setImprovementValidation] = useState<ImprovementValidationResult | null>(null);
+  const [cvContent, setCvContent] = useState<string>('');
+  const [progressiveResult, setProgressiveResult] = useState<any>(null);
 
   useEffect(() => {
     const performAnalysis = async () => {
@@ -31,9 +35,15 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
         toast.info("🔍 Analyzing your resume with advanced AI...");
         
         const fileContent = await readFileContent(uploadedFile);
+        setCvContent(fileContent);
+        
         const rawAnalysis = await analyzeCVWithAI(fileContent);
         
-        const validationResult = validateAnalysisData(rawAnalysis);
+        // Apply progressive analysis to avoid repeated suggestions
+        const progressiveAnalysisResult = await performProgressiveAnalysis(rawAnalysis, fileContent);
+        setProgressiveResult(progressiveAnalysisResult);
+        
+        const validationResult = validateAnalysisData(progressiveAnalysisResult.analysisData);
         
         if (!validationResult.isValid) {
           console.log('Using fallback data due to validation issues');
@@ -44,11 +54,15 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
           const finalAnalysis = validationResult.correctedData || rawAnalysis;
           setAnalysisData(finalAnalysis);
           
-          await cvAnalysisService.saveCVAnalysis(
+          const analysisId = await cvAnalysisService.saveCVAnalysis(
             uploadedFile.name,
             uploadedFile.size,
-            finalAnalysis
+            finalAnalysis,
+            fileContent
           );
+          
+          // Save enhancement history for tracking
+          await saveEnhancementHistory(fileContent, null, analysisId);
           
           toast.success("✅ AI analysis completed and insights generated!");
         }
@@ -164,6 +178,16 @@ const CVAnalysis = ({ uploadedFile, onContinue, onReupload }: CVAnalysisProps) =
           Review the insights below and take action on the recommendations.
         </p>
       </div>
+
+      {progressiveResult && (
+        <ProgressiveAnalysisStatus
+          improvementRound={progressiveResult.improvementRound}
+          isProgressive={progressiveResult.isProgressive}
+          previouslyAddressed={progressiveResult.previouslyAddressed}
+          focusAreas={progressiveResult.focusAreas}
+          totalImprovements={analysisData.improvements.length}
+        />
+      )}
 
       <EnhancedOverallScores 
         overallScore={analysisData.overallScore}

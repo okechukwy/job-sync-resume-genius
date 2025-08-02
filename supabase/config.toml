@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.doc-text-extractor]
 verify_jwt = true
+
+[functions.progressive-cv-analysis]
+verify_jwt = true

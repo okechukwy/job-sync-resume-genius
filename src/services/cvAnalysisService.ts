@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AnalysisData } from "@/components/cv-analysis/types/analysisTypes";
 import { TablesInsert } from "@/integrations/supabase/types";
 import { validateAnalysisData, logValidationResult } from "@/components/cv-analysis/utils/dataValidation";
+import { generateContentHash } from "./contentComparisonService";
+import { performProgressiveAnalysis, getLatestEnhancementRound } from "./progressiveAnalysisService";
 
 export interface SavedCVAnalysis {
   id: string;
@@ -14,11 +16,13 @@ export interface SavedCVAnalysis {
 }
 
 export const cvAnalysisService = {
-  // Save CV analysis results with validation
+  // Save CV analysis results with validation and progressive tracking
   async saveCVAnalysis(
     fileName: string,
     fileSize: number,
-    analysisData: AnalysisData
+    analysisData: AnalysisData,
+    cvContent?: string,
+    previousAnalysisId?: string
   ): Promise<string> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error("User not authenticated");
@@ -28,6 +32,10 @@ export const cvAnalysisService = {
     logValidationResult(validationResult, 'CV Analysis Save');
     
     const dataToSave = validationResult.correctedData || analysisData;
+    
+    // Get enhancement round and content hash
+    const enhancementRound = await getLatestEnhancementRound();
+    const contentHash = cvContent ? generateContentHash(cvContent) : undefined;
 
     const { data, error } = await supabase
       .from("cv_analyses")
@@ -42,8 +50,11 @@ export const cvAnalysisService = {
         improvements: dataToSave.improvements as any,
         industry: dataToSave.industry,
         target_role: dataToSave.targetRole,
-        analysis_type: "ai_generated"
-      } as TablesInsert<'cv_analyses'>)
+        analysis_type: "ai_generated",
+        enhancement_round: enhancementRound,
+        previous_analysis_id: previousAnalysisId,
+        content_hash: contentHash
+      } as any)
       .select()
       .single();
 
@@ -91,6 +102,15 @@ export const cvAnalysisService = {
     logValidationResult(validationResult, 'CV Analysis Load');
     
     return validationResult.correctedData || rawAnalysis;
+  },
+
+  // Perform progressive CV analysis
+  async performProgressiveCVAnalysis(
+    originalAnalysis: AnalysisData,
+    cvContent: string
+  ): Promise<AnalysisData> {
+    const progressiveResult = await performProgressiveAnalysis(originalAnalysis, cvContent);
+    return progressiveResult.analysisData;
   },
 
   // Delete CV analysis

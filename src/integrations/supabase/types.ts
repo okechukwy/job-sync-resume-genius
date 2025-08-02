@@ -607,8 +607,11 @@ export type Database = {
       cv_analyses: {
         Row: {
           analysis_type: string | null
+          applied_improvements: Json | null
           ats_score: number
+          content_hash: string | null
           created_at: string | null
+          enhancement_round: number | null
           file_name: string
           file_size: number
           id: string
@@ -616,14 +619,18 @@ export type Database = {
           industry: string | null
           keywords: Json
           overall_score: number
+          previous_analysis_id: string | null
           sections: Json
           target_role: string | null
           user_id: string
         }
         Insert: {
           analysis_type?: string | null
+          applied_improvements?: Json | null
           ats_score: number
+          content_hash?: string | null
           created_at?: string | null
+          enhancement_round?: number | null
           file_name: string
           file_size: number
           id?: string
@@ -631,14 +638,18 @@ export type Database = {
           industry?: string | null
           keywords?: Json
           overall_score: number
+          previous_analysis_id?: string | null
           sections?: Json
           target_role?: string | null
           user_id: string
         }
         Update: {
           analysis_type?: string | null
+          applied_improvements?: Json | null
           ats_score?: number
+          content_hash?: string | null
           created_at?: string | null
+          enhancement_round?: number | null
           file_name?: string
           file_size?: number
           id?: string
@@ -646,8 +657,51 @@ export type Database = {
           industry?: string | null
           keywords?: Json
           overall_score?: number
+          previous_analysis_id?: string | null
           sections?: Json
           target_role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cv_enhancement_history: {
+        Row: {
+          applied_improvements: Json
+          content_changes: Json
+          created_at: string
+          cv_analysis_id: string | null
+          enhanced_content_hash: string | null
+          id: string
+          improvement_round: number
+          optimization_areas: Json
+          original_content_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_improvements?: Json
+          content_changes?: Json
+          created_at?: string
+          cv_analysis_id?: string | null
+          enhanced_content_hash?: string | null
+          id?: string
+          improvement_round?: number
+          optimization_areas?: Json
+          original_content_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_improvements?: Json
+          content_changes?: Json
+          created_at?: string
+          cv_analysis_id?: string | null
+          enhanced_content_hash?: string | null
+          id?: string
+          improvement_round?: number
+          optimization_areas?: Json
+          original_content_hash?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
