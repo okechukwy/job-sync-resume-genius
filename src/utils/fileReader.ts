@@ -2,7 +2,26 @@
 import { readTextFile } from './fileReaders/textFileReader';
 import { readPdfFile } from './fileReaders/pdfFileReader';
 import { readDocxFile } from './fileReaders/docxFileReader';
-import { readDocFile } from './fileReaders/docFileReader';
+import { supabase } from '@/integrations/supabase/client';
+
+const processDocFileServerSide = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const { data, error } = await supabase.functions.invoke('doc-text-extractor', {
+    body: formData,
+  });
+  
+  if (error) {
+    throw new Error(error.message || 'Failed to process .doc file on server');
+  }
+  
+  if (!data.success) {
+    throw new Error(data.error || 'Server-side processing failed');
+  }
+  
+  return data;
+};
 
 export interface FileReadResult {
   content: string;
@@ -37,8 +56,10 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
       content = await readDocxFile(file);
       processingMethod = 'Microsoft Word document extraction';
     } else if (fileType === 'application/msword' || fileName.endsWith('.doc')) {
-      content = await readDocFile(file);
-      processingMethod = 'Legacy DOC file extraction';
+      const result = await processDocFileServerSide(file);
+      content = result.text;
+      processingMethod = result.processingMethod;
+      warnings.push(...result.warnings);
     } else {
       throw new Error(`Unsupported file format: ${fileType}`);
     }

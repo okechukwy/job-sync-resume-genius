@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.ai-cv-enhancement]
 verify_jwt = true
+
+[functions.doc-text-extractor]
+verify_jwt = true
