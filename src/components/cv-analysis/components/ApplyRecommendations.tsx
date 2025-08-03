@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Zap, TrendingUp, Target, Lightbulb, AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, Zap, TrendingUp, Target, Lightbulb, AlertTriangle, Settings, Sparkles } from "lucide-react";
 import { useApplyRecommendations } from "../hooks/useApplyRecommendations";
 import CVDisplay from "./CVDisplay";
 import EnhancementLog from "./EnhancementLog";
 import DownloadOptions from "./DownloadOptions";
+import SmartRecommendationEngine from "./SmartRecommendationEngine";
+import ATSOptimizedTemplates from "./ATSOptimizedTemplates";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { OptimizationCompleteness } from "../utils/optimizationUtils";
 
@@ -24,6 +28,9 @@ const ApplyRecommendations = ({
   optimizationCompleteness,
   onOptimizationComplete 
 }: ApplyRecommendationsProps) => {
+  const [optimizationMode, setOptimizationMode] = useState<'legacy' | 'smart'>('smart');
+  const [smartOptimizationComplete, setSmartOptimizationComplete] = useState(false);
+  
   const {
     recommendationsApplied,
     enhancedResult,
@@ -31,6 +38,11 @@ const ApplyRecommendations = ({
     isProcessing,
     handleApplyRecommendations
   } = useApplyRecommendations(uploadedFile, analysisData, onOptimizationComplete);
+
+  const handleSmartOptimizationComplete = (result: EnhancedCVResult) => {
+    setSmartOptimizationComplete(true);
+    onOptimizationComplete(result);
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -123,13 +135,85 @@ const ApplyRecommendations = ({
 
   return (
     <div className="space-y-6">
+      {/* Optimization Mode Selector */}
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5" />
-            AI-Powered CV Optimization
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              ATS Optimization Engine
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={optimizationMode === 'smart' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setOptimizationMode('smart')}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Smart Engine
+              </Button>
+              <Button
+                variant={optimizationMode === 'legacy' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setOptimizationMode('legacy')}
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                One-Click
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`p-4 rounded-lg border ${optimizationMode === 'smart' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Smart Optimization Engine
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Select specific recommendations to apply</li>
+                <li>• Preview changes before applying</li>
+                <li>• Category-based optimization control</li>
+                <li>• Conflict detection and resolution</li>
+                <li>• Industry-specific templates</li>
+              </ul>
+            </div>
+            <div className={`p-4 rounded-lg border ${optimizationMode === 'legacy' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                One-Click Optimization
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Automatic application of all improvements</li>
+                <li>• AI-powered content enhancement</li>
+                <li>• Quick and simple optimization</li>
+                <li>• Best for basic optimization needs</li>
+                <li>• Standard export options</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Smart Optimization Mode */}
+      {optimizationMode === 'smart' && !smartOptimizationComplete && (
+        <SmartRecommendationEngine
+          originalContent={originalContent}
+          analysisData={analysisData}
+          isHtml={enhancedResult?.isHtmlContent || false}
+          onOptimizationComplete={handleSmartOptimizationComplete}
+        />
+      )}
+
+      {/* Legacy One-Click Mode */}
+      {optimizationMode === 'legacy' && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              One-Click AI Optimization
+            </CardTitle>
+          </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <p className="text-muted-foreground">
@@ -268,65 +352,102 @@ const ApplyRecommendations = ({
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {recommendationsApplied && enhancedResult && enhancedResult.changesApplied.length > 0 && (
-        <>
-          {/* Changes Applied Section */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                AI Improvements Applied ({enhancedResult.changesApplied.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {enhancedResult.changesApplied.map((change, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      {getCategoryIcon(change.category)}
-                      <Badge className={getCategoryBadge(change.category)}>
-                        {getCategoryLabel(change.category)}
-                      </Badge>
-                      <span className="text-sm font-medium">{change.section}</span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Original:</p>
-                        <p className="text-sm bg-red-50 p-2 rounded border text-red-800">
-                          {change.original}
-                        </p>
+      {/* Results Display - Show for both modes */}
+      {((optimizationMode === 'legacy' && recommendationsApplied && enhancedResult) || 
+        (optimizationMode === 'smart' && smartOptimizationComplete && enhancedResult)) && (
+        <Tabs defaultValue="preview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="changes">Changes ({enhancedResult.changesApplied.length})</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
+            <TabsTrigger value="templates">ATS Templates</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="preview" className="space-y-4">
+            <CVDisplay enhancedResult={enhancedResult} />
+          </TabsContent>
+
+          <TabsContent value="changes" className="space-y-4">
+            {enhancedResult.changesApplied.length > 0 ? (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Applied Optimizations ({enhancedResult.changesApplied.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {enhancedResult.changesApplied.map((change, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          {getCategoryIcon(change.category)}
+                          <Badge className={getCategoryBadge(change.category)}>
+                            {getCategoryLabel(change.category)}
+                          </Badge>
+                          <span className="text-sm font-medium">{change.section}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Original:</p>
+                            <p className="text-sm bg-red-50 p-2 rounded border text-red-800">
+                              {change.original}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Improved:</p>
+                            <p className="text-sm bg-green-50 p-2 rounded border text-green-800">
+                              {change.improved}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-2 rounded border border-blue-200">
+                          <p className="text-xs text-blue-800">
+                            <strong>Why this helps:</strong> {change.reasoning}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Improved:</p>
-                        <p className="text-sm bg-green-50 p-2 rounded border text-green-800">
-                          {change.improved}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-blue-50 p-2 rounded border border-blue-200">
-                      <p className="text-xs text-blue-800">
-                        <strong>Why this helps:</strong> {change.reasoning}
-                      </p>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="glass-card">
+                <CardContent className="text-center py-8">
+                  <AlertTriangle className="w-12 h-12 mx-auto text-yellow-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Changes Applied</h3>
+                  <p className="text-muted-foreground">
+                    Your resume appears to be already well-optimized, or no recommendations were selected.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            <EnhancementLog enhancedResult={enhancedResult} />
+          </TabsContent>
 
-          <CVDisplay enhancedResult={enhancedResult} />
-          <EnhancementLog enhancedResult={enhancedResult} />
-          <DownloadOptions 
-            enhancedResult={enhancedResult}
-            originalContent={originalContent}
-            uploadedFile={uploadedFile}
-          />
-        </>
+          <TabsContent value="export" className="space-y-4">
+            <DownloadOptions 
+              enhancedResult={enhancedResult}
+              originalContent={originalContent}
+              uploadedFile={uploadedFile}
+            />
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-4">
+            <ATSOptimizedTemplates
+              enhancedResult={enhancedResult}
+              originalContent={originalContent}
+              uploadedFile={uploadedFile}
+              targetIndustry={analysisData?.industry || 'Business'}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
