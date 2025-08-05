@@ -58,53 +58,53 @@ export const SocialAuthButtons = ({ onSuccess }: SocialAuthButtonsProps) => {
         <h3 className="text-lg font-semibold mb-4">Sign in to your account</h3>
       </div>
       
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid gap-3">
         <Button
           variant="outline"
           onClick={() => handleSocialSignIn('google')}
           disabled={loadingProvider !== null}
-          className="w-full h-10 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
+          className="w-full h-12 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
         >
           {loadingProvider === 'google' ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="mr-3 h-5 w-5 animate-spin" />
           ) : (
-            <div className="h-4 w-4 bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 rounded-sm flex items-center justify-center">
+            <div className="mr-3 h-5 w-5 bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 rounded-sm flex items-center justify-center">
               <span className="text-white text-xs font-bold">G</span>
             </div>
           )}
-          <span className="ml-2 text-sm">Google</span>
+          Continue with Google
         </Button>
 
         <Button
           variant="outline"
           onClick={() => handleSocialSignIn('linkedin_oidc')}
           disabled={loadingProvider !== null}
-          className="w-full h-10 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
+          className="w-full h-12 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
         >
           {loadingProvider === 'linkedin_oidc' ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="mr-3 h-5 w-5 animate-spin" />
           ) : (
-            <div className="h-4 w-4 bg-blue-700 rounded-sm flex items-center justify-center">
+            <div className="mr-3 h-5 w-5 bg-blue-700 rounded-sm flex items-center justify-center">
               <span className="text-white text-xs font-bold">in</span>
             </div>
           )}
-          <span className="ml-2 text-sm">LinkedIn</span>
+          Continue with LinkedIn
         </Button>
 
         <Button
           variant="outline"
           onClick={() => handleSocialSignIn('facebook')}
           disabled={loadingProvider !== null}
-          className="w-full h-10 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
+          className="w-full h-12 bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-200"
         >
           {loadingProvider === 'facebook' ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="mr-3 h-5 w-5 animate-spin" />
           ) : (
-            <div className="h-4 w-4 bg-blue-600 rounded-sm flex items-center justify-center">
+            <div className="mr-3 h-5 w-5 bg-blue-600 rounded-sm flex items-center justify-center">
               <span className="text-white text-xs font-bold">f</span>
             </div>
           )}
-          <span className="ml-2 text-sm">Facebook</span>
+          Continue with Facebook
         </Button>
       </div>
 
