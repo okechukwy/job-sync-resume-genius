@@ -3,20 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Edit3, 
-  Eye, 
   Save, 
   RotateCcw,
   Highlighter,
-  Layout,
-  FileText
+  Eye
 } from "lucide-react";
 import { toast } from "sonner";
-import { ATSFormattedDisplay } from "./ATSFormattedDisplay";
-import { RichTextEditor } from "./RichTextEditor";
-import { SectionEditor } from "./SectionEditor";
+import { ProfessionalATSTemplate } from "./ProfessionalATSTemplate";
 import { parseResumeToStructured } from "@/utils/resumeStructureParser";
 
 interface AppliedSuggestion {
@@ -42,7 +37,7 @@ export const ProfessionalCVEditor = ({
 }: ProfessionalCVEditorProps) => {
   const [localContent, setLocalContent] = useState(content);
   const [showChanges, setShowChanges] = useState(false);
-  const [editMode, setEditMode] = useState<'structured' | 'rich' | 'preview'>('preview');
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setLocalContent(content);
@@ -50,13 +45,19 @@ export const ProfessionalCVEditor = ({
 
   const handleSave = () => {
     onChange(localContent);
+    setIsEditing(false);
     toast.success("Changes saved successfully!");
   };
 
   const handleReset = () => {
     setLocalContent(originalContent);
     onChange(originalContent);
+    setIsEditing(false);
     toast.success("Content reset to original version");
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
   const structuredResume = useMemo(() => {
@@ -70,47 +71,6 @@ export const ProfessionalCVEditor = ({
     setLocalContent(newContent);
   };
 
-  const handleStructuredChange = (updatedResume: any) => {
-    // Convert structured data back to text format
-    const textContent = convertStructuredToText(updatedResume);
-    setLocalContent(textContent);
-  };
-
-  const convertStructuredToText = (resume: any): string => {
-    // Simple conversion for now - can be enhanced
-    let text = '';
-    resume.sections.forEach((section: any) => {
-      if (section.type === 'header') {
-        const header = section.content.data;
-        text += `${header.name}\n`;
-        if (header.title) text += `${header.title}\n`;
-        if (header.contact.email) text += `${header.contact.email}\n`;
-        if (header.contact.phone) text += `${header.contact.phone}\n`;
-        if (header.contact.location) text += `${header.contact.location}\n`;
-        text += '\n';
-      } else {
-        text += `${section.title.toUpperCase()}\n`;
-        if (section.content.type === 'experience_block') {
-          section.content.data.forEach((exp: any) => {
-            text += `${exp.title} at ${exp.company} ${exp.dates}\n`;
-            exp.responsibilities.forEach((resp: string) => {
-              text += `• ${resp}\n`;
-            });
-            text += '\n';
-          });
-        } else if (section.content.type === 'list') {
-          section.content.data.forEach((item: string) => {
-            text += `• ${item}\n`;
-          });
-        } else if (section.content.type === 'paragraph') {
-          text += `${section.content.data}\n`;
-        }
-        text += '\n';
-      }
-    });
-    return text;
-  };
-
   return (
     <Card className="glass-card h-full">
       <CardHeader>
@@ -118,14 +78,14 @@ export const ProfessionalCVEditor = ({
           <div>
             <CardTitle className="flex items-center gap-2">
               <Edit3 className="h-5 w-5" />
-              Professional CV Editor
+              Professional ATS Resume
             </CardTitle>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
               <span>{wordCount} words</span>
               <span>{charCount} characters</span>
               {appliedSuggestions.length > 0 && (
                 <Badge variant="secondary">
-                  {appliedSuggestions.length} changes applied
+                  {appliedSuggestions.length} optimization{appliedSuggestions.length !== 1 ? 's' : ''} applied
                 </Badge>
               )}
             </div>
@@ -142,7 +102,16 @@ export const ProfessionalCVEditor = ({
               {showChanges ? 'Hide' : 'Show'} Changes
             </Button>
             
-            {editMode !== 'preview' && (
+            {!isEditing ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEdit}
+              >
+                <Edit3 className="h-4 w-4" />
+                Edit
+              </Button>
+            ) : (
               <>
                 <Button
                   variant="outline"
@@ -150,7 +119,7 @@ export const ProfessionalCVEditor = ({
                   onClick={handleReset}
                 >
                   <RotateCcw className="h-4 w-4" />
-                  Reset
+                  Cancel
                 </Button>
                 
                 <Button
@@ -167,46 +136,32 @@ export const ProfessionalCVEditor = ({
       </CardHeader>
       
       <CardContent className="p-0">
-        <Tabs value={editMode} onValueChange={(value) => setEditMode(value as any)}>
-          <TabsList className="grid w-full grid-cols-3 mx-6 mb-4">
-            <TabsTrigger value="preview" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Preview
-            </TabsTrigger>
-            <TabsTrigger value="structured" className="flex items-center gap-2">
-              <Layout className="h-4 w-4" />
-              Sections
-            </TabsTrigger>
-            <TabsTrigger value="rich" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Rich Text
-            </TabsTrigger>
-          </TabsList>
-          
-          <ScrollArea className="h-[600px]">
-            <TabsContent value="preview" className="p-0 m-0">
-              <ATSFormattedDisplay 
-                structuredResume={structuredResume}
-                appliedSuggestions={appliedSuggestions}
-                showChanges={showChanges}
+        <ScrollArea className="h-[700px]">
+          {!isEditing ? (
+            <ProfessionalATSTemplate 
+              structuredResume={structuredResume}
+              appliedSuggestions={appliedSuggestions}
+              showChanges={showChanges}
+            />
+          ) : (
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Edit Resume Content
+                </label>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Make changes to your resume content. Use the preview mode to see how it looks with ATS formatting.
+                </p>
+              </div>
+              <textarea
+                value={localContent}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="w-full h-[500px] p-4 border border-border rounded-lg bg-background text-foreground text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Paste your resume content here..."
               />
-            </TabsContent>
-            
-            <TabsContent value="structured" className="p-6 m-0">
-              <SectionEditor 
-                structuredResume={structuredResume}
-                onChange={handleStructuredChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="rich" className="p-6 m-0">
-              <RichTextEditor 
-                content={localContent}
-                onChange={handleContentChange}
-              />
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
+            </div>
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

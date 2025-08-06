@@ -10,7 +10,7 @@ export interface ResumeSection {
 }
 
 export interface SectionContent {
-  type: 'header' | 'paragraph' | 'list' | 'experience_block' | 'education_block';
+  type: 'header' | 'header_data' | 'paragraph' | 'list' | 'experience_block' | 'education_block';
   data: any;
 }
 
@@ -43,66 +43,97 @@ export interface HeaderData {
 }
 
 export function parseResumeToStructured(content: string): StructuredResume {
-  // Enhanced content sanitization
-  const sanitizedContent = sanitizeContent(content);
-  const lines = sanitizedContent.split('\n').map(line => line.trim()).filter(line => line);
-  
-  if (lines.length === 0) {
-    return { sections: [] };
-  }
-  
-  const sections: ResumeSection[] = [];
-  
-  // First, extract header information from the top lines
-  const headerData = parseHeaderData(lines.slice(0, 6));
-  sections.push({
-    id: 'header',
-    type: 'header',
-    title: 'Header',
-    content: { type: 'header', data: headerData }
-  });
-  
-  let currentSection: ResumeSection | null = null;
-  let currentContent: string[] = [];
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const sectionType = identifySectionType(line);
-    
-    if (sectionType) {
-      // Save previous section if it exists
-      if (currentSection && currentContent.length > 0) {
-        currentSection.content = parseSectionContent(currentSection.type, currentContent);
-        sections.push(currentSection);
-      }
-      
-      // Start new section
-      currentSection = {
-        id: `section-${sections.length}`,
-        type: sectionType,
-        title: cleanSectionTitle(line),
-        content: { type: 'paragraph', data: '' }
-      };
-      currentContent = [];
-    } else if (currentSection) {
-      // Skip lines that are part of the header (already processed)
-      if (i < 6 && (line.includes('@') || line.match(/\d{3}/) || line.includes(','))) {
-        continue;
-      }
-      currentContent.push(line);
+  try {
+    const sanitizedContent = sanitizeContent(content);
+    const lines = sanitizedContent
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (lines.length === 0) {
+      return { sections: [] };
     }
+
+    const sections: ResumeSection[] = [];
+    let currentSection: ResumeSection | null = null;
+    let currentLines: string[] = [];
+    let headerProcessed = false;
+
+    // Try to extract header first (first 8 lines typically)
+    const headerData = parseHeaderData(lines.slice(0, 8));
+    if (headerData.name || headerData.contact.email || headerData.contact.phone) {
+      sections.push({
+        id: `header-${Date.now()}`,
+        type: 'header',
+        title: 'Header',
+        content: {
+          type: 'header_data',
+          data: headerData
+        }
+      });
+      headerProcessed = true;
+    }
+
+    // Process remaining lines, starting after potential header
+    const startIndex = headerProcessed ? 8 : 0;
+    
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      const sectionType = identifySectionType(line);
+
+      if (sectionType) {
+        // Save previous section
+        if (currentSection && currentLines.length > 0) {
+          currentSection.content = parseSectionContent(currentSection.type, currentLines);
+          sections.push(currentSection);
+        }
+
+        // Start new section
+        currentSection = {
+          id: `${sectionType}-${Date.now()}-${i}`,
+          type: sectionType,
+          title: line.replace(/[:\-–—]/g, '').trim(),
+          content: { type: 'paragraph', data: '' }
+        };
+        currentLines = [];
+      } else if (currentSection) {
+        currentLines.push(line);
+      } else if (!headerProcessed) {
+        // If no section detected yet and no header, treat as summary
+        if (!currentSection) {
+          currentSection = {
+            id: `summary-${Date.now()}`,
+            type: 'summary',
+            title: 'Professional Summary',
+            content: { type: 'paragraph', data: '' }
+          };
+          currentLines = [];
+        }
+        currentLines.push(line);
+      }
+    }
+
+    // Add final section
+    if (currentSection && currentLines.length > 0) {
+      currentSection.content = parseSectionContent(currentSection.type, currentLines);
+      sections.push(currentSection);
+    }
+
+    return ensureMinimumSections({ sections });
+  } catch (error) {
+    console.error('Error parsing resume:', error);
+    return {
+      sections: [{
+        id: 'fallback',
+        type: 'summary',
+        title: 'Resume Content',
+        content: {
+          type: 'paragraph',
+          data: content
+        }
+      }]
+    };
   }
-  
-  // Add final section
-  if (currentSection && currentContent.length > 0) {
-    currentSection.content = parseSectionContent(currentSection.type, currentContent);
-    sections.push(currentSection);
-  }
-  
-  // Ensure we have at least basic sections
-  ensureMinimumSections(sections);
-  
-  return { sections };
 }
 
 function cleanSectionTitle(title: string): string {
@@ -113,16 +144,17 @@ function cleanSectionTitle(title: string): string {
     .toUpperCase();
 }
 
-function ensureMinimumSections(sections: ResumeSection[]): void {
+function ensureMinimumSections(structuredResume: StructuredResume): StructuredResume {
+  const { sections } = structuredResume;
   const requiredSections = ['summary', 'experience', 'education', 'skills'];
   const existingSectionTypes = sections.map(s => s.type);
   
   requiredSections.forEach(sectionType => {
     if (!existingSectionTypes.includes(sectionType as any)) {
       sections.push({
-        id: `section-${sections.length}`,
+        id: `${sectionType}-${Date.now()}`,
         type: sectionType as any,
-        title: sectionType.toUpperCase(),
+        title: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
         content: { 
           type: sectionType === 'skills' ? 'list' : 'paragraph', 
           data: sectionType === 'skills' ? [] : '' 
@@ -130,6 +162,8 @@ function ensureMinimumSections(sections: ResumeSection[]): void {
       });
     }
   });
+
+  return { sections };
 }
 
 function sanitizeContent(content: string): string {
@@ -302,31 +336,91 @@ function parseSkillsList(content: string[]): string[] {
   );
 }
 
-function parseHeaderData(headerLines: string[]): HeaderData {
-  const data: HeaderData = {
-    name: headerLines[0] || '',
-    contact: {}
+function parseHeaderData(lines: string[]): HeaderData {
+  const headerData: HeaderData = {
+    name: '',
+    title: '',
+    contact: {
+      email: '',
+      phone: '',
+      location: '',
+      website: '',
+      linkedin: ''
+    }
   };
-  
+
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
-  const phoneRegex = /[\+]?[1-9]?[\d\s\-\(\)\.]{7,15}/;
-  const linkedinRegex = /linkedin\.com\/in\/[\w\-]+/i;
+  const phoneRegex = /[\+]?[\d\s\-\(\)\.]{10,}/;
+  const linkedinRegex = /(linkedin\.com\/in\/[^\s]+|linkedin\.com\/pub\/[^\s]+)/i;
+  const websiteRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
+
+  // First, identify contact info lines to exclude from name/title detection
+  const contactLines = new Set();
+  lines.forEach((line, index) => {
+    if (emailRegex.test(line) || phoneRegex.test(line) || linkedinRegex.test(line) || websiteRegex.test(line)) {
+      contactLines.add(index);
+    }
+  });
+
+  // Find name and title from non-contact lines
+  const nonContactLines = lines.filter((_, index) => !contactLines.has(index));
   
-  for (const line of headerLines.slice(1, 6)) {
-    if (emailRegex.test(line)) {
-      data.contact.email = line.match(emailRegex)?.[0];
-    } else if (phoneRegex.test(line)) {
-      data.contact.phone = line.match(phoneRegex)?.[0];
-    } else if (linkedinRegex.test(line)) {
-      data.contact.linkedin = line;
-    } else if (line.includes(',') && !line.includes('@')) {
-      data.contact.location = line;
-    } else if (line.toLowerCase().includes('title') || (!data.title && headerLines.indexOf(line) === 1)) {
-      data.title = line.replace(/title:?\s*/i, '');
+  if (nonContactLines.length > 0) {
+    // Name is typically the first substantial line
+    headerData.name = nonContactLines[0] || '';
+    
+    // Title might be the second line if it exists and looks like a job title
+    if (nonContactLines.length > 1) {
+      const potentialTitle = nonContactLines[1];
+      if (potentialTitle && 
+          potentialTitle.length > 3 && 
+          potentialTitle.length < 100 &&
+          !potentialTitle.includes(',') && 
+          !potentialTitle.toLowerCase().includes('experience') &&
+          !potentialTitle.toLowerCase().includes('education')) {
+        headerData.title = potentialTitle;
+      }
     }
   }
-  
-  return data;
+
+  // Extract contact information
+  for (const line of lines) {
+    const emailMatch = line.match(emailRegex);
+    if (emailMatch && !headerData.contact.email) {
+      headerData.contact.email = emailMatch[0];
+    }
+
+    const phoneMatch = line.match(phoneRegex);
+    if (phoneMatch && !headerData.contact.phone) {
+      headerData.contact.phone = phoneMatch[0].trim();
+    }
+
+    const linkedinMatch = line.match(linkedinRegex);
+    if (linkedinMatch && !headerData.contact.linkedin) {
+      headerData.contact.linkedin = linkedinMatch[0];
+    }
+
+    const websiteMatch = line.match(websiteRegex);
+    if (websiteMatch && !linkedinMatch && !headerData.contact.website) {
+      headerData.contact.website = websiteMatch[0];
+    }
+
+    // Enhanced location detection
+    if (!headerData.contact.location) {
+      // Look for city, state patterns
+      const locationPattern = /^[A-Za-z\s]+,\s*[A-Za-z\s]{2,}/;
+      if (locationPattern.test(line) && 
+          !emailMatch && 
+          !phoneMatch && 
+          !linkedinMatch && 
+          !websiteMatch &&
+          line.length < 50) {
+        headerData.contact.location = line;
+      }
+    }
+  }
+
+  return headerData;
 }
 
 function isJobTitle(line: string): boolean {
