@@ -43,7 +43,9 @@ export interface HeaderData {
 }
 
 export function parseResumeToStructured(content: string): StructuredResume {
-  const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+  // Enhanced content sanitization
+  const sanitizedContent = sanitizeContent(content);
+  const lines = sanitizedContent.split('\n').map(line => line.trim()).filter(line => line);
   const sections: ResumeSection[] = [];
   
   let currentSection: ResumeSection | null = null;
@@ -91,6 +93,38 @@ export function parseResumeToStructured(content: string): StructuredResume {
   }
   
   return { sections };
+}
+
+function sanitizeContent(content: string): string {
+  if (!content || typeof content !== 'string') {
+    return 'No content available';
+  }
+  
+  // Remove HTML tags and decode entities
+  const withoutHtml = content.replace(/<[^>]*>/g, '');
+  
+  // Fix common encoding issues
+  const withFixedEncoding = withoutHtml
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  
+  // Remove excessive whitespace and normalize line breaks
+  const normalized = withFixedEncoding
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\n\s*\n/g, '\n\n')
+    .replace(/[ \t]+/g, ' ');
+  
+  // Remove corrupted characters and replace with spaces
+  const cleaned = normalized
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, ' ')
+    .replace(/[^\x20-\x7E\n]/g, ' ');
+  
+  return cleaned.trim();
 }
 
 function identifySectionType(line: string): ResumeSection['type'] | null {

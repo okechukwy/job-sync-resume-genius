@@ -22,7 +22,7 @@ import {
 import { ATSOptimizationResult } from "@/services/openaiServices";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { SuggestionsPanel } from "./SuggestionsPanel";
-import { CVEditor } from "./CVEditor";
+import { ProfessionalCVEditor } from "./ProfessionalCVEditor";
 import { toast } from "sonner";
 
 interface UnifiedATSOptimizerProps {
@@ -189,8 +189,8 @@ export const UnifiedATSOptimizer = ({
           onApplySuggestion={handleApplySuggestion}
         />
         
-        {/* Right Panel - CV Editor */}
-        <CVEditor
+        {/* Right Panel - Professional CV Editor */}
+        <ProfessionalCVEditor
           content={currentContent}
           originalContent={originalContent}
           onChange={handleContentChange}

@@ -36,6 +36,21 @@ export const ATSFormattedDisplay = memo(({
   appliedSuggestions, 
   showChanges = false 
 }: ATSFormattedDisplayProps) => {
+  // Handle empty or malformed data
+  if (!structuredResume || !structuredResume.sections || structuredResume.sections.length === 0) {
+    return (
+      <Card className="bg-background border border-border">
+        <div className="p-8 text-center space-y-4">
+          <div className="text-muted-foreground">
+            No resume content available or content could not be parsed.
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Please upload a valid resume or ensure the content is properly formatted.
+          </div>
+        </div>
+      </Card>
+    );
+  }
   const highlightChanges = (text: string) => {
     if (!showChanges || appliedSuggestions.length === 0) {
       return text;
