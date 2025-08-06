@@ -171,8 +171,8 @@ function sanitizeContent(content: string): string {
     return createFallbackContent();
   }
   
-  // Remove HTML tags and decode entities
-  const withoutHtml = content.replace(/<[^>]*>/g, '');
+  // Remove HTML tags but preserve content structure
+  const withoutHtml = content.replace(/<[^>]*>/g, ' ');
   
   // Fix common encoding issues
   const withFixedEncoding = withoutHtml
@@ -181,33 +181,34 @@ function sanitizeContent(content: string): string {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"');
   
-  // Remove excessive whitespace and normalize line breaks
+  // Normalize line breaks and preserve structure
   const normalized = withFixedEncoding
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
-    .replace(/\n\s*\n/g, '\n\n')
-    .replace(/[ \t]+/g, ' ');
+    .replace(/\n{3,}/g, '\n\n') // Reduce excessive line breaks
+    .replace(/[ \t]+/g, ' '); // Normalize spaces
   
-  // Remove corrupted characters and Word artifacts
+  // Remove corrupted characters but be more lenient
   const cleaned = normalized
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, ' ')
-    .replace(/[^\x20-\x7E\n]/g, ' ')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ' ')
     .replace(/\{[^}]*\}/g, '') // Remove Word field codes
     .replace(/\\[a-zA-Z]+\d*/g, '') // Remove RTF codes
     .replace(/EMBED\s+\w+/gi, '') // Remove embedded objects
     .replace(/HYPERLINK\s+"[^"]*"/gi, '') // Remove hyperlink codes
-    .replace(/\s{3,}/g, ' '); // Collapse excessive spaces
+    .replace(/\s{3,}/g, ' ') // Collapse excessive spaces
+    .trim();
   
-  const finalContent = cleaned.trim();
-  
-  // If content is too short or seems corrupted, provide fallback
-  if (finalContent.length < 50 || !hasValidContent(finalContent)) {
+  // More lenient fallback - only use fallback if truly empty or corrupted
+  if (cleaned.length < 20) {
     return createFallbackContent();
   }
   
-  return finalContent;
+  return cleaned;
 }
 
 function hasValidContent(content: string): boolean {
@@ -282,27 +283,57 @@ function parseExperienceBlocks(content: string[]): ExperienceBlock[] {
   
   for (const line of content) {
     if (isJobTitle(line)) {
-      if (currentBlock) {
+      // Save previous block
+      if (currentBlock && (currentBlock.title || currentBlock.company)) {
+        if (!currentBlock.responsibilities) currentBlock.responsibilities = [];
         blocks.push(currentBlock as ExperienceBlock);
       }
       currentBlock = parseJobTitleLine(line);
     } else if (currentBlock) {
+      // Try to extract company and dates from subsequent lines if not found
+      if (!currentBlock.company && line.includes('|')) {
+        const parts = line.split('|');
+        if (parts.length >= 2) {
+          currentBlock.company = parts[0].trim();
+          currentBlock.dates = parts[1].trim();
+          continue;
+        }
+      }
+      
+      // Look for date patterns
+      if (!currentBlock.dates && /\d{4}/.test(line)) {
+        const dateMatch = line.match(/(\d{4}(?:\s*[-–—]\s*(?:\d{4}|present))?)/i);
+        if (dateMatch) {
+          currentBlock.dates = dateMatch[0];
+          continue;
+        }
+      }
+      
+      // Add to responsibilities
       if (!currentBlock.responsibilities) {
         currentBlock.responsibilities = [];
       }
-      if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-        currentBlock.responsibilities.push(line.replace(/^[•\-*]\s*/, ''));
-      } else {
-        currentBlock.responsibilities.push(line);
+      
+      // Clean bullet points and add content
+      const cleanLine = line.replace(/^[•\-*]\s*/, '').trim();
+      if (cleanLine) {
+        currentBlock.responsibilities.push(cleanLine);
       }
     }
   }
   
-  if (currentBlock) {
+  // Add final block
+  if (currentBlock && (currentBlock.title || currentBlock.company)) {
+    if (!currentBlock.responsibilities) currentBlock.responsibilities = [];
     blocks.push(currentBlock as ExperienceBlock);
   }
   
-  return blocks;
+  return blocks.length > 0 ? blocks : [{
+    title: 'Position Title',
+    company: 'Company Name',
+    dates: '2020 - Present',
+    responsibilities: ['Key responsibility or achievement']
+  }];
 }
 
 function parseEducationBlocks(content: string[]): EducationBlock[] {
@@ -354,37 +385,34 @@ function parseHeaderData(lines: string[]): HeaderData {
   const linkedinRegex = /(linkedin\.com\/in\/[^\s]+|linkedin\.com\/pub\/[^\s]+)/i;
   const websiteRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
 
-  // First, identify contact info lines to exclude from name/title detection
-  const contactLines = new Set();
-  lines.forEach((line, index) => {
-    if (emailRegex.test(line) || phoneRegex.test(line) || linkedinRegex.test(line) || websiteRegex.test(line)) {
-      contactLines.add(index);
-    }
-  });
-
-  // Find name and title from non-contact lines
-  const nonContactLines = lines.filter((_, index) => !contactLines.has(index));
+  // More aggressive name/title detection
+  let nameFound = false;
+  let titleFound = false;
   
-  if (nonContactLines.length > 0) {
-    // Name is typically the first substantial line
-    headerData.name = nonContactLines[0] || '';
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
     
-    // Title might be the second line if it exists and looks like a job title
-    if (nonContactLines.length > 1) {
-      const potentialTitle = nonContactLines[1];
-      if (potentialTitle && 
-          potentialTitle.length > 3 && 
-          potentialTitle.length < 100 &&
-          !potentialTitle.includes(',') && 
-          !potentialTitle.toLowerCase().includes('experience') &&
-          !potentialTitle.toLowerCase().includes('education')) {
-        headerData.title = potentialTitle;
-      }
+    // Check if line contains contact info
+    const hasContact = emailRegex.test(line) || phoneRegex.test(line) || 
+                      linkedinRegex.test(line) || websiteRegex.test(line);
+    
+    if (!hasContact && !nameFound && line.length > 2 && line.length < 50) {
+      // This is likely the name
+      headerData.name = line;
+      nameFound = true;
+    } else if (!hasContact && nameFound && !titleFound && 
+               line.length > 3 && line.length < 80 &&
+               !line.toLowerCase().includes('summary') &&
+               !line.toLowerCase().includes('experience') &&
+               !line.toLowerCase().includes('education') &&
+               !line.toLowerCase().includes('skills')) {
+      // This is likely the title
+      headerData.title = line;
+      titleFound = true;
     }
-  }
-
-  // Extract contact information
-  for (const line of lines) {
+    
+    // Extract contact information from all lines
     const emailMatch = line.match(emailRegex);
     if (emailMatch && !headerData.contact.email) {
       headerData.contact.email = emailMatch[0];
@@ -405,17 +433,19 @@ function parseHeaderData(lines: string[]): HeaderData {
       headerData.contact.website = websiteMatch[0];
     }
 
-    // Enhanced location detection
-    if (!headerData.contact.location) {
-      // Look for city, state patterns
-      const locationPattern = /^[A-Za-z\s]+,\s*[A-Za-z\s]{2,}/;
-      if (locationPattern.test(line) && 
-          !emailMatch && 
-          !phoneMatch && 
-          !linkedinMatch && 
-          !websiteMatch &&
-          line.length < 50) {
-        headerData.contact.location = line;
+    // Location detection - look for patterns like "City, State" or "City, Country"
+    if (!headerData.contact.location && !emailMatch && !phoneMatch && !linkedinMatch && !websiteMatch) {
+      const locationPatterns = [
+        /^[A-Za-z\s]+,\s*[A-Za-z\s]{2,}$/,  // City, State
+        /^[A-Za-z\s]+,\s*[A-Z]{2}$/,        // City, ST
+        /^\d+\s+[A-Za-z\s]+,\s*[A-Za-z\s]+/ // Address with city
+      ];
+      
+      for (const pattern of locationPatterns) {
+        if (pattern.test(line) && line.length < 60) {
+          headerData.contact.location = line;
+          break;
+        }
       }
     }
   }

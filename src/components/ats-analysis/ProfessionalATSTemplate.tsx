@@ -235,14 +235,24 @@ export const ProfessionalATSTemplate = memo(({
   // Render fallback if no structured data
   if (!structuredResume?.sections?.length) {
     return (
-      <div className="cv-document bg-background text-foreground p-8">
+      <div className="cv-document bg-background text-foreground p-8 max-w-4xl mx-auto">
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-muted-foreground mb-2">
-            No Resume Content
+            No Resume Content Available
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Please upload or paste your resume content to begin ATS optimization.
           </p>
+          <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg max-w-md mx-auto">
+            <p><strong>Tip:</strong> The system works best with well-formatted resume text that includes clear sections like:</p>
+            <ul className="mt-2 text-left space-y-1">
+              <li>• Contact information</li>
+              <li>• Professional summary</li>
+              <li>• Work experience</li>
+              <li>• Education</li>
+              <li>• Skills</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -253,13 +263,80 @@ export const ProfessionalATSTemplate = memo(({
   const otherSections = structuredResume.sections.filter(s => s.type !== 'header');
 
   return (
-    <div className="cv-document bg-background text-foreground p-8 max-w-4xl mx-auto">
-      {/* Header */}
-      {headerSection && renderHeader(headerSection.content.data as HeaderData)}
+    <div className="cv-document bg-background text-foreground p-8 max-w-4xl mx-auto font-sans">
+      {/* Professional Header */}
+      {headerSection ? (
+        renderHeader(headerSection.content.data as HeaderData)
+      ) : (
+        <div className="mb-8">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Professional Resume
+            </h1>
+            <h2 className="text-xl text-muted-foreground font-medium">
+              ATS-Optimized Format
+            </h2>
+          </div>
+          <Separator className="mt-6" />
+        </div>
+      )}
       
-      {/* Other Sections */}
-      <div className="space-y-6">
-        {otherSections.map(renderSection)}
+      {/* Resume Sections */}
+      <div className="space-y-8">
+        {otherSections.length > 0 ? (
+          otherSections.map(renderSection)
+        ) : (
+          <div className="space-y-8">
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">
+                PROFESSIONAL SUMMARY
+              </h2>
+              <p className="text-foreground text-sm leading-relaxed">
+                Results-driven professional with expertise in delivering high-quality solutions and contributing to organizational success.
+              </p>
+            </div>
+            
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">
+                PROFESSIONAL EXPERIENCE
+              </h2>
+              <div className="space-y-6">
+                {renderExperienceBlock({
+                  title: 'Professional Position',
+                  company: 'Company Name',
+                  dates: '2020 - Present',
+                  location: 'Location',
+                  responsibilities: [
+                    'Led cross-functional teams to deliver strategic initiatives',
+                    'Improved operational efficiency through process optimization',
+                    'Collaborated with stakeholders to achieve business objectives'
+                  ]
+                }, 0)}
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">
+                EDUCATION
+              </h2>
+              <div className="space-y-4">
+                {renderEducationBlock({
+                  degree: 'Bachelor\'s Degree',
+                  institution: 'University Name',
+                  dates: '2016 - 2020',
+                  location: 'Location'
+                }, 0)}
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">
+                CORE SKILLS
+              </h2>
+              {renderSkillsList(['Professional Skills', 'Technical Proficiency', 'Project Management', 'Team Leadership', 'Strategic Planning'])}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Applied Changes Summary */}
