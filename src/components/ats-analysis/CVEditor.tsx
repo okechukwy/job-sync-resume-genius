@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,8 @@ import {
   Highlighter
 } from "lucide-react";
 import { toast } from "sonner";
+import { ATSFormattedDisplay } from "./ATSFormattedDisplay";
+import { parseResumeToStructured } from "@/utils/resumeStructureParser";
 
 interface AppliedSuggestion {
   id: string;
@@ -109,7 +111,10 @@ export const CVEditor = ({
     return sections;
   };
 
-  const sections = parseContentSections(content);
+  const structuredResume = useMemo(() => {
+    return parseResumeToStructured(content);
+  }, [content]);
+  
   const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
   const charCount = content.length;
 
@@ -189,31 +194,12 @@ export const CVEditor = ({
               />
             </div>
           ) : (
-            <div className="p-6">
-              {sections.length > 1 ? (
-                <div className="space-y-6">
-                  {sections.map((section, index) => (
-                    <div key={index} className="space-y-3">
-                      <h3 className="font-semibold text-lg border-b pb-2">
-                        {section.title}
-                      </h3>
-                      <div 
-                        className="text-sm leading-relaxed whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{ 
-                          __html: highlightChanges(section.content) 
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div 
-                  className="text-sm leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ 
-                    __html: highlightChanges(content) 
-                  }}
-                />
-              )}
+            <div className="p-0">
+              <ATSFormattedDisplay 
+                structuredResume={structuredResume}
+                appliedSuggestions={appliedSuggestions}
+                showChanges={showChanges}
+              />
             </div>
           )}
         </ScrollArea>
