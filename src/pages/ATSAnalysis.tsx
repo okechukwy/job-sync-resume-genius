@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2, Zap, Edit3, Download } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2, Zap, Edit3, Download, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
@@ -16,6 +16,7 @@ import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices
 import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
 import ApplyRecommendations from "@/components/cv-analysis/components/ApplyRecommendations";
 import RealTimeEditor from "@/components/cv-analysis/components/RealTimeEditor";
+import SmartRecommendationEngine from "@/components/cv-analysis/components/SmartRecommendationEngine";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 
 const ATSAnalysis = () => {
@@ -588,18 +589,23 @@ const ATSAnalysis = () => {
             </TabsContent>
 
             <TabsContent value="optimization" className="space-y-6">
-              {uploadedResume && originalContent && (
-                <ApplyRecommendations
-                  uploadedFile={uploadedResume}
-                  onContinue={() => setActiveTab("preview")}
-                  analysisData={{
-                    ...analysis,
-                    industry: selectedIndustry,
-                    jobDescription: jobDescription,
-                    originalContent
-                  }}
+              {uploadedResume && originalContent && analysis && (
+                <SmartRecommendationEngine
+                  originalContent={originalContent}
+                  analysisData={analysis}
                   onOptimizationComplete={handleOptimizationComplete}
                 />
+              )}
+              {(!uploadedResume || !originalContent || !analysis) && (
+                <Card className="glass-card">
+                  <CardContent className="p-8 text-center">
+                    <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-warning" />
+                    <h3 className="text-lg font-medium mb-2">Resume Analysis Required</h3>
+                    <p className="text-muted-foreground">
+                      Please upload and analyze your resume first to access auto-optimization features.
+                    </p>
+                  </CardContent>
+                </Card>
               )}
             </TabsContent>
 

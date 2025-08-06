@@ -42,7 +42,9 @@ const SmartRecommendationEngine = ({
   const [appliedRecommendations, setAppliedRecommendations] = useState<ATSRecommendation[]>([]);
 
   useEffect(() => {
+    console.log('SmartRecommendationEngine - Generating recommendations with data:', analysisData);
     const recs = processor.generateRecommendations(analysisData);
+    console.log('SmartRecommendationEngine - Generated recommendations:', recs);
     setRecommendations(recs);
     // Auto-select high-priority recommendations
     const autoSelected = new Set(

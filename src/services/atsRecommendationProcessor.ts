@@ -171,8 +171,12 @@ export class ATSRecommendationProcessor {
   public generateRecommendations(analysisData: any): ATSRecommendation[] {
     this.recommendations = [];
 
-    // Generate keyword recommendations
-    if (analysisData.keywords?.missingKeywords) {
+    // Handle direct ATSOptimizationResult format
+    if (analysisData.contentOptimizations) {
+      this.generateFromATSOptimizations(analysisData);
+    }
+    // Handle transformed analysis data format
+    else if (analysisData.keywords?.missingKeywords) {
       this.generateKeywordRecommendations(analysisData.keywords.missingKeywords);
     }
 
@@ -181,13 +185,115 @@ export class ATSRecommendationProcessor {
       this.generateContentRecommendations(analysisData.improvements);
     }
 
-    // Generate action verb recommendations
+    // Always generate action verb and quantification recommendations
     this.generateActionVerbRecommendations();
-
-    // Generate quantification recommendations
     this.generateQuantificationRecommendations();
 
     return this.recommendations;
+  }
+
+  private generateFromATSOptimizations(atsResult: any): void {
+    // Generate from content optimizations
+    if (atsResult.contentOptimizations) {
+      atsResult.contentOptimizations.forEach((opt: any, index: number) => {
+        this.recommendations.push({
+          id: `ats-content-${index}`,
+          section: opt.section || 'summary',
+          type: 'professional-language',
+          priority: this.determinePriority(opt.reasoning),
+          original: opt.current,
+          suggested: opt.improved,
+          reasoning: opt.reasoning,
+          impact: this.calculateImpact(opt.reasoning),
+          category: opt.category || 'professional-language'
+        });
+      });
+    }
+
+    // Generate from keyword matches
+    if (atsResult.keywordMatches?.missing?.length > 0) {
+      atsResult.keywordMatches.missing.slice(0, 8).forEach((keyword: string, index: number) => {
+        const sections = Array.from(this.contentSections.keys());
+        const targetSection = sections[index % Math.max(sections.length, 1)] || 'summary';
+        const sectionContent = this.contentSections.get(targetSection) || '';
+        
+        const sentences = sectionContent.split(/[.!?]/);
+        const bestSentence = sentences.find(s => s.length > 20 && s.length < 200) || sentences[0] || '';
+        
+        if (bestSentence) {
+          this.recommendations.push({
+            id: `ats-keyword-${index}`,
+            section: targetSection,
+            type: 'keyword',
+            priority: 'high',
+            original: bestSentence.trim(),
+            suggested: this.integrateKeyword(bestSentence.trim(), keyword),
+            reasoning: `Add missing ATS keyword "${keyword}" to improve searchability`,
+            impact: 8,
+            category: 'keyword-integration'
+          });
+        }
+      });
+    }
+
+    // Generate from format optimizations
+    if (atsResult.formatOptimizations) {
+      atsResult.formatOptimizations.forEach((opt: any, index: number) => {
+        this.recommendations.push({
+          id: `ats-format-${index}`,
+          section: 'formatting',
+          type: 'formatting',
+          priority: opt.priority,
+          original: opt.issue,
+          suggested: opt.recommendation,
+          reasoning: `Format optimization: ${opt.recommendation}`,
+          impact: this.getFormatImpact(opt.priority),
+          category: 'formatting'
+        });
+      });
+    }
+  }
+
+  private determinePriority(reasoning: string): 'high' | 'medium' | 'low' {
+    const highPriorityKeywords = ['critical', 'essential', 'important', 'must', 'required'];
+    const lowPriorityKeywords = ['optional', 'minor', 'slight', 'consider'];
+    
+    const lowerReasoning = reasoning.toLowerCase();
+    
+    if (highPriorityKeywords.some(keyword => lowerReasoning.includes(keyword))) {
+      return 'high';
+    }
+    if (lowPriorityKeywords.some(keyword => lowerReasoning.includes(keyword))) {
+      return 'low';
+    }
+    return 'medium';
+  }
+
+  private calculateImpact(reasoning: string): number {
+    const impactKeywords = {
+      high: ['significantly', 'greatly', 'substantial', 'major'],
+      medium: ['moderately', 'improve', 'enhance', 'better'],
+      low: ['slightly', 'minor', 'small']
+    };
+
+    const lowerReasoning = reasoning.toLowerCase();
+    
+    if (impactKeywords.high.some(keyword => lowerReasoning.includes(keyword))) {
+      return 8;
+    }
+    if (impactKeywords.medium.some(keyword => lowerReasoning.includes(keyword))) {
+      return 6;
+    }
+    return 4;
+  }
+
+  private getFormatImpact(priority: 'high' | 'medium' | 'low'): number {
+    switch (priority) {
+      case 'high': return 7;
+      case 'medium': return 5;
+      case 'low': return 3;
+      default: return 4;
+    }
   }
 
   private generateKeywordRecommendations(missingKeywords: string[]): void {
