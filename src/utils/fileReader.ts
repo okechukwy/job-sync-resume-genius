@@ -60,6 +60,9 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
       content = result.text;
       processingMethod = result.processingMethod;
       warnings.push(...result.warnings);
+      
+      // Additional client-side sanitization for .doc files
+      content = sanitizeDocContent(content);
     } else {
       throw new Error(`Unsupported file format: ${fileType}`);
     }
@@ -89,6 +92,13 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
       warnings.push('Some characters could not be properly decoded. This may affect analysis accuracy.');
     }
     
+    // Check for binary artifacts
+    if (content.toLowerCase().includes('bjbj') || content.includes('\x00')) {
+      content = sanitizeBinaryArtifacts(content);
+      confidence = 'medium';
+      warnings.push('Removed binary formatting artifacts. Content has been cleaned.');
+    }
+    
     if (content.split('\n').length < 5 && wordCount > 200) {
       warnings.push('Text appears to be in a single block. Section analysis may be limited.');
     }
@@ -104,4 +114,26 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
     console.error('Error reading file:', error);
     throw new Error('Failed to extract text from the uploaded file. Please ensure the file is not corrupted, password-protected, or image-based, and try again.');
   }
+};
+
+// Sanitization functions for cleaning extracted content
+const sanitizeDocContent = (content: string): string => {
+  return content
+    .replace(/bjbj[^\s]*/gi, '') // Remove bjbj artifacts
+    .replace(/\x00+/g, ' ') // Replace null bytes with spaces
+    .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Remove non-printable characters except newlines and tabs
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+};
+
+const sanitizeBinaryArtifacts = (content: string): string => {
+  return content
+    .replace(/bjbj[^\s]*/gi, '') // Remove bjbj prefixes
+    .replace(/PK[^\s]*/gi, '') // Remove PK artifacts
+    .replace(/OLE2[^\s]*/gi, '') // Remove OLE2 references
+    .replace(/Microsoft[^\s]*Office[^\s]*/gi, '') // Remove Office metadata
+    .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Keep only printable ASCII + whitespace
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .replace(/^\s*[A-Z]{4,}\s*/gm, '') // Remove lines starting with long uppercase sequences
+    .trim();
 };

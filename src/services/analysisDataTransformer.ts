@@ -13,17 +13,29 @@ export class AnalysisDataTransformer {
     originalContent: string
   ): ATSRecommendation[] {
     const recommendations: ATSRecommendation[] = [];
+    
+    // Sanitize input content to remove any binary artifacts
+    const cleanContent = this.sanitizeContent(originalContent);
 
     // Transform content optimizations
     if (atsResult.contentOptimizations) {
       atsResult.contentOptimizations.forEach((opt, index) => {
+        // Sanitize recommendation content
+        const cleanOriginal = this.sanitizeContent(opt.current);
+        const cleanImproved = this.sanitizeContent(opt.improved);
+        
+        // Skip recommendations with binary artifacts
+        if (this.containsBinaryArtifacts(cleanOriginal) || this.containsBinaryArtifacts(cleanImproved)) {
+          return;
+        }
+        
         recommendations.push({
           id: `content-${index}`,
           section: opt.section || 'summary',
           type: 'professional-language',
           priority: this.determinePriority(opt.reasoning),
-          original: opt.current,
-          suggested: opt.improved,
+          original: cleanOriginal,
+          suggested: cleanImproved,
           reasoning: opt.reasoning,
           impact: this.calculateImpact(opt.reasoning),
           category: opt.category || 'professional-language'
@@ -34,8 +46,13 @@ export class AnalysisDataTransformer {
     // Transform keyword recommendations
     if (atsResult.keywordMatches?.missing?.length > 0) {
       atsResult.keywordMatches.missing.slice(0, 8).forEach((keyword, index) => {
-        const targetSection = this.selectBestSection(keyword, originalContent);
-        const contextSnippet = this.extractContext(targetSection, originalContent);
+        const targetSection = this.selectBestSection(keyword, cleanContent);
+        const contextSnippet = this.extractContext(targetSection, cleanContent);
+        
+        // Skip if context contains binary artifacts
+        if (this.containsBinaryArtifacts(contextSnippet.original)) {
+          return;
+        }
         
         recommendations.push({
           id: `keyword-${index}`,
@@ -221,5 +238,27 @@ export class AnalysisDataTransformer {
     }
     
     return improvements;
+  }
+
+  // Content sanitization methods
+  private static sanitizeContent(content: string): string {
+    if (!content) return '';
+    
+    return content
+      .replace(/bjbj[^\s]*/gi, '') // Remove bjbj artifacts
+      .replace(/\x00+/g, ' ') // Replace null bytes
+      .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Remove non-printable characters
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+  }
+
+  private static containsBinaryArtifacts(text: string): boolean {
+    if (!text) return false;
+    
+    return text.toLowerCase().includes('bjbj') ||
+           text.includes('\x00') ||
+           text.toLowerCase().includes('ole2') ||
+           text.toLowerCase().includes('compound') ||
+           /^[A-Z]{8,}/.test(text); // Long uppercase sequences often indicate metadata
   }
 }
