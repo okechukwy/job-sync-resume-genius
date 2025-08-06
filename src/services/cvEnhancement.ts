@@ -38,12 +38,22 @@ const isEnhanceableContent = (line: string): boolean => {
   // Must have some content
   if (!trimmed || trimmed.length < 10) return false;
   
+  // Check for corruption indicators first
+  if (/\bw[nwtf]\d*\b/i.test(trimmed)) return false; // Word field codes
+  if (/bjbj|\\f"|\*MERGEFORMAT/i.test(trimmed)) return false; // Binary artifacts
+  if (trimmed.includes('\x00')) return false; // Null bytes
+  
   // Skip obvious non-content lines
   if (/^[A-Z\s]{3,}$/.test(trimmed)) return false; // All caps headers
   if (/@|phone|tel|email|linkedin|github|http/i.test(trimmed)) return false; // Contact/URLs
   if (/^[-=_•*\s]+$/.test(trimmed)) return false; // Only separators
   if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(trimmed)) return false; // Just dates
   if (/^\d+$/.test(trimmed)) return false; // Just numbers
+  
+  // Check readability
+  const readableChars = trimmed.replace(/[^\x20-\x7E]/g, '').length;
+  const readableRatio = readableChars / trimmed.length;
+  if (readableRatio < 0.7) return false; // Must be mostly readable
   
   // More inclusive - allow content with at least 2 words
   const words = trimmed.split(/\s+/);
@@ -201,15 +211,24 @@ export const enhanceCVWithAI = async (
     atsScore
   });
   
-  const isHtml = originalContent.includes('<') && originalContent.includes('>');
+  // Sanitize input content to ensure clean processing
+  const { sanitizeResumeContent } = await import('@/utils/contentSanitizer');
+  const sanitizedContent = sanitizeResumeContent(originalContent);
+  
+  console.log('Content sanitized for AI processing', {
+    originalLength: originalContent.length,
+    sanitizedLength: sanitizedContent.length
+  });
+  
+  const isHtml = sanitizedContent.includes('<') && sanitizedContent.includes('>');
   
   try {
     console.log('Calling ai-cv-enhancement edge function...');
     
-    // Call the AI enhancement edge function
+    // Call the AI enhancement edge function with sanitized content
     const { data, error } = await supabase.functions.invoke('ai-cv-enhancement', {
       body: {
-        originalContent,
+        originalContent: sanitizedContent,
         missingKeywords,
         targetIndustry,
         targetRole,
@@ -251,8 +270,8 @@ export const enhanceCVWithAI = async (
   } catch (error) {
     console.error('AI enhancement failed, falling back to enhanced basic enhancement:', error);
     
-    // Fallback to enhanced basic optimization
-    return await enhanceCVBasic(originalContent, missingKeywords, targetIndustry);
+    // Fallback to enhanced basic optimization with sanitized content
+    return await enhanceCVBasic(sanitizedContent, missingKeywords, targetIndustry);
   }
 };
 

@@ -65,15 +65,29 @@ const ATSAnalysis = () => {
       console.log('Starting comprehensive resume analysis...');
 
       // Extract text from uploaded resume
-      const resumeText = await readFileContent(uploadedResume);
-      console.log('Extracted resume text length:', resumeText?.length || 0);
-      if (!resumeText || resumeText.trim().length < 50) {
+      const rawResumeText = await readFileContent(uploadedResume);
+      console.log('Extracted resume text length:', rawResumeText?.length || 0);
+      
+      if (!rawResumeText || rawResumeText.trim().length < 50) {
         toast.error('Unable to extract sufficient text from your resume. Please ensure it\'s not an image-based PDF and try again.');
         setIsAnalyzing(false);
         return;
       }
 
-      // Store original content for optimization
+      // Sanitize content to remove Word artifacts and corruption
+      const { sanitizeResumeContent, validateContentQuality } = await import('@/utils/contentSanitizer');
+      const contentQuality = validateContentQuality(rawResumeText);
+      
+      if (!contentQuality.isValid && contentQuality.confidence < 50) {
+        toast.error(`File appears to be corrupted (${contentQuality.issues.join(', ')}). Please try uploading a different format.`);
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      const resumeText = contentQuality.cleanedContent;
+      console.log('Sanitized content length:', resumeText.length, 'Quality:', contentQuality.confidence);
+
+      // Store sanitized content for optimization
       setOriginalContent(resumeText);
 
       // Validate inputs before sending

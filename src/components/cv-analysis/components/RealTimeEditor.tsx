@@ -45,7 +45,17 @@ const RealTimeEditor = ({
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setContent(enhancedResult?.resumeContent || initialContent);
+    const loadContent = async () => {
+      const rawContent = enhancedResult?.resumeContent || initialContent;
+      
+      // Sanitize content for editor display
+      const { sanitizeForEditor } = await import('@/utils/contentSanitizer');
+      const cleanContent = sanitizeForEditor(rawContent);
+      
+      setContent(cleanContent);
+    };
+    
+    loadContent();
   }, [enhancedResult, initialContent]);
 
   useEffect(() => {
