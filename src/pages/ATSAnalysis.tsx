@@ -7,12 +7,16 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2, Zap, Edit3, Download } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
 import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
+import ApplyRecommendations from "@/components/cv-analysis/components/ApplyRecommendations";
+import RealTimeEditor from "@/components/cv-analysis/components/RealTimeEditor";
+import { EnhancedCVResult } from "@/services/cvEnhancement";
 
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
@@ -21,6 +25,10 @@ const ATSAnalysis = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("Business");
   const [showTesting, setShowTesting] = useState(false);
+  const [activeTab, setActiveTab] = useState("analysis");
+  const [enhancedResult, setEnhancedResult] = useState<EnhancedCVResult | null>(null);
+  const [originalContent, setOriginalContent] = useState("");
+  const [optimizationComplete, setOptimizationComplete] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const industries = ["Technology", "Healthcare", "Finance", "Creative", "Business", "Research", "Marketing", "Sales", "Education", "Manufacturing", "Retail"];
 
@@ -40,6 +48,9 @@ const ATSAnalysis = () => {
     }
     setUploadedResume(file);
     setAnalysis(null); // Clear previous analysis
+    setEnhancedResult(null);
+    setOptimizationComplete(false);
+    setActiveTab("analysis");
     toast.success('Resume uploaded successfully!');
   };
 
@@ -60,6 +71,9 @@ const ATSAnalysis = () => {
         setIsAnalyzing(false);
         return;
       }
+
+      // Store original content for optimization
+      setOriginalContent(resumeText);
 
       // Validate inputs before sending
       if (resumeText.length > 15000) {
@@ -184,6 +198,32 @@ const ATSAnalysis = () => {
       byCategory,
       sections: Object.keys(getGroupedOptimizations()).length
     };
+  };
+
+  const handleOptimizationComplete = (result: EnhancedCVResult) => {
+    setEnhancedResult(result);
+    setOptimizationComplete(true);
+    setActiveTab("preview");
+    toast.success("CV optimization completed successfully!");
+  };
+
+  const handleContentChange = (content: string) => {
+    if (enhancedResult) {
+      setEnhancedResult({
+        ...enhancedResult,
+        resumeContent: content
+      });
+    }
+  };
+
+  const handleSaveContent = (content: string) => {
+    if (enhancedResult) {
+      setEnhancedResult({
+        ...enhancedResult,
+        resumeContent: content
+      });
+      toast.success("Changes saved successfully!");
+    }
   };
 
   return <div className="min-h-screen bg-gradient-hero">
@@ -316,8 +356,41 @@ const ATSAnalysis = () => {
             <OptimizationTesting resumeText="" jobDescription={jobDescription} industry={selectedIndustry} />
           </div>}
 
-        {/* Analysis Results */}
-        {analysis && <div className="space-y-8">
+        {/* Main Content Tabs */}
+        {analysis && (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsTrigger value="analysis" className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Analysis Results
+              </TabsTrigger>
+              <TabsTrigger 
+                value="optimization" 
+                className="flex items-center gap-2"
+                disabled={!originalContent}
+              >
+                <Zap className="w-4 h-4" />
+                Auto-Optimize
+              </TabsTrigger>
+              <TabsTrigger 
+                value="editor" 
+                className="flex items-center gap-2"
+                disabled={!enhancedResult}
+              >
+                <Edit3 className="w-4 h-4" />
+                Manual Editor
+              </TabsTrigger>
+              <TabsTrigger 
+                value="preview" 
+                className="flex items-center gap-2"
+                disabled={!enhancedResult}
+              >
+                <Download className="w-4 h-4" />
+                Export Resume
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="analysis" className="space-y-8">
             {/* Overall Score */}
             <Card className="glass-card">
               <CardHeader>
@@ -491,7 +564,126 @@ const ATSAnalysis = () => {
                 </ul>
               </CardContent>
             </Card>
-          </div>}
+
+            {/* Quick Action Button for Optimization */}
+            <Card className="glass-card">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-3">Ready to Optimize Your Resume?</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Apply AI-powered improvements automatically and see your ATS score improve instantly.
+                  </p>
+                  <Button
+                    variant="gradient"
+                    size="lg"
+                    onClick={() => setActiveTab("optimization")}
+                    className="w-full max-w-md"
+                  >
+                    <Zap className="w-5 h-5 mr-2" />
+                    Start Auto-Optimization
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            </TabsContent>
+
+            <TabsContent value="optimization" className="space-y-6">
+              {uploadedResume && originalContent && (
+                <ApplyRecommendations
+                  uploadedFile={uploadedResume}
+                  onContinue={() => setActiveTab("preview")}
+                  analysisData={{
+                    ...analysis,
+                    industry: selectedIndustry,
+                    jobDescription: jobDescription,
+                    originalContent
+                  }}
+                  onOptimizationComplete={handleOptimizationComplete}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="editor" className="space-y-6">
+              {enhancedResult && (
+                <RealTimeEditor
+                  initialContent={originalContent}
+                  enhancedResult={enhancedResult}
+                  isHtml={enhancedResult.isHtmlContent}
+                  onContentChange={handleContentChange}
+                  onSave={handleSaveContent}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="preview" className="space-y-6">
+              {enhancedResult && (
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="w-5 h-5" />
+                      Export Optimized Resume
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* Optimization Summary */}
+                      <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+                        <h4 className="font-semibold text-success mb-2 flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5" />
+                          Optimization Complete!
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <div className="font-medium">Changes Applied</div>
+                            <div className="text-2xl font-bold text-success">
+                              {enhancedResult.changesApplied.length}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-medium">ATS Score Improvement</div>
+                            <div className="text-2xl font-bold text-success">
+                              +{enhancedResult.estimatedATSScoreImprovement}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-medium">Keywords Added</div>
+                            <div className="text-2xl font-bold text-success">
+                              {enhancedResult.atsImprovements.keywordsAdded.length}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Export Options */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <FileText className="w-6 h-6" />
+                          <span>Download PDF</span>
+                        </Button>
+                        <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <FileText className="w-6 h-6" />
+                          <span>Download DOCX</span>
+                        </Button>
+                        <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <FileText className="w-6 h-6" />
+                          <span>Copy Text</span>
+                        </Button>
+                      </div>
+
+                      {/* Resume Preview */}
+                      <div className="border rounded-lg p-4 bg-white max-h-96 overflow-y-auto">
+                        <h4 className="font-semibold mb-3">Optimized Resume Preview</h4>
+                        <div className="whitespace-pre-wrap text-sm font-mono">
+                          {enhancedResult.resumeContent}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </div>;
 };
