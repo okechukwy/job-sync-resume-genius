@@ -120,6 +120,13 @@ export const readFileContentWithMetadata = async (file: File): Promise<FileReadR
 const sanitizeDocContent = (content: string): string => {
   return content
     .replace(/bjbj[^\s]*/gi, '') // Remove bjbj artifacts
+    .replace(/\bw[NWTF]\b/gi, '') // Remove Word field codes like wN, wW, wT, wF
+    .replace(/\bw\d+\b/gi, '') // Remove numbered Word field codes like w1, w2, etc.
+    .replace(/\\f"/gi, '') // Remove font formatting codes
+    .replace(/\\s\d+/gi, '') // Remove style markers
+    .replace(/\*MERGEFORMAT/gi, '') // Remove mail merge artifacts
+    .replace(/\b(HYPERLINK|REF|TOC|PAGEREF)\b/gi, '') // Remove Word field functions
+    .replace(/\{\s*\\[^}]*\}/gi, '') // Remove Word field code blocks
     .replace(/\x00+/g, ' ') // Replace null bytes with spaces
     .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Remove non-printable characters except newlines and tabs
     .replace(/\s+/g, ' ') // Normalize whitespace

@@ -246,6 +246,13 @@ export class AnalysisDataTransformer {
     
     return content
       .replace(/bjbj[^\s]*/gi, '') // Remove bjbj artifacts
+      .replace(/\bw[NWTF]\b/gi, '') // Remove Word field codes like wN, wW, wT, wF
+      .replace(/\bw\d+\b/gi, '') // Remove numbered Word field codes like w1, w2, etc.
+      .replace(/\\f"/gi, '') // Remove font formatting codes
+      .replace(/\\s\d+/gi, '') // Remove style markers
+      .replace(/\*MERGEFORMAT/gi, '') // Remove mail merge artifacts
+      .replace(/\b(HYPERLINK|REF|TOC|PAGEREF)\b/gi, '') // Remove Word field functions
+      .replace(/\{\s*\\[^}]*\}/gi, '') // Remove Word field code blocks
       .replace(/\x00+/g, ' ') // Replace null bytes
       .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Remove non-printable characters
       .replace(/\s+/g, ' ') // Normalize whitespace
@@ -256,9 +263,13 @@ export class AnalysisDataTransformer {
     if (!text) return false;
     
     return text.toLowerCase().includes('bjbj') ||
+           /\bw[nwtf]\b/i.test(text) || // Word field codes
+           /\bw\d+\b/i.test(text) || // Numbered Word field codes
            text.includes('\x00') ||
            text.toLowerCase().includes('ole2') ||
            text.toLowerCase().includes('compound') ||
+           /\\f"/i.test(text) || // Font formatting codes
+           /\*MERGEFORMAT/i.test(text) || // Mail merge artifacts
            /^[A-Z]{8,}/.test(text); // Long uppercase sequences often indicate metadata
   }
 }

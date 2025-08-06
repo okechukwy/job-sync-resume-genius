@@ -89,6 +89,13 @@ serve(async (req) => {
     
     // Join words with spaces and clean up
     extractedText = words.join(' ')
+      .replace(/\bw[NWTF]\b/gi, '') // Remove Word field codes like wN, wW, wT, wF
+      .replace(/\bw\d+\b/gi, '') // Remove numbered Word field codes like w1, w2, etc.
+      .replace(/\\f"/gi, '') // Remove font formatting codes
+      .replace(/\\s\d+/gi, '') // Remove style markers
+      .replace(/\*MERGEFORMAT/gi, '') // Remove mail merge artifacts
+      .replace(/\b(HYPERLINK|REF|TOC|PAGEREF)\b/gi, '') // Remove Word field functions
+      .replace(/\{\s*\\[^}]*\}/gi, '') // Remove Word field code blocks
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/[^\w\s@.-]/g, ' ') // Remove special characters but keep common ones
       .trim();
@@ -97,7 +104,7 @@ serve(async (req) => {
     const filteredWords = extractedText.split(' ').filter(word => {
       const lowerWord = word.toLowerCase();
       
-      // Filter out known binary artifacts
+      // Filter out known binary artifacts and Word field codes
       if (lowerWord.startsWith('bjbj') || 
           lowerWord.includes('bjbj') ||
           lowerWord.startsWith('pk') ||
@@ -106,7 +113,9 @@ serve(async (req) => {
           lowerWord.includes('microsoft') ||
           lowerWord.includes('windows') ||
           lowerWord.includes('docfile') ||
-          lowerWord.includes('worddoc')) {
+          lowerWord.includes('worddoc') ||
+          /^w[nwtf]$/i.test(word) || // Word field codes like wN, wW, wT, wF
+          /^w\d+$/i.test(word)) { // Numbered Word field codes like w1, w2, etc.
         return false;
       }
       
@@ -166,12 +175,14 @@ serve(async (req) => {
 
 // Helper function to validate if a word is meaningful
 function isValidWord(word: string): boolean {
-  // Filter out common binary artifacts
+  // Filter out common binary artifacts and Word field codes
   if (word.toLowerCase().includes('bjbj') ||
       word.toLowerCase().includes('ole2') ||
       word.toLowerCase().includes('compound') ||
       word.toLowerCase().startsWith('pk') ||
       word.includes('\x00') ||
+      /^w[nwtf]$/i.test(word) || // Word field codes like wN, wW, wT, wF
+      /^w\d+$/i.test(word) || // Numbered Word field codes like w1, w2, etc.
       word.length > 50) { // Suspiciously long words are likely binary
     return false;
   }
