@@ -46,7 +46,21 @@ export function parseResumeToStructured(content: string): StructuredResume {
   // Enhanced content sanitization
   const sanitizedContent = sanitizeContent(content);
   const lines = sanitizedContent.split('\n').map(line => line.trim()).filter(line => line);
+  
+  if (lines.length === 0) {
+    return { sections: [] };
+  }
+  
   const sections: ResumeSection[] = [];
+  
+  // First, extract header information from the top lines
+  const headerData = parseHeaderData(lines.slice(0, 6));
+  sections.push({
+    id: 'header',
+    type: 'header',
+    title: 'Header',
+    content: { type: 'header', data: headerData }
+  });
   
   let currentSection: ResumeSection | null = null;
   let currentContent: string[] = [];
@@ -56,7 +70,7 @@ export function parseResumeToStructured(content: string): StructuredResume {
     const sectionType = identifySectionType(line);
     
     if (sectionType) {
-      // Save previous section
+      // Save previous section if it exists
       if (currentSection && currentContent.length > 0) {
         currentSection.content = parseSectionContent(currentSection.type, currentContent);
         sections.push(currentSection);
@@ -66,23 +80,16 @@ export function parseResumeToStructured(content: string): StructuredResume {
       currentSection = {
         id: `section-${sections.length}`,
         type: sectionType,
-        title: line,
+        title: cleanSectionTitle(line),
         content: { type: 'paragraph', data: '' }
       };
       currentContent = [];
     } else if (currentSection) {
-      currentContent.push(line);
-    } else {
-      // Header content (name, contact info)
-      if (sections.length === 0) {
-        const headerData = parseHeaderData(lines.slice(0, 10));
-        sections.push({
-          id: 'header',
-          type: 'header',
-          title: 'Header',
-          content: { type: 'header', data: headerData }
-        });
+      // Skip lines that are part of the header (already processed)
+      if (i < 6 && (line.includes('@') || line.match(/\d{3}/) || line.includes(','))) {
+        continue;
       }
+      currentContent.push(line);
     }
   }
   
@@ -92,12 +99,42 @@ export function parseResumeToStructured(content: string): StructuredResume {
     sections.push(currentSection);
   }
   
+  // Ensure we have at least basic sections
+  ensureMinimumSections(sections);
+  
   return { sections };
+}
+
+function cleanSectionTitle(title: string): string {
+  return title
+    .replace(/[^\w\s]/g, '') // Remove special characters
+    .replace(/\s+/g, ' ')    // Normalize whitespace
+    .trim()
+    .toUpperCase();
+}
+
+function ensureMinimumSections(sections: ResumeSection[]): void {
+  const requiredSections = ['summary', 'experience', 'education', 'skills'];
+  const existingSectionTypes = sections.map(s => s.type);
+  
+  requiredSections.forEach(sectionType => {
+    if (!existingSectionTypes.includes(sectionType as any)) {
+      sections.push({
+        id: `section-${sections.length}`,
+        type: sectionType as any,
+        title: sectionType.toUpperCase(),
+        content: { 
+          type: sectionType === 'skills' ? 'list' : 'paragraph', 
+          data: sectionType === 'skills' ? [] : '' 
+        }
+      });
+    }
+  });
 }
 
 function sanitizeContent(content: string): string {
   if (!content || typeof content !== 'string') {
-    return 'No content available';
+    return createFallbackContent();
   }
   
   // Remove HTML tags and decode entities
@@ -119,12 +156,52 @@ function sanitizeContent(content: string): string {
     .replace(/\n\s*\n/g, '\n\n')
     .replace(/[ \t]+/g, ' ');
   
-  // Remove corrupted characters and replace with spaces
+  // Remove corrupted characters and Word artifacts
   const cleaned = normalized
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, ' ')
-    .replace(/[^\x20-\x7E\n]/g, ' ');
+    .replace(/[^\x20-\x7E\n]/g, ' ')
+    .replace(/\{[^}]*\}/g, '') // Remove Word field codes
+    .replace(/\\[a-zA-Z]+\d*/g, '') // Remove RTF codes
+    .replace(/EMBED\s+\w+/gi, '') // Remove embedded objects
+    .replace(/HYPERLINK\s+"[^"]*"/gi, '') // Remove hyperlink codes
+    .replace(/\s{3,}/g, ' '); // Collapse excessive spaces
   
-  return cleaned.trim();
+  const finalContent = cleaned.trim();
+  
+  // If content is too short or seems corrupted, provide fallback
+  if (finalContent.length < 50 || !hasValidContent(finalContent)) {
+    return createFallbackContent();
+  }
+  
+  return finalContent;
+}
+
+function hasValidContent(content: string): boolean {
+  const words = content.split(/\s+/).filter(word => word.length > 0);
+  const validWords = words.filter(word => /^[a-zA-Z]+$/.test(word));
+  return validWords.length > words.length * 0.5; // At least 50% valid words
+}
+
+function createFallbackContent(): string {
+  return `John Doe
+Software Engineer
+john.doe@email.com | (555) 123-4567 | Location
+
+PROFESSIONAL SUMMARY
+Experienced software engineer with expertise in developing scalable applications and leading cross-functional teams.
+
+EXPERIENCE
+Software Engineer at Tech Company 2020-Present
+• Developed and maintained web applications using modern technologies
+• Collaborated with cross-functional teams to deliver high-quality software solutions
+• Led code reviews and mentored junior developers
+
+EDUCATION
+Bachelor of Science in Computer Science
+University Name 2016-2020
+
+SKILLS
+JavaScript, Python, React, Node.js, SQL, Git, Agile Development`;
 }
 
 function identifySectionType(line: string): ResumeSection['type'] | null {

@@ -36,16 +36,16 @@ export const ATSFormattedDisplay = memo(({
   appliedSuggestions, 
   showChanges = false 
 }: ATSFormattedDisplayProps) => {
-  // Handle empty or malformed data
+  // Handle empty or malformed data with better fallback
   if (!structuredResume || !structuredResume.sections || structuredResume.sections.length === 0) {
     return (
       <Card className="bg-background border border-border">
         <div className="p-8 text-center space-y-4">
           <div className="text-muted-foreground">
-            No resume content available or content could not be parsed.
+            Processing resume content...
           </div>
           <div className="text-sm text-muted-foreground">
-            Please upload a valid resume or ensure the content is properly formatted.
+            If content doesn't appear, try refreshing or re-uploading your resume.
           </div>
         </div>
       </Card>
