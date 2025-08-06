@@ -1,23 +1,15 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Info, Target, Lightbulb, TrendingUp, TestTube, Loader2, Zap, Edit3, Download, AlertTriangle } from "lucide-react";
+import { Upload, FileText, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
-import OptimizationTesting from "@/components/ats-analysis/OptimizationTesting";
-import ApplyRecommendations from "@/components/cv-analysis/components/ApplyRecommendations";
-import RealTimeEditor from "@/components/cv-analysis/components/RealTimeEditor";
-import SmartRecommendationEngine from "@/components/cv-analysis/components/SmartRecommendationEngine";
-import { EnhancedCVResult } from "@/services/cvEnhancement";
+import { UnifiedATSOptimizer } from "@/components/ats-analysis/UnifiedATSOptimizer";
 
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
@@ -25,11 +17,7 @@ const ATSAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("Business");
-  const [showTesting, setShowTesting] = useState(false);
-  const [activeTab, setActiveTab] = useState("analysis");
-  const [enhancedResult, setEnhancedResult] = useState<EnhancedCVResult | null>(null);
   const [originalContent, setOriginalContent] = useState("");
-  const [optimizationComplete, setOptimizationComplete] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const industries = ["Technology", "Healthcare", "Finance", "Creative", "Business", "Research", "Marketing", "Sales", "Education", "Manufacturing", "Retail"];
 
@@ -49,9 +37,7 @@ const ATSAnalysis = () => {
     }
     setUploadedResume(file);
     setAnalysis(null); // Clear previous analysis
-    setEnhancedResult(null);
-    setOptimizationComplete(false);
-    setActiveTab("analysis");
+    setOriginalContent(""); // Clear previous content
     toast.success('Resume uploaded successfully!');
   };
 
@@ -132,116 +118,12 @@ const ATSAnalysis = () => {
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-success';
-    if (score >= 60) return 'text-warning';
-    return 'text-destructive';
+  const handleExport = () => {
+    toast.success("Export functionality coming soon!");
   };
 
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'medium':
-        return <AlertCircle className="h-4 w-4 text-warning" />;
-      default:
-        return <Info className="h-4 w-4 text-primary" />;
-    }
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const colors = {
-      high: 'bg-destructive/10 text-destructive border-destructive/20',
-      medium: 'bg-warning/10 text-warning border-warning/20',
-      low: 'bg-primary/10 text-primary border-primary/20'
-    };
-    return colors[priority as keyof typeof colors] || colors.low;
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'quantification':
-        return <TrendingUp className="h-4 w-4 text-blue-500" />;
-      case 'keywords':
-        return <Target className="h-4 w-4 text-green-500" />;
-      case 'action-verbs':
-        return <Lightbulb className="h-4 w-4 text-purple-500" />;
-      case 'achievement':
-        return <CheckCircle className="h-4 w-4 text-orange-500" />;
-      case 'industry-alignment':
-        return <Info className="h-4 w-4 text-indigo-500" />;
-      default:
-        return <FileText className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getCategoryBadge = (category: string) => {
-    const colors = {
-      quantification: 'bg-blue-50 text-blue-700 border-blue-200',
-      keywords: 'bg-green-50 text-green-700 border-green-200',
-      'action-verbs': 'bg-purple-50 text-purple-700 border-purple-200',
-      achievement: 'bg-orange-50 text-orange-700 border-orange-200',
-      'industry-alignment': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      formatting: 'bg-gray-50 text-gray-700 border-gray-200'
-    };
-    return colors[category as keyof typeof colors] || colors.formatting;
-  };
-
-  const getGroupedOptimizations = () => {
-    if (!analysis?.contentOptimizations) return {};
-    return analysis.contentOptimizations.reduce((groups, optimization) => {
-      const section = optimization.section;
-      if (!groups[section]) {
-        groups[section] = [];
-      }
-      groups[section].push(optimization);
-      return groups;
-    }, {} as Record<string, typeof analysis.contentOptimizations>);
-  };
-
-  const getSuggestionStats = () => {
-    if (!analysis?.contentOptimizations) return { total: 0, byCategory: {}, byPriority: {} };
-    
-    const byCategory = analysis.contentOptimizations.reduce((acc, opt) => {
-      const category = opt.category || 'general';
-      acc[category] = (acc[category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return {
-      total: analysis.contentOptimizations.length,
-      byCategory,
-      sections: Object.keys(getGroupedOptimizations()).length
-    };
-  };
-
-  const handleOptimizationComplete = (result: EnhancedCVResult) => {
-    setEnhancedResult(result);
-    setOptimizationComplete(true);
-    setActiveTab("preview");
-    toast.success("CV optimization completed successfully!");
-  };
-
-  const handleContentChange = (content: string) => {
-    if (enhancedResult) {
-      setEnhancedResult({
-        ...enhancedResult,
-        resumeContent: content
-      });
-    }
-  };
-
-  const handleSaveContent = (content: string) => {
-    if (enhancedResult) {
-      setEnhancedResult({
-        ...enhancedResult,
-        resumeContent: content
-      });
-      toast.success("Changes saved successfully!");
-    }
-  };
-
-  return <div className="min-h-screen bg-gradient-hero">
+  return (
+    <div className="min-h-screen bg-gradient-hero">
       <PageHeader />
 
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -272,7 +154,8 @@ const ATSAnalysis = () => {
           <CardContent className="space-y-6">
             <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={isAnalyzing} />
             
-            {uploadedResume ? <div className={`glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4 ${isAnalyzing ? 'opacity-75' : ''}`}>
+            {uploadedResume ? (
+              <div className={`glass-card p-4 rounded-lg border border-success/20 bg-success/5 mb-4 ${isAnalyzing ? 'opacity-75' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-success" />
@@ -303,13 +186,9 @@ const ATSAnalysis = () => {
                     </Button>
                   </div>
                 </div>
-                {isAnalyzing && (
-                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                    <Info className="w-4 h-4 inline mr-1" />
-                    File changes are disabled during analysis to ensure accurate results.
-                  </div>
-                )}
-              </div> : <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-border/50 rounded-lg p-12 text-center">
                 <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium mb-2">Upload your resume for comprehensive ATS analysis</p>
                 <p className="text-muted-foreground mb-6">
@@ -318,7 +197,8 @@ const ATSAnalysis = () => {
                 <Button onClick={() => fileInputRef.current?.click()} disabled={isAnalyzing}>
                   Choose File
                 </Button>
-              </div>}
+              </div>
+            )}
 
             {/* Industry Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -329,9 +209,11 @@ const ATSAnalysis = () => {
                     <SelectValue placeholder="Select your industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    {industries.map(industry => <SelectItem key={industry} value={industry}>
+                    {industries.map(industry => (
+                      <SelectItem key={industry} value={industry}>
                         {industry}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -353,7 +235,8 @@ const ATSAnalysis = () => {
               </p>
             </div>
             
-            {uploadedResume && <Button variant="hero" className="w-full" onClick={handleAnalyze} disabled={isAnalyzing}>
+            {uploadedResume && (
+              <Button variant="hero" className="w-full" onClick={handleAnalyze} disabled={isAnalyzing}>
                 {isAnalyzing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -362,350 +245,22 @@ const ATSAnalysis = () => {
                 ) : (
                   'Start Comprehensive ATS Analysis'
                 )}
-              </Button>}
+              </Button>
+            )}
           </CardContent>
         </Card>
 
-        {/* Testing Component */}
-        {showTesting && uploadedResume && <div className="mb-8">
-            <OptimizationTesting resumeText="" jobDescription={jobDescription} industry={selectedIndustry} />
-          </div>}
-
-        {/* Main Content Tabs */}
-        {analysis && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="analysis" className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Analysis Results
-              </TabsTrigger>
-              <TabsTrigger 
-                value="optimization" 
-                className="flex items-center gap-2"
-                disabled={!originalContent}
-              >
-                <Zap className="w-4 h-4" />
-                Auto-Optimize
-              </TabsTrigger>
-              <TabsTrigger 
-                value="editor" 
-                className="flex items-center gap-2"
-                disabled={!enhancedResult}
-              >
-                <Edit3 className="w-4 h-4" />
-                Manual Editor
-              </TabsTrigger>
-              <TabsTrigger 
-                value="preview" 
-                className="flex items-center gap-2"
-                disabled={!enhancedResult}
-              >
-                <Download className="w-4 h-4" />
-                Export Resume
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="analysis" className="space-y-8">
-            {/* Overall Score */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center justify-between">
-                  ATS Compatibility Score
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="text-sm">
-                      {getSuggestionStats().total} Comprehensive Optimizations
-                    </Badge>
-                    <Badge variant="secondary" className="text-sm">
-                      {getSuggestionStats().sections} Sections Analyzed
-                    </Badge>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center mb-6">
-                  <div className="text-center">
-                    <div className={`text-6xl font-bold ${getScoreColor(analysis.atsScore)}`}>
-                      {analysis.atsScore}
-                    </div>
-                    <div className="text-muted-foreground">out of 100</div>
-                  </div>
-                </div>
-                <Progress value={analysis.atsScore} className="h-4" />
-                
-                {getSuggestionStats().total >= 15 && (
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      ✨ <strong>Comprehensive Analysis Complete:</strong> We've identified {getSuggestionStats().total} specific optimization opportunities across {getSuggestionStats().sections} resume sections to maximize your ATS compatibility.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Keyword Analysis */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Keyword Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold mb-3 text-success">Found Keywords</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.keywordMatches.found.map((keyword, index) => <Badge key={index} variant="secondary" className="bg-success/10 text-success border-success/20">
-                          {keyword}
-                        </Badge>)}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3 text-warning">Missing Keywords</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.keywordMatches.missing.map((keyword, index) => <Badge key={index} variant="secondary" className="bg-warning/10 text-warning border-warning/20">
-                          {keyword}
-                        </Badge>)}
-                    </div>
-                  </div>
-                </div>
-                
-                {analysis.keywordMatches.suggestions.length > 0 && <div className="mt-6">
-                    <h3 className="font-semibold mb-3">Keyword Suggestions</h3>
-                    <ul className="space-y-2">
-                      {analysis.keywordMatches.suggestions.map((suggestion, index) => <li key={index} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                          {suggestion}
-                        </li>)}
-                    </ul>
-                  </div>}
-              </CardContent>
-            </Card>
-
-            {/* Format Optimizations */}
-            {analysis.formatOptimizations.length > 0 && <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>Format Issues</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {analysis.formatOptimizations.map((optimization, index) => <div key={index} className="glass-card p-4 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          {getPriorityIcon(optimization.priority)}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-medium">{optimization.issue}</h4>
-                              <Badge className={getPriorityBadge(optimization.priority)}>
-                                {optimization.priority}
-                              </Badge>
-                            </div>
-                            <p className="text-muted-foreground">{optimization.recommendation}</p>
-                          </div>
-                        </div>
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>}
-
-            {/* Content Optimizations - Enhanced Display with Better Organization */}
-            {analysis.contentOptimizations.length > 0 && <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5" />
-                    Comprehensive Content Improvements ({analysis.contentOptimizations.length} detailed optimizations)
-                  </CardTitle>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {Object.keys(getGroupedOptimizations()).length} Sections Covered
-                    </Badge>
-                    {Object.entries(getSuggestionStats().byCategory).map(([category, count]) => (
-                      <Badge key={category} variant="outline" className="text-xs">
-                        {category}: {count}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Systematic optimizations covering quantification, keywords, achievements, and formatting across all resume sections
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {Object.entries(getGroupedOptimizations()).map(([sectionName, optimizations]) => <div key={sectionName} className="space-y-4">
-                        <h3 className="text-lg font-semibold text-primary border-b border-border/20 pb-2">
-                          {sectionName} ({optimizations.length} optimization{optimizations.length !== 1 ? 's' : ''})
-                        </h3>
-                        {optimizations.map((optimization, index) => <div key={`${sectionName}-${index}`} className="glass-card p-4 rounded-lg border border-border/50">
-                            <div className="flex items-start gap-3 mb-3">
-                              {getCategoryIcon(optimization.category || 'formatting')}
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  {optimization.category && <Badge className={getCategoryBadge(optimization.category)}>
-                                      {optimization.category.replace('-', ' ')}
-                                    </Badge>}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                              <div>
-                                <p className="text-sm font-medium text-muted-foreground mb-2">Current:</p>
-                                <p className="text-sm bg-muted/50 p-3 rounded border">{optimization.current}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-success mb-2">Improved:</p>
-                                <p className="text-sm bg-success/10 p-3 rounded border border-success/20">{optimization.improved}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="bg-primary/5 p-3 rounded border border-primary/10">
-                              <p className="text-sm text-muted-foreground">
-                                <strong>Why this helps:</strong> {optimization.reasoning}
-                              </p>
-                            </div>
-                          </div>)}
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>}
-
-            {/* Overall Recommendations */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Optimization Recommendations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {analysis.overallRecommendations.map((rec, index) => <li key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {rec}
-                    </li>)}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Quick Action Button for Optimization */}
-            <Card className="glass-card">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-3">Ready to Optimize Your Resume?</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Apply AI-powered improvements automatically and see your ATS score improve instantly.
-                  </p>
-                  <Button
-                    variant="gradient"
-                    size="lg"
-                    onClick={() => setActiveTab("optimization")}
-                    className="w-full max-w-md"
-                  >
-                    <Zap className="w-5 h-5 mr-2" />
-                    Start Auto-Optimization
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            </TabsContent>
-
-            <TabsContent value="optimization" className="space-y-6">
-              {uploadedResume && originalContent && analysis && (
-                <SmartRecommendationEngine
-                  originalContent={originalContent}
-                  analysisData={analysis}
-                  onOptimizationComplete={handleOptimizationComplete}
-                />
-              )}
-              {(!uploadedResume || !originalContent || !analysis) && (
-                <Card className="glass-card">
-                  <CardContent className="p-8 text-center">
-                    <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-warning" />
-                    <h3 className="text-lg font-medium mb-2">Resume Analysis Required</h3>
-                    <p className="text-muted-foreground">
-                      Please upload and analyze your resume first to access auto-optimization features.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="editor" className="space-y-6">
-              {enhancedResult && (
-                <RealTimeEditor
-                  initialContent={originalContent}
-                  enhancedResult={enhancedResult}
-                  isHtml={enhancedResult.isHtmlContent}
-                  onContentChange={handleContentChange}
-                  onSave={handleSaveContent}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="preview" className="space-y-6">
-              {enhancedResult && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Download className="w-5 h-5" />
-                      Export Optimized Resume
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {/* Optimization Summary */}
-                      <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-                        <h4 className="font-semibold text-success mb-2 flex items-center gap-2">
-                          <CheckCircle className="w-5 h-5" />
-                          Optimization Complete!
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <div className="font-medium">Changes Applied</div>
-                            <div className="text-2xl font-bold text-success">
-                              {enhancedResult.changesApplied.length}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-medium">ATS Score Improvement</div>
-                            <div className="text-2xl font-bold text-success">
-                              +{enhancedResult.estimatedATSScoreImprovement}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-medium">Keywords Added</div>
-                            <div className="text-2xl font-bold text-success">
-                              {enhancedResult.atsImprovements.keywordsAdded.length}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Export Options */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button variant="outline" className="h-20 flex flex-col gap-2">
-                          <FileText className="w-6 h-6" />
-                          <span>Download PDF</span>
-                        </Button>
-                        <Button variant="outline" className="h-20 flex flex-col gap-2">
-                          <FileText className="w-6 h-6" />
-                          <span>Download DOCX</span>
-                        </Button>
-                        <Button variant="outline" className="h-20 flex flex-col gap-2">
-                          <FileText className="w-6 h-6" />
-                          <span>Copy Text</span>
-                        </Button>
-                      </div>
-
-                      {/* Resume Preview */}
-                      <div className="border rounded-lg p-4 bg-white max-h-96 overflow-y-auto">
-                        <h4 className="font-semibold mb-3">Optimized Resume Preview</h4>
-                        <div className="whitespace-pre-wrap text-sm font-mono">
-                          {enhancedResult.resumeContent}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          </Tabs>
+        {/* Unified ATS Optimizer */}
+        {analysis && originalContent && (
+          <UnifiedATSOptimizer
+            analysis={analysis}
+            originalContent={originalContent}
+            onExport={handleExport}
+          />
         )}
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default ATSAnalysis;
