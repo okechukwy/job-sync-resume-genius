@@ -1,35 +1,23 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   CheckCircle, 
-  AlertCircle, 
-  XCircle, 
-  Info, 
   Target, 
-  Lightbulb, 
-  TrendingUp, 
-  Zap,
-  Filter,
+  TrendingUp,
   ChevronRight,
   Undo,
   Redo
 } from "lucide-react";
 import { ATSOptimizationResult } from "@/services/openaiServices";
-import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { SuggestionsPanel } from "./SuggestionsPanel";
 import { ProfessionalCVEditor } from "./ProfessionalCVEditor";
+import { applySuggestionToContent } from "@/utils/atsContentProcessor";
 import { toast } from "sonner";
-
-interface UnifiedATSOptimizerProps {
-  analysis: ATSOptimizationResult;
-  originalContent: string;
-  onExport?: () => void;
-}
 
 interface AppliedSuggestion {
   id: string;
@@ -37,6 +25,12 @@ interface AppliedSuggestion {
   newText: string;
   section: string;
   timestamp: number;
+}
+
+interface UnifiedATSOptimizerProps {
+  analysis: ATSOptimizationResult;
+  originalContent: string;
+  onExport?: () => void;
 }
 
 export const UnifiedATSOptimizer = ({ 
@@ -55,7 +49,7 @@ export const UnifiedATSOptimizer = ({
     setUndoStack(prev => [...prev, currentContent]);
     setRedoStack([]); // Clear redo stack
     
-    // Apply the suggestion with intelligent content updating
+    // Apply the suggestion with improved content processing
     const updatedContent = applySuggestionToContent(currentContent, originalText, newText, section);
     setCurrentContent(updatedContent);
     
@@ -73,109 +67,6 @@ export const UnifiedATSOptimizer = ({
     setCurrentScore(prev => Math.min(100, prev + 2));
     
     toast.success("Suggestion applied successfully!");
-  };
-
-  const applySuggestionToContent = (content: string, originalText: string, newText: string, section: string): string => {
-    // First try exact match replacement
-    if (content.includes(originalText)) {
-      return content.replace(originalText, newText);
-    }
-    
-    // If exact match fails, try fuzzy matching within the section
-    const lines = content.split('\n');
-    const updatedLines: string[] = [];
-    let inTargetSection = false;
-    let sectionFound = false;
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const upperLine = line.toUpperCase();
-      
-      // Check if we're entering the target section
-      if (upperLine.includes(section.toUpperCase()) || 
-          (section.toLowerCase().includes('summary') && upperLine.includes('SUMMARY')) ||
-          (section.toLowerCase().includes('experience') && upperLine.includes('EXPERIENCE')) ||
-          (section.toLowerCase().includes('education') && upperLine.includes('EDUCATION')) ||
-          (section.toLowerCase().includes('skills') && upperLine.includes('SKILLS'))) {
-        inTargetSection = true;
-        sectionFound = true;
-        updatedLines.push(line);
-        continue;
-      }
-      
-      // Check if we're leaving the target section (found another section header)
-      if (inTargetSection && (upperLine.includes('SUMMARY') || upperLine.includes('EXPERIENCE') || 
-          upperLine.includes('EDUCATION') || upperLine.includes('SKILLS') || upperLine.includes('CERTIFICATIONS') ||
-          upperLine.includes('PROJECTS') || upperLine.includes('AWARDS'))) {
-        inTargetSection = false;
-      }
-      
-      // If we're in the target section, try to find and replace similar text
-      if (inTargetSection) {
-        const similarity = calculateSimilarity(line, originalText);
-        if (similarity > 0.6) { // 60% similarity threshold
-          updatedLines.push(newText);
-          continue;
-        }
-        
-        // Also check for partial matches
-        const words = originalText.split(/\s+/);
-        const matchedWords = words.filter(word => line.toLowerCase().includes(word.toLowerCase()));
-        if (matchedWords.length >= words.length * 0.5) { // 50% word match
-          updatedLines.push(line.replace(new RegExp(originalText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), newText));
-          continue;
-        }
-      }
-      
-      updatedLines.push(line);
-    }
-    
-    // If no section was found, append the new text at the end of the content
-    if (!sectionFound) {
-      updatedLines.push('');
-      updatedLines.push(section.toUpperCase());
-      updatedLines.push(newText);
-    }
-    
-    return updatedLines.join('\n');
-  };
-
-  const calculateSimilarity = (str1: string, str2: string): number => {
-    const longer = str1.length > str2.length ? str1 : str2;
-    const shorter = str1.length > str2.length ? str2 : str1;
-    
-    if (longer.length === 0) return 1.0;
-    
-    const distance = levenshteinDistance(longer.toLowerCase(), shorter.toLowerCase());
-    return (longer.length - distance) / longer.length;
-  };
-
-  const levenshteinDistance = (str1: string, str2: string): number => {
-    const matrix = [];
-    
-    for (let i = 0; i <= str2.length; i++) {
-      matrix[i] = [i];
-    }
-    
-    for (let j = 0; j <= str1.length; j++) {
-      matrix[0][j] = j;
-    }
-    
-    for (let i = 1; i <= str2.length; i++) {
-      for (let j = 1; j <= str1.length; j++) {
-        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1
-          );
-        }
-      }
-    }
-    
-    return matrix[str2.length][str1.length];
   };
 
   const handleUndo = () => {
@@ -232,17 +123,18 @@ export const UnifiedATSOptimizer = ({
                   <div className={`text-3xl font-bold ${getScoreColor(currentScore)}`}>
                     {currentScore}
                   </div>
-                  <div className="text-sm text-muted-foreground">Current Score</div>
+                  <div className="text-sm text-muted-foreground">ATS Score</div>
                 </div>
                 
                 {scoreImprovement > 0 && (
                   <>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-success">
+                      <div className="text-lg font-semibold text-success flex items-center gap-1">
+                        <TrendingUp className="h-4 w-4" />
                         +{scoreImprovement}
                       </div>
-                      <div className="text-sm text-muted-foreground">Improvement</div>
+                      <div className="text-sm text-muted-foreground">Improved</div>
                     </div>
                   </>
                 )}
@@ -283,7 +175,7 @@ export const UnifiedATSOptimizer = ({
         </CardHeader>
       </Card>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Jobscan Style Layout */}
       <div className="grid grid-cols-2 gap-6 min-h-[800px]">
         {/* Left Panel - Suggestions */}
         <SuggestionsPanel
@@ -292,7 +184,7 @@ export const UnifiedATSOptimizer = ({
           onApplySuggestion={handleApplySuggestion}
         />
         
-        {/* Right Panel - Professional CV Editor */}
+        {/* Right Panel - ATS Resume Display */}
         <ProfessionalCVEditor
           content={currentContent}
           originalContent={originalContent}
