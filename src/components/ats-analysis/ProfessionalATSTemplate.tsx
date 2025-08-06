@@ -32,12 +32,22 @@ export const ProfessionalATSTemplate = memo(({
 }: ProfessionalATSTemplateProps) => {
   
   const highlightChanges = (text: string): string => {
-    if (!showChanges || !appliedSuggestions.length) return text;
+    if (!showChanges || !appliedSuggestions.length || !text) return text;
     
     let highlightedText = text;
+    console.log('Highlighting changes in text:', text.substring(0, 50) + '...');
+    console.log('Applied suggestions:', appliedSuggestions.length);
+    
     appliedSuggestions.forEach(suggestion => {
-      const regex = new RegExp(suggestion.newText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-      highlightedText = highlightedText.replace(regex, `<mark class="bg-primary/20 px-1 rounded">${suggestion.newText}</mark>`);
+      if (suggestion.newText && suggestion.newText.trim()) {
+        // Create a regex that matches the new text
+        const escapedNewText = suggestion.newText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedNewText})`, 'gi');
+        
+        highlightedText = highlightedText.replace(regex, 
+          `<mark class="bg-yellow-200 px-1 rounded font-medium border border-yellow-300">$1</mark>`
+        );
+      }
     });
     
     return highlightedText;
@@ -47,12 +57,12 @@ export const ProfessionalATSTemplate = memo(({
     <div className="mb-8">
       {/* Name and Title */}
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          {data.name || 'Your Name'}
+        <h1 className="text-3xl font-bold text-foreground mb-2" 
+            dangerouslySetInnerHTML={{ __html: highlightChanges(data.name || 'Your Name') }}>
         </h1>
         {data.title && (
-          <h2 className="text-xl text-muted-foreground font-medium">
-            {data.title}
+          <h2 className="text-xl text-muted-foreground font-medium"
+              dangerouslySetInnerHTML={{ __html: highlightChanges(data.title) }}>
           </h2>
         )}
       </div>
@@ -62,31 +72,31 @@ export const ProfessionalATSTemplate = memo(({
         {data.contact.email && (
           <div className="flex items-center gap-1">
             <Mail className="h-4 w-4" />
-            <span>{data.contact.email}</span>
+            <span dangerouslySetInnerHTML={{ __html: highlightChanges(data.contact.email) }}></span>
           </div>
         )}
         {data.contact.phone && (
           <div className="flex items-center gap-1">
             <Phone className="h-4 w-4" />
-            <span>{data.contact.phone}</span>
+            <span dangerouslySetInnerHTML={{ __html: highlightChanges(data.contact.phone) }}></span>
           </div>
         )}
         {data.contact.location && (
           <div className="flex items-center gap-1">
             <MapPin className="h-4 w-4" />
-            <span>{data.contact.location}</span>
+            <span dangerouslySetInnerHTML={{ __html: highlightChanges(data.contact.location) }}></span>
           </div>
         )}
         {data.contact.website && (
           <div className="flex items-center gap-1">
             <Globe className="h-4 w-4" />
-            <span>{data.contact.website}</span>
+            <span dangerouslySetInnerHTML={{ __html: highlightChanges(data.contact.website) }}></span>
           </div>
         )}
         {data.contact.linkedin && (
           <div className="flex items-center gap-1">
             <Linkedin className="h-4 w-4" />
-            <span>{data.contact.linkedin}</span>
+            <span dangerouslySetInnerHTML={{ __html: highlightChanges(data.contact.linkedin) }}></span>
           </div>
         )}
       </div>
@@ -99,24 +109,24 @@ export const ProfessionalATSTemplate = memo(({
     <div key={index} className="mb-6">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="font-semibold text-foreground text-lg">
-            {block.title || 'Job Title'}
+          <h3 className="font-semibold text-foreground text-lg"
+              dangerouslySetInnerHTML={{ __html: highlightChanges(block.title || 'Job Title') }}>
           </h3>
-          <p className="text-muted-foreground font-medium">
-            {block.company || 'Company Name'}
+          <p className="text-muted-foreground font-medium"
+             dangerouslySetInnerHTML={{ __html: highlightChanges(block.company || 'Company Name') }}>
           </p>
         </div>
         <div className="text-right text-sm text-muted-foreground">
           {block.dates && (
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span>{block.dates}</span>
+              <span dangerouslySetInnerHTML={{ __html: highlightChanges(block.dates) }}></span>
             </div>
           )}
           {block.location && (
             <div className="flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3" />
-              <span>{block.location}</span>
+              <span dangerouslySetInnerHTML={{ __html: highlightChanges(block.location) }}></span>
             </div>
           )}
         </div>
@@ -139,24 +149,24 @@ export const ProfessionalATSTemplate = memo(({
     <div key={index} className="mb-4">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-foreground">
-            {block.degree || 'Degree'}
+          <h3 className="font-semibold text-foreground"
+              dangerouslySetInnerHTML={{ __html: highlightChanges(block.degree || 'Degree') }}>
           </h3>
-          <p className="text-muted-foreground">
-            {block.institution || 'Institution'}
+          <p className="text-muted-foreground"
+             dangerouslySetInnerHTML={{ __html: highlightChanges(block.institution || 'Institution') }}>
           </p>
         </div>
         <div className="text-right text-sm text-muted-foreground">
           {block.dates && (
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span>{block.dates}</span>
+              <span dangerouslySetInnerHTML={{ __html: highlightChanges(block.dates) }}></span>
             </div>
           )}
           {block.location && (
             <div className="flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3" />
-              <span>{block.location}</span>
+              <span dangerouslySetInnerHTML={{ __html: highlightChanges(block.location) }}></span>
             </div>
           )}
         </div>
@@ -171,8 +181,9 @@ export const ProfessionalATSTemplate = memo(({
           key={index} 
           variant="secondary" 
           className="text-xs"
-          dangerouslySetInnerHTML={{ __html: highlightChanges(skill) }}
-        />
+        >
+          <span dangerouslySetInnerHTML={{ __html: highlightChanges(skill) }}></span>
+        </Badge>
       ))}
     </div>
   );
@@ -259,8 +270,8 @@ export const ProfessionalATSTemplate = memo(({
   }
 
   // Find header section
-  const headerSection = structuredResume.sections.find(s => s.type === 'header');
-  const otherSections = structuredResume.sections.filter(s => s.type !== 'header');
+  const headerSection = structuredResume.sections?.find(s => s.type === 'header');
+  const otherSections = structuredResume.sections?.filter(s => s.type !== 'header') || [];
 
   return (
     <div className="cv-document bg-background text-foreground p-8 max-w-4xl mx-auto font-sans">
@@ -340,15 +351,18 @@ export const ProfessionalATSTemplate = memo(({
       </div>
       
       {/* Applied Changes Summary */}
-      {showChanges && appliedSuggestions.length > 0 && (
+      {appliedSuggestions.length > 0 && (
         <div className="mt-8 pt-6 border-t border-border">
           <div className="text-sm text-muted-foreground">
-            <Badge variant="secondary" className="mb-2">
+            <Badge variant="secondary" className="mb-2 bg-green-100 text-green-700 border-green-200">
               {appliedSuggestions.length} optimization{appliedSuggestions.length !== 1 ? 's' : ''} applied
             </Badge>
-            <p className="text-xs">
-              Highlighted sections show recent ATS optimizations
-            </p>
+            {showChanges && (
+              <p className="text-xs">
+                <span className="inline-block w-3 h-3 bg-yellow-200 border border-yellow-300 rounded mr-1"></span>
+                Highlighted sections show applied ATS optimizations
+              </p>
+            )}
           </div>
         </div>
       )}

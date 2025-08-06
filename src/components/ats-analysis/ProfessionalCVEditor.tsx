@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,9 +46,16 @@ export const ProfessionalCVEditor = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMode, setEditMode] = useState<'text' | 'structured'>('text');
 
+  // Update local content when parent content changes
   useEffect(() => {
+    console.log('ProfessionalCVEditor: Content updated from parent:', content.substring(0, 100) + '...');
     setLocalContent(content);
   }, [content]);
+
+  // Log when applied suggestions change
+  useEffect(() => {
+    console.log('ProfessionalCVEditor: Applied suggestions updated:', appliedSuggestions.length);
+  }, [appliedSuggestions]);
 
   const handleSave = () => {
     onChange(localContent);
@@ -66,7 +74,9 @@ export const ProfessionalCVEditor = ({
     setIsEditing(true);
   };
 
+  // Parse structured resume with current content
   const structuredResume = useMemo(() => {
+    console.log('ProfessionalCVEditor: Parsing structured resume from:', localContent.substring(0, 100) + '...');
     return parseResumeToStructured(localContent);
   }, [localContent]);
   
@@ -74,10 +84,12 @@ export const ProfessionalCVEditor = ({
   const charCount = localContent.length;
 
   const handleContentChange = (newContent: string) => {
+    console.log('ProfessionalCVEditor: Content changed locally');
     setLocalContent(newContent);
   };
 
   const handleStructuredSave = (newContent: string) => {
+    console.log('ProfessionalCVEditor: Structured content saved');
     setLocalContent(newContent);
     onChange(newContent);
     setIsEditing(false);
@@ -102,7 +114,7 @@ export const ProfessionalCVEditor = ({
               <span>{wordCount} words</span>
               <span>{charCount} characters</span>
               {appliedSuggestions.length > 0 && (
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
                   {appliedSuggestions.length} optimization{appliedSuggestions.length !== 1 ? 's' : ''} applied
                 </Badge>
               )}
@@ -115,36 +127,27 @@ export const ProfessionalCVEditor = ({
               size="sm"
               onClick={() => setShowChanges(!showChanges)}
               disabled={appliedSuggestions.length === 0}
+              className={showChanges ? "bg-primary/10 text-primary" : ""}
             >
               <Highlighter className="h-4 w-4" />
               {showChanges ? 'Hide' : 'Show'} Changes
             </Button>
             
             {!isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleEdit}
-                >
-                  <Edit3 className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Eye className="h-4 w-4" />
-                  Preview Mode
-                </Button>
-              </>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEdit}
+              >
+                <Edit3 className="h-4 w-4" />
+                Edit
+              </Button>
             ) : (
               <>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleReset}
+                  onClick={() => setIsEditing(false)}
                 >
                   <RotateCcw className="h-4 w-4" />
                   Cancel

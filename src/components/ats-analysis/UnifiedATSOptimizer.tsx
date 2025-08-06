@@ -51,12 +51,16 @@ export const UnifiedATSOptimizer = ({
   const [currentScore, setCurrentScore] = useState(analysis.atsScore);
   
   const handleApplySuggestion = (suggestionId: string, originalText: string, newText: string, section: string) => {
+    console.log('Applying suggestion:', { suggestionId, originalText, newText, section });
+    
     // Save current state to undo stack
     setUndoStack(prev => [...prev, currentContent]);
     setRedoStack([]); // Clear redo stack
     
-    // Apply the suggestion with intelligent content updating
+    // Apply the suggestion with improved content updating
     const updatedContent = applySuggestionToContent(currentContent, originalText, newText, section);
+    console.log('Content after applying suggestion:', updatedContent.substring(0, 200) + '...');
+    
     setCurrentContent(updatedContent);
     
     // Track applied suggestion
@@ -67,7 +71,11 @@ export const UnifiedATSOptimizer = ({
       section,
       timestamp: Date.now()
     };
-    setAppliedSuggestions(prev => [...prev, appliedSuggestion]);
+    setAppliedSuggestions(prev => {
+      const newSuggestions = [...prev, appliedSuggestion];
+      console.log('Total applied suggestions:', newSuggestions.length);
+      return newSuggestions;
+    });
     
     // Update score optimistically
     setCurrentScore(prev => Math.min(100, prev + 2));
@@ -76,68 +84,83 @@ export const UnifiedATSOptimizer = ({
   };
 
   const applySuggestionToContent = (content: string, originalText: string, newText: string, section: string): string => {
-    // First try exact match replacement
-    if (content.includes(originalText)) {
-      return content.replace(originalText, newText);
+    console.log('applySuggestionToContent called with:', { originalText, newText, section });
+    
+    // Try multiple replacement strategies
+    let updatedContent = content;
+    
+    // Strategy 1: Exact match replacement
+    if (updatedContent.includes(originalText)) {
+      updatedContent = updatedContent.replace(originalText, newText);
+      console.log('Applied using exact match');
+      return updatedContent;
     }
     
-    // If exact match fails, try fuzzy matching within the section
-    const lines = content.split('\n');
-    const updatedLines: string[] = [];
-    let inTargetSection = false;
-    let sectionFound = false;
+    // Strategy 2: Case-insensitive replacement
+    const regex = new RegExp(originalText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    if (regex.test(updatedContent)) {
+      updatedContent = updatedContent.replace(regex, newText);
+      console.log('Applied using case-insensitive match');
+      return updatedContent;
+    }
     
+    // Strategy 3: Word-by-word fuzzy matching
+    const words = originalText.split(/\s+/);
+    const contentLines = updatedContent.split('\n');
+    
+    for (let i = 0; i < contentLines.length; i++) {
+      const line = contentLines[i];
+      const matchedWords = words.filter(word => 
+        line.toLowerCase().includes(word.toLowerCase()) && word.length > 2
+      );
+      
+      // If we find a line with significant word overlap, replace it
+      if (matchedWords.length >= Math.ceil(words.length * 0.6)) {
+        contentLines[i] = line.includes(originalText) ? 
+          line.replace(originalText, newText) : 
+          newText;
+        console.log('Applied using fuzzy match on line:', i);
+        return contentLines.join('\n');
+      }
+    }
+    
+    // Strategy 4: If no match found, append to relevant section or end
+    console.log('No match found, appending to content');
+    const sectionHeaders = [
+      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE',
+      'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE',
+      'EDUCATION', 'QUALIFICATIONS',
+      'SKILLS', 'CORE COMPETENCIES', 'TECHNICAL SKILLS'
+    ];
+    
+    const lines = updatedContent.split('\n');
+    let insertIndex = -1;
+    
+    // Find section to insert into
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const upperLine = line.toUpperCase();
-      
-      // Check if we're entering the target section
-      if (upperLine.includes(section.toUpperCase()) || 
-          (section.toLowerCase().includes('summary') && upperLine.includes('SUMMARY')) ||
-          (section.toLowerCase().includes('experience') && upperLine.includes('EXPERIENCE')) ||
-          (section.toLowerCase().includes('education') && upperLine.includes('EDUCATION')) ||
-          (section.toLowerCase().includes('skills') && upperLine.includes('SKILLS'))) {
-        inTargetSection = true;
-        sectionFound = true;
-        updatedLines.push(line);
-        continue;
-      }
-      
-      // Check if we're leaving the target section (found another section header)
-      if (inTargetSection && (upperLine.includes('SUMMARY') || upperLine.includes('EXPERIENCE') || 
-          upperLine.includes('EDUCATION') || upperLine.includes('SKILLS') || upperLine.includes('CERTIFICATIONS') ||
-          upperLine.includes('PROJECTS') || upperLine.includes('AWARDS'))) {
-        inTargetSection = false;
-      }
-      
-      // If we're in the target section, try to find and replace similar text
-      if (inTargetSection) {
-        const similarity = calculateSimilarity(line, originalText);
-        if (similarity > 0.6) { // 60% similarity threshold
-          updatedLines.push(newText);
-          continue;
+      const line = lines[i].toUpperCase().trim();
+      if (sectionHeaders.some(header => 
+        line.includes(header) || 
+        line.includes(section.toUpperCase())
+      )) {
+        // Find next section or end of content
+        insertIndex = i + 1;
+        while (insertIndex < lines.length && 
+               !sectionHeaders.some(header => lines[insertIndex].toUpperCase().includes(header))) {
+          insertIndex++;
         }
-        
-        // Also check for partial matches
-        const words = originalText.split(/\s+/);
-        const matchedWords = words.filter(word => line.toLowerCase().includes(word.toLowerCase()));
-        if (matchedWords.length >= words.length * 0.5) { // 50% word match
-          updatedLines.push(line.replace(new RegExp(originalText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), newText));
-          continue;
-        }
+        break;
       }
-      
-      updatedLines.push(line);
     }
     
-    // If no section was found, append the new text at the end of the content
-    if (!sectionFound) {
-      updatedLines.push('');
-      updatedLines.push(section.toUpperCase());
-      updatedLines.push(newText);
+    if (insertIndex > -1) {
+      lines.splice(insertIndex, 0, newText);
+    } else {
+      // Append at end
+      lines.push('', newText);
     }
     
-    return updatedLines.join('\n');
+    return lines.join('\n');
   };
 
   const calculateSimilarity = (str1: string, str2: string): number => {
@@ -202,6 +225,7 @@ export const UnifiedATSOptimizer = ({
   };
 
   const handleContentChange = (content: string) => {
+    console.log('Content changed manually:', content.substring(0, 100) + '...');
     setCurrentContent(content);
   };
 
