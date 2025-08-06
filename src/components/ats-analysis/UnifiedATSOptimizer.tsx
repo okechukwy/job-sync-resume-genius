@@ -22,8 +22,9 @@ import {
 import { ATSOptimizationResult } from "@/services/openaiServices";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { SuggestionsPanel } from "./SuggestionsPanel";
-import { ProfessionalCVEditor } from "./ProfessionalCVEditor";
+import { JobscanStyleResumeViewer } from "./JobscanStyleResumeViewer";
 import { toast } from "sonner";
+import { parseResumeContent, convertStructuredToText } from "@/utils/enhancedResumeParser";
 
 interface UnifiedATSOptimizerProps {
   analysis: ATSOptimizationResult;
@@ -84,29 +85,72 @@ export const UnifiedATSOptimizer = ({
   };
 
   const applySuggestionToContent = (content: string, originalText: string, newText: string, section: string): string => {
-    console.log('applySuggestionToContent called with:', { originalText, newText, section });
+    console.log('Applying suggestion:', { originalText, newText, section });
     
-    // Try multiple replacement strategies
-    let updatedContent = content;
+    // Parse the content into structured format for more accurate replacements
+    const structuredResume = parseResumeContent(content);
+    let updated = false;
     
-    // Strategy 1: Exact match replacement
-    if (updatedContent.includes(originalText)) {
-      updatedContent = updatedContent.replace(originalText, newText);
+    // Strategy 1: Direct text replacement in raw content
+    if (content.includes(originalText)) {
+      const updatedContent = content.replace(originalText, newText);
       console.log('Applied using exact match');
       return updatedContent;
     }
     
     // Strategy 2: Case-insensitive replacement
     const regex = new RegExp(originalText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    if (regex.test(updatedContent)) {
-      updatedContent = updatedContent.replace(regex, newText);
+    if (regex.test(content)) {
+      const updatedContent = content.replace(regex, newText);
       console.log('Applied using case-insensitive match');
       return updatedContent;
     }
     
-    // Strategy 3: Word-by-word fuzzy matching
+    // Strategy 3: Smart section-based replacement
+    const sectionLower = section.toLowerCase();
+    
+    if (sectionLower.includes('experience') || sectionLower.includes('work')) {
+      // Try to find and update experience entries
+      structuredResume.sections.experience.forEach(exp => {
+        if (exp.title.includes(originalText) || exp.company.includes(originalText)) {
+          if (exp.title.includes(originalText)) exp.title = exp.title.replace(originalText, newText);
+          if (exp.company.includes(originalText)) exp.company = exp.company.replace(originalText, newText);
+          updated = true;
+        }
+        exp.responsibilities.forEach((resp, index) => {
+          if (resp.includes(originalText)) {
+            exp.responsibilities[index] = resp.replace(originalText, newText);
+            updated = true;
+          }
+        });
+      });
+    }
+    
+    if (sectionLower.includes('summary') || sectionLower.includes('objective')) {
+      if (structuredResume.sections.summary && structuredResume.sections.summary.includes(originalText)) {
+        structuredResume.sections.summary = structuredResume.sections.summary.replace(originalText, newText);
+        updated = true;
+      }
+    }
+    
+    if (sectionLower.includes('skill')) {
+      structuredResume.sections.skills.forEach((skill, index) => {
+        if (skill.includes(originalText)) {
+          structuredResume.sections.skills[index] = skill.replace(originalText, newText);
+          updated = true;
+        }
+      });
+    }
+    
+    if (updated) {
+      const updatedContent = convertStructuredToText(structuredResume);
+      console.log('Applied using structured replacement');
+      return updatedContent;
+    }
+    
+    // Strategy 4: Fuzzy matching with word-based approach
     const words = originalText.split(/\s+/);
-    const contentLines = updatedContent.split('\n');
+    const contentLines = content.split('\n');
     
     for (let i = 0; i < contentLines.length; i++) {
       const line = contentLines[i];
@@ -114,18 +158,18 @@ export const UnifiedATSOptimizer = ({
         line.toLowerCase().includes(word.toLowerCase()) && word.length > 2
       );
       
-      // If we find a line with significant word overlap, replace it
       if (matchedWords.length >= Math.ceil(words.length * 0.6)) {
         contentLines[i] = line.includes(originalText) ? 
           line.replace(originalText, newText) : 
-          newText;
+          `${line} ${newText}`.trim();
         console.log('Applied using fuzzy match on line:', i);
         return contentLines.join('\n');
       }
     }
     
-    // Strategy 4: If no match found, append to relevant section or end
-    console.log('No match found, appending to content');
+    // Strategy 5: Append to relevant section
+    console.log('No direct match found, appending to content');
+    const lines = content.split('\n');
     const sectionHeaders = [
       'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE',
       'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE',
@@ -133,18 +177,16 @@ export const UnifiedATSOptimizer = ({
       'SKILLS', 'CORE COMPETENCIES', 'TECHNICAL SKILLS'
     ];
     
-    const lines = updatedContent.split('\n');
+    // Find appropriate section to append to
     let insertIndex = -1;
-    
-    // Find section to insert into
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].toUpperCase().trim();
       if (sectionHeaders.some(header => 
         line.includes(header) || 
         line.includes(section.toUpperCase())
       )) {
-        // Find next section or end of content
         insertIndex = i + 1;
+        // Find the end of this section
         while (insertIndex < lines.length && 
                !sectionHeaders.some(header => lines[insertIndex].toUpperCase().includes(header))) {
           insertIndex++;
@@ -156,7 +198,6 @@ export const UnifiedATSOptimizer = ({
     if (insertIndex > -1) {
       lines.splice(insertIndex, 0, newText);
     } else {
-      // Append at end
       lines.push('', newText);
     }
     
@@ -316,8 +357,8 @@ export const UnifiedATSOptimizer = ({
           onApplySuggestion={handleApplySuggestion}
         />
         
-        {/* Right Panel - Professional CV Editor */}
-        <ProfessionalCVEditor
+        {/* Right Panel - Jobscan Style Resume Viewer */}
+        <JobscanStyleResumeViewer
           content={currentContent}
           originalContent={originalContent}
           onChange={handleContentChange}
