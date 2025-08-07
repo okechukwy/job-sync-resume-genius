@@ -688,6 +688,9 @@
       -webkit-print-color-adjust: exact !important;
     }
   }
+  
+  /* CV Content Elements */
+  .cv-preview-html {
     font-family: 'Times New Roman', serif;
     color: #000000;
     background: #ffffff;
@@ -696,7 +699,6 @@
     line-height: 1.6;
   }
   
-  /* CV Content Elements */
   .cv-header {
     font-weight: bold !important;
     font-size: 16px !important;
@@ -777,14 +779,30 @@
   .cv-preview-html div {
     white-space: pre-wrap !important;
   }
-}
 
-/* Print & export helpers */
-.resume-export { background: #ffffff; }
-.resume-export .shadow-lg, .resume-export .glass-card { box-shadow: none !important; }
-.avoid-break { break-inside: avoid; page-break-inside: avoid; }
+  /* Print & export helpers */
+  .resume-export { 
+    background: #ffffff; 
+  }
+  
+  .resume-export .shadow-lg, 
+  .resume-export .glass-card { 
+    box-shadow: none !important; 
+  }
+  
+  .avoid-break { 
+    break-inside: avoid; 
+    page-break-inside: avoid; 
+  }
 
-@media print {
-  .resume-export { width: 210mm; margin: 0 auto; }
-  .resume-export * { box-shadow: none !important; }
+  @media print {
+    .resume-export { 
+      width: 210mm; 
+      margin: 0 auto; 
+    }
+    
+    .resume-export * { 
+      box-shadow: none !important; 
+    }
+  }
 }
