@@ -80,7 +80,7 @@ export default function ResumePreview() {
 
       await (pdf as any).html(element, {
         html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' },
-        margin: [10, 10, 10, 10],
+        margin: [0, 0, 0, 0],
         autoPaging: 'text',
         callback: (doc: any) => {
           const fileName = resumeData.personalInfo?.fullName 

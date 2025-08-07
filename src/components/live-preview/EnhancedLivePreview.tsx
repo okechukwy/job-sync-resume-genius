@@ -196,35 +196,42 @@ export const EnhancedLivePreview = ({
           ref={previewRef}
           className="flex-1 overflow-auto p-4 bg-gray-50 relative"
         >
-          <div 
-            className="mx-auto bg-white shadow-lg origin-top transition-all duration-200"
-            style={{ 
+          {/* Scale wrapper keeps sheet width fixed while allowing zoom */}
+          <div
+            className="w-full flex justify-center"
+            style={{
               transform: `scale(${zoomLevel})`,
-              width: `${100 / zoomLevel}%`,
-              maxWidth: getPreviewWidth(),
-              minHeight: previewMode === 'mobile' ? '667px' : '297mm',
-              padding: previewMode === 'mobile' ? '10px' : '20mm'
+              transformOrigin: 'top center',
             }}
           >
-            <EnhancedResumeRenderer
-              data={data}
-              templateId={templateId}
-              onFieldUpdate={syncRef.current?.updateField || (() => {})}
-              onFieldFocus={handleFieldFocus}
-              onFieldBlur={handleFieldBlur}
-              currentFont={currentFont}
-              currentFontSize={currentFontSize}
-              formatDate={(dateString: string) => {
-                try {
-                  return new Date(dateString).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    year: 'numeric' 
-                  });
-                } catch {
-                  return dateString;
-                }
+            <div
+              className="mx-auto bg-white shadow-lg"
+              style={{
+                width: getPreviewWidth(),
+                minHeight: previewMode === 'mobile' ? '667px' : '297mm',
+                padding: previewMode === 'mobile' ? '10px' : '20mm'
               }}
-            />
+            >
+              <EnhancedResumeRenderer
+                data={data}
+                templateId={templateId}
+                onFieldUpdate={syncRef.current?.updateField || (() => {})}
+                onFieldFocus={handleFieldFocus}
+                onFieldBlur={handleFieldBlur}
+                currentFont={currentFont}
+                currentFontSize={currentFontSize}
+                formatDate={(dateString: string) => {
+                  try {
+                    return new Date(dateString).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      year: 'numeric' 
+                    });
+                  } catch {
+                    return dateString;
+                  }
+                }}
+              />
+            </div>
           </div>
 
           {/* Smart Suggestions Overlay */}

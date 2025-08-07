@@ -38,14 +38,10 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
           scale: 2, 
           useCORS: true, 
           allowTaint: true, 
-          backgroundColor: '#ffffff',
-          width: element.offsetWidth,
-          height: element.offsetHeight,
+          backgroundColor: '#ffffff'
         },
         margin: [0, 0, 0, 0],
         autoPaging: 'text',
-        width: 210,
-        windowWidth: element.offsetWidth,
         callback: (doc: any) => {
           const fileName = data.personalInfo.fullName 
             ? `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
@@ -162,7 +158,7 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
       {/* Resume Preview */}
       <Card ref={resumeRef} className="glass-card max-w-4xl mx-auto">
         <CardContent className="p-0 bg-white">
-          <div id="resume-export" className="w-full">
+          <div id="resume-export" className="w-full resume-export">
             <ResumeLayoutRenderer 
               data={data}
               templateId={templateId}

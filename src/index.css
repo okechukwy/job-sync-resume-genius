@@ -675,7 +675,6 @@
       margin: 0;
       padding: 15mm;
       box-shadow: none;
-      page-break-after: always;
     }
     
     .avoid-break {
