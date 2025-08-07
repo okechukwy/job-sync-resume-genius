@@ -227,7 +227,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     
     return renderSection(
       "PROFESSIONAL SUMMARY", 
-      <p className="text-gray-700 leading-relaxed">{data.summary.content}</p>,
+      <p className="text-gray-700 leading-relaxed avoid-break">{data.summary.content}</p>,
       true
     );
   };
@@ -239,7 +239,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       layout === 'professional' || layout === 'executive' ? "PROFESSIONAL EXPERIENCE" : "EXPERIENCE",
       <div className={spacingClass}>
         {data.experience.map((exp, index) => (
-          <div key={index} className="space-y-2">
+          <div key={index} className="space-y-2 avoid-break">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-gray-900">{exp.position}</h3>
@@ -272,7 +272,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       "EDUCATION",
       <div className={spacingClass}>
         {data.education.map((edu, index) => (
-          <div key={index} className="space-y-1">
+          <div key={index} className="space-y-1 avoid-break">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
@@ -406,8 +406,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       className={`bg-white shadow-lg mx-auto ${typographyClass}`}
       style={{
         ...layoutStyle,
-        width: '794px', // A4 width in pixels (210mm at 96 DPI)
-        minHeight: '1123px', // A4 height in pixels (297mm at 96 DPI)
+        width: '210mm', // A4 width in millimeters for consistent export
       }}
     >
       {renderHeader()}

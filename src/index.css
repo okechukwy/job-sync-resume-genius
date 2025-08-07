@@ -588,3 +588,13 @@
     white-space: pre-wrap !important;
   }
 }
+
+/* Print & export helpers */
+.resume-export { background: #ffffff; }
+.resume-export .shadow-lg, .resume-export .glass-card { box-shadow: none !important; }
+.avoid-break { break-inside: avoid; page-break-inside: avoid; }
+
+@media print {
+  .resume-export { width: 210mm; margin: 0 auto; }
+  .resume-export * { box-shadow: none !important; }
+}

@@ -9,7 +9,6 @@ import { ResumeLayoutRenderer } from '@/components/resume-layouts/ResumeLayoutRe
 import { supabase } from '@/integrations/supabase/client';
 import { ResumeData } from '@/types/resumeTypes';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 export default function ResumePreview() {
@@ -73,45 +72,28 @@ export default function ResumePreview() {
 
     try {
       setDownloading(true);
-      
-      const element = document.getElementById('resume-preview');
-      if (!element) return;
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-      });
+      const element = document.getElementById('resume-export');
+      if (!element) throw new Error('Resume element not found');
 
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
 
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const fileName = resumeData.personalInfo?.fullName 
-        ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
-        : 'Resume.pdf';
-      
-      pdf.save(fileName);
-      toast.success('Resume downloaded successfully!');
+      await (pdf as any).html(element, {
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' },
+        margin: [10, 10, 10, 10],
+        autoPaging: 'text',
+        callback: (doc: any) => {
+          const fileName = resumeData.personalInfo?.fullName 
+            ? `${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
+            : 'Resume.pdf';
+          doc.save(fileName);
+          toast.success('Resume downloaded successfully!');
+          setDownloading(false);
+        }
+      });
     } catch (error) {
       console.error('Error downloading resume:', error);
       toast.error('Failed to download resume');
-    } finally {
       setDownloading(false);
     }
   };
@@ -256,7 +238,7 @@ export default function ResumePreview() {
 
         {/* Resume Preview */}
         <Card className="p-6">
-          <div id="resume-preview" className="max-w-4xl mx-auto">
+          <div id="resume-export" className="max-w-4xl mx-auto">
             <ResumeLayoutRenderer
               data={resumeData}
               templateId={templateId}

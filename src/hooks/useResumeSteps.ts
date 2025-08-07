@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ResumeData, FormValidationState } from "@/types/resumeTypes";
 import { RESUME_STEPS, TOTAL_STEPS } from "@/constants/resumeSteps";
@@ -14,6 +14,7 @@ export const useResumeSteps = (resumeId?: string | null) => {
   const [resumeData, setResumeData] = useState<ResumeData>(getInitialResumeData());
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const saveTimerRef = useRef<number | null>(null);
 
   // Load existing resume data on mount
   useEffect(() => {
@@ -79,19 +80,22 @@ export const useResumeSteps = (resumeId?: string | null) => {
       ...resumeData,
       [section]: data,
     };
-    
+
     setResumeData(updatedData);
-    
-    // Auto-save to database
-    try {
-      const resumeId = await resumeService.saveResume(updatedData, "My Resume", "modern-minimalist");
-      if (!currentResumeId) {
-        setCurrentResumeId(resumeId);
+
+    // Debounced auto-save to database to reduce errors and jitter
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(async () => {
+      try {
+        const newResumeId = await resumeService.saveResume(updatedData, "My Resume", "modern-minimalist");
+        if (!currentResumeId) {
+          setCurrentResumeId(newResumeId);
+        }
+      } catch (error: any) {
+        console.error("Failed to save resume:", error);
+        toast.error(error?.message ? `Failed to save changes: ${error.message}` : "Failed to save changes");
       }
-    } catch (error) {
-      console.error("Failed to save resume:", error);
-      toast.error("Failed to save changes");
-    }
+    }, 600);
   };
 
   const handleValidationChange = (step: keyof FormValidationState, isValid: boolean) => {
