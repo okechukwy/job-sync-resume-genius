@@ -498,6 +498,196 @@
   
   .cv-preview-text {
     @apply whitespace-pre-wrap text-sm;
+  }
+
+  /* Export-Optimized Print Styles */
+  .export-layout {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    margin: 0;
+    background: white;
+    color: black;
+    font-family: 'Arial', sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .export-header {
+    margin-bottom: 20pt;
+    text-align: center;
+    border-bottom: 2pt solid #333;
+    padding-bottom: 10pt;
+  }
+
+  .export-name {
+    font-size: 22pt;
+    font-weight: bold;
+    margin: 0 0 5pt 0;
+    color: #333;
+  }
+
+  .export-title {
+    font-size: 14pt;
+    font-weight: 600;
+    margin: 0 0 10pt 0;
+    color: #666;
+  }
+
+  .export-contact {
+    font-size: 10pt;
+    display: flex;
+    justify-content: center;
+    gap: 20pt;
+    flex-wrap: wrap;
+    color: #555;
+  }
+
+  .export-section {
+    margin-bottom: 16pt;
+    page-break-inside: avoid;
+  }
+
+  .export-section-title {
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0 0 8pt 0;
+    color: #333;
+    border-bottom: 1pt solid #666;
+    padding-bottom: 2pt;
+  }
+
+  .export-content {
+    font-size: 11pt;
+    line-height: 1.5;
+    margin: 0;
+    text-align: justify;
+    color: #444;
+  }
+
+  .export-items {
+    margin: 0;
+  }
+
+  .export-item {
+    margin-bottom: 12pt;
+    page-break-inside: avoid;
+  }
+
+  .export-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4pt;
+  }
+
+  .export-item-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0 0 2pt 0;
+    color: #333;
+  }
+
+  .export-item-company {
+    font-size: 11pt;
+    font-weight: 600;
+    margin: 0 0 2pt 0;
+    color: #555;
+  }
+
+  .export-item-field {
+    font-size: 10pt;
+    font-style: italic;
+    margin: 0;
+    color: #666;
+  }
+
+  .export-item-date {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #666;
+    white-space: nowrap;
+  }
+
+  .export-item-description {
+    font-size: 10pt;
+    line-height: 1.4;
+    margin: 4pt 0 0 0;
+    text-align: justify;
+    color: #444;
+  }
+
+  .export-item-gpa {
+    font-size: 10pt;
+    margin: 2pt 0 0 0;
+    color: #666;
+  }
+
+  .export-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8pt;
+    margin: 0;
+  }
+
+  .export-skill {
+    background: #f5f5f5;
+    border: 1pt solid #ddd;
+    border-radius: 3pt;
+    padding: 4pt 8pt;
+    font-size: 10pt;
+    color: #333;
+    display: inline-block;
+  }
+
+  /* Print optimizations */
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .avoid-break-before {
+    page-break-before: avoid;
+    break-before: avoid;
+  }
+
+  .avoid-break-after {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Screen preview adjustments */
+  @media screen {
+    .export-layout {
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+    }
+  }
+
+  /* Print media styles */
+  @media print {
+    .export-layout {
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 15mm;
+      box-shadow: none;
+      page-break-after: always;
+    }
+    
+    .avoid-break {
+      page-break-inside: avoid;
+    }
+    
+    .export-skill {
+      background: #f0f0f0 !important;
+      border: 1pt solid #ccc !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+  }
     font-family: 'Times New Roman', serif;
     color: #000000;
     background: #ffffff;

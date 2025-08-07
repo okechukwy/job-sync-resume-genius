@@ -30,43 +30,31 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
     try {
       toast.info("Generating PDF...");
       
-      const canvas = await html2canvas(resumeRef.current, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
+      const element = resumeRef.current.querySelector('#resume-export') as HTMLElement || resumeRef.current;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      await (pdf as any).html(element, {
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          allowTaint: true, 
+          backgroundColor: '#ffffff',
+          width: element.offsetWidth,
+          height: element.offsetHeight,
+        },
+        margin: [0, 0, 0, 0],
+        autoPaging: 'text',
+        width: 210,
+        windowWidth: element.offsetWidth,
+        callback: (doc: any) => {
+          const fileName = data.personalInfo.fullName 
+            ? `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
+            : 'Resume.pdf';
+          
+          doc.save(fileName);
+          toast.success("Resume downloaded successfully!");
+        }
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      const fileName = data.personalInfo.fullName 
-        ? `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`
-        : 'Resume.pdf';
-      
-      pdf.save(fileName);
-      toast.success("Resume downloaded successfully!");
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Failed to generate PDF. Please try again.");
@@ -173,21 +161,24 @@ const ResumePreview = ({ data, template }: ResumePreviewProps) => {
 
       {/* Resume Preview */}
       <Card ref={resumeRef} className="glass-card max-w-4xl mx-auto">
-        <CardContent className={`${getLayoutSpacing()} bg-white text-black`}>
-          <ResumeLayoutRenderer 
-            data={data}
-            templateId={templateId}
-            formatDate={(dateString: string) => {
-              try {
-                return new Date(dateString).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  year: 'numeric' 
-                });
-              } catch {
-                return dateString;
-              }
-            }}
-          />
+        <CardContent className="p-0 bg-white">
+          <div id="resume-export" className="w-full">
+            <ResumeLayoutRenderer 
+              data={data}
+              templateId={templateId}
+              mode="export"
+              formatDate={(dateString: string) => {
+                try {
+                  return new Date(dateString).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                  });
+                } catch {
+                  return dateString;
+                }
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
 

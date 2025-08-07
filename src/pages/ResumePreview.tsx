@@ -243,6 +243,7 @@ export default function ResumePreview() {
               data={resumeData}
               templateId={templateId}
               formatDate={formatDate}
+              mode="export"
             />
           </div>
         </Card>

@@ -403,10 +403,11 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
 
   return (
     <div 
-      className={`bg-white shadow-lg mx-auto ${typographyClass}`}
+      className={`bg-white mx-auto ${typographyClass}`}
       style={{
         ...layoutStyle,
-        width: '210mm', // A4 width in millimeters for consistent export
+        maxWidth: '210mm', // A4 width constraint
+        width: '100%',
       }}
     >
       {renderHeader()}
