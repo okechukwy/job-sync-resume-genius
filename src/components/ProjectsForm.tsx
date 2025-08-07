@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Plus, Trash2, Code, Calendar, ExternalLink, Github, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -245,22 +246,21 @@ const ProjectsForm = ({ data, onUpdate, onValidationChange, industry }: Projects
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="month"
-                  {...register("startDate")}
-                  className={cn(errors.startDate && "border-destructive")}
+                <DatePicker
+                  value={watch("startDate") || ""}
+                  onChange={(value) => setValue("startDate", value)}
+                  placeholder="Select start date"
                 />
                 {errors.startDate && <p className="text-sm text-destructive">{errors.startDate.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="month"
+                <DatePicker
+                  value={watch("endDate") || ""}
+                  onChange={(value) => setValue("endDate", value)}
+                  placeholder="Select end date"
                   disabled={watchCurrent}
-                  {...register("endDate")}
                 />
               </div>
             </div>

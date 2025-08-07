@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Plus, Trash2, Award, Calendar, Building } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -33,6 +34,8 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<OptionalCertificateFormData>({
     resolver: zodResolver(optionalCertificateSchema),
@@ -179,22 +182,20 @@ const CertificatesForm = ({ data, onUpdate, onValidationChange, industry }: Cert
 
               <div className="space-y-2">
                 <Label htmlFor="issueDate">Issue Date</Label>
-                <Input
-                  id="issueDate"
-                  type="month"
-                  {...register("issueDate")}
-                  className={cn(errors.issueDate && "border-destructive")}
+                <DatePicker
+                  value={watch("issueDate") || ""}
+                  onChange={(value) => setValue("issueDate", value)}
+                  placeholder="Select issue date"
                 />
                 {errors.issueDate && <p className="text-sm text-destructive">{errors.issueDate.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input
-                  id="expiryDate"
-                  type="month"
+                <DatePicker
+                  value={watch("expiryDate") || ""}
+                  onChange={(value) => setValue("expiryDate", value)}
                   placeholder="Leave blank if no expiry"
-                  {...register("expiryDate")}
                 />
               </div>
 

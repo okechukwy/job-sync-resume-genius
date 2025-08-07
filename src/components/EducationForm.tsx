@@ -3,11 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, CalendarIcon } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Education {
@@ -90,13 +88,8 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
     ));
   };
 
-  const handleDateChange = (id: string, field: 'startDate' | 'endDate', date: Date | undefined) => {
-    if (date) {
-      const formattedDate = format(date, 'yyyy-MM');
-      handleEducationChange(id, field, formattedDate);
-    } else {
-      handleEducationChange(id, field, '');
-    }
+  const handleDateChange = (id: string, field: 'startDate' | 'endDate', value: string) => {
+    handleEducationChange(id, field, value);
   };
 
   const getDateValidationError = (education: Education) => {
@@ -174,62 +167,21 @@ const EducationForm = ({ data, onUpdate, onValidationChange }: EducationFormProp
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Start Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal glass-card",
-                        !education.startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {education.startDate ? format(new Date(education.startDate + '-01'), "MMM yyyy") : "Pick start date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      captionLayout="dropdown"
-                      fromYear={1950}
-                      toYear={2030}
-                      selected={education.startDate ? new Date(education.startDate + '-01') : undefined}
-                      onSelect={(date) => handleDateChange(education.id, 'startDate', date)}
-                      className="pointer-events-auto"
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  value={education.startDate}
+                  onChange={(value) => handleDateChange(education.id, 'startDate', value)}
+                  placeholder="Select start date"
+                  className="glass-card"
+                />
               </div>
               <div className="space-y-2">
                 <Label>End Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal glass-card",
-                        !education.endDate && "text-muted-foreground",
-                        getDateValidationError(education) && "border-destructive"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {education.endDate ? format(new Date(education.endDate + '-01'), "MMM yyyy") : "Pick end date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      captionLayout="dropdown"
-                      fromYear={1950}
-                      toYear={2030}
-                      selected={education.endDate ? new Date(education.endDate + '-01') : undefined}
-                      onSelect={(date) => handleDateChange(education.id, 'endDate', date)}
-                      className="pointer-events-auto"
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  value={education.endDate}
+                  onChange={(value) => handleDateChange(education.id, 'endDate', value)}
+                  placeholder="Select end date"
+                  className={cn("glass-card", getDateValidationError(education) && "border-destructive")}
+                />
                 {getDateValidationError(education) && (
                   <p className="text-sm font-medium text-destructive">
                     {getDateValidationError(education)}
