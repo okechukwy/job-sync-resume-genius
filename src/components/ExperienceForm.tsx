@@ -5,14 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Plus, Trash2, CalendarIcon } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -95,23 +90,8 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange }: ExperienceFormPr
     ));
   };
 
-  const handleDateChange = (id: string, field: 'startDate' | 'endDate', date: Date | undefined) => {
-    if (date) {
-      const formattedDate = format(date, 'yyyy-MM');
-      handleExperienceChange(id, field, formattedDate);
-    } else {
-      handleExperienceChange(id, field, '');
-    }
-  };
-
-  const parseDate = (dateString: string): Date | undefined => {
-    if (!dateString) return undefined;
-    // Parse YYYY-MM format to a Date object (first day of the month)
-    const [year, month] = dateString.split('-').map(Number);
-    if (year && month) {
-      return new Date(year, month - 1, 1);
-    }
-    return undefined;
+  const handleDateChange = (id: string, field: 'startDate' | 'endDate', value: string) => {
+    handleExperienceChange(id, field, value);
   };
 
   const getDateValidationError = (experience: Experience) => {
@@ -214,73 +194,25 @@ const ExperienceForm = ({ data, onUpdate, onValidationChange }: ExperienceFormPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal glass-card",
-                        !experience.startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {experience.startDate ? (
-                        format(parseDate(experience.startDate)!, "MMM yyyy")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        captionLayout="dropdown"
-                        fromYear={1950}
-                        toYear={2030}
-                        selected={parseDate(experience.startDate)}
-                        onSelect={(date) => handleDateChange(experience.id, 'startDate', date)}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  value={experience.startDate}
+                  onChange={(value) => handleDateChange(experience.id, 'startDate', value)}
+                  placeholder="Select start date"
+                  className="glass-card"
+                />
               </div>
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      disabled={experience.current}
-                      className={cn(
-                        "w-full justify-start text-left font-normal glass-card",
-                        !experience.endDate && "text-muted-foreground",
-                        getDateValidationError(experience) && "border-destructive",
-                        experience.current && "opacity-50"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {experience.endDate ? (
-                        format(parseDate(experience.endDate)!, "MMM yyyy")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          captionLayout="dropdown"
-                          fromYear={1950}
-                          toYear={2030}
-                          selected={parseDate(experience.endDate)}
-                          onSelect={(date) => handleDateChange(experience.id, 'endDate', date)}
-                          disabled={experience.current}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  value={experience.endDate}
+                  onChange={(value) => handleDateChange(experience.id, 'endDate', value)}
+                  placeholder="Select end date"
+                  disabled={experience.current}
+                  className={cn(
+                    "glass-card",
+                    getDateValidationError(experience) && "border-destructive"
+                  )}
+                />
                 {getDateValidationError(experience) && (
                   <p className="text-sm font-medium text-destructive">
                     {getDateValidationError(experience)}
