@@ -28,7 +28,7 @@ export const educationSchema = z.object({
 });
 
 export const summarySchema = z.object({
-  content: z.string().min(50, "Summary must be at least 50 characters long").max(500, "Summary must be less than 500 characters"),
+  content: z.string().min(50, "Summary must be at least 50 characters long").max(1500, "Summary must be less than 1500 characters"),
 });
 
 export const skillsSchema = z.object({
