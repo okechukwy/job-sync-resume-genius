@@ -75,7 +75,7 @@ const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeSt
         />
 
         {/* Main Content - Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 xl:gap-12 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Left Column - Form */}
           <Card className="glass-card">
             <CardContent className="p-8">
@@ -91,11 +91,11 @@ const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeSt
 
           {/* Right Column - Live Preview */}
           <Card className="glass-card hidden lg:block">
-            <CardContent className="p-4 h-full overflow-auto max-h-[calc(100vh-260px)]">
+            <CardContent className="p-0 h-full">
               <LivePreview
                 data={resumeData}
                 template={selectedTemplate}
-                className="h-full min-h-[600px] rounded-xl bg-background"
+                className="h-full min-h-[600px]"
                 onDataUpdate={handleDataUpdate}
               />
             </CardContent>

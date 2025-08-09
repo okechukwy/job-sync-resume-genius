@@ -189,11 +189,6 @@
     box-shadow: var(--shadow-glass);
     position: relative;
   }
-
-  /* Variant: remove border for contexts like PageHeader */
-  .glass-card--no-border {
-    border-color: transparent !important;
-  }
   
   .glass-card::before {
     content: '';
