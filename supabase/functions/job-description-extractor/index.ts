@@ -76,35 +76,83 @@ serve(async (req) => {
       });
     }
 
-    // Fetch page content
+    // Try Firecrawl first for robust extraction
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.warn('FIRECRAWL_API_KEY not set - falling back to basic fetch');
+      // fallthrough to fallback below
+    } else {
+      try {
+        const fcRes = await fetch('https://api.firecrawl.dev/v1/extract', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            url: parsed.toString(),
+            formats: ['markdown','html'],
+            onlyMainContent: true,
+          }),
+        });
+
+        if (fcRes.ok) {
+          const fcJson = await fcRes.json();
+          const data = fcJson?.data ?? fcJson;
+          const title = data?.metadata?.title || data?.title || null;
+          const markdown = data?.markdown || data?.content || null;
+          const html = data?.html || null;
+          const text = markdown
+            ? String(markdown).slice(0, 8000)
+            : html
+              ? htmlToText(String(html))
+              : null;
+
+          if (text) {
+            return new Response(
+              JSON.stringify({ success: true, title, text, source: 'firecrawl' }),
+              { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          console.warn('Firecrawl returned no usable content, falling back');
+        } else {
+          const errText = await fcRes.text();
+          console.warn('Firecrawl error', fcRes.status, errText);
+        }
+      } catch (err) {
+        console.warn('Firecrawl exception, falling back', err);
+      }
+    }
+
+    // Fallback: direct fetch and HTML-to-text parsing
     const res = await fetch(parsed.toString(), {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
-      redirect: "follow",
+      redirect: 'follow',
     });
 
     if (!res.ok) {
       return new Response(
         JSON.stringify({ error: `Failed to fetch page (${res.status})` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const html = await res.text();
 
-    // Get title
     const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim() : null;
 
     const text = htmlToText(html);
 
     return new Response(
-      JSON.stringify({ success: true, title, text }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ success: true, title, text, source: 'fallback' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (e) {
     console.error("job-description-extractor error", e);
