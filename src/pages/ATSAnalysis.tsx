@@ -145,7 +145,11 @@ const handleExtractFromUrl = async () => {
     if (error) throw error;
     if (!data || !data.text) throw new Error("Could not extract job description");
 
-    setJobDescription(data.text);
+    const extracted = String(data.text || '').trim();
+    setJobDescription(extracted);
+    if (data.isListing) {
+      toast.warning('This looks like a job listings page. For best results, open a specific job posting and paste its URL.');
+    }
     toast.success("Job description extracted from URL");
   } catch (err) {
     console.error("JD extract error:", err);
