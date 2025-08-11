@@ -82,12 +82,23 @@ serve(async (req) => {
       let refined: string | null = null;
 
       const containerPatterns = [
+        // Standard job description containers
         /<div[^>]*(id|class)=(['"])\s*job[-_\s]?description[^'\"]*\2[^>]*>([\s\S]*?)<\/div>/i,
         /<section[^>]*(id|class)=(['"])\s*(job[-_\s]?description|description|job[-_\s]?details)[^'\"]*\2[^>]*>([\s\S]*?)<\/section>/i,
         /<article[^>]*(id|class)=(['"])\s*(job[-_\s]?description|description)[^'\"]*\2[^>]*>([\s\S]*?)<\/article>/i,
         /<div[^>]*(data-testid)=(['"])job-description[^'\"]*\2[^>]*>([\s\S]*?)<\/div>/i,
         /<div[^>]*(id|class)=(['"])\s*(job[-_\s]?content|posting[-_\s]?body|vacancy[-_\s]?description|role[-_\s]?description)[^'\"]*\2[^>]*>([\s\S]*?)<\/div>/i,
         /<section[^>]*(id|class)=(['"])\s*(role[-_\s]?description|position[-_\s]?details|about[-_\s]?the[-_\s]?role)[^'\"]*\2[^>]*>([\s\S]*?)<\/section>/i,
+        // JobServe-specific patterns
+        /<td[^>]*class=(['"])jobdisplay[^'\"]*\1[^>]*>([\s\S]*?)<\/td>/i,
+        /<div[^>]*class=(['"])jobdetail[^'\"]*\1[^>]*>([\s\S]*?)<\/div>/i,
+        /<table[^>]*class=(['"])jobdata[^'\"]*\1[^>]*>([\s\S]*?)<\/table>/i,
+        // Indeed patterns
+        /<div[^>]*data-testid=(['"])jobsearch-JobComponent[^'\"]*\1[^>]*>([\s\S]*?)<\/div>/i,
+        /<div[^>]*id=(['"])jobDescriptionText[^'\"]*\1[^>]*>([\s\S]*?)<\/div>/i,
+        // LinkedIn patterns
+        /<div[^>]*class=(['"])description__text[^'\"]*\1[^>]*>([\s\S]*?)<\/div>/i,
+        /<section[^>]*class=(['"])description[^'\"]*\1[^>]*>([\s\S]*?)<\/section>/i,
       ];
 
       const headingKeywords = /(Job\s*Description|About\s*the\s*role|Responsibilities|What\s*you'?ll\s*do|Duties|Requirements|Qualifications|Skills|What\s*we\s*are\s*looking\s*for|About\s*you)/i;
@@ -110,7 +121,20 @@ serve(async (req) => {
         }
 
         // Detect obvious listing pages (facets/filters heavy)
-        const listingMarkers = [/jobs?\s+found/i, /Refine\s+Your\s+Search/i, /Saved\s+Searches/i, /Within\s+\d+\s+miles/i, /Salary\/Rate/i, /Industries/i];
+        const listingMarkers = [
+          /jobs?\s+found/i, 
+          /Refine\s+Your\s+Search/i, 
+          /Saved\s+Searches/i, 
+          /Within\s+\d+\s+miles/i, 
+          /Salary\/Rate/i, 
+          /Industries/i,
+          /JobSearch\.aspx/i,
+          /search\s*results/i,
+          /Sort\s+by\s+(Best|Latest)\s+Match/i,
+          /Loading/i,
+          /Recent\s+Searches/i,
+          /Consider\s+Another\s+Country/i
+        ];
         isListing = listingMarkers.some((rx) => rx.test(html));
       }
 
@@ -145,6 +169,20 @@ serve(async (req) => {
       return { text: null as string | null, isListing };
     }
 
+    // Detect JobServe-specific URLs and patterns
+    const isJobServe = parsed.hostname.includes('jobserve.com');
+    const isJobServeJob = isJobServe && /shid=/i.test(parsed.search);
+    
+    if (isJobServe && !isJobServeJob) {
+      return new Response(
+        JSON.stringify({ 
+          error: "This appears to be a JobServe search results page. Please use a direct job posting URL instead.",
+          isListing: true 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Try Firecrawl first for robust extraction
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
@@ -152,7 +190,8 @@ serve(async (req) => {
       // fallthrough to fallback below
     } else {
       try {
-        const fcRes = await fetch('https://api.firecrawl.dev/v1/extract', {
+        console.log('Using Firecrawl to scrape:', parsed.toString());
+        const fcRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -160,8 +199,9 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             url: parsed.toString(),
-            formats: ['markdown','html'],
-            onlyMainContent: true,
+            formats: ['markdown', 'html'],
+            includeTags: ['main', 'article', '[class*="job"]', '[id*="job"]', '[class*="description"]'],
+            excludeTags: ['nav', 'header', 'footer', 'aside', '[class*="sidebar"]', '[class*="menu"]']
           }),
         });
 
