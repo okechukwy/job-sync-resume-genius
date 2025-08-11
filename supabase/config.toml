@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.progressive-cv-analysis]
 verify_jwt = true
+
+[functions.job-description-extractor]
+verify_jwt = false

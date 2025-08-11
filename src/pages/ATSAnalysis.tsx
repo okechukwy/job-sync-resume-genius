@@ -10,12 +10,15 @@ import { toast } from "sonner";
 import { readFileContent } from "@/utils/fileReader";
 import { optimizeForATS, ATSOptimizationResult } from "@/services/openaiServices";
 import { UnifiedATSOptimizer } from "@/components/ats-analysis/UnifiedATSOptimizer";
-
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 const ATSAnalysis = () => {
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<ATSOptimizationResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
+  const [jobUrl, setJobUrl] = useState("");
+  const [isExtracting, setIsExtracting] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState("Business");
   const [originalContent, setOriginalContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,11 +119,42 @@ const ATSAnalysis = () => {
     } finally {
       setIsAnalyzing(false);
     }
-  };
+};
 
-  const handleExport = () => {
-    toast.success("Export functionality coming soon!");
-  };
+const handleExport = () => {
+  toast.success("Export functionality coming soon!");
+};
+
+// Extract JD from URL using Supabase Edge Function
+const handleExtractFromUrl = async () => {
+  if (!jobUrl) return;
+  try {
+    const parsed = new URL(jobUrl);
+    if (!/^https?:$/.test(parsed.protocol)) throw new Error("Invalid URL");
+  } catch {
+    toast.error("Please enter a valid job posting URL");
+    return;
+  }
+
+  setIsExtracting(true);
+  try {
+    const { data, error } = await supabase.functions.invoke("job-description-extractor", {
+      body: { url: jobUrl },
+    });
+
+    if (error) throw error;
+    if (!data || !data.text) throw new Error("Could not extract job description");
+
+    setJobDescription(data.text);
+    toast.success("Job description extracted from URL");
+  } catch (err) {
+    console.error("JD extract error:", err);
+    const message = err instanceof Error ? err.message : "Failed to extract from URL";
+    toast.error(message);
+  } finally {
+    setIsExtracting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -219,9 +253,37 @@ const ATSAnalysis = () => {
               </div>
             </div>
 
-            {/* Job Description (Optional) */}
+{/* Job Description (Optional) */}
             <div className="space-y-2">
               <Label htmlFor="jobDescription">Job Description (Optional)</Label>
+
+              {/* URL Extractor */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="url"
+                  placeholder="Paste job posting URL (e.g., LinkedIn, Indeed)..."
+                  value={jobUrl}
+                  onChange={(e) => setJobUrl(e.target.value)}
+                  disabled={isAnalyzing || isExtracting}
+                  className={isAnalyzing || isExtracting ? 'opacity-50 cursor-not-allowed' : ''}
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleExtractFromUrl}
+                  disabled={!jobUrl || isExtracting || isAnalyzing}
+                  title="Extract job description from URL"
+                >
+                  {isExtracting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Extracting...
+                    </>
+                  ) : (
+                    'Extract from URL'
+                  )}
+                </Button>
+              </div>
+
               <Textarea 
                 id="jobDescription" 
                 placeholder="Paste the job description for more targeted optimization..." 
