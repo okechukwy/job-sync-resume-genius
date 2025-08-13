@@ -136,10 +136,17 @@ export const useCoaching = (userId?: string) => {
   const enrollInProgramMutation = useMutation({
     mutationFn: ({ programId }: { programId: string }) => 
       userId ? CoachingService.enrollInProgram(userId, programId) : Promise.reject('No user ID'),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['user-enrollments', userId] });
       queryClient.invalidateQueries({ queryKey: ['overall-progress', userId] });
-      toast.success('Successfully enrolled in program!');
+      
+      if (data.isExisting) {
+        toast.info('You are already enrolled in this program!');
+      } else if (data.isReactivated) {
+        toast.success('Program reactivated! Continue your learning journey.');
+      } else {
+        toast.success('Successfully enrolled in program!');
+      }
     },
     onError: (error) => {
       toast.error('Failed to enroll in program: ' + error.message);

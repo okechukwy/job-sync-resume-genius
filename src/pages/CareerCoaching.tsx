@@ -115,6 +115,20 @@ const CareerCoaching = () => {
     }
   };
 
+  // Check if user is enrolled in a program
+  const isEnrolledInProgram = (programId: string) => {
+    return userEnrollments?.some(enrollment => 
+      enrollment.program_id === programId && enrollment.status === 'active'
+    );
+  };
+
+  // Get enrollment for a program
+  const getProgramEnrollment = (programId: string) => {
+    return userEnrollments?.find(enrollment => 
+      enrollment.program_id === programId
+    );
+  };
+
   const handleCreateGoal = async () => {
     try {
       await createGoal({
@@ -334,14 +348,37 @@ const CareerCoaching = () => {
                         <span>{program.estimated_duration_weeks} weeks</span>
                         <span>{program.is_premium ? 'Premium' : 'Free'}</span>
                       </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleEnrollInProgram(program.id)}
-                        disabled={isEnrolling}
-                      >
-                        {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
+                      
+                      {(() => {
+                        const enrollment = getProgramEnrollment(program.id);
+                        const isEnrolled = isEnrolledInProgram(program.id);
+                        
+                        if (isEnrolled) {
+                          return (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm text-green-600">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span>Enrolled - {enrollment?.progress_percentage || 0}% complete</span>
+                              </div>
+                              <Button variant="outline" className="w-full">
+                                Continue Learning
+                                <ArrowRight className="h-4 w-4 ml-2" />
+                              </Button>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <Button 
+                            className="w-full" 
+                            onClick={() => handleEnrollInProgram(program.id)}
+                            disabled={isEnrolling}
+                          >
+                            {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 )) || <div>No programs available</div>}

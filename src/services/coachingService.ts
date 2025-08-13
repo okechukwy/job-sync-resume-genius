@@ -41,6 +41,36 @@ export class CoachingService {
   }
 
   static async enrollInProgram(userId: string, programId: string) {
+    // First check if user is already enrolled
+    const { data: existingEnrollment } = await supabase
+      .from('user_coaching_enrollments')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('program_id', programId)
+      .maybeSingle();
+
+    if (existingEnrollment) {
+      // If already enrolled and active, return the existing enrollment
+      if (existingEnrollment.status === 'active') {
+        return { ...existingEnrollment, isExisting: true };
+      }
+      
+      // If enrolled but inactive (completed/paused), reactivate
+      const { data, error } = await supabase
+        .from('user_coaching_enrollments')
+        .update({
+          status: 'active',
+          last_accessed_at: new Date().toISOString()
+        })
+        .eq('id', existingEnrollment.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { ...data, isReactivated: true };
+    }
+
+    // Create new enrollment if none exists
     const { data, error } = await supabase
       .from('user_coaching_enrollments')
       .insert({
