@@ -34,6 +34,7 @@ import { format } from "date-fns";
 
 const CareerCoaching = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const { user } = useAuth();
   
   // Get coaching data using the hook
@@ -45,6 +46,7 @@ const CareerCoaching = () => {
     actionItems,
     coachingSessions,
     learningResources,
+    learningModules,
     overallProgress,
     careerStageAnalytics,
     isLoading,
@@ -57,7 +59,7 @@ const CareerCoaching = () => {
     isCreatingGoal,
     isCreatingAction,
     isCompletingAction
-  } = useCoaching(user?.id);
+  } = useCoaching(user?.id, selectedProgramId);
 
   // Helper functions for icons
   const getCategoryIcon = (category: string) => {
@@ -139,6 +141,11 @@ const CareerCoaching = () => {
     } catch (error) {
       toast.error('Failed to create goal');
     }
+  };
+
+  const handleContinueLearning = (programId: string) => {
+    setSelectedProgramId(programId);
+    setActiveTab("learning");
   };
 
   // Loading skeleton component
@@ -360,7 +367,11 @@ const CareerCoaching = () => {
                                 <CheckCircle2 className="h-4 w-4" />
                                 <span>Enrolled - {enrollment?.progress_percentage || 0}% complete</span>
                               </div>
-                              <Button variant="outline" className="w-full">
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => handleContinueLearning(program.id)}
+                              >
                                 Continue Learning
                                 <ArrowRight className="h-4 w-4 ml-2" />
                               </Button>
@@ -388,43 +399,131 @@ const CareerCoaching = () => {
 
           <TabsContent value="learning">
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold">Learning Modules</h3>
-              <div className="space-y-6">
-                {learningResources?.slice(0, 5).map((resource, index) => (
-                  <Card key={index} className="glass-card">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold mb-2">{resource.title}</h4>
-                          <p className="text-muted-foreground mb-3">{resource.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>by {resource.provider}</span>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{resource.rating || 4.5}</span>
+              {selectedProgramId ? (
+                <>
+                  {/* Program-specific learning modules */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setSelectedProgramId(null)}
+                    >
+                      ← Back to All Resources
+                    </Button>
+                    <div>
+                      <h3 className="text-xl font-semibold">
+                        {coachingPrograms?.find(p => p.id === selectedProgramId)?.title} - Learning Modules
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Complete these modules to progress in your program
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {learningModules?.length > 0 ? (
+                      learningModules.map((module, index) => (
+                        <Card key={module.id} className="glass-card">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex items-start gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                  <BookOpen className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-lg font-semibold mb-2">{module.title}</h4>
+                                  <p className="text-muted-foreground mb-3">{module.description}</p>
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                    <span>Module {module.order_index}</span>
+                                    <span>{module.estimated_duration_minutes} min</span>
+                                    <Badge variant="outline">{module.difficulty_level}</Badge>
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge variant="secondary">
+                                {module.module_type}
+                              </Badge>
                             </div>
-                            <span>{resource.estimated_time_minutes ? `${resource.estimated_time_minutes} min` : 'Self-paced'}</span>
+                            
+                            {module.learning_objectives && (
+                              <div className="mb-4">
+                                <h5 className="font-medium mb-2">Learning Objectives:</h5>
+                                <ul className="text-sm text-muted-foreground space-y-1">
+                                  {module.learning_objectives.map((objective, objIndex) => (
+                                    <li key={objIndex} className="flex items-start gap-2">
+                                      <CheckCircle2 className="h-3 w-3 mt-1 text-green-500" />
+                                      {objective}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            <Button className="w-full">
+                              <PlayCircle className="h-4 w-4 mr-2" />
+                              Start Module
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card className="glass-card">
+                        <CardContent className="p-6 text-center">
+                          <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                          <h4 className="text-lg font-semibold mb-2">No Modules Available</h4>
+                          <p className="text-muted-foreground mb-4">
+                            Learning modules for this program are being prepared.
+                          </p>
+                          <Button variant="outline" onClick={() => setSelectedProgramId(null)}>
+                            Browse All Resources
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* General learning resources */}
+                  <h3 className="text-xl font-semibold">Learning Resources</h3>
+                  <div className="space-y-6">
+                    {learningResources?.slice(0, 5).map((resource, index) => (
+                      <Card key={index} className="glass-card">
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold mb-2">{resource.title}</h4>
+                              <p className="text-muted-foreground mb-3">{resource.description}</p>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>by {resource.provider}</span>
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                  <span>{resource.rating || 4.5}</span>
+                                </div>
+                                <span>{resource.estimated_time_minutes ? `${resource.estimated_time_minutes} min` : 'Self-paced'}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="outline">{resource.difficulty_level}</Badge>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant="outline">{resource.difficulty_level}</Badge>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {resource.skill_areas?.map((skill, skillIndex) => (
-                          <Badge key={skillIndex} variant="secondary" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button className="w-full">
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        Start Module
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {resource.skill_areas?.map((skill, skillIndex) => (
+                              <Badge key={skillIndex} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                          <Button className="w-full">
+                            <PlayCircle className="h-4 w-4 mr-2" />
+                            Start Module
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </TabsContent>
 

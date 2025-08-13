@@ -4,7 +4,7 @@ import { CoachingService } from '@/services/coachingService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export const useCoaching = (userId?: string) => {
+export const useCoaching = (userId?: string, selectedProgramId?: string | null) => {
   const queryClient = useQueryClient();
 
   // Coaching Programs
@@ -104,6 +104,18 @@ export const useCoaching = (userId?: string) => {
   } = useQuery({
     queryKey: ['learning-resources'],
     queryFn: () => CoachingService.getLearningResources(),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+  });
+
+  // Learning Modules
+  const {
+    data: learningModules,
+    isLoading: modulesLoading,
+    error: modulesError
+  } = useQuery({
+    queryKey: ['learning-modules', selectedProgramId],
+    queryFn: () => selectedProgramId ? CoachingService.getLearningModules(selectedProgramId) : Promise.resolve([]),
+    enabled: !!selectedProgramId,
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
 
@@ -275,6 +287,7 @@ export const useCoaching = (userId?: string) => {
     actionItems,
     certifications,
     learningResources,
+    learningModules,
     overallProgress,
     careerStageAnalytics,
 
@@ -282,7 +295,7 @@ export const useCoaching = (userId?: string) => {
     isLoading: programsLoading || enrollmentsLoading || goalsLoading || 
                assessmentsLoading || sessionsLoading || insightsLoading || 
                actionsLoading || certificationsLoading || resourcesLoading ||
-               progressLoading || analyticsLoading,
+               modulesLoading || progressLoading || analyticsLoading,
 
     // Individual loading states
     programsLoading,
@@ -294,6 +307,7 @@ export const useCoaching = (userId?: string) => {
     actionsLoading,
     certificationsLoading,
     resourcesLoading,
+    modulesLoading,
     progressLoading,
     analyticsLoading,
 
