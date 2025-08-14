@@ -10,15 +10,18 @@ import StepContent from "@/components/resume-steps/StepContent";
 import { LivePreview } from "@/components/live-preview";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { FormValidationState } from "@/types/resumeTypes";
-
 interface ResumeStepsProps {
   selectedTemplate: string;
   onBack: () => void;
   resumeId?: string | null;
   isPreview?: boolean;
 }
-
-const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeStepsProps) => {
+const ResumeSteps = ({
+  selectedTemplate,
+  onBack,
+  resumeId,
+  isPreview
+}: ResumeStepsProps) => {
   const {
     currentStep,
     formValidation,
@@ -29,21 +32,16 @@ const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeSt
     handleNext,
     handlePrevious,
     handleDataUpdate,
-    handleValidationChange,
+    handleValidationChange
   } = useResumeSteps(resumeId);
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading your resume..." />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
-      <div className="glass-card border-b border-border/20 sticky top-0 z-50">
+      <div className="glass-card border-b border-border/20 sticky top-0 z-50 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -62,42 +60,24 @@ const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeSt
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Progress Section */}
-        <ProgressHeader 
-          currentStep={currentStep}
-          steps={steps}
-          progress={progress}
-        />
+        <ProgressHeader currentStep={currentStep} steps={steps} progress={progress} />
 
         {/* Step Navigation */}
-        <StepIndicator 
-          steps={steps}
-          currentStep={currentStep}
-        />
+        <StepIndicator steps={steps} currentStep={currentStep} />
 
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 xl:gap-12 mb-8">
           {/* Left Column - Form */}
           <Card className="glass-card">
             <CardContent className="p-8">
-              <StepContent
-                currentStep={currentStep}
-                resumeData={resumeData}
-                selectedTemplate={selectedTemplate}
-                onDataUpdate={handleDataUpdate}
-                onValidationChange={handleValidationChange}
-              />
+              <StepContent currentStep={currentStep} resumeData={resumeData} selectedTemplate={selectedTemplate} onDataUpdate={handleDataUpdate} onValidationChange={handleValidationChange} />
             </CardContent>
           </Card>
 
           {/* Right Column - Live Preview */}
           <Card className="glass-card hidden lg:block">
             <CardContent className="p-4 h-full overflow-auto max-h-[calc(100vh-260px)]">
-              <LivePreview
-                data={resumeData}
-                template={selectedTemplate}
-                className="h-full min-h-[600px] rounded-xl bg-background"
-                onDataUpdate={handleDataUpdate}
-              />
+              <LivePreview data={resumeData} template={selectedTemplate} className="h-full min-h-[600px] rounded-xl bg-background" onDataUpdate={handleDataUpdate} />
             </CardContent>
           </Card>
         </div>
@@ -106,27 +86,14 @@ const ResumeSteps = ({ selectedTemplate, onBack, resumeId, isPreview }: ResumeSt
         <div className="lg:hidden mb-8">
           <Card className="glass-card">
             <CardContent className="p-4">
-              <LivePreview
-                data={resumeData}
-                template={selectedTemplate}
-                className="h-96"
-                onDataUpdate={handleDataUpdate}
-              />
+              <LivePreview data={resumeData} template={selectedTemplate} className="h-96" onDataUpdate={handleDataUpdate} />
             </CardContent>
           </Card>
         </div>
 
         {/* Navigation Buttons - only show if not in preview mode */}
-        {!isPreview && (
-          <NavigationButtons
-            currentStep={currentStep}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-          />
-        )}
+        {!isPreview && <NavigationButtons currentStep={currentStep} onNext={handleNext} onPrevious={handlePrevious} />}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ResumeSteps;
