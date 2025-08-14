@@ -42,7 +42,7 @@ const ResumeSteps = ({
   return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card border-b border-border/20 sticky top-0 z-50 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack}>
