@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1684,6 +1684,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_type: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_viewed: boolean
+          metadata: Json | null
+          points_earned: number | null
+          title: string
+          unlocked_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type: string
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          is_viewed?: boolean
+          metadata?: Json | null
+          points_earned?: number | null
+          title: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_viewed?: boolean
+          metadata?: Json | null
+          points_earned?: number | null
+          title?: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_coaching_enrollments: {
         Row: {
           completed_at: string | null
@@ -2201,20 +2246,20 @@ export type Database = {
     }
     Functions: {
       calculate_performance_metrics: {
-        Args: { user_uuid: string; period?: string }
+        Args: { period?: string; user_uuid: string }
         Returns: undefined
       }
       get_resume_version_metrics: {
         Args: { resume_id: string }
         Returns: {
-          total_applications: number
-          responses_received: number
-          interviews_scheduled: number
-          offers_received: number
           avg_ats_score: number
-          response_rate: number
           interview_rate: number
+          interviews_scheduled: number
           offer_rate: number
+          offers_received: number
+          response_rate: number
+          responses_received: number
+          total_applications: number
         }[]
       }
     }

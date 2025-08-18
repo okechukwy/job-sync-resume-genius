@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   GraduationCap, 
@@ -25,7 +25,11 @@ import {
   FileText,
   Brain,
   Plus,
-  ExternalLink
+  ExternalLink,
+  Trophy,
+  Zap,
+  RefreshCw,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCoaching } from "@/hooks/useCoaching";
@@ -47,6 +51,7 @@ const CareerCoaching = () => {
     coachingSessions,
     learningResources,
     learningModules,
+    userAchievements,
     overallProgress,
     careerStageAnalytics,
     isLoading,
@@ -55,6 +60,8 @@ const CareerCoaching = () => {
     createActionItem,
     completeActionItem,
     markInsightAsRead,
+    markAchievementAsViewed,
+    calculateAchievements,
     isEnrolling,
     isCreatingGoal,
     isCreatingAction,
@@ -98,6 +105,26 @@ const CareerCoaching = () => {
         return 'secondary';
       default:
         return 'outline';
+    }
+  };
+
+  const getAchievementIcon = (type: string) => {
+    switch (type) {
+      case 'module_completion': return <BookOpen className="h-4 w-4" />;
+      case 'skill_milestone': return <Star className="h-4 w-4" />;
+      case 'goal_reached': return <Target className="h-4 w-4" />;
+      case 'learning_streak': return <Zap className="h-4 w-4" />;
+      case 'assessment_score': return <Award className="h-4 w-4" />;
+      default: return <Trophy className="h-4 w-4" />;
+    }
+  };
+
+  const getAchievementVariant = (category: string): "default" | "destructive" => {
+    switch (category) {
+      case 'milestone': return 'default';
+      case 'skill': return 'default';
+      case 'certification': return 'default';
+      default: return 'default';
     }
   };
 
@@ -302,31 +329,64 @@ const CareerCoaching = () => {
               {/* Recent Achievements */}
               <Card className="glass-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5" />
-                    Recent Achievements
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-5 w-5" />
+                      Recent Achievements
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => calculateAchievements()}
+                      className="text-sm"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <Alert>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Completed:</strong> Personal Branding Module - 90% score achieved!
-                      </AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <Star className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Milestone:</strong> Reached 50+ professional connections this quarter
-                      </AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <TrendingUp className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Progress:</strong> 75% completion rate on career path planning
-                      </AlertDescription>
-                    </Alert>
+                  <div className="space-y-3">
+                    {userAchievements?.slice(0, 3).map((achievement) => {
+                      const achievementIcon = getAchievementIcon(achievement.achievement_type);
+                      const achievementVariant = getAchievementVariant(achievement.category);
+                      
+                      return (
+                        <Alert key={achievement.id} variant={achievementVariant}>
+                          {achievementIcon}
+                          <AlertTitle className="flex items-center justify-between">
+                            {achievement.title}
+                            {!achievement.is_viewed && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => markAchievementAsViewed(achievement.id)}
+                                className="ml-2 h-6 w-6 p-0"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </AlertTitle>
+                          <AlertDescription>
+                            {achievement.description}
+                            {achievement.points_earned > 0 && (
+                              <span className="ml-2 text-primary font-medium">
+                                +{achievement.points_earned} points
+                              </span>
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      );
+                    }) || []}
+                    {(!userAchievements || userAchievements.length === 0) && (
+                      <Alert>
+                        <Trophy className="h-4 w-4" />
+                        <AlertTitle>Ready to Start!</AlertTitle>
+                        <AlertDescription>
+                          Complete your first learning module or career goal to unlock achievements.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </div>
                 </CardContent>
               </Card>
