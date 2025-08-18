@@ -76,6 +76,8 @@ const CareerCoaching = () => {
 
   // Helper functions for icons
   const getCategoryIcon = (category: string) => {
+    if (!category) return <Brain className="h-5 w-5 text-primary" />;
+    
     switch (category.toLowerCase()) {
       case 'strengths':
         return <Award className="h-5 w-5 text-yellow-500" />;
@@ -91,6 +93,8 @@ const CareerCoaching = () => {
   };
 
   const getPriorityVariant = (priority: string) => {
+    if (!priority) return 'outline';
+    
     switch (priority.toLowerCase()) {
       case 'high':
         return 'destructive';
@@ -102,6 +106,8 @@ const CareerCoaching = () => {
   };
 
   const getStatusVariant = (status: string) => {
+    if (!status) return 'outline';
+    
     switch (status.toLowerCase()) {
       case 'completed':
       case 'complete':

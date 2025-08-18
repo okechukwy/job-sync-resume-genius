@@ -67,6 +67,8 @@ export const ModuleContentModal = ({
   const progressPercentage = progress?.progress_percentage || 0;
 
   const getContentIcon = (contentType: string) => {
+    if (!contentType) return <FileText className="h-5 w-5" />;
+    
     switch (contentType.toLowerCase()) {
       case 'video':
         return <PlayCircle className="h-5 w-5" />;
@@ -78,6 +80,8 @@ export const ModuleContentModal = ({
   };
 
   const getDifficultyColor = (level: string) => {
+    if (!level) return 'bg-gray-500';
+    
     switch (level.toLowerCase()) {
       case 'beginner':
         return 'bg-green-500';
