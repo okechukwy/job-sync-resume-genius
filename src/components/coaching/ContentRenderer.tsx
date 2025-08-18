@@ -71,18 +71,47 @@ export const ContentRenderer = ({
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'video':
-        return 'bg-blue-500';
+        return 'bg-primary';
       case 'interactive':
-        return 'bg-purple-500';
+        return 'bg-accent';
       case 'assessment':
-        return 'bg-green-500';
+        return 'bg-secondary';
       default:
-        return 'bg-gray-500';
+        return 'bg-muted-foreground';
     }
   };
 
   const renderVideoContent = () => (
     <div className="space-y-4">
+      {/* Rich video content with text and objectives */}
+      {section.content && (
+        <div className="space-y-4">
+          {section.content.text && (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-foreground">{section.content.text}</p>
+            </div>
+          )}
+          
+          {section.content.objectives && section.content.objectives.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Learning Objectives
+              </h4>
+              <ul className="space-y-1">
+                {section.content.objectives.map((objective, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    {objective}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Video player or placeholder */}
       {section.content_url ? (
         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
           <div className="text-center space-y-2">
@@ -99,13 +128,15 @@ export const ContentRenderer = ({
           </div>
         </div>
       ) : (
-        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+        <div className="aspect-video bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
           <div className="text-center space-y-2">
-            <PlayCircle className="h-12 w-12 mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Video content will be available soon</p>
+            <PlayCircle className="h-12 w-12 mx-auto text-primary" />
+            <p className="text-sm text-muted-foreground">Interactive video content coming soon</p>
+            <p className="text-xs text-muted-foreground">Continue with the learning materials above</p>
           </div>
         </div>
       )}
+
       {progress > 0 && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
