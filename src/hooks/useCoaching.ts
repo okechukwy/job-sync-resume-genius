@@ -130,6 +130,18 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
 
+  // User Module Progress
+  const {
+    data: userModuleProgress,
+    isLoading: moduleProgressLoading,
+    error: moduleProgressError
+  } = useQuery({
+    queryKey: ['user-module-progress', userId],
+    queryFn: () => userId ? CoachingService.getUserModuleProgress(userId) : Promise.resolve([]),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Progress Analytics
   const {
     data: overallProgress,
@@ -263,6 +275,24 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     },
   });
 
+  const updateModuleProgressMutation = useMutation({
+    mutationFn: ({ moduleId, enrollmentId, progressData }: { 
+      moduleId: string; 
+      enrollmentId: string; 
+      progressData: any;
+    }) => userId ? CoachingService.updateModuleProgress(userId, moduleId, enrollmentId, progressData) : Promise.reject('No user ID'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-module-progress', userId] });
+      queryClient.invalidateQueries({ queryKey: ['user-enrollments', userId] });
+      queryClient.invalidateQueries({ queryKey: ['overall-progress', userId] });
+      calculateAchievementsMutation.mutate(); // Auto-calculate achievements
+      toast.success('Progress updated!');
+    },
+    onError: (error) => {
+      toast.error('Failed to update progress: ' + error.message);
+    },
+  });
+
   // Real-time subscriptions
   useEffect(() => {
     if (!userId) return;
@@ -322,6 +352,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     certifications,
     learningResources,
     learningModules,
+    userModuleProgress,
     userAchievements,
     overallProgress,
     careerStageAnalytics,
@@ -330,7 +361,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     isLoading: programsLoading || enrollmentsLoading || goalsLoading || 
                assessmentsLoading || sessionsLoading || insightsLoading || 
                actionsLoading || certificationsLoading || resourcesLoading ||
-               modulesLoading || progressLoading || analyticsLoading || achievementsLoading,
+               modulesLoading || moduleProgressLoading || progressLoading || analyticsLoading || achievementsLoading,
 
     // Individual loading states
     programsLoading,
@@ -343,6 +374,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     certificationsLoading,
     resourcesLoading,
     modulesLoading,
+    moduleProgressLoading,
     progressLoading,
     analyticsLoading,
     achievementsLoading,
@@ -362,6 +394,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     markInsightAsRead: markInsightAsReadMutation.mutate,
     markAchievementAsViewed: markAchievementViewedMutation.mutate,
     calculateAchievements: calculateAchievementsMutation.mutate,
+    updateModuleProgress: updateModuleProgressMutation.mutate,
 
     // Mutation states
     isEnrolling: enrollInProgramMutation.isPending,
@@ -372,6 +405,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     isCreatingAssessment: createSkillsAssessmentMutation.isPending,
     isMarkingAchievementViewed: markAchievementViewedMutation.isPending,
     isCalculatingAchievements: calculateAchievementsMutation.isPending,
+    isUpdatingModuleProgress: updateModuleProgressMutation.isPending,
   };
 };
 

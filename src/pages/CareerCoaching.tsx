@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ModuleContentModal } from "@/components/coaching/ModuleContentModal";
 import { 
   GraduationCap, 
   Target, 
@@ -39,6 +40,8 @@ import { format } from "date-fns";
 const CareerCoaching = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const { user } = useAuth();
   
   // Get coaching data using the hook
@@ -51,6 +54,7 @@ const CareerCoaching = () => {
     coachingSessions,
     learningResources,
     learningModules,
+    userModuleProgress,
     userAchievements,
     overallProgress,
     careerStageAnalytics,
@@ -62,10 +66,12 @@ const CareerCoaching = () => {
     markInsightAsRead,
     markAchievementAsViewed,
     calculateAchievements,
+    updateModuleProgress,
     isEnrolling,
     isCreatingGoal,
     isCreatingAction,
-    isCompletingAction
+    isCompletingAction,
+    isUpdatingModuleProgress
   } = useCoaching(user?.id, selectedProgramId);
 
   // Helper functions for icons
@@ -173,6 +179,66 @@ const CareerCoaching = () => {
   const handleContinueLearning = (programId: string) => {
     setSelectedProgramId(programId);
     setActiveTab("learning");
+  };
+
+  // Get module progress for a specific module
+  const getModuleProgress = (moduleId: string) => {
+    return userModuleProgress?.find(progress => progress.module_id === moduleId);
+  };
+
+  // Get progress status for a module
+  const getModuleStatus = (moduleId: string) => {
+    const progress = getModuleProgress(moduleId);
+    if (!progress) return 'not_started';
+    return progress.status;
+  };
+
+  // Get progress percentage for a module
+  const getModuleProgressPercentage = (moduleId: string) => {
+    const progress = getModuleProgress(moduleId);
+    return progress?.progress_percentage || 0;
+  };
+
+  // Handle module click
+  const handleModuleClick = (module: any) => {
+    setSelectedModule(module);
+    setIsModuleModalOpen(true);
+  };
+
+  // Handle starting a module
+  const handleStartModule = async (moduleId: string, enrollmentId: string) => {
+    try {
+      await updateModuleProgress({
+        moduleId,
+        enrollmentId,
+        progressData: {
+          status: 'in_progress',
+          progress_percentage: 10,
+          started_at: new Date().toISOString()
+        }
+      });
+      setIsModuleModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to start module');
+    }
+  };
+
+  // Handle completing a module
+  const handleCompleteModule = async (moduleId: string, enrollmentId: string) => {
+    try {
+      await updateModuleProgress({
+        moduleId,
+        enrollmentId,
+        progressData: {
+          status: 'completed',
+          progress_percentage: 100,
+          completed_at: new Date().toISOString()
+        }
+      });
+      setIsModuleModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to complete module');
+    }
   };
 
   // Loading skeleton component
@@ -480,52 +546,112 @@ const CareerCoaching = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    {learningModules?.length > 0 ? (
-                      learningModules.map((module, index) => (
-                        <Card key={module.id} className="glass-card">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex items-start gap-4">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                  <BookOpen className="h-5 w-5 text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className="text-lg font-semibold mb-2">{module.title}</h4>
-                                  <p className="text-muted-foreground mb-3">{module.description}</p>
-                                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                    <span>Module {module.order_index}</span>
-                                    <span>{module.estimated_duration_minutes} min</span>
-                                    <Badge variant="outline">{module.difficulty_level}</Badge>
-                                  </div>
-                                </div>
-                              </div>
-                              <Badge variant="secondary">
-                                {module.module_type}
-                              </Badge>
-                            </div>
-                            
-                            {module.learning_objectives && (
-                              <div className="mb-4">
-                                <h5 className="font-medium mb-2">Learning Objectives:</h5>
-                                <ul className="text-sm text-muted-foreground space-y-1">
-                                  {module.learning_objectives.map((objective, objIndex) => (
-                                    <li key={objIndex} className="flex items-start gap-2">
-                                      <CheckCircle2 className="h-3 w-3 mt-1 text-green-500" />
-                                      {objective}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            <Button className="w-full">
-                              <PlayCircle className="h-4 w-4 mr-2" />
-                              Start Module
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      ))
+                   <div className="space-y-4">
+                     {learningModules?.length > 0 ? (
+                       learningModules.map((module, index) => {
+                         const moduleStatus = getModuleStatus(module.id);
+                         const progressPercentage = getModuleProgressPercentage(module.id);
+                         const enrollment = getProgramEnrollment(selectedProgramId!);
+                         
+                         return (
+                           <Card 
+                             key={module.id} 
+                             className="glass-card cursor-pointer hover:shadow-lg transition-all"
+                             onClick={() => handleModuleClick(module)}
+                           >
+                             <CardContent className="p-6">
+                               <div className="flex justify-between items-start mb-4">
+                                 <div className="flex items-start gap-4">
+                                   <div className="p-2 bg-primary/10 rounded-lg">
+                                     {moduleStatus === 'completed' ? (
+                                       <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                     ) : moduleStatus === 'in_progress' ? (
+                                       <PlayCircle className="h-5 w-5 text-blue-500" />
+                                     ) : (
+                                       <BookOpen className="h-5 w-5 text-primary" />
+                                     )}
+                                   </div>
+                                   <div className="flex-1">
+                                     <h4 className="text-lg font-semibold mb-2">{module.title}</h4>
+                                     <p className="text-muted-foreground mb-3">{module.description}</p>
+                                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                       <span>Module {module.order_index}</span>
+                                       <span>{module.estimated_duration_minutes} min</span>
+                                       <Badge variant="outline">{module.difficulty_level}</Badge>
+                                     </div>
+                                   </div>
+                                 </div>
+                                 <div className="flex flex-col items-end gap-2">
+                                   <Badge variant={moduleStatus === 'completed' ? 'default' : 
+                                                 moduleStatus === 'in_progress' ? 'secondary' : 'outline'}>
+                                     {moduleStatus === 'completed' ? 'Completed' :
+                                      moduleStatus === 'in_progress' ? 'In Progress' : 'Not Started'}
+                                   </Badge>
+                                   <Badge variant="secondary">
+                                     {module.content_type}
+                                   </Badge>
+                                 </div>
+                               </div>
+                               
+                               {/* Progress Bar */}
+                               {moduleStatus !== 'not_started' && (
+                                 <div className="mb-4">
+                                   <div className="flex justify-between items-center text-sm mb-1">
+                                     <span>Progress</span>
+                                     <span>{progressPercentage}%</span>
+                                   </div>
+                                   <Progress value={progressPercentage} className="h-2" />
+                                 </div>
+                               )}
+                               
+                               {module.learning_objectives && (
+                                 <div className="mb-4">
+                                   <h5 className="font-medium mb-2">Learning Objectives:</h5>
+                                   <ul className="text-sm text-muted-foreground space-y-1">
+                                     {module.learning_objectives.slice(0, 2).map((objective, objIndex) => (
+                                       <li key={objIndex} className="flex items-start gap-2">
+                                         <Target className="h-3 w-3 mt-1 text-primary" />
+                                         {objective}
+                                       </li>
+                                     ))}
+                                     {module.learning_objectives.length > 2 && (
+                                       <li className="text-xs text-muted-foreground">
+                                         +{module.learning_objectives.length - 2} more objectives...
+                                       </li>
+                                     )}
+                                   </ul>
+                                 </div>
+                               )}
+                               
+                               <Button 
+                                 className="w-full" 
+                                 variant={moduleStatus === 'completed' ? 'outline' : 'default'}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleModuleClick(module);
+                                 }}
+                               >
+                                 {moduleStatus === 'completed' ? (
+                                   <>
+                                     <CheckCircle2 className="h-4 w-4 mr-2" />
+                                     Review Module
+                                   </>
+                                 ) : moduleStatus === 'in_progress' ? (
+                                   <>
+                                     <PlayCircle className="h-4 w-4 mr-2" />
+                                     Continue Module
+                                   </>
+                                 ) : (
+                                   <>
+                                     <PlayCircle className="h-4 w-4 mr-2" />
+                                     Start Module
+                                   </>
+                                 )}
+                               </Button>
+                             </CardContent>
+                           </Card>
+                         );
+                       })
                     ) : (
                       <Card className="glass-card">
                         <CardContent className="p-6 text-center">
@@ -736,6 +862,18 @@ const CareerCoaching = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Module Content Modal */}
+      <ModuleContentModal 
+        isOpen={isModuleModalOpen}
+        onClose={() => setIsModuleModalOpen(false)}
+        module={selectedModule}
+        progress={selectedModule ? getModuleProgress(selectedModule.id) : undefined}
+        enrollmentId={getProgramEnrollment(selectedProgramId || '')?.id || ''}
+        onStartModule={handleStartModule}
+        onCompleteModule={handleCompleteModule}
+        isUpdating={isUpdatingModuleProgress}
+      />
     </div>
   );
 };
