@@ -96,7 +96,7 @@ export class CoachingService {
       .order('order_index', { ascending: true });
 
     if (error) throw error;
-    return data as LearningModule[];
+    return data;
   }
 
   static async getUserModuleProgress(userId: string, enrollmentId?: string) {

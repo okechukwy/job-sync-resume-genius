@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { ContentRenderer } from './ContentRenderer';
+import { SectionProgressTracker } from './SectionProgressTracker';
 import { 
   PlayCircle, 
   FileText, 
@@ -16,6 +18,18 @@ import {
   X
 } from 'lucide-react';
 
+interface ContentSection {
+  id: string;
+  title: string;
+  type: 'video' | 'article' | 'interactive' | 'assessment';
+  content_url?: string;
+  content?: any;
+  duration_minutes: number;
+  description: string;
+  is_required: boolean;
+  order_index: number;
+}
+
 interface LearningModule {
   id: string;
   title: string;
@@ -26,6 +40,7 @@ interface LearningModule {
   prerequisites: string[];
   difficulty_level: string;
   order_index: number;
+  content_sections?: ContentSection[];
 }
 
 interface ModuleProgress {
@@ -59,12 +74,16 @@ export const ModuleContentModal = ({
   isUpdating
 }: ModuleContentModalProps) => {
   const [currentSection, setCurrentSection] = useState(0);
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
 
   if (!module) return null;
 
   const isStarted = progress?.status === 'in_progress' || progress?.status === 'completed';
   const isCompleted = progress?.status === 'completed';
   const progressPercentage = progress?.progress_percentage || 0;
+  
+  const contentSections = module.content_sections || [];
+  const currentSectionData = contentSections[currentSection];
 
   const getContentIcon = (contentType: string) => {
     if (!contentType) return <FileText className="h-5 w-5" />;
@@ -102,12 +121,20 @@ export const ModuleContentModal = ({
     onCompleteModule(module.id, enrollmentId);
   };
 
-  const sections = [
-    { title: 'Overview', content: 'Module Introduction' },
-    { title: 'Learning Content', content: 'Main Content' },
-    { title: 'Practice', content: 'Exercises' },
-    { title: 'Assessment', content: 'Knowledge Check' }
-  ];
+  const handleSectionComplete = (sectionId: string) => {
+    setCompletedSections(prev => new Set([...prev, sectionId]));
+    
+    // Check if all required sections are completed
+    const requiredSections = contentSections.filter(s => s.is_required);
+    const completedRequiredSections = requiredSections.filter(s => 
+      completedSections.has(s.id) || s.id === sectionId
+    );
+    
+    if (completedRequiredSections.length === requiredSections.length) {
+      // Auto-complete the module if all required sections are done
+      setTimeout(() => handleComplete(), 1000);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -202,36 +229,39 @@ export const ModuleContentModal = ({
           {/* Learning Content Sections */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Module Content</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sections.map((section, index) => (
-                <Card 
-                  key={index} 
-                  className={`cursor-pointer transition-all border-2 ${
-                    currentSection === index ? 'border-primary' : 'border-border'
-                  }`}
-                  onClick={() => setCurrentSection(index)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          currentSection === index ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <h4 className="font-medium">{section.title}</h4>
-                          <p className="text-xs text-muted-foreground">{section.content}</p>
-                        </div>
-                      </div>
-                      {currentSection === index && (
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            
+            {contentSections.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Progress Tracker Sidebar */}
+                <div className="lg:col-span-1">
+                  <SectionProgressTracker
+                    sections={contentSections}
+                    completedSections={completedSections}
+                    currentSection={currentSection}
+                    onSectionSelect={setCurrentSection}
+                  />
+                </div>
+
+                {/* Current Section Content */}
+                <div className="lg:col-span-2">
+                  {currentSectionData && (
+                    <ContentRenderer
+                      section={currentSectionData}
+                      isActive={true}
+                      isCompleted={completedSections.has(currentSectionData.id)}
+                      onComplete={handleSectionComplete}
+                      progress={currentSection === 0 ? progressPercentage : 0}
+                    />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-3" />
+                <p>No content sections available yet.</p>
+                <p className="text-sm">Content will be added soon.</p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
