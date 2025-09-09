@@ -63,12 +63,7 @@ function App() {
             <BrowserRouter>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={
-                <div className="min-h-screen">
-                  <Navigation />
-                  <Index />
-                </div>
-              } />
+              <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

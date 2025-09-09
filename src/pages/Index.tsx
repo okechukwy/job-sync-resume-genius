@@ -1,16 +1,18 @@
 
-import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import TemplatesSection from "@/components/TemplatesSection";
 import PricingSection from "@/components/PricingSection";
 import ResourcesSection from "@/components/ResourcesSection";
+import { TrialStatusBanner } from "@/components/subscription/TrialStatusBanner";
+import Navigation from "@/components/Navigation";
 import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-hero">
       <Navigation />
+      <TrialStatusBanner />
       <HeroSection />
       <FeaturesSection />
       <TemplatesSection />
