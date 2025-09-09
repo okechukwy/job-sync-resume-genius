@@ -1687,6 +1687,33 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_settings: {
+        Row: {
+          auto_upgrade_plan: string | null
+          created_at: string | null
+          id: string
+          trial_duration_days: number | null
+          trial_features_enabled: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_upgrade_plan?: string | null
+          created_at?: string | null
+          id?: string
+          trial_duration_days?: number | null
+          trial_features_enabled?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_upgrade_plan?: string | null
+          created_at?: string | null
+          id?: string
+          trial_duration_days?: number | null
+          trial_features_enabled?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_type: string
@@ -2186,6 +2213,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          auto_upgrade_enabled: boolean | null
+          created_at: string | null
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_end_date: string | null
+          subscription_plan: string | null
+          subscription_start_date: string | null
+          subscription_status: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_upgrade_enabled?: boolean | null
+          created_at?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_upgrade_enabled?: boolean | null
+          created_at?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       white_label_configs: {
         Row: {
           accent_color: string | null
@@ -2264,6 +2339,14 @@ export type Database = {
           responses_received: number
           total_applications: number
         }[]
+      }
+      get_trial_days_remaining: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
+      is_trial_expired: {
+        Args: { user_uuid: string }
+        Returns: boolean
       }
     }
     Enums: {
