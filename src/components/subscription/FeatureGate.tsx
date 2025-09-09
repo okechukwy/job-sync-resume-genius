@@ -39,7 +39,8 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   // Default upgrade prompt
   if (showUpgrade) {
     const handleUpgrade = () => {
-      navigate('/checkout?plan=starter&type=upgrade');
+      // Temporarily redirect to home until payment is integrated
+      navigate('/');
     };
 
     return (

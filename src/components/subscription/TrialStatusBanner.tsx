@@ -15,7 +15,8 @@ export const TrialStatusBanner = () => {
   if (subscription.subscription_status === 'active') return null;
 
   const handleUpgrade = () => {
-    navigate('/checkout?plan=starter&type=upgrade');
+    // Temporarily show coming soon message
+    navigate('/');
   };
 
   if (subscription.subscription_status === 'trial' && trialInfo?.isActive) {

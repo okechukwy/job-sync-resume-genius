@@ -119,55 +119,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const enableAutoUpgrade = async () => {
-    if (!subscription) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ auto_upgrade_enabled: true })
-        .eq('id', subscription.id);
-
-      if (error) throw error;
-
-      setSubscription(prev => prev ? { ...prev, auto_upgrade_enabled: true } : null);
-      toast({
-        title: "Auto-upgrade enabled",
-        description: "Your trial will automatically upgrade to the Starter plan when it expires."
-      });
-    } catch (error) {
-      console.error('Error enabling auto-upgrade:', error);
-      toast({
-        title: "Error",
-        description: "Failed to enable auto-upgrade. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // Auto-upgrade functionality will be available once payment integration is complete
+    console.log('Auto-upgrade will be available with payment integration');
   };
 
   const disableAutoUpgrade = async () => {
-    if (!subscription) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ auto_upgrade_enabled: false })
-        .eq('id', subscription.id);
-
-      if (error) throw error;
-
-      setSubscription(prev => prev ? { ...prev, auto_upgrade_enabled: false } : null);
-      toast({
-        title: "Auto-upgrade disabled",
-        description: "Your trial will not automatically upgrade when it expires."
-      });
-    } catch (error) {
-      console.error('Error disabling auto-upgrade:', error);
-      toast({
-        title: "Error",
-        description: "Failed to disable auto-upgrade. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // Auto-upgrade functionality will be available once payment integration is complete
+    console.log('Auto-upgrade will be available with payment integration');
   };
 
   const refreshSubscription = async () => {

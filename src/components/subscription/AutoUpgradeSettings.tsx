@@ -3,9 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Badge } from '@/components/ui/badge';
 import { InfoIcon, CreditCard } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export const AutoUpgradeSettings = () => {
-  const { subscription, trialInfo, enableAutoUpgrade, disableAutoUpgrade } = useSubscription();
+  const { subscription, trialInfo } = useSubscription();
+  const { toast } = useToast();
 
   // Only show for trial users
   if (!subscription || subscription.subscription_status !== 'trial') {
@@ -13,11 +15,11 @@ export const AutoUpgradeSettings = () => {
   }
 
   const handleToggle = (enabled: boolean) => {
-    if (enabled) {
-      enableAutoUpgrade();
-    } else {
-      disableAutoUpgrade();
-    }
+    // Auto-upgrade will be available once payment integration is complete
+    toast({
+      title: "Coming Soon",
+      description: "Auto-upgrade will be available once payment integration is complete.",
+    });
   };
 
   return (

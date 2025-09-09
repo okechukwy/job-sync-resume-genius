@@ -2,7 +2,6 @@ import { Check, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -161,23 +160,31 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <Link to={`/checkout?plan=${plan.name.toLowerCase()}&price=${plan.price}&type=${subscription?.subscription_status === 'trial' ? 'upgrade' : 'new'}`}>
-                  <Button 
-                    variant={plan.buttonVariant} 
-                    size="lg" 
-                    className="w-full"
-                    disabled={isCurrentPlan(plan.name)}
-                  >
-                    {isCurrentPlan(plan.name) ? (
-                      <div className="flex items-center space-x-2">
-                        <Crown className="h-4 w-4" />
-                        <span>Current Plan</span>
-                      </div>
-                    ) : (
-                      <span>{getButtonText(plan.name)}</span>
-                    )}
-                  </Button>
-                </Link>
+                <Button 
+                  variant={plan.buttonVariant} 
+                  size="lg" 
+                  className="w-full"
+                  disabled={isCurrentPlan(plan.name)}
+                  onClick={() => {
+                    if (!user || isCurrentPlan(plan.name)) return;
+                    // Coming soon toast
+                    import('@/hooks/use-toast').then(({ toast }) => {
+                      toast({
+                        title: "Coming Soon",
+                        description: "Payment integration is coming soon. For now, enjoy your free trial!",
+                      });
+                    });
+                  }}
+                >
+                  {isCurrentPlan(plan.name) ? (
+                    <div className="flex items-center space-x-2">
+                      <Crown className="h-4 w-4" />
+                      <span>Current Plan</span>
+                    </div>
+                  ) : (
+                    <span>{getButtonText(plan.name)}</span>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -194,14 +201,24 @@ const PricingSection = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {payPerUse.map((item, index) => (
-              <Link key={index} to={`/checkout?type=payperuse&plan=${item.item}&price=${item.price}`}>
-                <Card className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer">
-                  <CardContent className="p-0">
-                    <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
-                    <div className="text-sm text-muted-foreground">{item.item}</div>
-                  </CardContent>
-                </Card>
-              </Link>
+            <Card 
+              key={index}
+              className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer"
+              onClick={() => {
+                // Coming soon toast
+                import('@/hooks/use-toast').then(({ toast }) => {
+                  toast({
+                    title: "Coming Soon",
+                    description: "Payment integration is coming soon. For now, enjoy your free trial!",
+                  });
+                });
+              }}
+            >
+              <CardContent className="p-0">
+                <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
+                <div className="text-sm text-muted-foreground">{item.item}</div>
+              </CardContent>
+            </Card>
             ))}
           </div>
         </div>
