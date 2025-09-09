@@ -320,6 +320,201 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     );
   };
 
+  const renderCertificates = () => {
+    if (!data.certificates?.length) return null;
+    
+    return renderSection(
+      "CERTIFICATIONS",
+      <div className={spacingClass}>
+        {data.certificates.map((cert, index) => (
+          <div key={index} className="space-y-2 avoid-break">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-900">{cert.name}</h3>
+                <p className="text-gray-600">{cert.issuer}</p>
+                {cert.credentialId && (
+                  <p className="text-sm text-gray-500">ID: {cert.credentialId}</p>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(cert.issueDate)}
+                {cert.expiryDate && ` - ${formatDate(cert.expiryDate)}`}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderProjects = () => {
+    if (!data.projects?.length) return null;
+    
+    return renderSection(
+      "PROJECTS",
+      <div className={spacingClass}>
+        {data.projects.map((project, index) => (
+          <div key={index} className="space-y-2 avoid-break">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                {project.description && (
+                  <p className="text-gray-700 text-sm leading-relaxed mt-1">{project.description}</p>
+                )}
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {project.technologies.map((tech, techIndex) => (
+                      <span key={techIndex} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(project.startDate)} - {project.endDate ? formatDate(project.endDate) : 'Present'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderLanguages = () => {
+    if (!data.languages?.length) return null;
+    
+    return renderSection(
+      "LANGUAGES",
+      <div className="grid grid-cols-2 gap-3">
+        {data.languages.map((lang, index) => (
+          <div key={index} className="flex justify-between items-center">
+            <span className="font-medium text-gray-900">{lang.language}</span>
+            <span className="text-sm text-gray-600">{lang.proficiency}</span>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderVolunteering = () => {
+    if (!data.volunteering?.length) return null;
+    
+    return renderSection(
+      "VOLUNTEERING",
+      <div className={spacingClass}>
+        {data.volunteering.map((vol, index) => (
+          <div key={index} className="space-y-2 avoid-break">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-900">{vol.role}</h3>
+                <p className="text-gray-600">{vol.organization}</p>
+                {vol.description && (
+                  <p className="text-gray-700 text-sm leading-relaxed mt-1">{vol.description}</p>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(vol.startDate)} - {vol.current ? 'Present' : formatDate(vol.endDate)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderAwards = () => {
+    if (!data.awards?.length) return null;
+    
+    return renderSection(
+      "AWARDS & ACHIEVEMENTS",
+      <div className={spacingClass}>
+        {data.awards.map((award, index) => (
+          <div key={index} className="space-y-2 avoid-break">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-900">{award.title}</h3>
+                <p className="text-gray-600">{award.issuer}</p>
+                {award.description && (
+                  <p className="text-gray-700 text-sm leading-relaxed mt-1">{award.description}</p>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(award.date)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderPublications = () => {
+    if (!data.publications?.length) return null;
+    
+    return renderSection(
+      "PUBLICATIONS",
+      <div className={spacingClass}>
+        {data.publications.map((pub, index) => (
+          <div key={index} className="space-y-2 avoid-break">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-gray-900">{pub.title}</h3>
+                <p className="text-gray-600">{pub.publisher}</p>
+                {pub.description && (
+                  <p className="text-gray-700 text-sm leading-relaxed mt-1">{pub.description}</p>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDate(pub.date)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderInterests = () => {
+    if (!data.interests?.interests?.length) return null;
+    
+    return renderSection(
+      "INTERESTS & HOBBIES",
+      <div className="flex flex-wrap gap-2">
+        {data.interests.interests.map((interest, index) => (
+          <span
+            key={index}
+            className="px-3 py-1 text-sm rounded-full border"
+            style={{
+              backgroundColor: 'var(--template-accent)',
+              borderColor: 'var(--template-primary)',
+              color: 'var(--template-secondary)'
+            }}
+          >
+            {interest}
+          </span>
+        ))}
+      </div>,
+      true
+    );
+  };
+
+  const renderAdditionalInfo = () => {
+    if (!data.additionalInfo?.content) return null;
+    
+    return renderSection(
+      "ADDITIONAL INFORMATION", 
+      <p className="text-gray-700 leading-relaxed avoid-break">{data.additionalInfo.content}</p>,
+      true
+    );
+  };
+
   const renderContent = () => {
     switch (layout) {
       case 'portfolio':
@@ -329,10 +524,18 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
             <div className="lg:col-span-2 space-y-6">
               {renderSummary()}
               {renderExperience()}
+              {renderProjects()}
+              {renderAwards()}
+              {renderPublications()}
             </div>
             <div className="space-y-6">
               {renderEducation()}
               {renderSkills()}
+              {renderCertificates()}
+              {renderLanguages()}
+              {renderVolunteering()}
+              {renderInterests()}
+              {renderAdditionalInfo()}
             </div>
           </div>
         );
@@ -342,9 +545,17 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
         return (
           <div className="space-y-6">
             {renderSkills()}
+            {renderProjects()}
+            {renderCertificates()}
             {renderSummary()}
             {renderExperience()}
             {renderEducation()}
+            {renderLanguages()}
+            {renderVolunteering()}
+            {renderAwards()}
+            {renderPublications()}
+            {renderInterests()}
+            {renderAdditionalInfo()}
           </div>
         );
 
@@ -354,10 +565,18 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
             <div className="lg:col-span-1 space-y-6">
               {renderSkills()}
               {renderEducation()}
+              {renderCertificates()}
+              {renderLanguages()}
+              {renderInterests()}
             </div>
             <div className="lg:col-span-3 space-y-6">
               {renderSummary()}
               {renderExperience()}
+              {renderProjects()}
+              {renderVolunteering()}
+              {renderAwards()}
+              {renderPublications()}
+              {renderAdditionalInfo()}
             </div>
           </div>
         );
@@ -370,10 +589,18 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-6">
                 {renderExperience()}
+                {renderProjects()}
+                {renderVolunteering()}
               </div>
               <div className="space-y-6">
                 {renderEducation()}
                 {renderSkills()}
+                {renderCertificates()}
+                {renderAwards()}
+                {renderLanguages()}
+                {renderPublications()}
+                {renderInterests()}
+                {renderAdditionalInfo()}
               </div>
             </div>
           </div>
@@ -384,8 +611,16 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
           <div className="space-y-6">
             {renderSummary()}
             {renderEducation()}
+            {renderPublications()}
+            {renderCertificates()}
             {renderExperience()}
+            {renderProjects()}
             {renderSkills()}
+            {renderAwards()}
+            {renderLanguages()}
+            {renderVolunteering()}
+            {renderInterests()}
+            {renderAdditionalInfo()}
           </div>
         );
       
@@ -396,6 +631,14 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
             {renderExperience()}
             {renderEducation()}
             {renderSkills()}
+            {renderCertificates()}
+            {renderProjects()}
+            {renderLanguages()}
+            {renderVolunteering()}
+            {renderAwards()}
+            {renderPublications()}
+            {renderInterests()}
+            {renderAdditionalInfo()}
           </div>
         );
     }
