@@ -4,10 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const PricingSection = () => {
   const { user } = useAuth();
   const { subscription, trialInfo } = useSubscription();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const isCurrentPlan = (planName: string) => {
     if (!subscription) return false;
@@ -20,7 +24,7 @@ const PricingSection = () => {
     if (isCurrentPlan(planName)) return "Current Plan";
     
     if (subscription?.subscription_status === 'trial') {
-      return "Upgrade";
+      return trialInfo?.isActive ? "Continue Trial" : "Upgrade";
     }
     
     if (subscription?.subscription_status === 'expired') {
@@ -28,6 +32,42 @@ const PricingSection = () => {
     }
     
     return "Start Free Trial";
+  };
+
+  const handleButtonClick = (planName: string) => {
+    if (isCurrentPlan(planName)) return;
+    
+    // If user is not authenticated, redirect to auth with trial intent
+    if (!user) {
+      navigate('/auth', { state: { from: { pathname: '/dashboard' }, intent: 'trial' } });
+      return;
+    }
+    
+    // If user is on active trial, redirect to dashboard to continue using features
+    if (subscription?.subscription_status === 'trial' && trialInfo?.isActive) {
+      navigate('/dashboard');
+      toast({
+        title: `Welcome to your ${trialInfo.daysRemaining}-day trial!`,
+        description: "Continue building your resume and exploring features.",
+      });
+      return;
+    }
+    
+    // For expired trial or subscription, show upgrade message
+    if (subscription?.subscription_status === 'trial' || subscription?.subscription_status === 'expired') {
+      toast({
+        title: "Upgrade Coming Soon",
+        description: "Payment integration is coming soon. Continue using your trial features!",
+      });
+      navigate('/dashboard');
+      return;
+    }
+    
+    // Default fallback for other states
+    toast({
+      title: "Coming Soon",
+      description: "Payment integration is coming soon. Start your free trial now!",
+    });
   };
 
   const plans = [
@@ -165,16 +205,7 @@ const PricingSection = () => {
                   size="lg" 
                   className="w-full"
                   disabled={isCurrentPlan(plan.name)}
-                  onClick={() => {
-                    if (!user || isCurrentPlan(plan.name)) return;
-                    // Coming soon toast
-                    import('@/hooks/use-toast').then(({ toast }) => {
-                      toast({
-                        title: "Coming Soon",
-                        description: "Payment integration is coming soon. For now, enjoy your free trial!",
-                      });
-                    });
-                  }}
+                  onClick={() => handleButtonClick(plan.name)}
                 >
                   {isCurrentPlan(plan.name) ? (
                     <div className="flex items-center space-x-2">
@@ -205,13 +236,14 @@ const PricingSection = () => {
               key={index}
               className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer"
               onClick={() => {
-                // Coming soon toast
-                import('@/hooks/use-toast').then(({ toast }) => {
+                if (!user) {
+                  navigate('/auth', { state: { from: { pathname: '/dashboard' }, intent: 'trial' } });
+                } else {
                   toast({
                     title: "Coming Soon",
                     description: "Payment integration is coming soon. For now, enjoy your free trial!",
                   });
-                });
+                }
               }}
             >
               <CardContent className="p-0">
