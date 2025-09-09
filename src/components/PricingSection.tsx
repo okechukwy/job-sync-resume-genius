@@ -1,9 +1,36 @@
+import { Check, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PricingSection = () => {
+  const { user } = useAuth();
+  const { subscription, trialInfo } = useSubscription();
+  
+  const isCurrentPlan = (planName: string) => {
+    if (!subscription) return false;
+    return subscription.subscription_status === 'active' && subscription.subscription_plan === planName.toLowerCase();
+  };
+
+  const getButtonText = (planName: string) => {
+    if (!user) return "Start Free Trial";
+    
+    if (isCurrentPlan(planName)) return "Current Plan";
+    
+    if (subscription?.subscription_status === 'trial') {
+      return "Upgrade";
+    }
+    
+    if (subscription?.subscription_status === 'expired') {
+      return "Reactivate";
+    }
+    
+    return "Start Free Trial";
+  };
+
   const plans = [
     {
       name: "Starter",
@@ -134,13 +161,21 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <Link to={`/checkout?plan=${plan.name.toLowerCase()}&price=${plan.price}&period=${plan.period}`}>
+                <Link to={`/checkout?plan=${plan.name.toLowerCase()}&price=${plan.price}&type=${subscription?.subscription_status === 'trial' ? 'upgrade' : 'new'}`}>
                   <Button 
                     variant={plan.buttonVariant} 
                     size="lg" 
                     className="w-full"
+                    disabled={isCurrentPlan(plan.name)}
                   >
-                    {plan.buttonText}
+                    {isCurrentPlan(plan.name) ? (
+                      <div className="flex items-center space-x-2">
+                        <Crown className="h-4 w-4" />
+                        <span>Current Plan</span>
+                      </div>
+                    ) : (
+                      <span>{getButtonText(plan.name)}</span>
+                    )}
                   </Button>
                 </Link>
               </CardContent>
