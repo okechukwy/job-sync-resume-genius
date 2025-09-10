@@ -81,6 +81,17 @@ export const ContentRenderer = ({
     }
   };
 
+  const convertYouTubeUrl = (url: string) => {
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    } else if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return url;
+  };
+
   const renderVideoContent = () => (
     <div className="space-y-4">
       {/* Rich video content with text and objectives */}
@@ -114,29 +125,43 @@ export const ContentRenderer = ({
       {/* Video player or placeholder */}
       {section.content_url ? (
         <div className="space-y-3">
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+          <div className="aspect-video bg-muted rounded-lg overflow-hidden border">
             {section.content_url.includes('youtube.com') || section.content_url.includes('youtu.be') ? (
               <iframe
-                src={section.content_url}
+                src={convertYouTubeUrl(section.content_url)}
                 className="w-full h-full"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={section.title}
               />
+            ) : section.content_url.includes('vimeo.com') ? (
+              <iframe
+                src={section.content_url}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title={section.title}
+              />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <PlayCircle className="h-12 w-12 mx-auto text-primary" />
-                  <p className="text-sm text-muted-foreground">Video Content</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => window.open(section.content_url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Watch Video
-                  </Button>
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+                <div className="text-center space-y-3">
+                  <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto">
+                    <PlayCircle className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">External Video Content</p>
+                    <p className="text-xs text-muted-foreground mb-3">Click to open in new tab</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(section.content_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Watch Video
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -256,17 +281,29 @@ export const ContentRenderer = ({
 
         <div className="space-y-3">
           {section.content_url ? (
-            <Button 
-              onClick={() => window.open(section.content_url, '_blank')}
-              className="w-full"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Launch Interactive Exercise
-            </Button>
+            <div className="p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h5 className="font-medium">Ready to Practice</h5>
+                  <p className="text-sm text-muted-foreground">Interactive exercise available</p>
+                </div>
+                <Button 
+                  onClick={() => window.open(section.content_url, '_blank')}
+                  size="sm"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Launch
+                </Button>
+              </div>
+            </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Target className="h-8 w-8 mx-auto mb-2" />
+            <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
+              <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">Interactive exercise coming soon</p>
+              <p className="text-xs mt-1">Continue with other sections for now</p>
             </div>
           )}
         </div>
