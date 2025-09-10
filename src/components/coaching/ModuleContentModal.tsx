@@ -35,10 +35,10 @@ interface LearningModule {
   title: string;
   description: string;
   content_type: string;
-  estimated_duration_minutes: number;
+  duration_minutes: number;
   learning_objectives: string[];
   prerequisites: string[];
-  difficulty_level: string;
+  difficulty_level?: string;
   order_index: number;
   content_sections?: ContentSection[];
 }
@@ -149,12 +149,14 @@ export const ModuleContentModal = ({
               <div className="flex items-center gap-3 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {module.estimated_duration_minutes} min
+                  {module.duration_minutes} min
                 </Badge>
-                <Badge variant="outline">
-                  <div className={`w-2 h-2 rounded-full ${getDifficultyColor(module.difficulty_level)} mr-1`} />
-                  {module.difficulty_level}
-                </Badge>
+                {module.difficulty_level && (
+                  <Badge variant="outline">
+                    <div className={`w-2 h-2 rounded-full ${getDifficultyColor(module.difficulty_level)} mr-1`} />
+                    {module.difficulty_level}
+                  </Badge>
+                )}
                 {isCompleted && (
                   <Badge variant="default" className="bg-green-500">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
