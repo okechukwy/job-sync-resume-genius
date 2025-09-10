@@ -125,7 +125,7 @@ export const ContentRenderer = ({
       {/* Video player or placeholder */}
       {section.content_url ? (
         <div className="space-y-3">
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden border">
+          <div className="w-full max-h-[400px] bg-muted rounded-lg overflow-hidden border" style={{ aspectRatio: '16/9' }}>
             {section.content_url.includes('youtube.com') || section.content_url.includes('youtu.be') ? (
               <iframe
                 src={convertYouTubeUrl(section.content_url)}
@@ -168,7 +168,7 @@ export const ContentRenderer = ({
           </div>
         </div>
       ) : (
-        <div className="aspect-video bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
+        <div className="w-full h-64 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
           <div className="text-center space-y-2">
             <PlayCircle className="h-12 w-12 mx-auto text-primary" />
             <p className="text-sm text-muted-foreground">Interactive video content coming soon</p>

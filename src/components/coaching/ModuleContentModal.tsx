@@ -138,8 +138,8 @@ export const ModuleContentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogTitle className="flex items-center gap-3 text-xl">
@@ -171,130 +171,134 @@ export const ModuleContentModal = ({
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Progress Section */}
-          {isStarted && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Your Progress</span>
-                  <span className="text-sm text-muted-foreground">{progressPercentage}%</span>
-                </div>
-                <Progress value={progressPercentage} className="h-2" />
-                {progress?.time_spent_minutes && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Time spent: {Math.round(progress.time_spent_minutes)} minutes
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="space-y-6 pr-2">
+            {/* Progress Section */}
+            {isStarted && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Your Progress</span>
+                    <span className="text-sm text-muted-foreground">{progressPercentage}%</span>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Module Description */}
-          <div>
-            <h3 className="text-lg font-semibold mb-2">About this module</h3>
-            <p className="text-muted-foreground">{module.description}</p>
-          </div>
-
-          {/* Learning Objectives */}
-          {module.learning_objectives && module.learning_objectives.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Learning Objectives</h3>
-              <ul className="space-y-2">
-                {module.learning_objectives.map((objective, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{objective}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Prerequisites */}
-          {module.prerequisites && module.prerequisites.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
-              <ul className="space-y-2">
-                {module.prerequisites.map((prerequisite, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{prerequisite}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Learning Content Sections */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Module Content</h3>
-            
-            {contentSections.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Progress Tracker Sidebar */}
-                <div className="lg:col-span-1">
-                  <SectionProgressTracker
-                    sections={contentSections}
-                    completedSections={completedSections}
-                    currentSection={currentSection}
-                    onSectionSelect={setCurrentSection}
-                  />
-                </div>
-
-                {/* Current Section Content */}
-                <div className="lg:col-span-2">
-                  {currentSectionData && (
-                    <ContentRenderer
-                      section={currentSectionData}
-                      isActive={true}
-                      isCompleted={completedSections.has(currentSectionData.id)}
-                      onComplete={handleSectionComplete}
-                      progress={currentSection === 0 ? progressPercentage : 0}
-                    />
+                  <Progress value={progressPercentage} className="h-2" />
+                  {progress?.time_spent_minutes && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Time spent: {Math.round(progress.time_spent_minutes)} minutes
+                    </div>
                   )}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-3" />
-                <p>No content sections available yet.</p>
-                <p className="text-sm">Content will be added soon.</p>
-              </div>
+                </CardContent>
+              </Card>
             )}
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
-            {!isStarted ? (
-              <Button 
-                onClick={handleStart} 
-                disabled={isUpdating}
-                className="flex-1"
-              >
-                <PlayCircle className="h-4 w-4 mr-2" />
-                Start Module
-              </Button>
-            ) : !isCompleted ? (
-              <Button 
-                onClick={handleComplete} 
-                disabled={isUpdating}
-                className="flex-1"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Mark as Complete
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={onClose} className="flex-1">
-                Close
-              </Button>
+            {/* Module Description */}
+            <div>
+              <h3 className="text-lg font-semibold mb-2">About this module</h3>
+              <p className="text-muted-foreground">{module.description}</p>
+            </div>
+
+            {/* Learning Objectives */}
+            {module.learning_objectives && module.learning_objectives.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Learning Objectives</h3>
+                <ul className="space-y-2">
+                  {module.learning_objectives.map((objective, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">{objective}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+
+            {/* Prerequisites */}
+            {module.prerequisites && module.prerequisites.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Prerequisites</h3>
+                <ul className="space-y-2">
+                  {module.prerequisites.map((prerequisite, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <BookOpen className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground">{prerequisite}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Learning Content Sections */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Module Content</h3>
+              
+              {contentSections.length > 0 ? (
+                <div className="flex flex-col lg:flex-row gap-6 min-h-0">
+                  {/* Progress Tracker Sidebar */}
+                  <div className="w-full lg:w-80 flex-shrink-0">
+                    <div className="sticky top-0">
+                      <SectionProgressTracker
+                        sections={contentSections}
+                        completedSections={completedSections}
+                        currentSection={currentSection}
+                        onSectionSelect={setCurrentSection}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Current Section Content */}
+                  <div className="flex-1 min-w-0">
+                    {currentSectionData && (
+                      <ContentRenderer
+                        section={currentSectionData}
+                        isActive={true}
+                        isCompleted={completedSections.has(currentSectionData.id)}
+                        onComplete={handleSectionComplete}
+                        progress={currentSection === 0 ? progressPercentage : 0}
+                      />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-3" />
+                  <p>No content sections available yet.</p>
+                  <p className="text-sm">Content will be added soon.</p>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex-shrink-0 flex gap-3 pt-4 border-t mt-6">
+          {!isStarted ? (
+            <Button 
+              onClick={handleStart} 
+              disabled={isUpdating}
+              className="flex-1"
+            >
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Start Module
+            </Button>
+          ) : !isCompleted ? (
+            <Button 
+              onClick={handleComplete} 
+              disabled={isUpdating}
+              className="flex-1"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Mark as Complete
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              Close
+            </Button>
+          )}
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
