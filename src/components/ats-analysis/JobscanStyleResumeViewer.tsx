@@ -36,11 +36,17 @@ export const JobscanStyleResumeViewer = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
+    console.log('📄 JobscanStyleResumeViewer: Content updated, length:', content.length);
     if (content) {
       const parsed = parseResumeContent(content);
       setStructuredResume(parsed);
+      console.log('✨ Resume parsed successfully:', parsed.header.name);
     }
   }, [content]);
+
+  useEffect(() => {
+    console.log('🎨 Applied suggestions updated in viewer:', appliedSuggestions.length);
+  }, [appliedSuggestions]);
 
   const handleEditClick = () => {
     setEditContent(content);
