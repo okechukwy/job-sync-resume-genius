@@ -17,14 +17,12 @@ import {
   Filter,
   ChevronRight,
   Undo,
-  Redo,
-  FileText
+  Redo
 } from "lucide-react";
 import { ATSOptimizationResult } from "@/services/openaiServices";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
 import { SuggestionsPanel } from "./SuggestionsPanel";
 import { JobscanStyleResumeViewer } from "./JobscanStyleResumeViewer";
-import { OriginalCVDisplay } from "./OriginalCVDisplay";
 import { toast } from "sonner";
 import { parseResumeContent, convertStructuredToText } from "@/utils/enhancedResumeParser";
 
@@ -54,13 +52,7 @@ export const UnifiedATSOptimizer = ({
   const [currentScore, setCurrentScore] = useState(analysis.atsScore);
   
   const handleApplySuggestion = (suggestionId: string, originalText: string, newText: string, section: string) => {
-    console.log('🔧 Applying suggestion:', { 
-      suggestionId, 
-      originalText: originalText?.substring(0, 100), 
-      newText: newText?.substring(0, 100), 
-      section,
-      currentContentLength: currentContent.length
-    });
+    console.log('Applying suggestion:', { suggestionId, originalText, newText, section });
     
     // Save current state to undo stack
     setUndoStack(prev => [...prev, currentContent]);
@@ -68,177 +60,148 @@ export const UnifiedATSOptimizer = ({
     
     // Apply the suggestion with improved content updating
     const updatedContent = applySuggestionToContent(currentContent, originalText, newText, section);
+    console.log('Content after applying suggestion:', updatedContent.substring(0, 200) + '...');
     
-    console.log('📝 Content update result:', {
-      originalLength: currentContent.length,
-      updatedLength: updatedContent.length,
-      contentChanged: currentContent !== updatedContent,
-      preview: updatedContent.substring(0, 200) + '...'
+    setCurrentContent(updatedContent);
+    
+    // Track applied suggestion
+    const appliedSuggestion: AppliedSuggestion = {
+      id: suggestionId,
+      originalText,
+      newText,
+      section,
+      timestamp: Date.now()
+    };
+    setAppliedSuggestions(prev => {
+      const newSuggestions = [...prev, appliedSuggestion];
+      console.log('Total applied suggestions:', newSuggestions.length);
+      return newSuggestions;
     });
     
-    if (currentContent !== updatedContent) {
-      setCurrentContent(updatedContent);
-      
-      // Track applied suggestion
-      const appliedSuggestion: AppliedSuggestion = {
-        id: suggestionId,
-        originalText,
-        newText,
-        section,
-        timestamp: Date.now()
-      };
-      setAppliedSuggestions(prev => {
-        const newSuggestions = [...prev, appliedSuggestion];
-        console.log('✅ Total applied suggestions:', newSuggestions.length);
-        return newSuggestions;
-      });
-      
-      // Update score optimistically
-      setCurrentScore(prev => Math.min(100, prev + 2));
-      
-      toast.success(`Suggestion applied successfully! (${section})`);
-    } else {
-      console.warn('⚠️ Suggestion did not change content');
-      toast.warning("Suggestion could not be applied - text not found in resume");
-    }
+    // Update score optimistically
+    setCurrentScore(prev => Math.min(100, prev + 2));
+    
+    toast.success("Suggestion applied successfully!");
   };
 
   const applySuggestionToContent = (content: string, originalText: string, newText: string, section: string): string => {
-    console.log('Applying suggestion:', { originalText, newText, section, contentLength: content.length });
+    console.log('Applying suggestion:', { originalText, newText, section });
     
-    // Input validation
-    if (!originalText || !newText) {
-      console.warn('Missing originalText or newText, skipping suggestion');
-      return content;
-    }
+    // Parse the content into structured format for more accurate replacements
+    const structuredResume = parseResumeContent(content);
+    let updated = false;
     
-    // Clean and normalize text for better matching
-    const cleanOriginal = originalText.trim();
-    const cleanNew = newText.trim();
-    
-    // Strategy 1: Direct exact text replacement
-    if (content.includes(cleanOriginal)) {
-      const updatedContent = content.replace(cleanOriginal, cleanNew);
-      console.log('✓ Applied using exact match');
+    // Strategy 1: Direct text replacement in raw content
+    if (content.includes(originalText)) {
+      const updatedContent = content.replace(originalText, newText);
+      console.log('Applied using exact match');
       return updatedContent;
     }
     
-    // Strategy 2: Case-insensitive global replacement
-    const regex = new RegExp(cleanOriginal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    // Strategy 2: Case-insensitive replacement
+    const regex = new RegExp(originalText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     if (regex.test(content)) {
-      const updatedContent = content.replace(regex, cleanNew);
-      console.log('✓ Applied using case-insensitive match');
+      const updatedContent = content.replace(regex, newText);
+      console.log('Applied using case-insensitive match');
       return updatedContent;
     }
     
-    // Strategy 3: Word-by-word fuzzy matching
-    const originalWords = cleanOriginal.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    // Strategy 3: Smart section-based replacement
+    const sectionLower = section.toLowerCase();
+    
+    if (sectionLower.includes('experience') || sectionLower.includes('work')) {
+      // Try to find and update experience entries
+      structuredResume.sections.experience.forEach(exp => {
+        if (exp.title.includes(originalText) || exp.company.includes(originalText)) {
+          if (exp.title.includes(originalText)) exp.title = exp.title.replace(originalText, newText);
+          if (exp.company.includes(originalText)) exp.company = exp.company.replace(originalText, newText);
+          updated = true;
+        }
+        exp.responsibilities.forEach((resp, index) => {
+          if (resp.includes(originalText)) {
+            exp.responsibilities[index] = resp.replace(originalText, newText);
+            updated = true;
+          }
+        });
+      });
+    }
+    
+    if (sectionLower.includes('summary') || sectionLower.includes('objective')) {
+      if (structuredResume.sections.summary && structuredResume.sections.summary.includes(originalText)) {
+        structuredResume.sections.summary = structuredResume.sections.summary.replace(originalText, newText);
+        updated = true;
+      }
+    }
+    
+    if (sectionLower.includes('skill')) {
+      structuredResume.sections.skills.forEach((skill, index) => {
+        if (skill.includes(originalText)) {
+          structuredResume.sections.skills[index] = skill.replace(originalText, newText);
+          updated = true;
+        }
+      });
+    }
+    
+    if (updated) {
+      const updatedContent = convertStructuredToText(structuredResume);
+      console.log('Applied using structured replacement');
+      return updatedContent;
+    }
+    
+    // Strategy 4: Fuzzy matching with word-based approach
+    const words = originalText.split(/\s+/);
     const contentLines = content.split('\n');
     
     for (let i = 0; i < contentLines.length; i++) {
       const line = contentLines[i];
-      const lineLower = line.toLowerCase();
+      const matchedWords = words.filter(word => 
+        line.toLowerCase().includes(word.toLowerCase()) && word.length > 2
+      );
       
-      // Check if this line contains most of the original text words
-      const matchedWords = originalWords.filter(word => lineLower.includes(word));
-      const matchPercentage = matchedWords.length / originalWords.length;
-      
-      if (matchPercentage >= 0.6) {
-        // Try exact replacement first
-        if (line.includes(cleanOriginal)) {
-          contentLines[i] = line.replace(cleanOriginal, cleanNew);
-        } else {
-          // Replace the entire line with the new text
-          contentLines[i] = cleanNew;
-        }
-        console.log(`✓ Applied using fuzzy match on line ${i} (${Math.round(matchPercentage * 100)}% match)`);
+      if (matchedWords.length >= Math.ceil(words.length * 0.6)) {
+        contentLines[i] = line.includes(originalText) ? 
+          line.replace(originalText, newText) : 
+          `${line} ${newText}`.trim();
+        console.log('Applied using fuzzy match on line:', i);
         return contentLines.join('\n');
       }
     }
     
-    // Strategy 4: Partial word matching and replacement
+    // Strategy 5: Append to relevant section
+    console.log('No direct match found, appending to content');
     const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Find partial matches in bullets or sentences
-      const partialMatch = originalWords.find(word => 
-        word.length > 3 && line.toLowerCase().includes(word)
-      );
-      
-      if (partialMatch && originalWords.length <= 3) {
-        // For short suggestions, replace the line if it contains key words
-        lines[i] = line.includes(cleanOriginal) ? 
-          line.replace(cleanOriginal, cleanNew) : 
-          cleanNew;
-        console.log(`✓ Applied using partial match on line ${i}`);
-        return lines.join('\n');
-      }
-    }
+    const sectionHeaders = [
+      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE',
+      'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE',
+      'EDUCATION', 'QUALIFICATIONS',
+      'SKILLS', 'CORE COMPETENCIES', 'TECHNICAL SKILLS'
+    ];
     
-    // Strategy 5: Section-based intelligent insertion
-    const sectionLower = section.toLowerCase();
-    const contentLines2 = content.split('\n');
+    // Find appropriate section to append to
     let insertIndex = -1;
-    
-    // Define section patterns
-    const sectionPatterns = {
-      experience: /(?:experience|work|employment|professional)/i,
-      summary: /(?:summary|objective|profile|about)/i,
-      skills: /(?:skills|competencies|expertise|technical)/i,
-      education: /(?:education|qualifications|academic)/i,
-      projects: /(?:projects|portfolio|accomplishments)/i
-    };
-    
-    // Find the relevant section
-    for (let i = 0; i < contentLines2.length; i++) {
-      const line = contentLines2[i].trim();
-      
-      // Check if this line is a section header
-      const isHeader = line.length < 50 && 
-        (line.toUpperCase() === line || line.includes(':')) &&
-        Object.values(sectionPatterns).some(pattern => pattern.test(line));
-      
-      if (isHeader) {
-        // Check if this header matches our target section
-        const matchesSection = sectionLower.includes('experience') && sectionPatterns.experience.test(line) ||
-                              sectionLower.includes('summary') && sectionPatterns.summary.test(line) ||
-                              sectionLower.includes('skill') && sectionPatterns.skills.test(line) ||
-                              sectionLower.includes('education') && sectionPatterns.education.test(line) ||
-                              sectionLower.includes('project') && sectionPatterns.projects.test(line);
-        
-        if (matchesSection) {
-          // Find a good insertion point in this section
-          insertIndex = i + 1;
-          
-          // Skip to the first content line or bullet point
-          while (insertIndex < contentLines2.length && 
-                 contentLines2[insertIndex].trim() === '') {
-            insertIndex++;
-          }
-          
-          // Insert after the first existing bullet/content line
-          if (insertIndex < contentLines2.length && 
-              contentLines2[insertIndex].trim().startsWith('•')) {
-            insertIndex++;
-          }
-          
-          break;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].toUpperCase().trim();
+      if (sectionHeaders.some(header => 
+        line.includes(header) || 
+        line.includes(section.toUpperCase())
+      )) {
+        insertIndex = i + 1;
+        // Find the end of this section
+        while (insertIndex < lines.length && 
+               !sectionHeaders.some(header => lines[insertIndex].toUpperCase().includes(header))) {
+          insertIndex++;
         }
+        break;
       }
     }
     
-    // Insert the new content
-    if (insertIndex > -1 && insertIndex < contentLines2.length) {
-      contentLines2.splice(insertIndex, 0, `• ${cleanNew}`);
-      console.log(`✓ Applied by inserting into ${section} section at line ${insertIndex}`);
-      return contentLines2.join('\n');
+    if (insertIndex > -1) {
+      lines.splice(insertIndex, 0, newText);
+    } else {
+      lines.push('', newText);
     }
     
-    // Strategy 6: Fallback - append to end with section label
-    console.log('⚠ No good insertion point found, appending to end');
-    const fallbackContent = `${content}\n\n${section.toUpperCase()}:\n• ${cleanNew}`;
-    return fallbackContent;
+    return lines.join('\n');
   };
 
   const calculateSimilarity = (str1: string, str2: string): number => {
@@ -385,31 +348,22 @@ export const UnifiedATSOptimizer = ({
         </CardHeader>
       </Card>
 
-      {/* Three Panel Layout: Original CV | Suggestions | Optimized CV */}
-      <div className="grid grid-cols-12 gap-6 min-h-[800px]">
-        {/* Left Panel - Original CV Display (3 columns) */}
-        <div className="col-span-3">
-          <OriginalCVDisplay content={originalContent} />
-        </div>
+      {/* Main Content Area */}
+      <div className="grid grid-cols-2 gap-6 min-h-[800px]">
+        {/* Left Panel - Suggestions */}
+        <SuggestionsPanel
+          analysis={analysis}
+          appliedSuggestions={appliedSuggestions}
+          onApplySuggestion={handleApplySuggestion}
+        />
         
-        {/* Middle Panel - Suggestions (4 columns) */}
-        <div className="col-span-4">
-          <SuggestionsPanel
-            analysis={analysis}
-            appliedSuggestions={appliedSuggestions}
-            onApplySuggestion={handleApplySuggestion}
-          />
-        </div>
-        
-        {/* Right Panel - Optimized Resume (5 columns) */}
-        <div className="col-span-5">
-          <JobscanStyleResumeViewer
-            content={currentContent}
-            originalContent={originalContent}
-            onChange={handleContentChange}
-            appliedSuggestions={appliedSuggestions}
-          />
-        </div>
+        {/* Right Panel - Jobscan Style Resume Viewer */}
+        <JobscanStyleResumeViewer
+          content={currentContent}
+          originalContent={originalContent}
+          onChange={handleContentChange}
+          appliedSuggestions={appliedSuggestions}
+        />
       </div>
     </div>
   );

@@ -257,23 +257,17 @@ export const SuggestionsPanel = ({
                               size="sm"
                               variant={applied ? "outline" : "default"}
                               disabled={applied}
-                              onClick={() => {
-                                console.log('🎯 Button clicked for suggestion:', {
-                                  suggestionId,
-                                  current: suggestion.current?.substring(0, 50),
-                                  improved: suggestion.improved?.substring(0, 50),
-                                  section
-                                });
+                              onClick={() => 
                                 onApplySuggestion(
                                   suggestionId,
                                   suggestion.current,
                                   suggestion.improved,
                                   section
-                                );
-                              }}
+                                )
+                              }
                               className="w-full"
                             >
-                              {applied ? "✓ Applied" : "Apply Suggestion"}
+                              {applied ? "Applied" : "Apply Suggestion"}
                             </Button>
                           </div>
                         </div>
