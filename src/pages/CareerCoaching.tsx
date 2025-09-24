@@ -22,7 +22,6 @@ import {
   BarChart3,
   Star,
   ArrowRight,
-  PlayCircle,
   FileText,
   Brain,
   Plus,
@@ -572,7 +571,7 @@ const CareerCoaching = () => {
                                      {moduleStatus === 'completed' ? (
                                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                                      ) : moduleStatus === 'in_progress' ? (
-                                       <PlayCircle className="h-5 w-5 text-blue-500" />
+                                       <Clock className="h-5 w-5 text-blue-500" />
                                      ) : (
                                        <BookOpen className="h-5 w-5 text-primary" />
                                      )}
@@ -644,12 +643,12 @@ const CareerCoaching = () => {
                                    </>
                                  ) : moduleStatus === 'in_progress' ? (
                                    <>
-                                     <PlayCircle className="h-4 w-4 mr-2" />
+                                      <ArrowRight className="h-4 w-4 mr-2" />
                                      Continue Module
                                    </>
                                  ) : (
                                    <>
-                                     <PlayCircle className="h-4 w-4 mr-2" />
+                                      <BookOpen className="h-4 w-4 mr-2" />
                                      Start Module
                                    </>
                                  )}
@@ -707,7 +706,7 @@ const CareerCoaching = () => {
                             ))}
                           </div>
                           <Button className="w-full">
-                            <PlayCircle className="h-4 w-4 mr-2" />
+                            <BookOpen className="h-4 w-4 mr-2" />
                             Start Module
                           </Button>
                         </CardContent>

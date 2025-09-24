@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { ContentRenderer } from './ContentRenderer';
 import { SectionProgressTracker } from './SectionProgressTracker';
 import { 
-  PlayCircle, 
   FileText, 
   Clock, 
   CheckCircle2, 
@@ -21,7 +20,7 @@ import {
 interface ContentSection {
   id: string;
   title: string;
-  type: 'video' | 'article' | 'interactive' | 'assessment';
+  type: 'article' | 'interactive' | 'assessment';
   content_url?: string;
   content?: any;
   duration_minutes: number;
@@ -89,10 +88,10 @@ export const ModuleContentModal = ({
     if (!contentType) return <FileText className="h-5 w-5" />;
     
     switch (contentType.toLowerCase()) {
-      case 'video':
-        return <PlayCircle className="h-5 w-5" />;
       case 'interactive':
         return <Target className="h-5 w-5" />;
+      case 'assessment':
+        return <CheckCircle2 className="h-5 w-5" />;
       default:
         return <FileText className="h-5 w-5" />;
     }
@@ -279,7 +278,7 @@ export const ModuleContentModal = ({
               disabled={isUpdating}
               className="flex-1"
             >
-              <PlayCircle className="h-4 w-4 mr-2" />
+              <BookOpen className="h-4 w-4 mr-2" />
               Start Module
             </Button>
           ) : !isCompleted ? (

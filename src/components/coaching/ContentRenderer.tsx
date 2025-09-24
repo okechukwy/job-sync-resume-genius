@@ -4,21 +4,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
-  PlayCircle, 
   FileText, 
   Clock, 
   CheckCircle2, 
   Target,
   BookOpen,
   ExternalLink,
-  Video,
   MessageSquare
 } from 'lucide-react';
 
 interface ContentSection {
   id: string;
   title: string;
-  type: 'video' | 'article' | 'interactive' | 'assessment';
+  type: 'article' | 'interactive' | 'assessment';
   content_url?: string;
   content?: {
     text?: string;
@@ -57,8 +55,6 @@ export const ContentRenderer = ({
 }: ContentRendererProps) => {
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'video':
-        return <Video className="h-5 w-5" />;
       case 'interactive':
         return <Target className="h-5 w-5" />;
       case 'assessment':
@@ -70,8 +66,6 @@ export const ContentRenderer = ({
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'video':
-        return 'bg-primary';
       case 'interactive':
         return 'bg-accent';
       case 'assessment':
@@ -81,113 +75,6 @@ export const ContentRenderer = ({
     }
   };
 
-  const convertYouTubeUrl = (url: string) => {
-    if (url.includes('youtube.com/watch?v=')) {
-      const videoId = url.split('v=')[1]?.split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    } else if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    return url;
-  };
-
-  const renderVideoContent = () => (
-    <div className="space-y-4">
-      {/* Rich video content with text and objectives */}
-      {section.content && (
-        <div className="space-y-4">
-          {section.content.text && (
-            <div className="prose prose-sm max-w-none">
-              <p className="text-foreground">{section.content.text}</p>
-            </div>
-          )}
-          
-          {section.content.objectives && section.content.objectives.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Learning Objectives
-              </h4>
-              <ul className="space-y-1">
-                {section.content.objectives.map((objective, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    {objective}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Video player or placeholder */}
-      {section.content_url ? (
-        <div className="space-y-3">
-          <div className="w-full max-h-[400px] bg-muted rounded-lg overflow-hidden border" style={{ aspectRatio: '16/9' }}>
-            {section.content_url.includes('youtube.com') || section.content_url.includes('youtu.be') ? (
-              <iframe
-                src={convertYouTubeUrl(section.content_url)}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={section.title}
-              />
-            ) : section.content_url.includes('vimeo.com') ? (
-              <iframe
-                src={section.content_url}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                title={section.title}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-                <div className="text-center space-y-3">
-                  <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto">
-                    <PlayCircle className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">External Video Content</p>
-                    <p className="text-xs text-muted-foreground mb-3">Click to open in new tab</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(section.content_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Watch Video
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="w-full h-64 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
-          <div className="text-center space-y-2">
-            <PlayCircle className="h-12 w-12 mx-auto text-primary" />
-            <p className="text-sm text-muted-foreground">Interactive video content coming soon</p>
-            <p className="text-xs text-muted-foreground">Continue with the learning materials above</p>
-          </div>
-        </div>
-      )}
-
-      {progress > 0 && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progress</span>
-            <span>{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-      )}
-    </div>
-  );
 
   const renderArticleContent = () => (
     <div className="space-y-4">
@@ -367,8 +254,6 @@ export const ContentRenderer = ({
 
   const renderContent = () => {
     switch (section.type) {
-      case 'video':
-        return renderVideoContent();
       case 'article':
         return renderArticleContent();
       case 'interactive':
