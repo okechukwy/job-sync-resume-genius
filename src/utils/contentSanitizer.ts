@@ -1,5 +1,6 @@
 // Content sanitization utilities for resume processing
 // Comprehensive cleaning for Word artifacts, binary data, and corrupted content
+import DOMPurify from 'dompurify';
 
 export interface ContentQuality {
   isValid: boolean;
@@ -134,4 +135,60 @@ export const sanitizeForEditor = (content: string): string => {
     .join('\n')
     .replace(/\n{3,}/g, '\n\n') // Limit consecutive blank lines
     .trim();
+};
+
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * Uses DOMPurify for secure HTML cleaning while preserving formatting
+ */
+export const sanitizeHTML = (html: string): string => {
+  if (!html || typeof html !== 'string') return '';
+  
+  // Configure DOMPurify for resume content
+  const config = {
+    // Allow safe formatting tags
+    ALLOWED_TAGS: [
+      'p', 'div', 'span', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'tr', 'td', 'th', 'thead', 
+      'tbody', 'mark', 'hr', 'pre', 'code', 'blockquote', 'sup', 'sub'
+    ],
+    // Allow safe formatting attributes
+    ALLOWED_ATTR: [
+      'class', 'style', 'id', 'data-*'
+    ],
+    // Allow safe CSS properties for styling
+    ALLOWED_CSS: [
+      'color', 'background-color', 'font-size', 'font-weight', 'font-style',
+      'text-decoration', 'text-align', 'margin', 'padding', 'border',
+      'border-radius', 'display', 'width', 'height', 'max-width', 'max-height'
+    ],
+    // Remove script-related attributes
+    FORBID_ATTR: ['onload', 'onerror', 'onclick', 'onmouseover', 'onfocus'],
+    // Remove dangerous protocols
+    FORBID_PROTOCOLS: ['javascript', 'vbscript', 'data'],
+    // Keep whitespace
+    KEEP_CONTENT: true,
+    // Return a DOM fragment instead of HTML string for better security
+    RETURN_DOM_FRAGMENT: false,
+    RETURN_DOM_IMPORT: false
+  };
+  
+  return DOMPurify.sanitize(html, config);
+};
+
+/**
+ * Sanitize resume content that may contain HTML highlighting
+ * Combines text sanitization with HTML security
+ */
+export const sanitizeResumeHTML = (content: string): string => {
+  // First apply basic content sanitization for Word artifacts
+  const textCleaned = sanitizeResumeContent(content);
+  
+  // If content contains HTML tags, sanitize them securely
+  if (textCleaned.includes('<') && textCleaned.includes('>')) {
+    return sanitizeHTML(textCleaned);
+  }
+  
+  // Otherwise return the text-sanitized content
+  return textCleaned;
 };

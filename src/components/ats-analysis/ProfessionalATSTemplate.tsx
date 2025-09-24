@@ -10,6 +10,7 @@ import {
   Calendar
 } from "lucide-react";
 import { StructuredResume, ExperienceBlock, EducationBlock, HeaderData } from "@/utils/resumeStructureParser";
+import { sanitizeHTML } from "@/utils/contentSanitizer";
 
 interface AppliedSuggestion {
   id: string;
@@ -32,7 +33,7 @@ export const ProfessionalATSTemplate = memo(({
 }: ProfessionalATSTemplateProps) => {
   
   const highlightChanges = (text: string): string => {
-    if (!showChanges || !appliedSuggestions.length || !text) return text;
+    if (!showChanges || !appliedSuggestions.length || !text) return sanitizeHTML(text);
     
     let highlightedText = text;
     console.log('Highlighting changes in text:', text.substring(0, 50) + '...');
@@ -50,7 +51,7 @@ export const ProfessionalATSTemplate = memo(({
       }
     });
     
-    return highlightedText;
+    return sanitizeHTML(highlightedText);
   };
 
   const renderHeader = (data: HeaderData) => (

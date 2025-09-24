@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
+import { sanitizeResumeHTML } from "@/utils/contentSanitizer";
 
 interface CVDisplayProps {
   enhancedResult: EnhancedCVResult;
@@ -20,7 +21,7 @@ const CVDisplay = ({ enhancedResult }: CVDisplayProps) => {
           {enhancedResult.isHtmlContent ? (
             <div 
               className="cv-preview-html"
-              dangerouslySetInnerHTML={{ __html: enhancedResult.resumeContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeResumeHTML(enhancedResult.resumeContent) }}
             />
           ) : (
             <div className="cv-preview-text">
