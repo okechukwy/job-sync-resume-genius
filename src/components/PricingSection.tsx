@@ -6,6 +6,7 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 
 const PricingSection = () => {
   const { user } = useAuth();
@@ -121,7 +122,7 @@ const PricingSection = () => {
         "Personal branding tools",
         "LinkedIn optimization",
         "Career coaching insights",
-        "White-label exports",
+        ...(isFeatureEnabled('enableWhiteLabel') ? ["White-label exports"] : []),
         "24/7 priority support"
       ],
       buttonText: "Go Premium",
