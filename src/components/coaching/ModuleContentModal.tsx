@@ -77,9 +77,13 @@ export const ModuleContentModal = ({
 
   if (!module) return null;
 
-  const isStarted = progress?.status === 'in_progress' || progress?.status === 'completed';
-  const isCompleted = progress?.status === 'completed';
+  // A module is truly "started" if user has meaningful progress or completed sections
+  // Initial 10% progress from just opening modal doesn't count as "started"
   const progressPercentage = progress?.progress_percentage || 0;
+  const hasCompletedSections = completedSections.size > 0;
+  const hasMeaningfulProgress = progressPercentage > 10;
+  const isStarted = progress?.status === 'completed' || hasMeaningfulProgress || hasCompletedSections;
+  const isCompleted = progress?.status === 'completed';
   
   // Normalize content_sections to handle both camelCase and snake_case data
   const normalizeContentSections = (sections: any): ContentSection[] => {
@@ -327,6 +331,7 @@ export const ModuleContentModal = ({
               onClick={handleComplete} 
               disabled={isUpdating}
               className="flex-1"
+              variant="outline"
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Mark as Complete
