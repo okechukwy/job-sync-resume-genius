@@ -50,3 +50,12 @@ verify_jwt = true
 
 [functions.job-description-extractor]
 verify_jwt = false
+
+[functions.security-monitor]
+verify_jwt = false
+
+[functions.data-encryption]
+verify_jwt = true
+
+[functions.privacy-analytics]
+verify_jwt = false
