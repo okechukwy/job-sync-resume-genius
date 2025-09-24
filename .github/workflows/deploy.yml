@@ -1,0 +1,54 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test --if-present
+        
+      - name: Build project
+        run: npm run build
+        env:
+          VITE_ENABLE_WHITE_LABEL: 'false'
+          VITE_ENABLE_ADVANCED_ANALYTICS: 'true'
+          VITE_ENABLE_BETA_FEATURES: 'false'
+        
+      - name: Deploy to Lovable
+        run: echo "Deploy to your production environment"
+        # Add your deployment commands here
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Supabase security checks
+        run: echo "Run database security validation"
+        # Add Supabase security validation commands
+        
+      - name: Validate environment variables
+        run: |
+          echo "Checking production environment configuration"
+          # Add environment validation logic
