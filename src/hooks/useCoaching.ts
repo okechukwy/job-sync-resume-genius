@@ -281,11 +281,19 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
       enrollmentId: string; 
       progressData: any;
     }) => userId ? CoachingService.updateModuleProgress(userId, moduleId, enrollmentId, progressData) : Promise.reject('No user ID'),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-module-progress', userId] });
       queryClient.invalidateQueries({ queryKey: ['user-enrollments', userId] });
       queryClient.invalidateQueries({ queryKey: ['overall-progress', userId] });
-      calculateAchievementsMutation.mutate(); // Auto-calculate achievements
+      
+      // Only calculate achievements for significant progress (≥50%) or completion
+      const progressPercentage = variables.progressData?.progress_percentage || 0;
+      const status = variables.progressData?.status;
+      
+      if (progressPercentage >= 50 || status === 'completed') {
+        calculateAchievementsMutation.mutate();
+      }
+      
       toast.success('Progress updated!');
     },
     onError: (error) => {
