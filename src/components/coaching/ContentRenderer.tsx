@@ -134,7 +134,8 @@ export const ContentRenderer = ({
         </div>
       )}
 
-      {section.content_url && (
+      {/* Only show external link if there's a URL and it's actually external content */}
+      {section.content_url && !section.content?.text && (
         <Button 
           variant="outline" 
           size="sm"
@@ -167,7 +168,20 @@ export const ContentRenderer = ({
         )}
 
         <div className="space-y-3">
-          {section.content_url ? (
+          {section.content?.instructions ? (
+            <div className="p-4 bg-background rounded-lg border">
+              <p className="text-sm mb-4">{section.content.instructions}</p>
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600"
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  Start Exercise
+                </Button>
+              </div>
+            </div>
+          ) : section.content_url ? (
             <div className="p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-primary/10 rounded-lg">

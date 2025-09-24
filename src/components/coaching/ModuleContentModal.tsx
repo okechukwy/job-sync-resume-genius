@@ -81,7 +81,27 @@ export const ModuleContentModal = ({
   const isCompleted = progress?.status === 'completed';
   const progressPercentage = progress?.progress_percentage || 0;
   
-  const contentSections = module.content_sections || [];
+  // Parse content_sections if it's a JSON string from the database
+  const parseContentSections = (sections: any): ContentSection[] => {
+    if (!sections) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(sections)) return sections;
+    
+    // If it's a JSON string, parse it
+    if (typeof sections === 'string') {
+      try {
+        return JSON.parse(sections);
+      } catch (error) {
+        console.error('Failed to parse content_sections:', error);
+        return [];
+      }
+    }
+    
+    return [];
+  };
+
+  const contentSections = parseContentSections(module.content_sections);
   const currentSectionData = contentSections[currentSection];
 
   const getContentIcon = (contentType: string) => {
