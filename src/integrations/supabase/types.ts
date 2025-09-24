@@ -172,6 +172,66 @@ export type Database = {
         }
         Relationships: []
       }
+      anonymized_analytics: {
+        Row: {
+          anonymized_data: Json | null
+          created_at: string
+          event_type: string
+          id: string
+          session_hash: string
+          user_segment: string | null
+        }
+        Insert: {
+          anonymized_data?: Json | null
+          created_at?: string
+          event_type: string
+          id?: string
+          session_hash: string
+          user_segment?: string | null
+        }
+        Update: {
+          anonymized_data?: Json | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          session_hash?: string
+          user_segment?: string | null
+        }
+        Relationships: []
+      }
+      api_rate_limits: {
+        Row: {
+          blocked_until: string | null
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          request_count: number | null
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string
+        }
+        Relationships: []
+      }
       application_stages: {
         Row: {
           application_id: string
@@ -706,6 +766,72 @@ export type Database = {
         }
         Relationships: []
       }
+      data_retention_policies: {
+        Row: {
+          auto_delete: boolean | null
+          created_at: string
+          data_type: string
+          id: string
+          last_cleanup_at: string | null
+          retention_period: unknown
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_delete?: boolean | null
+          created_at?: string
+          data_type: string
+          id?: string
+          last_cleanup_at?: string | null
+          retention_period?: unknown
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_delete?: boolean | null
+          created_at?: string
+          data_type?: string
+          id?: string
+          last_cleanup_at?: string | null
+          retention_period?: unknown
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      encrypted_data: {
+        Row: {
+          created_at: string
+          data_type: string
+          encrypted_content: string
+          encryption_key_id: string
+          id: string
+          iv: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          encrypted_content: string
+          encryption_key_id: string
+          id?: string
+          iv: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          encrypted_content?: string
+          encryption_key_id?: string
+          id?: string
+          iv?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       export_history: {
         Row: {
           client_name: string | null
@@ -1197,6 +1323,57 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_count: number | null
+          blocked_until: string | null
+          city: string | null
+          country_code: string | null
+          created_at: string
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: unknown
+          latitude: number | null
+          longitude: number | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          blocked_until?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address: unknown
+          latitude?: number | null
+          longitude?: number | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          blocked_until?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          longitude?: number | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       mentor_match_recommendations: {
         Row: {
           availability_requirements: Json
@@ -1552,6 +1729,48 @@ export type Database = {
         }
         Relationships: []
       }
+      security_anomalies: {
+        Row: {
+          anomaly_type: string
+          confidence_score: number | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity_level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anomaly_type: string
+          confidence_score?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity_level?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anomaly_type?: string
+          confidence_score?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity_level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string
@@ -1711,6 +1930,48 @@ export type Database = {
           trial_duration_days?: number | null
           trial_features_enabled?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trusted_devices: {
+        Row: {
+          city: string | null
+          country_code: string | null
+          created_at: string
+          device_fingerprint: string
+          device_name: string | null
+          id: string
+          ip_address: unknown | null
+          last_used_at: string | null
+          trusted: boolean | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_fingerprint: string
+          device_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_used_at?: string | null
+          trusted?: boolean | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_fingerprint?: string
+          device_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_used_at?: string | null
+          trusted?: boolean | null
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2326,6 +2587,19 @@ export type Database = {
       calculate_performance_metrics: {
         Args: { period?: string; user_uuid: string }
         Returns: undefined
+      }
+      check_brute_force_protection: {
+        Args: { p_email: string; p_ip_address: unknown }
+        Returns: Json
+      }
+      detect_login_anomaly: {
+        Args: {
+          p_country_code: string
+          p_ip_address: unknown
+          p_user_agent: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       get_resume_version_metrics: {
         Args: { resume_id: string }
