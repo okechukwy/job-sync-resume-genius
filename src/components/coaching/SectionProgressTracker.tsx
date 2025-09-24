@@ -12,7 +12,7 @@ import {
 interface ContentSection {
   id: string;
   title: string;
-  type: 'video' | 'article' | 'interactive' | 'assessment';
+  type: 'article' | 'interactive' | 'assessment';
   duration_minutes: number;
   is_required: boolean;
   order_index: number;
@@ -76,29 +76,29 @@ export const SectionProgressTracker = ({
               <button
                 key={section.id}
                 onClick={() => onSectionSelect(index)}
-                className={`w-full p-3 rounded-lg border transition-all text-left ${getStatusColor(section, index)}`}
+                className={`w-full p-3 rounded-lg border transition-all text-left overflow-hidden ${getStatusColor(section, index)}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     {getStatusIcon(section, index)}
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{section.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{section.title}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge 
                           variant="outline" 
-                          className="text-xs h-5"
+                          className="text-xs h-5 shrink-0"
                         >
                           <Clock className="h-3 w-3 mr-1" />
                           {section.duration_minutes}m
                         </Badge>
                         <Badge 
-                          variant={section.type === 'video' ? 'default' : 'secondary'} 
-                          className="text-xs h-5"
+                          variant="secondary" 
+                          className="text-xs h-5 shrink-0"
                         >
                           {section.type}
                         </Badge>
                         {section.is_required && (
-                          <Badge variant="destructive" className="text-xs h-5">
+                          <Badge variant="destructive" className="text-xs h-5 shrink-0">
                             Required
                           </Badge>
                         )}
@@ -107,7 +107,7 @@ export const SectionProgressTracker = ({
                   </div>
                   
                   {index === currentSection && (
-                    <div className="text-primary text-sm font-medium">
+                    <div className="text-primary text-sm font-medium shrink-0 ml-2">
                       Current
                     </div>
                   )}

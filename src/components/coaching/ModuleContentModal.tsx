@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -81,27 +81,40 @@ export const ModuleContentModal = ({
   const isCompleted = progress?.status === 'completed';
   const progressPercentage = progress?.progress_percentage || 0;
   
-  // Parse content_sections if it's a JSON string from the database
-  const parseContentSections = (sections: any): ContentSection[] => {
+  // Normalize content_sections to handle both camelCase and snake_case data
+  const normalizeContentSections = (sections: any): ContentSection[] => {
     if (!sections) return [];
     
-    // If it's already an array, return it
-    if (Array.isArray(sections)) return sections;
+    let parsedSections = sections;
     
-    // If it's a JSON string, parse it
+    // If it's a JSON string, parse it first
     if (typeof sections === 'string') {
       try {
-        return JSON.parse(sections);
+        parsedSections = JSON.parse(sections);
       } catch (error) {
         console.error('Failed to parse content_sections:', error);
         return [];
       }
     }
     
-    return [];
+    // If it's not an array, return empty
+    if (!Array.isArray(parsedSections)) return [];
+    
+    // Normalize each section to ensure consistent structure
+    return parsedSections.map((section: any) => ({
+      id: section.id || `section-${Date.now()}-${Math.random()}`,
+      title: section.title || 'Untitled Section',
+      type: section.type || 'article',
+      content_url: section.content_url || section.contentUrl,
+      content: section.content || {},
+      duration_minutes: section.duration_minutes || section.durationMinutes || 5,
+      description: section.description || '',
+      is_required: section.is_required ?? section.isRequired ?? true,
+      order_index: section.order_index ?? section.orderIndex ?? 0,
+    })).sort((a, b) => a.order_index - b.order_index);
   };
 
-  const contentSections = parseContentSections(module.content_sections);
+  const contentSections = normalizeContentSections(module.content_sections);
   const currentSectionData = contentSections[currentSection];
 
   const getContentIcon = (contentType: string) => {
@@ -165,6 +178,9 @@ export const ModuleContentModal = ({
                 {getContentIcon(module.content_type)}
                 {module.title}
               </DialogTitle>
+              <DialogDescription className="mt-1">
+                {module.description}
+              </DialogDescription>
               <div className="flex items-center gap-3 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -253,21 +269,26 @@ export const ModuleContentModal = ({
               <h3 className="text-lg font-semibold mb-4">Module Content</h3>
               
               {contentSections.length > 0 ? (
-                <div className="flex flex-col lg:flex-row gap-6 min-h-0">
+                <div className="grid lg:grid-cols-[20rem,1fr] gap-6 min-h-0">
                   {/* Progress Tracker Sidebar */}
-                  <div className="w-full lg:w-80 flex-shrink-0">
-                    <div className="sticky top-0">
-                      <SectionProgressTracker
-                        sections={contentSections}
-                        completedSections={completedSections}
-                        currentSection={currentSection}
-                        onSectionSelect={setCurrentSection}
-                      />
-                    </div>
+                  <div className="lg:sticky lg:top-2 lg:h-fit">
+                    <SectionProgressTracker
+                      sections={contentSections}
+                      completedSections={completedSections}
+                      currentSection={currentSection}
+                      onSectionSelect={(index) => {
+                        setCurrentSection(index);
+                        // Scroll content to top when switching sections
+                        const contentArea = document.querySelector('[data-content-area]');
+                        if (contentArea) {
+                          contentArea.scrollTop = 0;
+                        }
+                      }}
+                    />
                   </div>
 
                   {/* Current Section Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0" data-content-area>
                     {currentSectionData && (
                       <ContentRenderer
                         section={currentSectionData}
