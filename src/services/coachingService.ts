@@ -132,6 +132,8 @@ export class CoachingService {
         enrollment_id: enrollmentId,
         ...progressData,
         last_accessed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,module_id'
       })
       .select()
       .single();
