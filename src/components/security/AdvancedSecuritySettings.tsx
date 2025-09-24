@@ -83,7 +83,10 @@ export const AdvancedSecuritySettings: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRetentionPolicies(data || []);
+      setRetentionPolicies((data || []).map(item => ({
+        ...item,
+        retention_period: String(item.retention_period || '')
+      })) as DataRetentionPolicy[]);
     } catch (error) {
       console.error('Failed to fetch retention policies:', error);
       toast.error('Failed to load retention policies');
@@ -238,7 +241,7 @@ export const AdvancedSecuritySettings: React.FC = () => {
                         <div>
                           <div className="flex items-center space-x-2">
                             <Lock className="h-4 w-4" />
-                            <span className="font-medium">{item.data_type.replace(/_/g, ' ')}</span>
+                            <span className="font-medium">{item.data_type.split('_').join(' ')}</span>
                             <Badge variant="secondary">Encrypted</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
@@ -254,7 +257,7 @@ export const AdvancedSecuritySettings: React.FC = () => {
                           Delete
                         </Button>
                       </div>
-                    )))}
+                     ))}
                   </div>
                 )}
               </div>
@@ -327,7 +330,7 @@ export const AdvancedSecuritySettings: React.FC = () => {
                     <div className="flex items-center space-x-3">
                       <Database className="h-4 w-4" />
                       <div>
-                        <span className="font-medium">{policy.data_type.replace(/_/g, ' ')}</span>
+                        <span className="font-medium">{policy.data_type.split('_').join(' ')}</span>
                         <p className="text-sm text-muted-foreground">
                           Retention: {policy.retention_period}
                         </p>
@@ -351,7 +354,7 @@ export const AdvancedSecuritySettings: React.FC = () => {
                       />
                     </div>
                   </div>
-                )))}
+                 ))}
               </div>
             </CardContent>
           </Card>
