@@ -77,13 +77,12 @@ export const ModuleContentModal = ({
 
   if (!module) return null;
 
-  // A module is truly "started" if user has meaningful progress, has been started, or has completed sections
+  // A module is truly "started" if user has meaningful progress or completed sections
+  // Initial 10% progress from just opening modal doesn't count as "started"
   const progressPercentage = progress?.progress_percentage || 0;
   const hasCompletedSections = completedSections.size > 0;
-  const hasMeaningfulProgress = progressPercentage >= 10; // Include 10% as started
-  const hasStartedAt = progress?.started_at !== null;
-  const isInProgress = progress?.status === 'in_progress';
-  const isStarted = progress?.status === 'completed' || hasMeaningfulProgress || hasCompletedSections || hasStartedAt || isInProgress;
+  const hasMeaningfulProgress = progressPercentage > 10;
+  const isStarted = progress?.status === 'completed' || hasMeaningfulProgress || hasCompletedSections;
   const isCompleted = progress?.status === 'completed';
   
   // Normalize content_sections to handle both camelCase and snake_case data
@@ -202,13 +201,6 @@ export const ModuleContentModal = ({
     console.log('ModuleContentModal Debug:', {
       moduleId: module.id,
       moduleTitle: module.title,
-      progressPercentage,
-      hasCompletedSections,
-      hasMeaningfulProgress,
-      hasStartedAt,
-      isInProgress,
-      isStarted,
-      progressStatus: progress?.status,
       hasContentSections: !!module.content_sections,
       contentSectionsLength: parsedContentSections.length,
       finalContentSectionsLength: contentSections.length,
