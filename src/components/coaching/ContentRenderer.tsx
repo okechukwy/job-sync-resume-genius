@@ -9,7 +9,6 @@ import {
   CheckCircle2, 
   Target,
   BookOpen,
-  ExternalLink,
   MessageSquare
 } from 'lucide-react';
 
@@ -134,17 +133,6 @@ export const ContentRenderer = ({
         </div>
       )}
 
-      {/* Only show external link if there's a URL and it's actually external content */}
-      {section.content_url && !section.content?.text && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => window.open(section.content_url, '_blank')}
-        >
-          <ExternalLink className="h-4 w-4 mr-2" />
-          View External Resource
-        </Button>
-      )}
     </div>
   );
 
@@ -178,25 +166,6 @@ export const ContentRenderer = ({
                 >
                   <Target className="h-4 w-4 mr-2" />
                   Start Exercise
-                </Button>
-              </div>
-            </div>
-          ) : section.content_url ? (
-            <div className="p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Target className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h5 className="font-medium">Ready to Practice</h5>
-                  <p className="text-sm text-muted-foreground">Interactive exercise available</p>
-                </div>
-                <Button 
-                  onClick={() => window.open(section.content_url, '_blank')}
-                  size="sm"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Launch
                 </Button>
               </div>
             </div>

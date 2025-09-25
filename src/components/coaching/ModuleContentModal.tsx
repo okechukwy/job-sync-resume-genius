@@ -118,8 +118,96 @@ export const ModuleContentModal = ({
     })).sort((a, b) => a.order_index - b.order_index);
   };
 
-  const contentSections = normalizeContentSections(module.content_sections);
+  // Create fallback content sections if none exist
+  const createFallbackContentSections = (module: LearningModule): ContentSection[] => {
+    return [
+      {
+        id: 'module-overview',
+        title: 'Module Overview',
+        type: 'article',
+        content: {
+          text: module.description || 'Welcome to this learning module. This module will help you develop key skills and knowledge in your career development journey.',
+          key_points: [
+            'Understand the core concepts',
+            'Apply practical strategies',
+            'Develop new skills',
+            'Track your progress'
+          ],
+          objectives: module.learning_objectives || ['Complete the module successfully'],
+          reflection_questions: [
+            'What do you hope to learn from this module?',
+            'How will you apply these concepts in your career?'
+          ]
+        },
+        duration_minutes: 5,
+        description: 'Understanding the module goals',
+        is_required: true,
+        order_index: 1
+      },
+      {
+        id: 'main-content',
+        title: 'Main Content',
+        type: 'article',
+        content: {
+          text: 'This section contains the main learning content for this module. Take your time to read through the material and understand the key concepts. Focus on the practical applications and how you can implement these strategies in your career development.',
+          key_points: [
+            'Understand the core concepts and principles',
+            'Learn practical strategies and techniques',
+            'Apply knowledge to real-world scenarios',
+            'Develop skills through hands-on practice'
+          ],
+          instructions: 'Read through the content carefully and make notes of important concepts. Consider how you can apply these ideas in your current role or future career goals.',
+          exercise_type: 'Learning Exercise'
+        },
+        duration_minutes: Math.max(module.duration_minutes - 10, 15),
+        description: 'Core learning content',
+        is_required: true,
+        order_index: 2
+      },
+      {
+        id: 'knowledge-check',
+        title: 'Knowledge Check',
+        type: 'assessment',
+        content: {
+          questions: [
+            {
+              question: 'What are the key concepts covered in this module?',
+              type: 'multiple_choice',
+              options: ['Basic concepts', 'Advanced strategies', 'Practical applications', 'All of the above'],
+              correct_answer: 3
+            },
+            {
+              question: 'How will you apply what you learned in your career?',
+              type: 'text'
+            }
+          ]
+        },
+        duration_minutes: 5,
+        description: 'Test your understanding',
+        is_required: true,
+        order_index: 3
+      }
+    ];
+  };
+
+  const parsedContentSections = normalizeContentSections(module.content_sections);
+  const contentSections = parsedContentSections.length > 0 
+    ? parsedContentSections 
+    : createFallbackContentSections(module);
   const currentSectionData = contentSections[currentSection];
+
+  // Debug logging for development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ModuleContentModal Debug:', {
+      moduleId: module.id,
+      moduleTitle: module.title,
+      hasContentSections: !!module.content_sections,
+      contentSectionsLength: parsedContentSections.length,
+      finalContentSectionsLength: contentSections.length,
+      currentSection,
+      currentSectionData: currentSectionData?.title
+    });
+  }
 
   const getContentIcon = (contentType: string) => {
     if (!contentType) return <FileText className="h-5 w-5" />;
@@ -272,45 +360,37 @@ export const ModuleContentModal = ({
             <div>
               <h3 className="text-lg font-semibold mb-4">Module Content</h3>
               
-              {contentSections.length > 0 ? (
-                <div className="grid lg:grid-cols-[20rem,1fr] gap-6 min-h-0">
-                  {/* Progress Tracker Sidebar */}
-                  <div className="lg:sticky lg:top-2 lg:h-fit">
-                    <SectionProgressTracker
-                      sections={contentSections}
-                      completedSections={completedSections}
-                      currentSection={currentSection}
-                      onSectionSelect={(index) => {
-                        setCurrentSection(index);
-                        // Scroll content to top when switching sections
-                        const contentArea = document.querySelector('[data-content-area]');
-                        if (contentArea) {
-                          contentArea.scrollTop = 0;
-                        }
-                      }}
-                    />
-                  </div>
+              <div className="grid lg:grid-cols-[20rem,1fr] gap-6 min-h-0">
+                {/* Progress Tracker Sidebar */}
+                <div className="lg:sticky lg:top-2 lg:h-fit">
+                  <SectionProgressTracker
+                    sections={contentSections}
+                    completedSections={completedSections}
+                    currentSection={currentSection}
+                    onSectionSelect={(index) => {
+                      setCurrentSection(index);
+                      // Scroll content to top when switching sections
+                      const contentArea = document.querySelector('[data-content-area]');
+                      if (contentArea) {
+                        contentArea.scrollTop = 0;
+                      }
+                    }}
+                  />
+                </div>
 
-                  {/* Current Section Content */}
-                  <div className="min-w-0" data-content-area>
-                    {currentSectionData && (
-                      <ContentRenderer
-                        section={currentSectionData}
-                        isActive={true}
-                        isCompleted={completedSections.has(currentSectionData.id)}
-                        onComplete={handleSectionComplete}
-                        progress={currentSection === 0 ? progressPercentage : 0}
-                      />
-                    )}
-                  </div>
+                {/* Current Section Content */}
+                <div className="min-w-0" data-content-area>
+                  {currentSectionData && (
+                    <ContentRenderer
+                      section={currentSectionData}
+                      isActive={true}
+                      isCompleted={completedSections.has(currentSectionData.id)}
+                      onComplete={handleSectionComplete}
+                      progress={currentSection === 0 ? progressPercentage : 0}
+                    />
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-3" />
-                  <p>No content sections available yet.</p>
-                  <p className="text-sm">Content will be added soon.</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
