@@ -1,7 +1,7 @@
 
 
-// Enhanced Template Configuration System - 24 Professional Templates
-// Replaces generic templates with visually distinct, category-specific designs
+// ATS-Optimized Template Configuration System - Comprehensive Template Library
+// Designed for maximum ATS compatibility with clean, readable layouts
 
 export interface StylePreset {
   id: string;
@@ -12,11 +12,11 @@ export interface StylePreset {
   headerBg: string;
   headerText: string;
   sectionBorder: string;
-  layout: 'professional' | 'creative' | 'technical' | 'traditional' | 'sidebar' | 'academic' | 'executive' | 'portfolio' | 'developer';
+  layout: 'professional' | 'traditional' | 'sidebar' | 'academic' | 'executive' | 'minimal' | 'modern' | 'creative' | 'technical';
   spacing: 'compact' | 'standard' | 'spacious';
-  typography: 'serif' | 'sans' | 'modern' | 'technical';
+  typography: 'serif' | 'sans' | 'modern';
   visualElements: {
-    headerStyle: 'banner' | 'centered' | 'split' | 'minimal' | 'sidebar' | 'traditional';
+    headerStyle: 'banner' | 'centered' | 'minimal' | 'traditional';
     decorativeElements: boolean;
     gradientHeader: boolean;
     iconAccents: boolean;
@@ -28,7 +28,7 @@ export interface TemplateConfig {
   name: string;
   description: string;
   emoji: string;
-  category: 'professional' | 'creative' | 'technical';
+  category: 'professional' | 'creative' | 'technical' | 'student' | 'executive' | 'minimalist';
   stylePreset: string;
   tags: string[];
   industries: string[];
@@ -36,58 +36,20 @@ export interface TemplateConfig {
   perfectFor: string[];
 }
 
-// Enhanced Style Presets - 24 Unique Visual Themes
+// Comprehensive Style Presets - Multiple Categories
 export const stylePresets: StylePreset[] = [
-  // PROFESSIONAL CATEGORY (10 Presets)
+  // PROFESSIONAL CATEGORY (6 Templates)
   {
-    id: 'corporate-executive',
-    name: 'Corporate Executive',
-    primary: '222 84% 20%', // Deep Navy
-    secondary: '222 20% 30%', // Dark Gray Navy
-    accent: '222 100% 85%', // Light Navy
-    headerBg: 'linear-gradient(135deg, hsl(222 84% 20%), hsl(222 84% 15%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '222 84% 20%',
-    layout: 'executive',
+    id: 'classic-professional',
+    name: 'Classic Professional',
+    primary: '0 0% 20%', // Black
+    secondary: '0 0% 40%', // Dark Gray
+    accent: '0 0% 70%', // Light Gray
+    headerBg: 'hsl(0 0% 98%)',
+    headerText: '0 0% 20%',
+    sectionBorder: '0 0% 20%',
+    layout: 'professional',
     spacing: 'standard',
-    typography: 'serif',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: false,
-      gradientHeader: true,
-      iconAccents: false
-    }
-  },
-  {
-    id: 'modern-professional',
-    name: 'Modern Professional',
-    primary: '173 80% 40%', // Teal
-    secondary: '173 30% 25%', // Dark Teal
-    accent: '173 70% 85%', // Light Teal
-    headerBg: 'linear-gradient(135deg, hsl(173 80% 40%), hsl(185 80% 45%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '173 80% 40%',
-    layout: 'sidebar',
-    spacing: 'spacious',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'split',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'academic-researcher',
-    name: 'Academic Researcher',
-    primary: '0 0% 25%', // Charcoal
-    secondary: '0 0% 15%', // Very Dark Gray
-    accent: '0 0% 80%', // Light Gray
-    headerBg: 'hsl(0 0% 25%)',
-    headerText: '0 0% 100%',
-    sectionBorder: '0 0% 25%',
-    layout: 'academic',
-    spacing: 'spacious',
     typography: 'serif',
     visualElements: {
       headerStyle: 'traditional',
@@ -97,130 +59,326 @@ export const stylePresets: StylePreset[] = [
     }
   },
   {
-    id: 'business-manager',
-    name: 'Business Manager',
-    primary: '210 100% 35%', // Professional Blue
-    secondary: '210 50% 25%', // Dark Blue
-    accent: '210 100% 85%', // Light Blue
-    headerBg: 'linear-gradient(135deg, hsl(210 100% 35%), hsl(220 100% 40%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '210 100% 35%',
+    id: 'modern-professional',
+    name: 'Modern Professional',
+    primary: '0 0% 15%', // Very Dark Gray
+    secondary: '0 0% 35%', // Medium Gray
+    accent: '0 0% 75%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 15%',
+    sectionBorder: '0 0% 15%',
     layout: 'professional',
     spacing: 'standard',
     typography: 'sans',
     visualElements: {
       headerStyle: 'centered',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'finance-executive',
-    name: 'Finance Executive',
-    primary: '140 100% 25%', // Forest Green
-    secondary: '140 30% 20%', // Dark Green
-    accent: '140 60% 80%', // Light Green
-    headerBg: 'linear-gradient(135deg, hsl(140 100% 25%), hsl(150 100% 30%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '140 100% 25%',
-    layout: 'executive',
-    spacing: 'standard',
-    typography: 'serif',
-    visualElements: {
-      headerStyle: 'banner',
       decorativeElements: false,
-      gradientHeader: true,
+      gradientHeader: false,
       iconAccents: false
     }
   },
   {
-    id: 'healthcare-professional',
-    name: 'Healthcare Professional',
-    primary: '195 100% 40%', // Medical Blue
-    secondary: '195 50% 25%', // Dark Medical Blue
-    accent: '195 80% 85%', // Light Medical Blue
-    headerBg: 'linear-gradient(135deg, hsl(195 100% 40%), hsl(205 100% 45%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '195 100% 40%',
-    layout: 'professional',
-    spacing: 'standard',
-    typography: 'sans',
-    visualElements: {
-      headerStyle: 'centered',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'legal-professional',
-    name: 'Legal Professional',
-    primary: '345 60% 35%', // Burgundy
-    secondary: '345 30% 25%', // Dark Burgundy
-    accent: '345 40% 85%', // Light Burgundy
-    headerBg: 'linear-gradient(135deg, hsl(345 60% 35%), hsl(345 60% 30%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '345 60% 35%',
+    id: 'timeless-professional',
+    name: 'Timeless Professional',
+    primary: '0 0% 25%', // Charcoal
+    secondary: '0 0% 45%', // Medium Gray
+    accent: '0 0% 80%', // Light Gray
+    headerBg: 'hsl(0 0% 97%)',
+    headerText: '0 0% 25%',
+    sectionBorder: '0 0% 25%',
     layout: 'traditional',
     spacing: 'standard',
     typography: 'serif',
     visualElements: {
       headerStyle: 'traditional',
       decorativeElements: false,
-      gradientHeader: true,
+      gradientHeader: false,
       iconAccents: false
     }
   },
   {
-    id: 'consulting-expert',
-    name: 'Consulting Expert',
-    primary: '200 20% 30%', // Charcoal Blue
-    secondary: '200 15% 20%', // Very Dark Charcoal
-    accent: '200 30% 80%', // Light Charcoal
-    headerBg: 'linear-gradient(135deg, hsl(200 20% 30%), hsl(210 20% 35%))',
+    id: 'executive-blue',
+    name: 'Executive Blue',
+    primary: '220 100% 25%', // Professional Blue
+    secondary: '220 20% 30%', // Dark Gray Blue
+    accent: '220 100% 85%', // Light Blue
+    headerBg: 'hsl(220 100% 25%)',
     headerText: '0 0% 100%',
-    sectionBorder: '200 20% 30%',
-    layout: 'sidebar',
-    spacing: 'spacious',
-    typography: 'modern',
+    sectionBorder: '220 100% 25%',
+    layout: 'executive',
+    spacing: 'standard',
+    typography: 'serif',
     visualElements: {
-      headerStyle: 'split',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
+      headerStyle: 'banner',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
     }
   },
   {
-    id: 'academic-blue',
-    name: 'Academic Blue',
-    primary: '210 70% 45%', // Academic Blue
-    secondary: '210 40% 25%', // Dark Academic Blue
-    accent: '210 70% 85%', // Light Academic Blue
-    headerBg: 'linear-gradient(135deg, hsl(210 70% 45%), hsl(220 70% 50%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '210 70% 45%',
+    id: 'business-classic',
+    name: 'Business Classic',
+    primary: '0 0% 18%', // Dark Gray
+    secondary: '0 0% 38%', // Medium Gray
+    accent: '0 0% 72%', // Light Gray
+    headerBg: 'hsl(0 0% 99%)',
+    headerText: '0 0% 18%',
+    sectionBorder: '0 0% 18%',
+    layout: 'professional',
+    spacing: 'standard',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'corporate-traditional',
+    name: 'Corporate Traditional',
+    primary: '0 0% 22%', // Dark Gray
+    secondary: '0 0% 42%', // Medium Gray
+    accent: '0 0% 68%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 22%',
+    sectionBorder: '0 0% 22%',
+    layout: 'traditional',
+    spacing: 'standard',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'traditional',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+
+  // STUDENT CATEGORY (4 Templates)
+  {
+    id: 'modern-student',
+    name: 'Modern Student',
+    primary: '0 0% 16%', // Very Dark Gray
+    secondary: '0 0% 36%', // Medium Gray
+    accent: '0 0% 74%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 16%',
+    sectionBorder: '0 0% 16%',
+    layout: 'modern',
+    spacing: 'spacious',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'academic-clean',
+    name: 'Academic Clean',
+    primary: '0 0% 20%', // Dark Gray
+    secondary: '0 0% 40%', // Medium Gray
+    accent: '0 0% 70%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 20%',
+    sectionBorder: '0 0% 20%',
     layout: 'academic',
     spacing: 'spacious',
     typography: 'serif',
     visualElements: {
-      headerStyle: 'traditional',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
     }
   },
   {
-    id: 'clean-minimalist',
-    name: 'Clean Minimalist',
-    primary: '0 0% 20%', // Clean Charcoal
+    id: 'graduate-fresh',
+    name: 'Graduate Fresh',
+    primary: '0 0% 19%', // Dark Gray
+    secondary: '0 0% 39%', // Medium Gray
+    accent: '0 0% 71%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 19%',
+    sectionBorder: '0 0% 19%',
+    layout: 'modern',
+    spacing: 'standard',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'internship-ready',
+    name: 'Internship Ready',
+    primary: '0 0% 17%', // Dark Gray
+    secondary: '0 0% 37%', // Medium Gray
+    accent: '0 0% 73%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 17%',
+    sectionBorder: '0 0% 17%',
+    layout: 'professional',
+    spacing: 'compact',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+
+  // MINIMALIST CATEGORY (4 Templates)
+  {
+    id: 'minimalist-expert',
+    name: 'Minimalist Expert',
+    primary: '0 0% 15%', // Very Dark Gray
+    secondary: '0 0% 35%', // Medium Gray
+    accent: '0 0% 75%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 15%',
+    sectionBorder: '0 0% 15%',
+    layout: 'minimal',
+    spacing: 'spacious',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'clean-minimal',
+    name: 'Clean Minimal',
+    primary: '0 0% 18%', // Dark Gray
+    secondary: '0 0% 38%', // Medium Gray
+    accent: '0 0% 72%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 18%',
+    sectionBorder: '0 0% 18%',
+    layout: 'minimal',
+    spacing: 'standard',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'simple-elegant',
+    name: 'Simple Elegant',
+    primary: '0 0% 20%', // Dark Gray
     secondary: '0 0% 40%', // Medium Gray
     accent: '0 0% 70%', // Light Gray
-    headerBg: 'hsl(0 0% 98%)',
+    headerBg: 'hsl(0 0% 100%)',
     headerText: '0 0% 20%',
     sectionBorder: '0 0% 20%',
-    layout: 'professional',
+    layout: 'minimal',
     spacing: 'spacious',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'bare-essentials',
+    name: 'Bare Essentials',
+    primary: '0 0% 16%', // Very Dark Gray
+    secondary: '0 0% 36%', // Medium Gray
+    accent: '0 0% 74%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 16%',
+    sectionBorder: '0 0% 16%',
+    layout: 'minimal',
+    spacing: 'compact',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+
+  // CREATIVE CATEGORY (4 Templates)
+  {
+    id: 'creative-modern',
+    name: 'Creative Modern',
+    primary: '0 0% 19%', // Dark Gray
+    secondary: '0 0% 39%', // Medium Gray
+    accent: '0 0% 71%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 19%',
+    sectionBorder: '0 0% 19%',
+    layout: 'creative',
+    spacing: 'spacious',
+    typography: 'modern',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'design-focused',
+    name: 'Design Focused',
+    primary: '0 0% 17%', // Dark Gray
+    secondary: '0 0% 37%', // Medium Gray
+    accent: '0 0% 73%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 17%',
+    sectionBorder: '0 0% 17%',
+    layout: 'creative',
+    spacing: 'standard',
+    typography: 'modern',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'portfolio-ready',
+    name: 'Portfolio Ready',
+    primary: '0 0% 18%', // Dark Gray
+    secondary: '0 0% 38%', // Medium Gray
+    accent: '0 0% 72%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 18%',
+    sectionBorder: '0 0% 18%',
+    layout: 'creative',
+    spacing: 'spacious',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'centered',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'artistic-clean',
+    name: 'Artistic Clean',
+    primary: '0 0% 20%', // Dark Gray
+    secondary: '0 0% 40%', // Medium Gray
+    accent: '0 0% 70%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 20%',
+    sectionBorder: '0 0% 20%',
+    layout: 'creative',
+    spacing: 'standard',
     typography: 'modern',
     visualElements: {
       headerStyle: 'minimal',
@@ -230,571 +388,487 @@ export const stylePresets: StylePreset[] = [
     }
   },
 
-  // CREATIVE CATEGORY (8 Presets)
+  // TECHNICAL CATEGORY (4 Templates)
   {
-    id: 'graphic-designer',
-    name: 'Graphic Designer',
-    primary: '280 100% 60%', // Vibrant Purple
-    secondary: '280 50% 30%', // Dark Purple
-    accent: '280 80% 85%', // Light Purple
-    headerBg: 'linear-gradient(135deg, hsl(280 100% 60%), hsl(300 100% 65%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '280 100% 60%',
-    layout: 'portfolio',
-    spacing: 'spacious',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'ux-ui-designer',
-    name: 'UX/UI Designer',
-    primary: '25 100% 55%', // Creative Orange
-    secondary: '25 60% 30%', // Dark Orange
-    accent: '25 100% 85%', // Light Orange
-    headerBg: 'linear-gradient(135deg, hsl(25 100% 55%), hsl(35 100% 60%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '25 100% 55%',
-    layout: 'creative',
-    spacing: 'spacious',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'split',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'marketing-creative',
-    name: 'Marketing Creative',
-    primary: '320 100% 55%', // Pink
-    secondary: '320 60% 30%', // Dark Pink
-    accent: '320 80% 85%', // Light Pink
-    headerBg: 'linear-gradient(135deg, hsl(320 100% 55%), hsl(340 100% 60%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '320 100% 55%',
-    layout: 'creative',
-    spacing: 'standard',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'centered',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'content-creator',
-    name: 'Content Creator',
-    primary: '180 100% 45%', // Turquoise
-    secondary: '180 60% 25%', // Dark Turquoise
-    accent: '180 80% 85%', // Light Turquoise
-    headerBg: 'linear-gradient(135deg, hsl(180 100% 45%), hsl(190 100% 50%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '180 100% 45%',
-    layout: 'creative',
-    spacing: 'spacious',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'art-director',
-    name: 'Art Director',
-    primary: '300 100% 50%', // Bold Magenta
-    secondary: '300 60% 25%', // Dark Magenta
-    accent: '300 80% 85%', // Light Magenta
-    headerBg: 'linear-gradient(135deg, hsl(300 100% 50%), hsl(320 100% 55%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '300 100% 50%',
-    layout: 'portfolio',
-    spacing: 'spacious',
-    typography: 'modern',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'photographer',
-    name: 'Photographer',
-    primary: '0 0% 10%', // Deep Black
-    secondary: '0 0% 20%', // Dark Gray
-    accent: '0 0% 85%', // Light Gray
-    headerBg: 'linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 15%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '0 0% 10%',
-    layout: 'portfolio',
-    spacing: 'spacious',
-    typography: 'modern',
+    id: 'tech-professional',
+    name: 'Tech Professional',
+    primary: '0 0% 16%', // Very Dark Gray
+    secondary: '0 0% 36%', // Medium Gray
+    accent: '0 0% 74%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 16%',
+    sectionBorder: '0 0% 16%',
+    layout: 'technical',
+    spacing: 'compact',
+    typography: 'sans',
     visualElements: {
       headerStyle: 'minimal',
       decorativeElements: false,
-      gradientHeader: true,
+      gradientHeader: false,
       iconAccents: false
     }
   },
   {
-    id: 'ux-ui-creative',
-    name: 'UX/UI Creative',
-    primary: '270 100% 65%', // Emma Purple
-    secondary: '270 60% 30%', // Dark Purple
-    accent: '270 80% 85%', // Light Purple
-    headerBg: 'linear-gradient(135deg, hsl(270 100% 65%), hsl(285 100% 70%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '270 100% 65%',
-    layout: 'creative',
-    spacing: 'spacious',
-    typography: 'modern',
+    id: 'developer-clean',
+    name: 'Developer Clean',
+    primary: '0 0% 18%', // Dark Gray
+    secondary: '0 0% 38%', // Medium Gray
+    accent: '0 0% 72%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 18%',
+    sectionBorder: '0 0% 18%',
+    layout: 'technical',
+    spacing: 'standard',
+    typography: 'sans',
     visualElements: {
       headerStyle: 'centered',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
     }
   },
   {
-    id: 'gradient-creative',
-    name: 'Gradient Creative',
-    primary: '330 100% 60%', // Sarah Pink
-    secondary: '330 60% 30%', // Dark Pink
-    accent: '330 80% 85%', // Light Pink
-    headerBg: 'linear-gradient(135deg, hsl(330 100% 60%), hsl(270 100% 65%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '330 100% 60%',
-    layout: 'creative',
+    id: 'engineering-focused',
+    name: 'Engineering Focused',
+    primary: '0 0% 19%', // Dark Gray
+    secondary: '0 0% 39%', // Medium Gray
+    accent: '0 0% 71%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 19%',
+    sectionBorder: '0 0% 19%',
+    layout: 'technical',
     spacing: 'standard',
-    typography: 'modern',
+    typography: 'sans',
     visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
+      headerStyle: 'traditional',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'data-scientist',
+    name: 'Data Scientist',
+    primary: '0 0% 17%', // Dark Gray
+    secondary: '0 0% 37%', // Medium Gray
+    accent: '0 0% 73%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 17%',
+    sectionBorder: '0 0% 17%',
+    layout: 'technical',
+    spacing: 'compact',
+    typography: 'sans',
+    visualElements: {
+      headerStyle: 'minimal',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
     }
   },
 
-  // TECHNICAL CATEGORY (6 Presets)
+  // EXECUTIVE CATEGORY (4 Templates)
   {
-    id: 'software-engineer-pro',
-    name: 'Software Engineer Pro',
-    primary: '140 60% 45%', // Tech Green
-    secondary: '140 30% 25%', // Dark Green
-    accent: '140 80% 80%', // Light Green
-    headerBg: 'linear-gradient(135deg, hsl(140 60% 45%), hsl(150 60% 50%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '140 60% 45%',
-    layout: 'developer',
-    spacing: 'compact',
-    typography: 'technical',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'data-scientist-elite',
-    name: 'Data Scientist Elite',
-    primary: '200 100% 50%', // Cyber Blue
-    secondary: '200 60% 30%', // Dark Cyan
-    accent: '200 100% 85%', // Light Cyan
-    headerBg: 'linear-gradient(135deg, hsl(200 100% 50%), hsl(210 100% 55%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '200 100% 50%',
-    layout: 'technical',
-    spacing: 'compact',
-    typography: 'technical',
-    visualElements: {
-      headerStyle: 'split',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'devops-engineer',
-    name: 'DevOps Engineer',
-    primary: '240 100% 30%', // Dark Tech Blue
-    secondary: '240 60% 20%', // Very Dark Blue
-    accent: '240 80% 85%', // Light Blue
-    headerBg: 'linear-gradient(135deg, hsl(240 100% 30%), hsl(250 100% 35%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '240 100% 30%',
-    layout: 'developer',
-    spacing: 'compact',
-    typography: 'technical',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'cybersecurity-expert',
-    name: 'Cybersecurity Expert',
-    primary: '0 100% 40%', // Security Red
-    secondary: '0 60% 25%', // Dark Red
-    accent: '0 80% 85%', // Light Red
-    headerBg: 'linear-gradient(135deg, hsl(0 100% 40%), hsl(15 100% 45%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '0 100% 40%',
-    layout: 'technical',
-    spacing: 'compact',
-    typography: 'technical',
-    visualElements: {
-      headerStyle: 'banner',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'ai-ml-engineer',
-    name: 'AI/ML Engineer',
-    primary: '270 100% 55%', // AI Purple
-    secondary: '270 60% 30%', // Dark Purple
-    accent: '270 80% 85%', // Light Purple
-    headerBg: 'linear-gradient(135deg, hsl(270 100% 55%), hsl(285 100% 60%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '270 100% 55%',
-    layout: 'developer',
-    spacing: 'compact',
-    typography: 'technical',
-    visualElements: {
-      headerStyle: 'split',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
-    }
-  },
-  {
-    id: 'cloud-architect',
-    name: 'Cloud Architect',
-    primary: '195 100% 45%', // Sky Blue
-    secondary: '195 60% 25%', // Dark Sky Blue
-    accent: '195 80% 85%', // Light Sky Blue
-    headerBg: 'linear-gradient(135deg, hsl(195 100% 45%), hsl(205 100% 50%))',
-    headerText: '0 0% 100%',
-    sectionBorder: '195 100% 45%',
-    layout: 'technical',
+    id: 'executive-traditional',
+    name: 'Executive Traditional',
+    primary: '0 0% 25%', // Charcoal
+    secondary: '0 0% 45%', // Medium Gray
+    accent: '0 0% 80%', // Light Gray
+    headerBg: 'hsl(0 0% 97%)',
+    headerText: '0 0% 25%',
+    sectionBorder: '0 0% 25%',
+    layout: 'executive',
     spacing: 'standard',
-    typography: 'technical',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'banner',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'leadership-focused',
+    name: 'Leadership Focused',
+    primary: '0 0% 22%', // Dark Gray
+    secondary: '0 0% 42%', // Medium Gray
+    accent: '0 0% 68%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 22%',
+    sectionBorder: '0 0% 22%',
+    layout: 'executive',
+    spacing: 'standard',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'traditional',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'c-suite-ready',
+    name: 'C-Suite Ready',
+    primary: '0 0% 20%', // Dark Gray
+    secondary: '0 0% 40%', // Medium Gray
+    accent: '0 0% 70%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 20%',
+    sectionBorder: '0 0% 20%',
+    layout: 'executive',
+    spacing: 'spacious',
+    typography: 'serif',
+    visualElements: {
+      headerStyle: 'banner',
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
+    }
+  },
+  {
+    id: 'senior-management',
+    name: 'Senior Management',
+    primary: '0 0% 18%', // Dark Gray
+    secondary: '0 0% 38%', // Medium Gray
+    accent: '0 0% 72%', // Light Gray
+    headerBg: 'hsl(0 0% 100%)',
+    headerText: '0 0% 18%',
+    sectionBorder: '0 0% 18%',
+    layout: 'executive',
+    spacing: 'standard',
+    typography: 'sans',
     visualElements: {
       headerStyle: 'centered',
-      decorativeElements: true,
-      gradientHeader: true,
-      iconAccents: true
+      decorativeElements: false,
+      gradientHeader: false,
+      iconAccents: false
     }
   }
 ];
 
-// Template Configurations - 24 Professional Templates
+// Comprehensive Template Configurations - Multiple Categories
 export const templateConfigs: TemplateConfig[] = [
-  // PROFESSIONAL CATEGORY (10 Templates)
+  // PROFESSIONAL CATEGORY (6 Templates)
   {
-    id: 'corporate-executive',
-    name: 'Corporate Executive',
-    description: 'Traditional navy design for C-suite executives and senior leadership roles',
-    emoji: '👔',
+    id: 'classic-professional',
+    name: 'Classic Professional',
+    description: 'Traditional black and white design for maximum ATS compatibility',
+    emoji: '📄',
     category: 'professional',
-    stylePreset: 'corporate-executive',
-    tags: ['Executive', 'Leadership', 'C-Suite', 'Traditional'],
-    industries: ['Finance', 'Banking', 'Insurance', 'Corporate'],
-    features: ['Executive Header', 'Achievement Focus', 'Leadership Emphasis', 'ATS Optimized'],
-    perfectFor: ['CEOs', 'CFOs', 'COOs', 'VPs', 'Directors', 'Senior Executives']
+    stylePreset: 'classic-professional',
+    tags: ['Traditional', 'Professional', 'ATS Optimized', 'Classic'],
+    industries: ['All Industries'],
+    features: ['Traditional Layout', 'Clean Design', 'Maximum ATS Compatibility', 'Professional'],
+    perfectFor: ['All Professionals', 'Traditional Industries', 'Government', 'Corporate']
   },
   {
     id: 'modern-professional',
     name: 'Modern Professional',
-    description: 'Contemporary teal design with sidebar layout for modern professionals',
+    description: 'Contemporary professional design with clean typography',
     emoji: '💼',
     category: 'professional',
     stylePreset: 'modern-professional',
-    tags: ['Modern', 'Contemporary', 'Sidebar', 'Professional'],
-    industries: ['Technology', 'Consulting', 'Healthcare', 'Startups'],
-    features: ['Sidebar Layout', 'Modern Typography', 'Visual Hierarchy', 'Icon Accents'],
-    perfectFor: ['Managers', 'Directors', 'Consultants', 'Team Leads', 'Project Managers']
+    tags: ['Modern', 'Professional', 'Clean', 'ATS Optimized'],
+    industries: ['Technology', 'Consulting', 'Finance', 'Healthcare'],
+    features: ['Modern Typography', 'Clean Layout', 'Professional Design', 'ATS Optimized'],
+    perfectFor: ['Managers', 'Directors', 'Consultants', 'Team Leads']
   },
   {
-    id: 'academic-researcher',
-    name: 'Academic Researcher',
-    description: 'Scholarly charcoal design focused on research and publications',
-    emoji: '🎓',
+    id: 'timeless-professional',
+    name: 'Timeless Professional',
+    description: 'Elegant and enduring professional design',
+    emoji: '🎯',
     category: 'professional',
-    stylePreset: 'academic-researcher',
-    tags: ['Academic', 'Research', 'Publications', 'Scholarly'],
-    industries: ['Education', 'Research', 'Academia', 'Think Tanks'],
-    features: ['Publication Focus', 'Research Emphasis', 'Traditional Layout', 'Clean Design'],
-    perfectFor: ['Professors', 'Researchers', 'PhD Holders', 'Scientists', 'Academics']
+    stylePreset: 'timeless-professional',
+    tags: ['Timeless', 'Elegant', 'Professional', 'ATS Optimized'],
+    industries: ['Finance', 'Legal', 'Corporate', 'Government'],
+    features: ['Timeless Design', 'Elegant Typography', 'Professional Appeal', 'ATS Optimized'],
+    perfectFor: ['Senior Professionals', 'Traditional Industries', 'Government Officials']
   },
   {
-    id: 'business-manager',
-    name: 'Business Manager',
-    description: 'Professional blue design optimized for business and management roles',
-    emoji: '📊',
+    id: 'executive-blue',
+    name: 'Executive Blue',
+    description: 'Professional blue design for executives and senior leadership',
+    emoji: '👔',
     category: 'professional',
-    stylePreset: 'business-manager',
-    tags: ['Business', 'Management', 'Results-Driven', 'Professional'],
-    industries: ['Business', 'Operations', 'Sales', 'Project Management'],
-    features: ['Results Focus', 'Management Emphasis', 'Clean Layout', 'Professional Design'],
-    perfectFor: ['Business Managers', 'Operations Managers', 'Sales Managers', 'Team Leaders']
+    stylePreset: 'executive-blue',
+    tags: ['Executive', 'Leadership', 'Professional', 'Colored'],
+    industries: ['Finance', 'Banking', 'Insurance', 'Corporate'],
+    features: ['Executive Header', 'Professional Blue', 'Leadership Focus', 'ATS Optimized'],
+    perfectFor: ['CEOs', 'CFOs', 'COOs', 'VPs', 'Directors']
   },
   {
-    id: 'finance-executive',
-    name: 'Finance Executive',
-    description: 'Forest green design tailored for financial professionals and executives',
-    emoji: '💰',
+    id: 'business-classic',
+    name: 'Business Classic',
+    description: 'Classic business design for corporate professionals',
+    emoji: '🏢',
     category: 'professional',
-    stylePreset: 'finance-executive',
-    tags: ['Finance', 'Executive', 'Numbers-Focused', 'Professional'],
-    industries: ['Finance', 'Banking', 'Investment', 'Accounting'],
-    features: ['Financial Focus', 'Executive Layout', 'Achievement Emphasis', 'Professional Design'],
-    perfectFor: ['Finance Directors', 'CFOs', 'Investment Managers', 'Financial Analysts']
+    stylePreset: 'business-classic',
+    tags: ['Business', 'Classic', 'Corporate', 'ATS Optimized'],
+    industries: ['Corporate', 'Business', 'Consulting', 'Sales'],
+    features: ['Business Focus', 'Classic Design', 'Corporate Appeal', 'ATS Optimized'],
+    perfectFor: ['Business Professionals', 'Corporate Roles', 'Sales Managers']
   },
   {
-    id: 'healthcare-professional',
-    name: 'Healthcare Professional',
-    description: 'Medical blue design for healthcare workers and medical professionals',
-    emoji: '⚕️',
+    id: 'corporate-traditional',
+    name: 'Corporate Traditional',
+    description: 'Traditional corporate design for established companies',
+    emoji: '📋',
     category: 'professional',
-    stylePreset: 'healthcare-professional',
-    tags: ['Healthcare', 'Medical', 'Clean', 'Professional'],
-    industries: ['Healthcare', 'Medical', 'Nursing', 'Pharmaceutical'],
-    features: ['Medical Focus', 'Clean Design', 'Professional Layout', 'Healthcare Icons'],
-    perfectFor: ['Doctors', 'Nurses', 'Healthcare Managers', 'Medical Professionals']
-  },
-  {
-    id: 'legal-professional',
-    name: 'Legal Professional',
-    description: 'Burgundy traditional design for legal professionals and law firms',
-    emoji: '⚖️',
-    category: 'professional',
-    stylePreset: 'legal-professional',
-    tags: ['Legal', 'Traditional', 'Professional', 'Conservative'],
-    industries: ['Legal', 'Law Firms', 'Government', 'Compliance'],
-    features: ['Traditional Layout', 'Professional Design', 'Conservative Style', 'Legal Focus'],
-    perfectFor: ['Lawyers', 'Paralegals', 'Legal Counsels', 'Judges', 'Legal Professionals']
-  },
-  {
-    id: 'consulting-expert',
-    name: 'Consulting Expert',
-    description: 'Charcoal modern design for consultants and advisory professionals',
-    emoji: '💡',
-    category: 'professional',
-    stylePreset: 'consulting-expert',
-    tags: ['Consulting', 'Advisory', 'Modern', 'Expert'],
-    industries: ['Consulting', 'Advisory', 'Strategy', 'Business Services'],
-    features: ['Modern Layout', 'Expert Focus', 'Professional Design', 'Consulting Emphasis'],
-    perfectFor: ['Consultants', 'Advisors', 'Strategy Experts', 'Business Analysts']
-  },
-  {
-    id: 'academic-blue',
-    name: 'Academic Blue',
-    description: 'Professional blue design for researchers and academic professionals',
-    emoji: '🔬',
-    category: 'professional',
-    stylePreset: 'academic-blue',
-    tags: ['Academic', 'Research', 'Professional', 'Blue'],
-    industries: ['Research', 'Academia', 'Education', 'Science'],
-    features: ['Research Focus', 'Academic Layout', 'Professional Design', 'Publication Emphasis'],
-    perfectFor: ['Research Scientists', 'Academic Researchers', 'PhD Candidates', 'Lab Directors']
-  },
-  {
-    id: 'clean-minimalist',
-    name: 'Clean Minimalist',
-    description: 'Ultra-clean typography and layout perfect for modern professionals',
-    emoji: '✨',
-    category: 'professional',
-    stylePreset: 'clean-minimalist',
-    tags: ['Minimalist', 'Clean', 'Modern', 'Simple'],
-    industries: ['Business', 'Technology', 'Consulting', 'Product Management'],
-    features: ['Minimalist Design', 'Clean Typography', 'Modern Layout', 'Spacious Design'],
-    perfectFor: ['Product Managers', 'Business Analysts', 'Consultants', 'Modern Professionals']
+    stylePreset: 'corporate-traditional',
+    tags: ['Corporate', 'Traditional', 'Established', 'ATS Optimized'],
+    industries: ['Corporate', 'Finance', 'Legal', 'Government'],
+    features: ['Corporate Design', 'Traditional Layout', 'Established Appeal', 'ATS Optimized'],
+    perfectFor: ['Corporate Professionals', 'Finance Roles', 'Legal Professionals']
   },
 
-  // CREATIVE CATEGORY (8 Templates)
+  // STUDENT CATEGORY (4 Templates)
   {
-    id: 'graphic-designer',
-    name: 'Graphic Designer',
-    description: 'Vibrant purple design with portfolio showcase for graphic artists',
+    id: 'modern-student',
+    name: 'Modern Student',
+    description: 'Contemporary design perfect for students and recent graduates',
+    emoji: '🎓',
+    category: 'student',
+    stylePreset: 'modern-student',
+    tags: ['Student', 'Modern', 'Graduate', 'ATS Optimized'],
+    industries: ['All Industries'],
+    features: ['Student Focus', 'Modern Design', 'Graduate Ready', 'ATS Optimized'],
+    perfectFor: ['Students', 'Recent Graduates', 'Interns', 'Entry Level']
+  },
+  {
+    id: 'academic-clean',
+    name: 'Academic Clean',
+    description: 'Clean academic design for research and education professionals',
+    emoji: '📚',
+    category: 'student',
+    stylePreset: 'academic-clean',
+    tags: ['Academic', 'Research', 'Clean', 'ATS Optimized'],
+    industries: ['Education', 'Research', 'Academia', 'Think Tanks'],
+    features: ['Academic Layout', 'Research Focus', 'Clean Design', 'ATS Optimized'],
+    perfectFor: ['Students', 'Researchers', 'Academic Professionals']
+  },
+  {
+    id: 'graduate-fresh',
+    name: 'Graduate Fresh',
+    description: 'Fresh design for new graduates entering the workforce',
+    emoji: '🎉',
+    category: 'student',
+    stylePreset: 'graduate-fresh',
+    tags: ['Graduate', 'Fresh', 'Entry Level', 'ATS Optimized'],
+    industries: ['All Industries'],
+    features: ['Graduate Focus', 'Fresh Design', 'Entry Level Ready', 'ATS Optimized'],
+    perfectFor: ['Recent Graduates', 'Entry Level Positions', 'Career Changers']
+  },
+  {
+    id: 'internship-ready',
+    name: 'Internship Ready',
+    description: 'Compact design perfect for internship applications',
+    emoji: '🔍',
+    category: 'student',
+    stylePreset: 'internship-ready',
+    tags: ['Internship', 'Compact', 'Student', 'ATS Optimized'],
+    industries: ['All Industries'],
+    features: ['Internship Focus', 'Compact Layout', 'Student Ready', 'ATS Optimized'],
+    perfectFor: ['Interns', 'Students', 'Part-time Workers']
+  },
+
+  // MINIMALIST CATEGORY (4 Templates)
+  {
+    id: 'minimalist-expert',
+    name: 'Minimalist Expert',
+    description: 'Clean minimal design with maximum readability',
+    emoji: '✨',
+    category: 'minimalist',
+    stylePreset: 'minimalist-expert',
+    tags: ['Minimalist', 'Clean', 'Expert', 'ATS Optimized'],
+    industries: ['Technology', 'Design', 'Creative', 'Consulting'],
+    features: ['Minimal Design', 'Clean Typography', 'Maximum Readability', 'ATS Optimized'],
+    perfectFor: ['Designers', 'Developers', 'Consultants', 'Creative Professionals']
+  },
+  {
+    id: 'clean-minimal',
+    name: 'Clean Minimal',
+    description: 'Ultra-clean minimal design for modern professionals',
+    emoji: '🧹',
+    category: 'minimalist',
+    stylePreset: 'clean-minimal',
+    tags: ['Clean', 'Minimal', 'Modern', 'ATS Optimized'],
+    industries: ['Technology', 'Startups', 'Creative', 'Modern Companies'],
+    features: ['Ultra Clean', 'Minimal Design', 'Modern Appeal', 'ATS Optimized'],
+    perfectFor: ['Tech Professionals', 'Startup Employees', 'Modern Companies']
+  },
+  {
+    id: 'simple-elegant',
+    name: 'Simple Elegant',
+    description: 'Simple yet elegant design for sophisticated professionals',
+    emoji: '💎',
+    category: 'minimalist',
+    stylePreset: 'simple-elegant',
+    tags: ['Simple', 'Elegant', 'Sophisticated', 'ATS Optimized'],
+    industries: ['Luxury', 'Consulting', 'Finance', 'Professional Services'],
+    features: ['Simple Design', 'Elegant Typography', 'Sophisticated Appeal', 'ATS Optimized'],
+    perfectFor: ['Consultants', 'Finance Professionals', 'Luxury Brands']
+  },
+  {
+    id: 'bare-essentials',
+    name: 'Bare Essentials',
+    description: 'Essential-only design for maximum impact',
+    emoji: '⚡',
+    category: 'minimalist',
+    stylePreset: 'bare-essentials',
+    tags: ['Essential', 'Bare', 'Impact', 'ATS Optimized'],
+    industries: ['Technology', 'Creative', 'Startups', 'Modern Companies'],
+    features: ['Essential Only', 'Bare Design', 'Maximum Impact', 'ATS Optimized'],
+    perfectFor: ['Tech Leaders', 'Creative Directors', 'Startup Founders']
+  },
+
+  // CREATIVE CATEGORY (4 Templates)
+  {
+    id: 'creative-modern',
+    name: 'Creative Modern',
+    description: 'Modern design for creative professionals',
     emoji: '🎨',
     category: 'creative',
-    stylePreset: 'graphic-designer',
-    tags: ['Creative', 'Visual', 'Portfolio', 'Artistic'],
-    industries: ['Design', 'Creative', 'Advertising', 'Marketing'],
-    features: ['Portfolio Showcase', 'Creative Layout', 'Visual Elements', 'Bold Design'],
-    perfectFor: ['Graphic Designers', 'Visual Artists', 'Creative Directors', 'Brand Designers']
+    stylePreset: 'creative-modern',
+    tags: ['Creative', 'Modern', 'Artistic', 'ATS Optimized'],
+    industries: ['Design', 'Marketing', 'Creative', 'Entertainment'],
+    features: ['Creative Design', 'Modern Layout', 'Artistic Appeal', 'ATS Optimized'],
+    perfectFor: ['Designers', 'Artists', 'Creative Directors', 'Marketing Professionals']
   },
   {
-    id: 'ux-ui-designer',
-    name: 'UX/UI Designer',
-    description: 'Creative orange design for user experience and interface designers',
-    emoji: '📱',
+    id: 'design-focused',
+    name: 'Design Focused',
+    description: 'Design-centric layout for visual professionals',
+    emoji: '🎯',
     category: 'creative',
-    stylePreset: 'ux-ui-designer',
-    tags: ['UX/UI', 'Design', 'User-Focused', 'Modern'],
-    industries: ['Technology', 'Design', 'Startups', 'Digital'],
-    features: ['Design Process Focus', 'User Research', 'Prototyping', 'Modern Layout'],
-    perfectFor: ['UX Designers', 'UI Designers', 'Product Designers', 'Interaction Designers']
+    stylePreset: 'design-focused',
+    tags: ['Design', 'Visual', 'Creative', 'ATS Optimized'],
+    industries: ['Design', 'Creative', 'Marketing', 'Entertainment'],
+    features: ['Design Focus', 'Visual Layout', 'Creative Appeal', 'ATS Optimized'],
+    perfectFor: ['UX/UI Designers', 'Graphic Designers', 'Visual Artists']
   },
   {
-    id: 'marketing-creative',
-    name: 'Marketing Creative',
-    description: 'Pink gradient design for marketing professionals and creatives',
-    emoji: '📢',
+    id: 'portfolio-ready',
+    name: 'Portfolio Ready',
+    description: 'Portfolio-style design for showcasing work',
+    emoji: '📁',
     category: 'creative',
-    stylePreset: 'marketing-creative',
-    tags: ['Marketing', 'Creative', 'Campaign', 'Brand'],
-    industries: ['Marketing', 'Advertising', 'PR', 'Brand Management'],
-    features: ['Campaign Focus', 'Brand Emphasis', 'Creative Layout', 'Marketing Metrics'],
-    perfectFor: ['Marketing Managers', 'Brand Managers', 'Marketing Directors', 'Campaign Managers']
+    stylePreset: 'portfolio-ready',
+    tags: ['Portfolio', 'Showcase', 'Creative', 'ATS Optimized'],
+    industries: ['Design', 'Creative', 'Freelance', 'Entertainment'],
+    features: ['Portfolio Style', 'Work Showcase', 'Creative Layout', 'ATS Optimized'],
+    perfectFor: ['Freelancers', 'Portfolio Builders', 'Creative Professionals']
   },
   {
-    id: 'content-creator',
-    name: 'Content Creator',
-    description: 'Turquoise design for writers, content specialists, and digital creators',
-    emoji: '✍️',
+    id: 'artistic-clean',
+    name: 'Artistic Clean',
+    description: 'Clean artistic design for creative professionals',
+    emoji: '🖼️',
     category: 'creative',
-    stylePreset: 'content-creator',
-    tags: ['Content', 'Writing', 'Digital', 'Creative'],
-    industries: ['Media', 'Publishing', 'Digital Marketing', 'Content'],
-    features: ['Content Portfolio', 'Writing Samples', 'Digital Focus', 'Creative Layout'],
-    perfectFor: ['Content Writers', 'Copywriters', 'Content Managers', 'Digital Creators']
-  },
-  {
-    id: 'art-director',
-    name: 'Art Director',
-    description: 'Bold magenta design for creative leadership and art direction roles',
-    emoji: '🎭',
-    category: 'creative',
-    stylePreset: 'art-director',
-    tags: ['Art Direction', 'Creative Leadership', 'Vision', 'Bold'],
-    industries: ['Creative', 'Advertising', 'Film', 'Entertainment'],
-    features: ['Creative Vision', 'Leadership Focus', 'Portfolio Showcase', 'Bold Design'],
-    perfectFor: ['Art Directors', 'Creative Directors', 'Visual Directors', 'Creative Leads']
-  },
-  {
-    id: 'photographer',
-    name: 'Photographer',
-    description: 'Minimalist black design for photographers and visual artists',
-    emoji: '📸',
-    category: 'creative',
-    stylePreset: 'photographer',
-    tags: ['Photography', 'Visual', 'Minimalist', 'Artistic'],
-    industries: ['Photography', 'Visual Arts', 'Media', 'Creative'],
-    features: ['Portfolio Focus', 'Minimalist Design', 'Visual Emphasis', 'Clean Layout'],
-    perfectFor: ['Photographers', 'Visual Artists', 'Photo Editors', 'Visual Storytellers']
-  },
-  {
-    id: 'ux-ui-creative',
-    name: 'UX/UI Creative',
-    description: 'Purple creative design inspired by Emma for UX/UI professionals',
-    emoji: '🌟',
-    category: 'creative',
-    stylePreset: 'ux-ui-creative',
-    tags: ['UX/UI', 'Creative', 'Modern', 'Purple'],
-    industries: ['Technology', 'Design', 'Startups', 'Creative'],
-    features: ['Creative Layout', 'UX Focus', 'Modern Design', 'Portfolio Ready'],
-    perfectFor: ['UX/UI Designers', 'Creative Professionals', 'Design Leads', 'Product Designers']
-  },
-  {
-    id: 'gradient-creative',
-    name: 'Gradient Creative',
-    description: 'Pink-purple gradient design inspired by Sarah for creative roles',
-    emoji: '🎆',
-    category: 'creative',
-    stylePreset: 'gradient-creative',
-    tags: ['Gradient', 'Creative', 'Modern', 'Pink'],
-    industries: ['Creative', 'Marketing', 'Design', 'Media'],
-    features: ['Gradient Header', 'Creative Focus', 'Modern Layout', 'Eye-catching Design'],
-    perfectFor: ['Creative Directors', 'Marketing Creatives', 'Brand Designers', 'Visual Artists']
+    stylePreset: 'artistic-clean',
+    tags: ['Artistic', 'Clean', 'Creative', 'ATS Optimized'],
+    industries: ['Art', 'Design', 'Creative', 'Entertainment'],
+    features: ['Artistic Design', 'Clean Layout', 'Creative Appeal', 'ATS Optimized'],
+    perfectFor: ['Artists', 'Creative Professionals', 'Designers']
   },
 
-  // TECHNICAL CATEGORY (6 Templates)
+  // TECHNICAL CATEGORY (4 Templates)
   {
-    id: 'software-engineer-pro',
-    name: 'Software Engineer Pro',
-    description: 'Tech green design optimized for software engineers and developers',
+    id: 'tech-professional',
+    name: 'Tech Professional',
+    description: 'Professional design for technology professionals',
     emoji: '💻',
     category: 'technical',
-    stylePreset: 'software-engineer-pro',
-    tags: ['Software', 'Engineering', 'Technical', 'Code'],
-    industries: ['Technology', 'Software', 'Startups', 'Tech'],
-    features: ['Technical Skills', 'Code Projects', 'Engineering Focus', 'Tech Design'],
-    perfectFor: ['Software Engineers', 'Developers', 'Full-Stack Engineers', 'Backend Engineers']
+    stylePreset: 'tech-professional',
+    tags: ['Tech', 'Professional', 'Technical', 'ATS Optimized'],
+    industries: ['Technology', 'Software', 'IT', 'Engineering'],
+    features: ['Tech Focus', 'Professional Design', 'Technical Layout', 'ATS Optimized'],
+    perfectFor: ['Software Engineers', 'IT Professionals', 'Tech Leaders']
   },
   {
-    id: 'data-scientist-elite',
-    name: 'Data Scientist Elite',
-    description: 'Cyber blue design for data scientists and machine learning engineers',
+    id: 'developer-clean',
+    name: 'Developer Clean',
+    description: 'Clean design for software developers',
+    emoji: '👨‍💻',
+    category: 'technical',
+    stylePreset: 'developer-clean',
+    tags: ['Developer', 'Clean', 'Technical', 'ATS Optimized'],
+    industries: ['Software', 'Technology', 'IT', 'Startups'],
+    features: ['Developer Focus', 'Clean Design', 'Technical Appeal', 'ATS Optimized'],
+    perfectFor: ['Software Developers', 'Programmers', 'Tech Professionals']
+  },
+  {
+    id: 'engineering-focused',
+    name: 'Engineering Focused',
+    description: 'Engineering-focused design for technical professionals',
+    emoji: '⚙️',
+    category: 'technical',
+    stylePreset: 'engineering-focused',
+    tags: ['Engineering', 'Technical', 'Professional', 'ATS Optimized'],
+    industries: ['Engineering', 'Manufacturing', 'Technology', 'Construction'],
+    features: ['Engineering Focus', 'Technical Design', 'Professional Layout', 'ATS Optimized'],
+    perfectFor: ['Engineers', 'Technical Professionals', 'Project Managers']
+  },
+  {
+    id: 'data-scientist',
+    name: 'Data Scientist',
+    description: 'Data-focused design for analytics professionals',
     emoji: '📊',
     category: 'technical',
-    stylePreset: 'data-scientist-elite',
-    tags: ['Data Science', 'Analytics', 'ML', 'Technical'],
-    industries: ['Technology', 'Data', 'Analytics', 'AI'],
-    features: ['Data Projects', 'Analytics Focus', 'ML Emphasis', 'Technical Design'],
-    perfectFor: ['Data Scientists', 'ML Engineers', 'Data Analysts', 'Research Scientists']
+    stylePreset: 'data-scientist',
+    tags: ['Data', 'Analytics', 'Technical', 'ATS Optimized'],
+    industries: ['Data Science', 'Analytics', 'Technology', 'Finance'],
+    features: ['Data Focus', 'Analytics Design', 'Technical Layout', 'ATS Optimized'],
+    perfectFor: ['Data Scientists', 'Analysts', 'Research Professionals']
+  },
+
+  // EXECUTIVE CATEGORY (4 Templates)
+  {
+    id: 'executive-traditional',
+    name: 'Executive Traditional',
+    description: 'Traditional executive layout with professional styling',
+    emoji: '👑',
+    category: 'executive',
+    stylePreset: 'executive-traditional',
+    tags: ['Executive', 'Traditional', 'Leadership', 'ATS Optimized'],
+    industries: ['Finance', 'Banking', 'Corporate', 'Government'],
+    features: ['Executive Layout', 'Traditional Design', 'Leadership Focus', 'ATS Optimized'],
+    perfectFor: ['Executives', 'Senior Managers', 'C-Suite', 'Directors']
   },
   {
-    id: 'devops-engineer',
-    name: 'DevOps Engineer',
-    description: 'Dark tech blue design for DevOps and infrastructure professionals',
-    emoji: '🔧',
-    category: 'technical',
-    stylePreset: 'devops-engineer',
-    tags: ['DevOps', 'Infrastructure', 'Automation', 'Technical'],
-    industries: ['Technology', 'Cloud', 'Infrastructure', 'DevOps'],
-    features: ['Infrastructure Focus', 'Automation Emphasis', 'Technical Skills', 'DevOps Tools'],
-    perfectFor: ['DevOps Engineers', 'Infrastructure Engineers', 'Platform Engineers', 'SREs']
+    id: 'leadership-focused',
+    name: 'Leadership Focused',
+    description: 'Leadership-focused design for senior professionals',
+    emoji: '🎖️',
+    category: 'executive',
+    stylePreset: 'leadership-focused',
+    tags: ['Leadership', 'Executive', 'Senior', 'ATS Optimized'],
+    industries: ['Corporate', 'Finance', 'Consulting', 'Government'],
+    features: ['Leadership Focus', 'Executive Design', 'Senior Appeal', 'ATS Optimized'],
+    perfectFor: ['Leaders', 'Senior Executives', 'Directors', 'Managers']
   },
   {
-    id: 'cybersecurity-expert',
-    name: 'Cybersecurity Expert',
-    description: 'Security red design for cybersecurity and information security professionals',
-    emoji: '🔐',
-    category: 'technical',
-    stylePreset: 'cybersecurity-expert',
-    tags: ['Security', 'Cybersecurity', 'Protection', 'Technical'],
-    industries: ['Security', 'Technology', 'Government', 'Finance'],
-    features: ['Security Focus', 'Threat Analysis', 'Technical Skills', 'Security Certifications'],
-    perfectFor: ['Security Engineers', 'Security Analysts', 'CISO', 'Security Consultants']
+    id: 'c-suite-ready',
+    name: 'C-Suite Ready',
+    description: 'C-Suite ready design for top executives',
+    emoji: '🏆',
+    category: 'executive',
+    stylePreset: 'c-suite-ready',
+    tags: ['C-Suite', 'Executive', 'Top Level', 'ATS Optimized'],
+    industries: ['Corporate', 'Finance', 'Consulting', 'Government'],
+    features: ['C-Suite Ready', 'Executive Design', 'Top Level Appeal', 'ATS Optimized'],
+    perfectFor: ['CEOs', 'CFOs', 'COOs', 'C-Suite Executives']
   },
   {
-    id: 'ai-ml-engineer',
-    name: 'AI/ML Engineer',
-    description: 'AI purple design for artificial intelligence and machine learning specialists',
-    emoji: '🤖',
-    category: 'technical',
-    stylePreset: 'ai-ml-engineer',
-    tags: ['AI', 'Machine Learning', 'Deep Learning', 'Technical'],
-    industries: ['AI', 'Technology', 'Research', 'Innovation'],
-    features: ['AI Projects', 'ML Models', 'Research Focus', 'Technical Innovation'],
-    perfectFor: ['AI Engineers', 'ML Engineers', 'AI Researchers', 'Deep Learning Engineers']
-  },
-  {
-    id: 'cloud-architect',
-    name: 'Cloud Architect',
-    description: 'Sky blue design for cloud architects and infrastructure specialists',
-    emoji: '☁️',
-    category: 'technical',
-    stylePreset: 'cloud-architect',
-    tags: ['Cloud', 'Architecture', 'Infrastructure', 'Technical'],
-    industries: ['Cloud', 'Technology', 'Infrastructure', 'Enterprise'],
-    features: ['Cloud Architecture', 'Infrastructure Design', 'Scalability Focus', 'Technical Leadership'],
-    perfectFor: ['Cloud Architects', 'Solutions Architects', 'Infrastructure Architects', 'Cloud Engineers']
+    id: 'senior-management',
+    name: 'Senior Management',
+    description: 'Senior management design for experienced leaders',
+    emoji: '🎯',
+    category: 'executive',
+    stylePreset: 'senior-management',
+    tags: ['Senior', 'Management', 'Leadership', 'ATS Optimized'],
+    industries: ['Corporate', 'Finance', 'Consulting', 'Government'],
+    features: ['Senior Focus', 'Management Design', 'Leadership Appeal', 'ATS Optimized'],
+    perfectFor: ['Senior Managers', 'Directors', 'VPs', 'Executives']
   }
 ];
 
@@ -807,27 +881,23 @@ export const getStylePresetById = (id: string): StylePreset | undefined => {
   return stylePresets.find(preset => preset.id === id);
 };
 
-export const getTemplatesByCategory = (category: 'professional' | 'creative' | 'technical'): TemplateConfig[] => {
+export const getTemplatesByCategory = (category: string): TemplateConfig[] => {
   return templateConfigs.filter(template => template.category === category);
 };
 
 export const getAllCategories = (): Array<{ id: string; name: string; templates: TemplateConfig[] }> => {
-  return [
-    {
-      id: 'professional',
-      name: 'Professional',
-      templates: getTemplatesByCategory('professional')
-    },
-    {
-      id: 'creative',
-      name: 'Creative',
-      templates: getTemplatesByCategory('creative')
-    },
-    {
-      id: 'technical',
-      name: 'Technical',
-      templates: getTemplatesByCategory('technical')
-    }
+  const categories = [
+    { id: 'professional', name: 'Professional' },
+    { id: 'student', name: 'Student & Graduate' },
+    { id: 'minimalist', name: 'Minimalist' },
+    { id: 'creative', name: 'Creative' },
+    { id: 'technical', name: 'Technical' },
+    { id: 'executive', name: 'Executive' }
   ];
+
+  return categories.map(category => ({
+    ...category,
+    templates: getTemplatesByCategory(category.id)
+  }));
 };
 

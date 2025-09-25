@@ -1,11 +1,11 @@
 import { PageHeader } from "@/components/common/PageHeader";
-import { TemplateSelector } from "@/components/template-selection/TemplateSelector";
+import { UnifiedTemplateHub } from "@/components/template-selection/UnifiedTemplateHub";
 
 const Templates = () => {
   return (
     <div className="min-h-screen bg-gradient-hero">
       <PageHeader />
-      <TemplateSelector />
+      <UnifiedTemplateHub mode="standalone" />
     </div>
   );
 };

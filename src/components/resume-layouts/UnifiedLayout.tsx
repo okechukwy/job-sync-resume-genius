@@ -6,9 +6,10 @@ interface UnifiedLayoutProps {
   data: ResumeData;
   stylePreset: StylePreset;
   formatDate: (dateString: string) => string;
+  previewMode?: boolean;
 }
 
-export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutProps) => {
+export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = false }: UnifiedLayoutProps) => {
   // Safety check for undefined stylePreset
   if (!stylePreset) {
     return (
@@ -78,44 +79,73 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     );
   };
 
-  const renderHeader = () => {
-    const getHeaderContent = () => (
-      <div className="relative z-10">
-        <h1 className={`font-bold mb-2 ${
-          visualElements.headerStyle === 'banner' ? 'text-4xl' : 
-          visualElements.headerStyle === 'minimal' ? 'text-2xl' :
-          visualElements.headerStyle === 'traditional' ? 'text-3xl' : 'text-4xl'
-        }`}>
-          {data.personalInfo.fullName}
-        </h1>
-        
-        {/* Professional title based on template category */}
-        <p className={`opacity-90 mb-4 ${
-          visualElements.headerStyle === 'minimal' ? 'text-sm' : 'text-xl'
-        }`}>
-          {stylePreset.id.includes('executive') ? 'Executive Professional' :
-           stylePreset.id.includes('academic') ? 'Academic Professional' :
-           stylePreset.id.includes('creative') || stylePreset.id.includes('designer') ? 'Creative Professional' :
-           stylePreset.id.includes('tech') || stylePreset.id.includes('engineer') ? 'Technical Professional' :
-           'Professional'}
-        </p>
-        
-        <div className={`flex flex-wrap gap-4 text-sm opacity-80 ${
-          visualElements.headerStyle === 'minimal' ? 'text-xs' : ''
-        }`}>
-          {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
-          {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
-          {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
-        </div>
-      </div>
-    );
+     const renderHeader = () => {
+     const getHeaderContent = () => {
+       // Enhanced alignment detection for all template types
+       const isCenteredHeader = visualElements.headerStyle === 'centered' || 
+                               stylePreset.id.includes('classic') || 
+                               stylePreset.id.includes('traditional') ||
+                               stylePreset.id.includes('academic') ||
+                               stylePreset.id.includes('creative') ||
+                               stylePreset.id.includes('portfolio');
+       
+       const isMinimalHeader = visualElements.headerStyle === 'minimal' ||
+                              stylePreset.id.includes('minimalist') ||
+                              stylePreset.id.includes('bare') ||
+                              stylePreset.id.includes('simple');
+       
+       const isTechnicalHeader = stylePreset.id.includes('tech') ||
+                                stylePreset.id.includes('developer') ||
+                                stylePreset.id.includes('engineering') ||
+                                stylePreset.id.includes('data');
+       
+       const headerAlignment = isCenteredHeader ? 'text-center' : 
+                              isMinimalHeader ? 'text-left' :
+                              isTechnicalHeader ? 'text-left' : 'text-left';
+       
+       return (
+         <div className={`relative z-10 ${headerAlignment}`}>
+           <h1 className={`font-bold mb-2 ${
+             previewMode ? 'text-2xl' :
+             visualElements.headerStyle === 'banner' ? 'text-4xl' : 
+             visualElements.headerStyle === 'minimal' ? 'text-2xl' :
+             visualElements.headerStyle === 'traditional' ? 'text-3xl' : 'text-4xl'
+           }`}>
+             {data.personalInfo.fullName}
+           </h1>
+           
+           {/* Professional title based on template category */}
+           <p className={`opacity-90 mb-4 ${
+             previewMode ? 'text-sm' :
+             visualElements.headerStyle === 'minimal' ? 'text-sm' : 'text-xl'
+           }`}>
+             {stylePreset.id.includes('executive') ? 'Executive Professional' :
+              stylePreset.id.includes('academic') ? 'Academic Professional' :
+              stylePreset.id.includes('creative') || stylePreset.id.includes('designer') ? 'Creative Professional' :
+              stylePreset.id.includes('tech') || stylePreset.id.includes('engineer') ? 'Technical Professional' :
+              'Professional'}
+           </p>
+           
+           <div className={`flex flex-wrap gap-4 opacity-80 ${
+             previewMode ? 'text-xs' :
+             visualElements.headerStyle === 'minimal' ? 'text-xs' : 'text-sm'
+           } ${isCenteredHeader ? 'justify-center' : 'justify-start'}`}>
+             {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
+             {data.personalInfo.phone && <span>{data.personalInfo.phone}</span>}
+             {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
+           </div>
+         </div>
+       );
+     };
 
     // Header style variations
     switch (visualElements.headerStyle) {
       case 'banner':
         return (
           <header 
-            className="p-8 text-white relative overflow-hidden border-b-4"
+            className={`text-white relative overflow-hidden border-b-4 ${
+              previewMode ? 'p-4' : 'p-8'
+            }`}
             style={{ 
               background: 'var(--template-header-bg)', 
               color: 'var(--template-header-text)',
@@ -130,7 +160,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       case 'centered':
         return (
           <header 
-            className="p-8 text-white relative overflow-hidden text-center"
+            className={`text-white relative overflow-hidden text-center ${
+              previewMode ? 'p-4' : 'p-8'
+            }`}
             style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
           >
             {renderDecorativeElements()}
@@ -141,7 +173,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       case 'split':
         return (
           <header 
-            className="p-8 text-white relative overflow-hidden"
+            className={`text-white relative overflow-hidden ${
+              previewMode ? 'p-4' : 'p-8'
+            }`}
             style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
           >
             {renderDecorativeElements()}
@@ -161,7 +195,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       case 'minimal':
         return (
           <header 
-            className="p-6 text-white relative"
+            className={`text-white relative ${
+              previewMode ? 'p-3' : 'p-6'
+            }`}
             style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
           >
             {getHeaderContent()}
@@ -171,7 +207,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       case 'traditional':
         return (
           <header 
-            className="p-6 text-white relative border-b-4"
+            className={`text-white relative border-b-4 ${
+              previewMode ? 'p-3' : 'p-6'
+            }`}
             style={{ 
               background: 'var(--template-header-bg)', 
               color: 'var(--template-header-text)',
@@ -185,7 +223,9 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       default:
         return (
           <header 
-            className="p-8 text-white relative overflow-hidden"
+            className={`text-white relative overflow-hidden ${
+              previewMode ? 'p-4' : 'p-8'
+            }`}
             style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
           >
             {renderDecorativeElements()}
@@ -195,209 +235,474 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
     }
   };
 
-  const renderSection = (title: string, children: React.ReactNode, customBorder?: boolean) => {
-    const borderStyle = customBorder && (layout === 'creative' || layout === 'portfolio') 
-      ? 'border-l-4 pl-4 border-b-0' 
-      : 'border-b-2';
+           const renderSection = (title: string, children: React.ReactNode, customBorder?: boolean) => {
+      // Enhanced alignment detection for all template types
+      const isCenteredTemplate = stylePreset.id.includes('classic') || 
+                                stylePreset.id.includes('traditional') ||
+                                stylePreset.id.includes('academic') ||
+                                stylePreset.id.includes('creative') ||
+                                stylePreset.id.includes('portfolio') ||
+                                visualElements.headerStyle === 'centered';
       
-    return (
-      <section className="mb-6">
-        <h2 
-          className={`text-lg font-bold mb-4 pb-2 ${borderStyle} ${visualElements.iconAccents ? 'flex items-center gap-2' : ''}`}
-          style={{ 
-            borderColor: 'var(--template-section-border)',
-            color: 'var(--template-primary)'
-          }}
-        >
-          {visualElements.iconAccents && (
-            <div 
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: 'var(--template-primary)' }}
-            ></div>
-          )}
-          {title}
-        </h2>
-        {children}
-      </section>
-    );
-  };
-
-  const renderSummary = () => {
-    if (!data.summary?.content) return null;
-    
-    return renderSection(
-      "PROFESSIONAL SUMMARY", 
-      <p className="text-gray-700 leading-relaxed avoid-break">{data.summary.content}</p>,
-      true
-    );
-  };
-
-  const renderExperience = () => {
-    if (!data.experience?.length) return null;
-    
-    return renderSection(
-      layout === 'professional' || layout === 'executive' ? "PROFESSIONAL EXPERIENCE" : "EXPERIENCE",
-      <div className={spacingClass}>
-        {data.experience.map((exp, index) => (
-          <div key={index} className="space-y-2 avoid-break">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-gray-900">{exp.position}</h3>
-                <p className="text-gray-600">{exp.company}</p>
-              </div>
-              <span 
-                className="text-sm font-medium px-3 py-1 rounded-full"
-                style={{ 
-                  backgroundColor: 'var(--template-accent)',
-                  color: 'var(--template-secondary)'
-                }}
-              >
-                {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
-              </span>
-            </div>
-            {exp.description && (
-              <p className="text-gray-700 text-sm leading-relaxed">{exp.description}</p>
-            )}
-          </div>
-        ))}
-      </div>,
-      true
-    );
-  };
-
-  const renderEducation = () => {
-    if (!data.education?.length) return null;
-    
-    return renderSection(
-      "EDUCATION",
-      <div className={spacingClass}>
-        {data.education.map((edu, index) => (
-          <div key={index} className="space-y-1 avoid-break">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-gray-900">{edu.degree}</h3>
-                <p className="text-gray-600">{edu.school}</p>
-                {edu.field && <p className="text-sm text-gray-500">{edu.field}</p>}
-              </div>
-              <span className="text-sm text-gray-500">
-                {formatDate(edu.endDate)}
-              </span>
-            </div>
-            {edu.gpa && (
-              <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>
-            )}
-          </div>
-        ))}
-      </div>,
-      true
-    );
-  };
-
-  const renderSkills = () => {
-    if (!data.skills?.technical?.length && !data.skills?.soft?.length) return null;
-    
-    const allSkills = [...(data.skills.technical || []), ...(data.skills.soft || [])];
-    const skillsDisplay = layout === 'technical' || layout === 'developer' ? 'grid grid-cols-2 gap-2' : 'flex flex-wrap gap-2';
-    
-    return renderSection(
-      layout === 'technical' || layout === 'developer' ? "TECHNICAL SKILLS" : "SKILLS",
-      <div className={skillsDisplay}>
-        {allSkills.map((skill, index) => (
-          <span
-            key={index}
-            className="px-3 py-1 text-sm rounded-full border"
-            style={{
-              backgroundColor: 'var(--template-accent)',
-              borderColor: 'var(--template-primary)',
-              color: 'var(--template-secondary)'
-            }}
-          >
-            {skill}
-          </span>
-        ))}
-      </div>,
-      true
-    );
-  };
-
-  const renderContent = () => {
-    switch (layout) {
-      case 'portfolio':
-      case 'creative':
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              {renderSummary()}
-              {renderExperience()}
-            </div>
-            <div className="space-y-6">
-              {renderEducation()}
-              {renderSkills()}
-            </div>
-          </div>
-        );
+      const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                               stylePreset.id.includes('bare') ||
+                               stylePreset.id.includes('simple') ||
+                               stylePreset.id.includes('clean');
       
-      case 'technical':
-      case 'developer':
-        return (
-          <div className="space-y-6">
-            {renderSkills()}
-            {renderSummary()}
-            {renderExperience()}
-            {renderEducation()}
-          </div>
-        );
-
-      case 'sidebar':
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-1 space-y-6">
-              {renderSkills()}
-              {renderEducation()}
-            </div>
-            <div className="lg:col-span-3 space-y-6">
-              {renderSummary()}
-              {renderExperience()}
-            </div>
-          </div>
-        );
-
-      case 'traditional':
-      case 'executive':
-        return (
-          <div className="space-y-8">
-            {renderSummary()}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                {renderExperience()}
-              </div>
-              <div className="space-y-6">
-                {renderEducation()}
-                {renderSkills()}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'academic':
-        return (
-          <div className="space-y-6">
-            {renderSummary()}
-            {renderEducation()}
-            {renderExperience()}
-            {renderSkills()}
-          </div>
-        );
+      const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                 stylePreset.id.includes('developer') ||
+                                 stylePreset.id.includes('engineering') ||
+                                 stylePreset.id.includes('data');
       
-      default: // professional
-        return (
-          <div className="space-y-6">
-            {renderSummary()}
-            {renderExperience()}
-            {renderEducation()}
-            {renderSkills()}
-          </div>
-        );
+      const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                 stylePreset.id.includes('leadership') ||
+                                 stylePreset.id.includes('corporate');
+      
+      const sectionAlignment = isCenteredTemplate ? 'text-center' : 
+                              isMinimalTemplate ? 'text-left' :
+                              isTechnicalTemplate ? 'text-left' :
+                              isExecutiveTemplate ? 'text-left' : 'text-left';
+      
+      const titleAlignment = isCenteredTemplate ? 'text-center' : 
+                            isMinimalTemplate ? 'text-left' :
+                            isTechnicalTemplate ? 'text-left' :
+                            isExecutiveTemplate ? 'text-left' : 'text-left';
+     
+     const borderStyle = customBorder && (layout === 'creative' || layout === 'portfolio') 
+       ? 'border-l-4 pl-4 border-b-0' 
+       : 'border-b-2';
+       
+            // Template-specific section margins
+       const getSectionMargin = () => {
+         if (previewMode) {
+           return isMinimalTemplate ? 'mb-2' : 'mb-4';
+         }
+         return isMinimalTemplate ? 'mb-4' : 'mb-6';
+       };
+       
+       return (
+         <section className={getSectionMargin()}>
+                    <h2 
+             className={`font-bold pb-2 ${borderStyle} ${visualElements.iconAccents ? 'flex items-center gap-2' : ''} ${
+               previewMode ? (isMinimalTemplate ? 'text-sm mb-1' : 'text-base mb-2') : 
+               (isMinimalTemplate ? 'text-base mb-3' : 'text-lg mb-4')
+             } ${titleAlignment}`}
+           style={{ 
+             borderColor: 'var(--template-section-border)',
+             color: 'var(--template-primary)'
+           }}
+         >
+           {visualElements.iconAccents && (
+             <div 
+               className="w-3 h-3 rounded-full"
+               style={{ backgroundColor: 'var(--template-primary)' }}
+             ></div>
+           )}
+           {title}
+         </h2>
+         <div className={sectionAlignment}>
+           {children}
+         </div>
+       </section>
+     );
+   };
+
+           const renderSummary = () => {
+      if (!data.summary?.content) return null;
+      
+      // Enhanced alignment detection for all template types
+      const isCenteredTemplate = stylePreset.id.includes('classic') || 
+                                stylePreset.id.includes('traditional') ||
+                                stylePreset.id.includes('academic') ||
+                                stylePreset.id.includes('creative') ||
+                                stylePreset.id.includes('portfolio') ||
+                                visualElements.headerStyle === 'centered';
+      
+      const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                               stylePreset.id.includes('bare') ||
+                               stylePreset.id.includes('simple') ||
+                               stylePreset.id.includes('clean');
+      
+      const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                 stylePreset.id.includes('developer') ||
+                                 stylePreset.id.includes('engineering') ||
+                                 stylePreset.id.includes('data');
+      
+      const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                 stylePreset.id.includes('leadership') ||
+                                 stylePreset.id.includes('corporate');
+      
+      const summaryAlignment = isCenteredTemplate ? 'text-center' : 
+                              isMinimalTemplate ? 'text-left' :
+                              isTechnicalTemplate ? 'text-left' :
+                              isExecutiveTemplate ? 'text-left' : 'text-left';
+     
+     return renderSection(
+       "PROFESSIONAL SUMMARY", 
+       <p className={`text-gray-700 leading-relaxed avoid-break ${
+         previewMode ? 'text-xs' : ''
+       } ${summaryAlignment}`}>{data.summary.content}</p>,
+       true
+     );
+   };
+
+           const renderExperience = () => {
+      if (!data.experience?.length) return null;
+      
+      // Enhanced alignment detection for all template types
+      const isCenteredTemplate = stylePreset.id.includes('classic') || 
+                                stylePreset.id.includes('traditional') ||
+                                stylePreset.id.includes('academic') ||
+                                stylePreset.id.includes('creative') ||
+                                stylePreset.id.includes('portfolio') ||
+                                visualElements.headerStyle === 'centered';
+      
+      const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                               stylePreset.id.includes('bare') ||
+                               stylePreset.id.includes('simple') ||
+                               stylePreset.id.includes('clean');
+      
+      const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                 stylePreset.id.includes('developer') ||
+                                 stylePreset.id.includes('engineering') ||
+                                 stylePreset.id.includes('data');
+      
+      const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                 stylePreset.id.includes('leadership') ||
+                                 stylePreset.id.includes('corporate');
+      
+      const experienceAlignment = isCenteredTemplate ? 'text-center' : 
+                                 isMinimalTemplate ? 'text-left' :
+                                 isTechnicalTemplate ? 'text-left' :
+                                 isExecutiveTemplate ? 'text-left' : 'text-left';
+      
+      const contentAlignment = isCenteredTemplate ? 'justify-center' : 
+                              isMinimalTemplate ? 'justify-between' :
+                              isTechnicalTemplate ? 'justify-between' :
+                              isExecutiveTemplate ? 'justify-between' : 'justify-between';
+     
+     return renderSection(
+       layout === 'professional' || layout === 'executive' ? "PROFESSIONAL EXPERIENCE" : "EXPERIENCE",
+       <div className={spacingClass}>
+         {data.experience.map((exp, index) => (
+           <div key={index} className={`${
+             previewMode ? (isMinimalTemplate ? 'space-y-1 avoid-break' : 'space-y-1 avoid-break') : 
+             (isMinimalTemplate ? 'space-y-2 avoid-break' : 'space-y-2 avoid-break')
+           } ${experienceAlignment}`}>
+             <div className={`flex ${contentAlignment} items-start`}>
+                                <div className={isCenteredTemplate ? 'text-center' : 'text-left'}>
+                   <h3 className={`font-semibold text-gray-900 ${
+                     previewMode ? (isMinimalTemplate ? 'text-xs' : 'text-sm') : 
+                     (isMinimalTemplate ? 'text-sm' : '')
+                   }`}>{exp.position}</h3>
+                   <p className={`text-gray-600 ${
+                     previewMode ? (isMinimalTemplate ? 'text-xs' : 'text-xs') : 
+                     (isMinimalTemplate ? 'text-xs' : '')
+                   }`}>{exp.company}</p>
+                 </div>
+               {!isCenteredTemplate && (
+                 <span 
+                   className={`font-medium px-3 py-1 rounded-full ${
+                     previewMode ? (isMinimalTemplate ? 'text-xs' : 'text-xs') : 
+                     (isMinimalTemplate ? 'text-xs' : 'text-sm')
+                   }`}
+                   style={{ 
+                     backgroundColor: 'var(--template-accent)',
+                     color: 'var(--template-secondary)'
+                   }}
+                 >
+                   {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+                 </span>
+               )}
+             </div>
+             {isCenteredTemplate && (
+               <div className="text-center mb-2">
+                 <span 
+                   className={`font-medium px-3 py-1 rounded-full ${
+                     previewMode ? (isMinimalTemplate ? 'text-xs' : 'text-xs') : 
+                     (isMinimalTemplate ? 'text-xs' : 'text-sm')
+                   }`}
+                   style={{ 
+                     backgroundColor: 'var(--template-accent)',
+                     color: 'var(--template-secondary)'
+                   }}
+                 >
+                   {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
+                 </span>
+               </div>
+             )}
+                           {exp.description && (
+                <div className={`text-gray-700 leading-relaxed ${
+                  previewMode ? (isMinimalTemplate ? 'text-xs' : 'text-xs') : 
+                  (isMinimalTemplate ? 'text-xs' : 'text-sm')
+                } ${isCenteredTemplate ? 'text-center' : 'text-left'}`}>
+                  {/* Convert description to bullet points for ATS compatibility */}
+                  {exp.description.split('. ').map((sentence, idx) => (
+                    sentence.trim() && (
+                      <div key={idx} className={`${isCenteredTemplate ? 'text-center' : 'text-left'} ${
+                        isCenteredTemplate ? '' : 
+                        isMinimalTemplate ? 'ml-2' :
+                        isTechnicalTemplate ? 'ml-4' :
+                        isExecutiveTemplate ? 'ml-3' : 'ml-4'
+                      }`}>
+                        {!isCenteredTemplate && '• '}{sentence.trim()}{sentence.endsWith('.') ? '' : '.'}
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+           </div>
+         ))}
+       </div>,
+       true
+     );
+   };
+
+           const renderEducation = () => {
+      if (!data.education?.length) return null;
+      
+      // Enhanced alignment detection for all template types
+      const isCenteredTemplate = stylePreset.id.includes('classic') || 
+                                stylePreset.id.includes('traditional') ||
+                                stylePreset.id.includes('academic') ||
+                                stylePreset.id.includes('creative') ||
+                                stylePreset.id.includes('portfolio') ||
+                                visualElements.headerStyle === 'centered';
+      
+      const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                               stylePreset.id.includes('bare') ||
+                               stylePreset.id.includes('simple') ||
+                               stylePreset.id.includes('clean');
+      
+      const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                 stylePreset.id.includes('developer') ||
+                                 stylePreset.id.includes('engineering') ||
+                                 stylePreset.id.includes('data');
+      
+      const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                 stylePreset.id.includes('leadership') ||
+                                 stylePreset.id.includes('corporate');
+      
+      const educationAlignment = isCenteredTemplate ? 'text-center' : 
+                                isMinimalTemplate ? 'text-left' :
+                                isTechnicalTemplate ? 'text-left' :
+                                isExecutiveTemplate ? 'text-left' : 'text-left';
+      
+      const contentAlignment = isCenteredTemplate ? 'justify-center' : 
+                              isMinimalTemplate ? 'justify-between' :
+                              isTechnicalTemplate ? 'justify-between' :
+                              isExecutiveTemplate ? 'justify-between' : 'justify-between';
+     
+     return renderSection(
+       "EDUCATION",
+       <div className={spacingClass}>
+         {data.education.map((edu, index) => (
+           <div key={index} className={`space-y-1 avoid-break ${educationAlignment}`}>
+             <div className={`flex ${contentAlignment} items-start`}>
+               <div className={isCenteredTemplate ? 'text-center' : 'text-left'}>
+                 <h3 className={`font-semibold text-gray-900 ${previewMode ? 'text-sm' : ''}`}>{edu.degree}</h3>
+                 <p className={`text-gray-600 ${previewMode ? 'text-xs' : ''}`}>{edu.school}</p>
+                 {edu.field && <p className={`text-gray-500 ${previewMode ? 'text-xs' : 'text-sm'}`}>{edu.field}</p>}
+               </div>
+               {!isCenteredTemplate && (
+                 <span className={`text-gray-500 ${previewMode ? 'text-xs' : 'text-sm'}`}>
+                   {formatDate(edu.endDate)}
+                 </span>
+               )}
+             </div>
+             {isCenteredTemplate && (
+               <div className="text-center mb-2">
+                 <span className={`text-gray-500 ${previewMode ? 'text-xs' : 'text-sm'}`}>
+                   {formatDate(edu.endDate)}
+                 </span>
+               </div>
+             )}
+             {edu.gpa && (
+               <p className={`text-gray-600 ${previewMode ? 'text-xs' : 'text-sm'} ${isCenteredTemplate ? 'text-center' : 'text-left'}`}>
+                 GPA: {edu.gpa}
+               </p>
+             )}
+           </div>
+         ))}
+       </div>,
+       true
+     );
+   };
+
+           const renderSkills = () => {
+      if (!data.skills?.technical?.length && !data.skills?.soft?.length) return null;
+      
+      // Enhanced alignment detection for all template types
+      const isCenteredTemplate = stylePreset.id.includes('classic') || 
+                                stylePreset.id.includes('traditional') ||
+                                stylePreset.id.includes('academic') ||
+                                stylePreset.id.includes('creative') ||
+                                stylePreset.id.includes('portfolio') ||
+                                visualElements.headerStyle === 'centered';
+      
+      const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                               stylePreset.id.includes('bare') ||
+                               stylePreset.id.includes('simple') ||
+                               stylePreset.id.includes('clean');
+      
+      const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                 stylePreset.id.includes('developer') ||
+                                 stylePreset.id.includes('engineering') ||
+                                 stylePreset.id.includes('data');
+      
+      const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                 stylePreset.id.includes('leadership') ||
+                                 stylePreset.id.includes('corporate');
+      
+      const skillsAlignment = isCenteredTemplate ? 'justify-center' : 
+                             isMinimalTemplate ? 'justify-start' :
+                             isTechnicalTemplate ? 'justify-start' :
+                             isExecutiveTemplate ? 'justify-start' : 'justify-start';
+      
+      const skillsDisplay = layout === 'technical' || layout === 'developer' 
+        ? `grid grid-cols-2 gap-2 ${isCenteredTemplate ? 'place-items-center' : ''}` 
+        : `flex flex-wrap gap-2 ${skillsAlignment}`;
+     
+     const allSkills = [...(data.skills.technical || []), ...(data.skills.soft || [])];
+     
+     return renderSection(
+       layout === 'technical' || layout === 'developer' ? "TECHNICAL SKILLS" : "SKILLS",
+       <div className={skillsDisplay}>
+         {allSkills.slice(0, previewMode ? 6 : allSkills.length).map((skill, index) => (
+           <span
+             key={index}
+             className={`px-3 py-1 rounded-full border ${
+               previewMode ? 'text-xs' : 'text-sm'
+             } ${isCenteredTemplate ? 'text-center' : 
+                isMinimalTemplate ? 'text-left' :
+                isTechnicalTemplate ? 'text-center' :
+                isExecutiveTemplate ? 'text-center' : 'text-left'}`}
+             style={{
+               backgroundColor: 'var(--template-accent)',
+               borderColor: 'var(--template-primary)',
+               color: 'var(--template-secondary)'
+             }}
+           >
+             {skill}
+           </span>
+         ))}
+       </div>,
+       true
+     );
+   };
+
+     const renderContent = () => {
+     // Enhanced spacing detection for all template types
+     const isMinimalTemplate = stylePreset.id.includes('minimalist') ||
+                              stylePreset.id.includes('bare') ||
+                              stylePreset.id.includes('simple') ||
+                              stylePreset.id.includes('clean');
+     
+     const isTechnicalTemplate = stylePreset.id.includes('tech') ||
+                                stylePreset.id.includes('developer') ||
+                                stylePreset.id.includes('engineering') ||
+                                stylePreset.id.includes('data');
+     
+     const isExecutiveTemplate = stylePreset.id.includes('executive') ||
+                                stylePreset.id.includes('leadership') ||
+                                stylePreset.id.includes('corporate');
+     
+     const isAcademicTemplate = stylePreset.id.includes('academic') ||
+                               stylePreset.id.includes('graduate') ||
+                               stylePreset.id.includes('student');
+     
+     // Template-specific spacing
+     const getSpacing = () => {
+       if (previewMode) {
+         return isMinimalTemplate ? 'gap-2' : 'gap-4';
+       }
+       return isMinimalTemplate ? 'gap-6' : 'gap-8';
+     };
+     
+     const getSectionSpacing = () => {
+       if (previewMode) {
+         return isMinimalTemplate ? 'space-y-2' : 'space-y-4';
+       }
+       return isMinimalTemplate ? 'space-y-4' : 'space-y-6';
+     };
+     
+     switch (layout) {
+       case 'portfolio':
+       case 'creative':
+         return (
+           <div className={`grid grid-cols-1 ${getSpacing()}`}>
+             <div className={`${getSectionSpacing()}`}>
+               {renderSummary()}
+               {renderExperience()}
+             </div>
+             <div className={getSectionSpacing()}>
+               {renderEducation()}
+               {renderSkills()}
+             </div>
+           </div>
+         );
+      
+             case 'technical':
+       case 'developer':
+         return (
+           <div className={getSectionSpacing()}>
+             {renderSkills()}
+             {renderSummary()}
+             {renderExperience()}
+             {renderEducation()}
+           </div>
+         );
+
+       case 'sidebar':
+         return (
+           <div className={`grid grid-cols-1 ${getSpacing()}`}>
+             <div className={`${getSectionSpacing()}`}>
+               {renderSkills()}
+               {renderEducation()}
+             </div>
+             <div className={`${getSectionSpacing()}`}>
+               {renderSummary()}
+               {renderExperience()}
+             </div>
+           </div>
+         );
+
+       case 'traditional':
+       case 'executive':
+         return (
+           <div className={getSectionSpacing()}>
+             {renderSummary()}
+             <div className={`grid grid-cols-1 ${getSpacing()}`}>
+               <div className={getSectionSpacing()}>
+                 {renderExperience()}
+               </div>
+               <div className={getSectionSpacing()}>
+                 {renderEducation()}
+                 {renderSkills()}
+               </div>
+             </div>
+           </div>
+         );
+
+       case 'academic':
+         return (
+           <div className={getSectionSpacing()}>
+             {renderSummary()}
+             {renderEducation()}
+             {renderExperience()}
+             {renderSkills()}
+           </div>
+         );
+       
+       default: // professional
+         return (
+           <div className={getSectionSpacing()}>
+             {renderSummary()}
+             {renderExperience()}
+             {renderEducation()}
+             {renderSkills()}
+           </div>
+         );
     }
   };
 
@@ -406,12 +711,15 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate }: UnifiedLayoutPr
       className={`bg-white mx-auto ${typographyClass}`}
       style={{
         ...layoutStyle,
-        maxWidth: '210mm', // A4 width constraint
+        maxWidth: previewMode ? '100%' : '210mm', // A4 width constraint for full mode, flexible for preview
         width: '100%',
       }}
     >
       {renderHeader()}
-      <main className={`${spacing === 'compact' ? 'p-6' : spacing === 'spacious' ? 'p-12' : 'p-8'}`}>
+             <main className={`${
+         previewMode ? 'p-2' :
+         spacing === 'compact' ? 'p-6' : spacing === 'spacious' ? 'p-12' : 'p-8'
+       }`}>
         {renderContent()}
       </main>
     </div>

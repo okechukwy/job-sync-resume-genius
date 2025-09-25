@@ -2,7 +2,7 @@
 import ResumeSteps from "@/components/ResumeSteps";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { AnalysisStep } from "@/components/resume-builder";
-import UnifiedTemplateStep from "@/components/resume-builder/UnifiedTemplateStep";
+import { UnifiedTemplateHub } from "@/components/template-selection/UnifiedTemplateHub";
 import { FullWidthLayout } from "@/components/common/FullWidthLayout";
 import { useSearchParams } from "react-router-dom";
 
@@ -55,21 +55,17 @@ const ResumeBuilder = () => {
     );
   }
 
-  // Template selection step (default)
+  // Template selection step (default) - use unified hub
   return (
-    <FullWidthLayout>
-      <UnifiedTemplateStep
-        selectedTemplate={selectedTemplate}
+    <div className="min-h-screen bg-gradient-hero">
+      <UnifiedTemplateHub
+        mode="resume-builder"
         onTemplateSelect={handleTemplateSelect}
         uploadedFile={uploadedFile}
         onFileChange={handleFileChange}
         onStartFromScratch={handleStartFromScratch}
-        showPreviewModal={showPreviewModal}
-        previewTemplateId={previewTemplateId}
-        onPreviewOpen={handlePreviewOpen}
-        onPreviewClose={handlePreviewClose}
       />
-    </FullWidthLayout>
+    </div>
   );
 };
 

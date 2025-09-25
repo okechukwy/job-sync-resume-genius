@@ -38,28 +38,43 @@ export const TemplateSelector = () => {
     );
   };
 
-  const renderTemplateCard = (template: typeof templateConfigs[0]) => (
-    <Card 
-      key={template.id}
-      className={`glass-card hover:shadow-glow transition-all duration-300 cursor-pointer ${
-        selectedTemplate.id === template.id ? 'ring-2 ring-primary' : ''
-      }`}
-      onClick={() => setSelectedTemplate(template)}
-    >
-      <CardHeader className="text-center pb-4">
-        <div className="text-4xl mb-2">{template.emoji}</div>
-        <CardTitle className="text-lg">{template.name}</CardTitle>
-        <p className="text-sm text-muted-foreground">{template.description}</p>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-1 mb-4">
-          {template.tags.map((tag, idx) => (
-            <Badge key={idx} variant="outline" className="text-xs">
-              {tag}
+  const renderTemplateCard = (template: typeof templateConfigs[0]) => {
+    const isColoredTemplate = template.stylePreset.includes('blue') || 
+                             template.stylePreset.includes('teal') || 
+                             template.stylePreset.includes('green');
+    
+    return (
+      <Card 
+        key={template.id}
+        className={`glass-card hover:shadow-glow transition-all duration-300 cursor-pointer ${
+          selectedTemplate.id === template.id ? 'ring-2 ring-primary' : ''
+        }`}
+        onClick={() => setSelectedTemplate(template)}
+      >
+        <CardHeader className="text-center pb-4">
+          <div className="text-4xl mb-2">{template.emoji}</div>
+          <CardTitle className="text-lg">{template.name}</CardTitle>
+          <p className="text-sm text-muted-foreground">{template.description}</p>
+          {isColoredTemplate && (
+            <Badge variant="secondary" className="mt-2 text-xs">
+              🎨 Colored Design
             </Badge>
-          ))}
-        </div>
-        <div className="space-y-2">
+          )}
+          {!isColoredTemplate && (
+            <Badge variant="outline" className="mt-2 text-xs">
+              ⚡ ATS Optimized
+            </Badge>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-1 mb-4">
+            {template.tags.map((tag, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <div className="space-y-2">
           <Button 
             variant="outline" 
             size="sm" 
@@ -89,6 +104,7 @@ export const TemplateSelector = () => {
       </CardContent>
     </Card>
   );
+  };
 
   if (previewMode) {
     return (
@@ -209,24 +225,22 @@ export const TemplateSelector = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4 glass-card">
-            📋 Choose Your Template
+            ⚡ ATS-Optimized Templates
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Professional{" "}
-            <span className="gradient-text">Resume Templates</span>
+            Choose Your Perfect{" "}
+            <span className="gradient-text">Resume Template</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Choose from our curated collection of templates organized by category. 
-            Each template is professionally designed and ATS-optimized.
+            Select from our ATS-optimized templates designed for maximum compatibility with Applicant Tracking Systems. 
+            Only 3 templates feature colors - the rest are black & white for maximum ATS compatibility.
           </p>
         </div>
 
         {/* Template Categories */}
         <Tabs defaultValue="professional" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 glass-card">
-            <TabsTrigger value="professional">Professional</TabsTrigger>
-            <TabsTrigger value="creative">Creative</TabsTrigger>
-            <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1 mb-8 glass-card">
+            <TabsTrigger value="professional">Professional Templates</TabsTrigger>
           </TabsList>
 
           {categories.map((category) => (
@@ -234,10 +248,25 @@ export const TemplateSelector = () => {
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold mb-2">{category.name} Templates</h2>
                 <p className="text-muted-foreground">
-                  {category.id === 'professional' && 'Clean, formal designs perfect for traditional industries'}
-                  {category.id === 'creative' && 'Bold, visual designs that showcase your creativity'}
-                  {category.id === 'technical' && 'Modern layouts optimized for tech and engineering roles'}
+                  ATS-optimized templates designed for maximum compatibility with Applicant Tracking Systems
                 </p>
+              </div>
+              
+              {/* ATS Optimization Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                <div className="flex items-start gap-4">
+                  <div className="text-2xl">⚡</div>
+                  <div>
+                    <h3 className="font-semibold text-blue-900 mb-2">ATS Optimization Features</h3>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• Clean, readable typography optimized for ATS parsing</li>
+                      <li>• Standard section headers that ATS systems recognize</li>
+                      <li>• Proper formatting for easy text extraction</li>
+                      <li>• 9 black & white templates for maximum compatibility</li>
+                      <li>• 3 colored templates for industries that accept them</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
