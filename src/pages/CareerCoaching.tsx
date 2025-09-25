@@ -222,7 +222,7 @@ const CareerCoaching = () => {
           started_at: new Date().toISOString()
         }
       });
-      setIsModuleModalOpen(false);
+      // Keep modal open so users can see learning content
     } catch (error) {
       toast.error('Failed to start module');
     }
