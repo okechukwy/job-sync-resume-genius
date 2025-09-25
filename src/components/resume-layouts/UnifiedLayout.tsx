@@ -170,10 +170,10 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = fal
           </header>
         );
       
-      case 'split':
+      case 'centered':
         return (
           <header 
-            className={`text-white relative overflow-hidden ${
+            className={`text-white relative overflow-hidden text-center ${
               previewMode ? 'p-4' : 'p-8'
             }`}
             style={{ background: 'var(--template-header-bg)', color: 'var(--template-header-text)' }}
@@ -268,7 +268,7 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = fal
                           isTechnicalTemplate ? 'text-left' :
                           isExecutiveTemplate ? 'text-left' : 'text-left';
    
-   const borderStyle = customBorder && (layout === 'creative' || layout === 'portfolio') 
+   const borderStyle = customBorder && (layout === 'creative' || layout === 'modern') 
      ? 'border-l-4 pl-4 border-b-0' 
      : 'border-b-2';
      
@@ -559,14 +559,14 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = fal
                            isTechnicalTemplate ? 'justify-start' :
                            isExecutiveTemplate ? 'justify-start' : 'justify-start';
     
-    const skillsDisplay = layout === 'technical' || layout === 'developer' 
+    const skillsDisplay = layout === 'technical' || layout === 'modern' 
       ? `grid grid-cols-2 gap-2 ${isCenteredTemplate ? 'place-items-center' : ''}` 
       : `flex flex-wrap gap-2 ${skillsAlignment}`;
     
    const allSkills = [...(data.skills.technical || []), ...(data.skills.soft || [])];
    
    return renderSection(
-     layout === 'technical' || layout === 'developer' ? "TECHNICAL SKILLS" : "SKILLS",
+     layout === 'technical' || layout === 'modern' ? "TECHNICAL SKILLS" : "SKILLS",
      <div className={skillsDisplay}>
        {allSkills.slice(0, previewMode ? 6 : allSkills.length).map((skill, index) => (
          <span
@@ -822,7 +822,6 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = fal
     };
     
     switch (layout) {
-      case 'portfolio':
       case 'creative':
         return (
           <div className={`grid grid-cols-1 ${getSpacing()}`}>
@@ -838,7 +837,6 @@ export const UnifiedLayout = ({ data, stylePreset, formatDate, previewMode = fal
         );
       
       case 'technical':
-      case 'developer':
         return (
           <div className={getSectionSpacing()}>
             {renderSkills()}

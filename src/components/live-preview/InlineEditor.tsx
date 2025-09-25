@@ -6,6 +6,7 @@ interface InlineEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  style?: React.CSSProperties;
   multiline?: boolean;
   fontSize?: string;
   fontWeight?: string;
@@ -20,6 +21,7 @@ export const InlineEditor = ({
   onChange,
   placeholder = "Click to edit...",
   className = "",
+  style,
   multiline = false,
   fontSize = "14px",
   fontWeight = "normal",
@@ -90,6 +92,7 @@ export const InlineEditor = ({
         textAlign,
         minWidth: '20px',
         wordBreak: 'break-word',
+        ...style
       }}
       data-placeholder={isEmpty ? placeholder : ''}
     >

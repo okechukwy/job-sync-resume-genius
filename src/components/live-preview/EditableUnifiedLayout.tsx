@@ -181,10 +181,10 @@ export const EditableUnifiedLayout = ({
           </header>
         );
       
-      case 'split':
+      case 'centered':
         return (
           <header className="flex justify-between items-start py-6 mb-6">
-            <div className="flex-1">
+            <div className="flex-1 text-center">
               {getHeaderContent()}
             </div>
           </header>
