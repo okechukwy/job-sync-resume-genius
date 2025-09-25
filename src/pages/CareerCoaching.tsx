@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleContentModal } from "@/components/coaching/ModuleContentModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   GraduationCap, 
   Target, 
@@ -41,6 +42,7 @@ const CareerCoaching = () => {
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
   const { user } = useAuth();
   
   // Get coaching data using the hook
@@ -72,6 +74,26 @@ const CareerCoaching = () => {
     isCompletingAction,
     isUpdatingModuleProgress
   } = useCoaching(user?.id, selectedProgramId);
+
+  // Check for loading or error states
+  if (process.env.NODE_ENV === 'development') {
+    if (isLoading) console.log('🔄 Coaching data loading...');
+    if (coachingPrograms?.length === 0) console.log('⚠️ No coaching programs found');
+    if (selectedProgramId && learningModules?.length === 0) console.log('⚠️ No learning modules found for program:', selectedProgramId);
+  }
+
+  // Test function for debugging
+  const testDataFetching = async () => {
+    try {
+      const { CoachingService } = await import('@/services/coachingService');
+      const programs = await CoachingService.getCoachingPrograms();
+      console.log('📊 Test fetch results:', programs);
+      toast.success(`Found ${programs?.length || 0} coaching programs`);
+    } catch (error) {
+      console.error('🚫 Test fetch error:', error);
+      toast.error('Failed to fetch data: ' + (error as Error).message);
+    }
+  };
 
   // Helper functions for icons
   const getCategoryIcon = (category: string) => {
@@ -206,8 +228,14 @@ const CareerCoaching = () => {
 
   // Handle module click
   const handleModuleClick = (module: any) => {
+    console.log('🎯 Clicked module:', module);
     setSelectedModule(module);
-    setIsModuleModalOpen(true);
+    // Use test dialog first to verify basic functionality
+    if (process.env.NODE_ENV === 'development') {
+      setIsTestDialogOpen(true);
+    } else {
+      setIsModuleModalOpen(true);
+    }
   };
 
   // Handle starting a module
@@ -300,6 +328,13 @@ const CareerCoaching = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Get personalized career guidance, professional development insights, and strategic advice to accelerate your career growth
           </p>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4">
+              <Button onClick={testDataFetching} variant="outline" size="sm">
+                🔍 Test Data Fetch
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Progress Overview */}
@@ -530,6 +565,26 @@ const CareerCoaching = () => {
 
           <TabsContent value="learning">
             <div className="space-y-6">
+              {/* Debug panel for development */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-yellow-800 mb-2">🔍 Debug Info</h4>
+                  <div className="text-sm text-yellow-700 space-y-1">
+                    <p><strong>Selected Program ID:</strong> {selectedProgramId || 'None'}</p>
+                    <p><strong>Learning Modules Count:</strong> {learningModules?.length || 0}</p>
+                    <p><strong>Is Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
+                    <p><strong>Coaching Programs Count:</strong> {coachingPrograms?.length || 0}</p>
+                    {learningModules?.length > 0 && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer font-medium">Learning Modules Data</summary>
+                        <pre className="mt-2 text-xs overflow-auto max-h-32">
+                          {JSON.stringify(learningModules, null, 2)}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              )}
               {selectedProgramId ? (
                 <>
                   {/* Program-specific learning modules */}
@@ -552,8 +607,26 @@ const CareerCoaching = () => {
                   </div>
                   
                    <div className="space-y-4">
-                     {learningModules?.length > 0 ? (
-                       learningModules.map((module, index) => {
+                     {(() => {
+                       try {
+                         if (!learningModules || learningModules.length === 0) {
+                           return (
+                             <Card className="glass-card">
+                               <CardContent className="p-6 text-center">
+                                 <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                                 <h4 className="text-lg font-semibold mb-2">No Modules Available</h4>
+                                 <p className="text-muted-foreground mb-4">
+                                   Learning modules for this program are being prepared.
+                                 </p>
+                                 <Button variant="outline" onClick={() => setSelectedProgramId(null)}>
+                                   Browse All Resources
+                                 </Button>
+                               </CardContent>
+                             </Card>
+                           );
+                         }
+                         
+                         return learningModules.map((module, index) => {
                          const moduleStatus = getModuleStatus(module.id);
                          const progressPercentage = getModuleProgressPercentage(module.id);
                          const enrollment = getProgramEnrollment(selectedProgramId!);
@@ -581,7 +654,7 @@ const CareerCoaching = () => {
                                      <p className="text-muted-foreground mb-3">{module.description}</p>
                                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                        <span>Module {module.order_index}</span>
-                                       <span>{module.estimated_duration_minutes} min</span>
+                                       <span>{module.duration_minutes} min</span>
                                        <Badge variant="outline">{module.difficulty_level}</Badge>
                                      </div>
                                    </div>
@@ -656,21 +729,26 @@ const CareerCoaching = () => {
                              </CardContent>
                            </Card>
                          );
-                       })
-                    ) : (
-                      <Card className="glass-card">
-                        <CardContent className="p-6 text-center">
-                          <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                          <h4 className="text-lg font-semibold mb-2">No Modules Available</h4>
-                          <p className="text-muted-foreground mb-4">
-                            Learning modules for this program are being prepared.
-                          </p>
-                          <Button variant="outline" onClick={() => setSelectedProgramId(null)}>
-                            Browse All Resources
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
+                       });
+                       
+                       } catch (error) {
+                         console.error('Error rendering learning modules:', error);
+                         return (
+                           <Card className="glass-card">
+                             <CardContent className="p-6 text-center">
+                               <div className="text-red-500 mb-4">
+                                 <h4 className="text-lg font-semibold mb-2">Error Loading Modules</h4>
+                                 <p className="text-sm">There was an error loading the learning modules.</p>
+                                 <p className="text-xs mt-2 opacity-70">{(error as Error).message}</p>
+                               </div>
+                               <Button variant="outline" onClick={() => setSelectedProgramId(null)}>
+                                 Back to Resources
+                               </Button>
+                             </CardContent>
+                           </Card>
+                         );
+                       }
+                     })()}
                   </div>
                 </>
               ) : (
@@ -868,17 +946,60 @@ const CareerCoaching = () => {
         </Tabs>
       </div>
 
+      {/* Test Dialog for Debugging */}
+      <Dialog open={isTestDialogOpen} onOpenChange={setIsTestDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-green-600">✅ Module Dialog Test</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm">This is a simple test dialog to verify modal functionality works.</p>
+            {selectedModule && (
+              <div className="bg-muted p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Selected Module:</h4>
+                <p><strong>Title:</strong> {selectedModule.title}</p>
+                <p><strong>Description:</strong> {selectedModule.description}</p>
+                <p><strong>Duration:</strong> {selectedModule.duration_minutes} minutes</p>
+                <p><strong>Content Type:</strong> {selectedModule.content_type}</p>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => {
+                  setIsTestDialogOpen(false);
+                  setIsModuleModalOpen(true);
+                }}
+              >
+                Open Full Module Modal
+              </Button>
+              <Button variant="outline" onClick={() => setIsTestDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Module Content Modal */}
-      <ModuleContentModal 
-        isOpen={isModuleModalOpen}
-        onClose={() => setIsModuleModalOpen(false)}
-        module={selectedModule}
-        progress={selectedModule ? getModuleProgress(selectedModule.id) : undefined}
-        enrollmentId={getProgramEnrollment(selectedProgramId || '')?.id || ''}
-        onStartModule={handleStartModule}
-        onCompleteModule={handleCompleteModule}
-        isUpdating={isUpdatingModuleProgress}
-      />
+      {(() => {
+        try {
+          return (
+            <ModuleContentModal 
+              isOpen={isModuleModalOpen}
+              onClose={() => setIsModuleModalOpen(false)}
+              module={selectedModule}
+              progress={selectedModule ? getModuleProgress(selectedModule.id) : undefined}
+              enrollmentId={getProgramEnrollment(selectedProgramId || '')?.id || ''}
+              onStartModule={handleStartModule}
+              onCompleteModule={handleCompleteModule}
+              isUpdating={isUpdatingModuleProgress}
+            />
+          );
+        } catch (error) {
+          console.error('Error rendering ModuleContentModal:', error);
+          return null;
+        }
+      })()}
     </div>
   );
 };

@@ -23,7 +23,11 @@ export class CoachingService {
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching coaching programs:', error);
+      throw error;
+    }
+    console.log('📚 Fetched coaching programs:', data?.length || 0);
     return data as CoachingProgram[];
   }
 
@@ -95,7 +99,11 @@ export class CoachingService {
       .eq('program_id', programId)
       .order('order_index', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching learning modules for program', programId, ':', error);
+      throw error;
+    }
+    console.log('📝 Fetched learning modules for program', programId, ':', data?.length || 0);
     return data;
   }
 
