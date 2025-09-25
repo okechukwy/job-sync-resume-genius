@@ -1,9 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 
 const FeaturesSection = () => {
-  const features = [
+  const allFeatures = [
     {
       icon: "🎯",
       title: "Smart Resume Builder",
@@ -89,6 +90,14 @@ const FeaturesSection = () => {
       highlights: ["24/7 Availability", "Priority Queue", "Dedicated Support"]
     }
   ];
+
+  // Filter out white-label feature if disabled
+  const features = allFeatures.filter(feature => {
+    if (feature.title === "White Label Exports") {
+      return isFeatureEnabled('enableWhiteLabel');
+    }
+    return true;
+  });
 
   return (
     <section id="features" className="py-24 px-4 relative">

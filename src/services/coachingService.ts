@@ -12,6 +12,7 @@ type PersonalizedInsight = Database['public']['Tables']['personalized_insights']
 type ActionItem = Database['public']['Tables']['action_items']['Row'];
 type CareerCertification = Database['public']['Tables']['career_certifications']['Row'];
 type LearningResource = Database['public']['Tables']['learning_resources']['Row'];
+type UserAchievement = Database['public']['Tables']['user_achievements']['Row'];
 
 export class CoachingService {
   // Coaching Programs
@@ -95,7 +96,7 @@ export class CoachingService {
       .order('order_index', { ascending: true });
 
     if (error) throw error;
-    return data as LearningModule[];
+    return data;
   }
 
   static async getUserModuleProgress(userId: string, enrollmentId?: string) {
@@ -131,6 +132,8 @@ export class CoachingService {
         enrollment_id: enrollmentId,
         ...progressData,
         last_accessed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,module_id'
       })
       .select()
       .single();
@@ -364,6 +367,147 @@ export class CoachingService {
 
     if (error) throw error;
     return data as LearningResource[];
+  }
+
+  // Achievements Management
+  static async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*')
+      .eq('user_id', userId)
+      .order('unlocked_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async markAchievementAsViewed(achievementId: string): Promise<void> {
+    const { error } = await supabase
+      .from('user_achievements')
+      .update({ is_viewed: true, updated_at: new Date().toISOString() })
+      .eq('id', achievementId);
+
+    if (error) throw error;
+  }
+
+  static async createAchievement(userId: string, achievement: {
+    achievement_type: string;
+    title: string;
+    description: string;
+    category?: string;
+    points_earned?: number;
+    metadata?: any;
+  }): Promise<UserAchievement> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .insert({
+        user_id: userId,
+        category: achievement.category || 'progress',
+        points_earned: achievement.points_earned || 0,
+        metadata: achievement.metadata || {},
+        ...achievement
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  static async calculateAchievements(userId: string): Promise<void> {
+    // Get user's progress data to determine achievements
+    const [progressData, goalsData, assessmentsData] = await Promise.all([
+      supabase
+        .from('user_module_progress')
+        .select('*, learning_modules(title)')
+        .eq('user_id', userId)
+        .eq('status', 'completed'),
+      supabase
+        .from('career_goals')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'completed'),
+      supabase
+        .from('skills_assessments')
+        .select('*')
+        .eq('user_id', userId)
+    ]);
+
+    const completedModules = progressData.data || [];
+    const completedGoals = goalsData.data || [];
+    const assessments = assessmentsData.data || [];
+
+    // Check for module completion achievements
+    for (const module of completedModules) {
+      const existingAchievement = await supabase
+        .from('user_achievements')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('achievement_type', 'module_completion')
+        .eq('metadata->>module_id', module.module_id)
+        .single();
+
+      if (!existingAchievement.data) {
+        await this.createAchievement(userId, {
+          achievement_type: 'module_completion',
+          title: 'Module Completed',
+          description: `Completed "${module.learning_modules?.title || 'Learning Module'}"`,
+          category: 'progress',
+          points_earned: 10,
+          metadata: { module_id: module.module_id, progress: module.progress_percentage }
+        });
+      }
+    }
+
+    // Check for goal completion achievements
+    for (const goal of completedGoals) {
+      const existingAchievement = await supabase
+        .from('user_achievements')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('achievement_type', 'goal_reached')
+        .eq('metadata->>goal_id', goal.id)
+        .single();
+
+      if (!existingAchievement.data) {
+        await this.createAchievement(userId, {
+          achievement_type: 'goal_reached',
+          title: 'Goal Achieved',
+          description: `Completed goal: "${goal.title}"`,
+          category: 'milestone',
+          points_earned: 25,
+          metadata: { goal_id: goal.id, priority: goal.priority }
+        });
+      }
+    }
+
+    // Check for skill assessment milestones
+    const highScoreAssessments = assessments.filter(a => a.current_level >= 8);
+    for (const assessment of highScoreAssessments) {
+      const existingAchievement = await supabase
+        .from('user_achievements')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('achievement_type', 'skill_milestone')
+        .eq('metadata->>skill_name', assessment.skill_name)
+        .single();
+
+      if (!existingAchievement.data) {
+        await this.createAchievement(userId, {
+          achievement_type: 'skill_milestone',
+          title: 'Skill Mastery',
+          description: `Achieved high proficiency in ${assessment.skill_name}`,
+          category: 'skill',
+          points_earned: 20,
+          metadata: { 
+            skill_name: assessment.skill_name, 
+            level: assessment.current_level,
+            category: assessment.category
+          }
+        });
+      }
+    }
   }
 
   // Analytics and Progress

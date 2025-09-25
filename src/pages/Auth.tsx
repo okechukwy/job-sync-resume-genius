@@ -26,6 +26,7 @@ const Auth = () => {
   const { toast } = useToast();
 
   const from = location.state?.from?.pathname || "/get-started";
+  const intent = location.state?.intent;
 
   // Handle cooldown timer
   useEffect(() => {
@@ -83,9 +84,16 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
+      const welcomeMessage = intent === 'trial' 
+        ? "Welcome! Your 14-day trial is ready." 
+        : "Welcome back!";
+      const description = intent === 'trial'
+        ? "Start building your resume and explore all features."
+        : "You have been successfully signed in.";
+        
       toast({
-        title: "Welcome back!",
-        description: "You have been successfully signed in.",
+        title: welcomeMessage,
+        description: description,
       });
       navigate(from, { replace: true });
     }
@@ -119,9 +127,16 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
+      const welcomeMessage = intent === 'trial' 
+        ? "Welcome! Your 14-day trial starts now." 
+        : "Account created!";
+      const description = intent === 'trial'
+        ? "Start building your resume and explore all features."
+        : "Please check your email to verify your account.";
+        
       toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
+        title: welcomeMessage,
+        description: description,
       });
       navigate(from, { replace: true });
     }

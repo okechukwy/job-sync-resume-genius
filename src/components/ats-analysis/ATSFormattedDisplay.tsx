@@ -19,6 +19,7 @@ import {
   EducationBlock, 
   HeaderData 
 } from "@/utils/resumeStructureParser";
+import { sanitizeHTML } from "@/utils/contentSanitizer";
 
 interface ATSFormattedDisplayProps {
   structuredResume: StructuredResume;
@@ -53,7 +54,7 @@ export const ATSFormattedDisplay = memo(({
   }
   const highlightChanges = (text: string) => {
     if (!showChanges || appliedSuggestions.length === 0) {
-      return text;
+      return sanitizeHTML(text);
     }
 
     let highlightedText = text;
@@ -68,7 +69,7 @@ export const ATSFormattedDisplay = memo(({
       );
     });
     
-    return highlightedText;
+    return sanitizeHTML(highlightedText);
   };
 
   const renderHeader = (data: HeaderData) => (

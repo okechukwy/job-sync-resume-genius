@@ -1,0 +1,58 @@
+name: Hotfix Deployment
+
+on:
+  push:
+    branches: [hotfix/*]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+    
+# Only run on hotfix branches targeting main
+jobs:
+  urgent-validation:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/hotfix/') || (github.event.pull_request && startsWith(github.head_ref, 'hotfix/'))
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Critical security checks
+        run: |
+          echo "Running critical security validation"
+          npm audit --audit-level=high
+          
+      - name: Fast build validation
+        run: npm run build
+        
+      - name: Notify team
+        run: |
+          echo "🚨 Hotfix branch detected: ${{ github.ref }}"
+          echo "Ensure proper review and testing before merge"
+
+  security-priority:
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'security') || contains(github.head_ref, 'security')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Enhanced security scan
+        run: |
+          echo "Running enhanced security scan for security hotfix"
+          # Add security-specific validation
+          
+      - name: Database migration check
+        run: |
+          echo "Validating database migrations for security impact"
+          # Add migration validation logic

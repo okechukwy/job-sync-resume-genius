@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Edit3, Eye, Save, X, FileText, MapPin, Mail, Phone, Linkedin } from "lucide-react";
 import { EnhancedStructuredResume, parseResumeContent, convertStructuredToText } from "@/utils/enhancedResumeParser";
+import { sanitizeHTML } from "@/utils/contentSanitizer";
 
 interface AppliedSuggestion {
   id: string;
@@ -53,7 +54,7 @@ export const JobscanStyleResumeViewer = ({
   };
 
   const highlightChanges = (text: string): string => {
-    if (!appliedSuggestions.length) return text;
+    if (!appliedSuggestions.length) return sanitizeHTML(text);
 
     let highlightedText = text;
     appliedSuggestions.forEach(suggestion => {
@@ -65,7 +66,7 @@ export const JobscanStyleResumeViewer = ({
       }
     });
 
-    return highlightedText;
+    return sanitizeHTML(highlightedText);
   };
 
   const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;

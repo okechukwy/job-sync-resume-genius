@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -169,6 +169,66 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      anonymized_analytics: {
+        Row: {
+          anonymized_data: Json | null
+          created_at: string
+          event_type: string
+          id: string
+          session_hash: string
+          user_segment: string | null
+        }
+        Insert: {
+          anonymized_data?: Json | null
+          created_at?: string
+          event_type: string
+          id?: string
+          session_hash: string
+          user_segment?: string | null
+        }
+        Update: {
+          anonymized_data?: Json | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          session_hash?: string
+          user_segment?: string | null
+        }
+        Relationships: []
+      }
+      api_rate_limits: {
+        Row: {
+          blocked_until: string | null
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          request_count: number | null
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string
         }
         Relationships: []
       }
@@ -706,6 +766,72 @@ export type Database = {
         }
         Relationships: []
       }
+      data_retention_policies: {
+        Row: {
+          auto_delete: boolean | null
+          created_at: string
+          data_type: string
+          id: string
+          last_cleanup_at: string | null
+          retention_period: unknown
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_delete?: boolean | null
+          created_at?: string
+          data_type: string
+          id?: string
+          last_cleanup_at?: string | null
+          retention_period?: unknown
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_delete?: boolean | null
+          created_at?: string
+          data_type?: string
+          id?: string
+          last_cleanup_at?: string | null
+          retention_period?: unknown
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      encrypted_data: {
+        Row: {
+          created_at: string
+          data_type: string
+          encrypted_content: string
+          encryption_key_id: string
+          id: string
+          iv: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          encrypted_content: string
+          encryption_key_id: string
+          id?: string
+          iv: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          encrypted_content?: string
+          encryption_key_id?: string
+          id?: string
+          iv?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       export_history: {
         Row: {
           client_name: string | null
@@ -964,6 +1090,7 @@ export type Database = {
       }
       learning_modules: {
         Row: {
+          content_sections: Json | null
           content_type: string
           content_url: string | null
           created_at: string
@@ -979,6 +1106,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          content_sections?: Json | null
           content_type?: string
           content_url?: string | null
           created_at?: string
@@ -994,6 +1122,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          content_sections?: Json | null
           content_type?: string
           content_url?: string | null
           created_at?: string
@@ -1191,6 +1320,57 @@ export type Database = {
           summary?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      login_attempts: {
+        Row: {
+          attempt_count: number | null
+          blocked_until: string | null
+          city: string | null
+          country_code: string | null
+          created_at: string
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: unknown
+          latitude: number | null
+          longitude: number | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          blocked_until?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address: unknown
+          latitude?: number | null
+          longitude?: number | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          blocked_until?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown
+          latitude?: number | null
+          longitude?: number | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1549,6 +1729,48 @@ export type Database = {
         }
         Relationships: []
       }
+      security_anomalies: {
+        Row: {
+          anomaly_type: string
+          confidence_score: number | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity_level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anomaly_type: string
+          confidence_score?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity_level?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anomaly_type?: string
+          confidence_score?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity_level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string
@@ -1679,6 +1901,120 @@ export type Database = {
           skill_gaps?: Json
           target_industry?: string
           target_role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trial_settings: {
+        Row: {
+          auto_upgrade_plan: string | null
+          created_at: string | null
+          id: string
+          trial_duration_days: number | null
+          trial_features_enabled: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_upgrade_plan?: string | null
+          created_at?: string | null
+          id?: string
+          trial_duration_days?: number | null
+          trial_features_enabled?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_upgrade_plan?: string | null
+          created_at?: string | null
+          id?: string
+          trial_duration_days?: number | null
+          trial_features_enabled?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trusted_devices: {
+        Row: {
+          city: string | null
+          country_code: string | null
+          created_at: string
+          device_fingerprint: string
+          device_name: string | null
+          id: string
+          ip_address: unknown | null
+          last_used_at: string | null
+          trusted: boolean | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_fingerprint: string
+          device_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_used_at?: string | null
+          trusted?: boolean | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_fingerprint?: string
+          device_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_used_at?: string | null
+          trusted?: boolean | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_type: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_viewed: boolean
+          metadata: Json | null
+          points_earned: number | null
+          title: string
+          unlocked_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type: string
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          is_viewed?: boolean
+          metadata?: Json | null
+          points_earned?: number | null
+          title: string
+          unlocked_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_viewed?: boolean
+          metadata?: Json | null
+          points_earned?: number | null
+          title?: string
+          unlocked_at?: string
           updated_at?: string
           user_id?: string
         }
@@ -2138,6 +2474,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          auto_upgrade_enabled: boolean | null
+          created_at: string | null
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_end_date: string | null
+          subscription_plan: string | null
+          subscription_start_date: string | null
+          subscription_status: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_upgrade_enabled?: boolean | null
+          created_at?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_upgrade_enabled?: boolean | null
+          created_at?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: string | null
+          subscription_start_date?: string | null
+          subscription_status?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       white_label_configs: {
         Row: {
           accent_color: string | null
@@ -2201,21 +2585,42 @@ export type Database = {
     }
     Functions: {
       calculate_performance_metrics: {
-        Args: { user_uuid: string; period?: string }
+        Args: { period?: string; user_uuid: string }
         Returns: undefined
+      }
+      check_brute_force_protection: {
+        Args: { p_email: string; p_ip_address: unknown }
+        Returns: Json
+      }
+      detect_login_anomaly: {
+        Args: {
+          p_country_code: string
+          p_ip_address: unknown
+          p_user_agent: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       get_resume_version_metrics: {
         Args: { resume_id: string }
         Returns: {
-          total_applications: number
-          responses_received: number
-          interviews_scheduled: number
-          offers_received: number
           avg_ats_score: number
-          response_rate: number
           interview_rate: number
+          interviews_scheduled: number
           offer_rate: number
+          offers_received: number
+          response_rate: number
+          responses_received: number
+          total_applications: number
         }[]
+      }
+      get_trial_days_remaining: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
+      is_trial_expired: {
+        Args: { user_uuid: string }
+        Returns: boolean
       }
     }
     Enums: {

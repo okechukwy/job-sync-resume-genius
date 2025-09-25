@@ -9,6 +9,7 @@ import {
   Bold, Italic, Underline, Eye, EyeOff, Zap, History
 } from "lucide-react";
 import { EnhancedCVResult } from "@/services/cvEnhancement";
+import { sanitizeResumeHTML } from "@/utils/contentSanitizer";
 
 interface RealTimeEditorProps {
   initialContent: string;
@@ -324,7 +325,7 @@ const RealTimeEditor = ({
                   }}
                 >
                   {isHtml ? (
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeResumeHTML(content) }} />
                   ) : (
                     <div className="whitespace-pre-wrap">{content}</div>
                   )}

@@ -18,6 +18,17 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
+  // User Achievements
+  const {
+    data: userAchievements,
+    isLoading: achievementsLoading,
+    error: achievementsError
+  } = useQuery({
+    queryKey: ['user-achievements', userId],
+    queryFn: () => userId ? CoachingService.getUserAchievements(userId) : Promise.resolve([]),
+    enabled: !!userId,
+  });
+
   // User Enrollments
   const {
     data: userEnrollments,
@@ -119,6 +130,18 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
 
+  // User Module Progress
+  const {
+    data: userModuleProgress,
+    isLoading: moduleProgressLoading,
+    error: moduleProgressError
+  } = useQuery({
+    queryKey: ['user-module-progress', userId],
+    queryFn: () => userId ? CoachingService.getUserModuleProgress(userId) : Promise.resolve([]),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Progress Analytics
   const {
     data: overallProgress,
@@ -145,12 +168,28 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
   });
 
   // Mutations
+  const markAchievementViewedMutation = useMutation({
+    mutationFn: (achievementId: string) => CoachingService.markAchievementAsViewed(achievementId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-achievements', userId] });
+    },
+  });
+
+  const calculateAchievementsMutation = useMutation({
+    mutationFn: () => userId ? CoachingService.calculateAchievements(userId) : Promise.reject('No user ID'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-achievements', userId] });
+      toast.success('Achievements updated!');
+    },
+  });
+
   const enrollInProgramMutation = useMutation({
     mutationFn: ({ programId }: { programId: string }) => 
       userId ? CoachingService.enrollInProgram(userId, programId) : Promise.reject('No user ID'),
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['user-enrollments', userId] });
       queryClient.invalidateQueries({ queryKey: ['overall-progress', userId] });
+      calculateAchievementsMutation.mutate(); // Auto-calculate achievements
       
       if (data.isExisting) {
         toast.info('You are already enrolled in this program!');
@@ -208,6 +247,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
       CoachingService.completeActionItem(actionId, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['action-items', userId] });
+      calculateAchievementsMutation.mutate(); // Auto-calculate achievements
       toast.success('Action item completed!');
     },
     onError: (error) => {
@@ -232,6 +272,32 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     mutationFn: (insightId: string) => CoachingService.markInsightAsRead(insightId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['personalized-insights', userId] });
+    },
+  });
+
+  const updateModuleProgressMutation = useMutation({
+    mutationFn: ({ moduleId, enrollmentId, progressData }: { 
+      moduleId: string; 
+      enrollmentId: string; 
+      progressData: any;
+    }) => userId ? CoachingService.updateModuleProgress(userId, moduleId, enrollmentId, progressData) : Promise.reject('No user ID'),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['user-module-progress', userId] });
+      queryClient.invalidateQueries({ queryKey: ['user-enrollments', userId] });
+      queryClient.invalidateQueries({ queryKey: ['overall-progress', userId] });
+      
+      // Only calculate achievements for significant progress (≥50%) or completion
+      const progressPercentage = variables.progressData?.progress_percentage || 0;
+      const status = variables.progressData?.status;
+      
+      if (progressPercentage >= 50 || status === 'completed') {
+        calculateAchievementsMutation.mutate();
+      }
+      
+      toast.success('Progress updated!');
+    },
+    onError: (error) => {
+      toast.error('Failed to update progress: ' + error.message);
     },
   });
 
@@ -268,6 +334,12 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
             queryClient.invalidateQueries({ queryKey: ['personalized-insights', userId] });
           }
         )
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'user_achievements', filter: `user_id=eq.${userId}` },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ['user-achievements', userId] });
+          }
+        )
         .subscribe()
     ];
 
@@ -288,6 +360,8 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     certifications,
     learningResources,
     learningModules,
+    userModuleProgress,
+    userAchievements,
     overallProgress,
     careerStageAnalytics,
 
@@ -295,7 +369,7 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     isLoading: programsLoading || enrollmentsLoading || goalsLoading || 
                assessmentsLoading || sessionsLoading || insightsLoading || 
                actionsLoading || certificationsLoading || resourcesLoading ||
-               modulesLoading || progressLoading || analyticsLoading,
+               modulesLoading || moduleProgressLoading || progressLoading || analyticsLoading || achievementsLoading,
 
     // Individual loading states
     programsLoading,
@@ -308,13 +382,15 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     certificationsLoading,
     resourcesLoading,
     modulesLoading,
+    moduleProgressLoading,
     progressLoading,
     analyticsLoading,
+    achievementsLoading,
 
     // Errors
     hasError: !!(programsError || enrollmentsError || goalsError || 
                   assessmentsError || sessionsError || insightsError || 
-                  actionsError || certificationsError || resourcesError),
+                  actionsError || certificationsError || resourcesError || achievementsError),
 
     // Actions
     enrollInProgram: enrollInProgramMutation.mutate,
@@ -324,6 +400,9 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     completeActionItem: completeActionItemMutation.mutate,
     createSkillsAssessment: createSkillsAssessmentMutation.mutate,
     markInsightAsRead: markInsightAsReadMutation.mutate,
+    markAchievementAsViewed: markAchievementViewedMutation.mutate,
+    calculateAchievements: calculateAchievementsMutation.mutate,
+    updateModuleProgress: updateModuleProgressMutation.mutate,
 
     // Mutation states
     isEnrolling: enrollInProgramMutation.isPending,
@@ -332,6 +411,9 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
     isCreatingAction: createActionItemMutation.isPending,
     isCompletingAction: completeActionItemMutation.isPending,
     isCreatingAssessment: createSkillsAssessmentMutation.isPending,
+    isMarkingAchievementViewed: markAchievementViewedMutation.isPending,
+    isCalculatingAchievements: calculateAchievementsMutation.isPending,
+    isUpdatingModuleProgress: updateModuleProgressMutation.isPending,
   };
 };
 

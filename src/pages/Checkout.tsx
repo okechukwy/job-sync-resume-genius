@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 
 const Checkout = () => {
   const [searchParams] = useSearchParams();
@@ -43,16 +44,16 @@ const Checkout = () => {
       name: "Premium",
       price: "$15",
       period: "/month",
-      features: [
-        "Everything in Professional",
-        "Unlimited job matching",
-        "AI interview preparation",
-        "Personal branding tools",
-        "LinkedIn optimization",
-        "Career coaching insights",
-        "White-label exports",
-        "24/7 priority support"
-      ]
+        features: [
+          "Everything in Professional",
+          "Unlimited job matching",
+          "AI interview preparation", 
+          "Personal branding tools",
+          "LinkedIn optimization",
+          "Career coaching insights",
+          ...(isFeatureEnabled('enableWhiteLabel') ? ["White-label exports"] : []),
+          "24/7 priority support"
+        ]
     }
   };
 

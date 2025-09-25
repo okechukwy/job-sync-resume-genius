@@ -18,6 +18,7 @@ import {
   HeartHandshake,
   Sparkles
 } from "lucide-react";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -32,57 +33,66 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const navigationItems = [
-  {
-    title: "Dashboard",
-    icon: Home,
-    url: "/dashboard",
-  },
-  {
-    groupLabel: "Resume Tools",
-    items: [
-      { title: "Resume Builder", url: "/dashboard/resume/builder", icon: FileText },
-      { title: "Templates", url: "/dashboard/resume/templates", icon: FileText },
-      { title: "ATS Analysis", url: "/dashboard/resume/ats-analysis", icon: Search },
-      { title: "Version Management", url: "/dashboard/resume/versions", icon: GitBranch },
-    ]
-  },
-  {
-    groupLabel: "Job Search",
-    items: [
-      { title: "Job Matching", url: "/dashboard/job-search/matching", icon: Target },
-      { title: "Performance Tracking", url: "/dashboard/job-search/performance", icon: TrendingUp },
-      { title: "Cover Letter Generator", url: "/dashboard/job-search/cover-letter", icon: MessageSquare },
-    ]
-  },
-  {
-    groupLabel: "Career Development",
-    items: [
-      { title: "AI Interview Prep", url: "/dashboard/career/interview-prep", icon: Users },
-      { title: "LinkedIn Optimization", url: "/dashboard/career/linkedin", icon: Linkedin },
-      { title: "Personal Branding", url: "/dashboard/career/branding", icon: Award },
-      { title: "Career Coaching", url: "/dashboard/career/coaching", icon: HeartHandshake },
-    ]
-  },
-  {
-    groupLabel: "Resources & Support",
-    items: [
-      { title: "Resources", url: "/dashboard/resources", icon: BookOpen },
-      { title: "Priority Support", url: "/dashboard/support", icon: HelpCircle },
-      { title: "Help Center", url: "/dashboard/help", icon: HelpCircle },
-    ]
-  },
-  {
-    groupLabel: "Advanced",
-    items: [
-      { title: "White Label Exports", url: "/dashboard/exports", icon: Download },
-    ]
+const getNavigationItems = () => {
+  const baseItems = [
+    {
+      title: "Dashboard",
+      icon: Home,
+      url: "/dashboard",
+    },
+    {
+      groupLabel: "Resume Tools",
+      items: [
+        { title: "Resume Builder", url: "/dashboard/resume/builder", icon: FileText },
+        { title: "Templates", url: "/dashboard/resume/templates", icon: FileText },
+        { title: "ATS Analysis", url: "/dashboard/resume/ats-analysis", icon: Search },
+        { title: "Version Management", url: "/dashboard/resume/versions", icon: GitBranch },
+      ]
+    },
+    {
+      groupLabel: "Job Search",
+      items: [
+        { title: "Job Matching", url: "/dashboard/job-search/matching", icon: Target },
+        { title: "Performance Tracking", url: "/dashboard/job-search/performance", icon: TrendingUp },
+        { title: "Cover Letter Generator", url: "/dashboard/job-search/cover-letter", icon: MessageSquare },
+      ]
+    },
+    {
+      groupLabel: "Career Development",
+      items: [
+        { title: "AI Interview Prep", url: "/dashboard/career/interview-prep", icon: Users },
+        { title: "LinkedIn Optimization", url: "/dashboard/career/linkedin", icon: Linkedin },
+        { title: "Personal Branding", url: "/dashboard/career/branding", icon: Award },
+        { title: "Career Coaching", url: "/dashboard/career/coaching", icon: HeartHandshake },
+      ]
+    },
+    {
+      groupLabel: "Resources & Support",
+      items: [
+        { title: "Resources", url: "/dashboard/resources", icon: BookOpen },
+        { title: "Priority Support", url: "/dashboard/support", icon: HelpCircle },
+        { title: "Help Center", url: "/dashboard/help", icon: HelpCircle },
+      ]
+    }
+  ];
+
+  // Only add Advanced section if white-label exports are enabled
+  if (isFeatureEnabled('enableWhiteLabel')) {
+    baseItems.push({
+      groupLabel: "Advanced",
+      items: [
+        { title: "White Label Exports", url: "/dashboard/exports", icon: Download },
+      ]
+    });
   }
-];
+
+  return baseItems;
+};
 
 export const DashboardSidebar = () => {
   const location = useLocation();
   const { state } = useSidebar();
+  const navigationItems = getNavigationItems();
 
   const isActive = (url: string) => {
     if (url === "/dashboard") {

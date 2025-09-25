@@ -9,6 +9,7 @@ import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionC
 import { RecentActivityCard } from "@/components/dashboard/RecentActivityCard";
 import { QuickActionsCard } from "@/components/dashboard/QuickActionsCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TrialStatusBanner } from "@/components/subscription/TrialStatusBanner";
 
 const Dashboard = () => {
   const { user } = useAuth();

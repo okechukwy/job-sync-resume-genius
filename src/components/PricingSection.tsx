@@ -1,9 +1,76 @@
+import { Check, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { isFeatureEnabled } from "@/utils/featureFlags";
 
 const PricingSection = () => {
+  const { user } = useAuth();
+  const { subscription, trialInfo } = useSubscription();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const isCurrentPlan = (planName: string) => {
+    if (!subscription) return false;
+    return subscription.subscription_status === 'active' && subscription.subscription_plan === planName.toLowerCase();
+  };
+
+  const getButtonText = (planName: string) => {
+    if (!user) return "Start Free Trial";
+    
+    if (isCurrentPlan(planName)) return "Current Plan";
+    
+    if (subscription?.subscription_status === 'trial') {
+      return trialInfo?.isActive ? "Continue Trial" : "Upgrade";
+    }
+    
+    if (subscription?.subscription_status === 'expired') {
+      return "Reactivate";
+    }
+    
+    return "Start Free Trial";
+  };
+
+  const handleButtonClick = (planName: string) => {
+    if (isCurrentPlan(planName)) return;
+    
+    // If user is not authenticated, redirect to auth with trial intent
+    if (!user) {
+      navigate('/auth', { state: { from: { pathname: '/dashboard' }, intent: 'trial' } });
+      return;
+    }
+    
+    // If user is on active trial, redirect to dashboard to continue using features
+    if (subscription?.subscription_status === 'trial' && trialInfo?.isActive) {
+      navigate('/dashboard');
+      toast({
+        title: `Welcome to your ${trialInfo.daysRemaining}-day trial!`,
+        description: "Continue building your resume and exploring features.",
+      });
+      return;
+    }
+    
+    // For expired trial or subscription, show upgrade message
+    if (subscription?.subscription_status === 'trial' || subscription?.subscription_status === 'expired') {
+      toast({
+        title: "Upgrade Coming Soon",
+        description: "Payment integration is coming soon. Continue using your trial features!",
+      });
+      navigate('/dashboard');
+      return;
+    }
+    
+    // Default fallback for other states
+    toast({
+      title: "Coming Soon",
+      description: "Payment integration is coming soon. Start your free trial now!",
+    });
+  };
+
   const plans = [
     {
       name: "Starter",
@@ -55,7 +122,7 @@ const PricingSection = () => {
         "Personal branding tools",
         "LinkedIn optimization",
         "Career coaching insights",
-        "White-label exports",
+        ...(isFeatureEnabled('enableWhiteLabel') ? ["White-label exports"] : []),
         "24/7 priority support"
       ],
       buttonText: "Go Premium",
@@ -134,15 +201,22 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <Link to={`/checkout?plan=${plan.name.toLowerCase()}&price=${plan.price}&period=${plan.period}`}>
-                  <Button 
-                    variant={plan.buttonVariant} 
-                    size="lg" 
-                    className="w-full"
-                  >
-                    {plan.buttonText}
-                  </Button>
-                </Link>
+                <Button 
+                  variant={plan.buttonVariant} 
+                  size="lg" 
+                  className="w-full"
+                  disabled={isCurrentPlan(plan.name)}
+                  onClick={() => handleButtonClick(plan.name)}
+                >
+                  {isCurrentPlan(plan.name) ? (
+                    <div className="flex items-center space-x-2">
+                      <Crown className="h-4 w-4" />
+                      <span>Current Plan</span>
+                    </div>
+                  ) : (
+                    <span>{getButtonText(plan.name)}</span>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -159,14 +233,25 @@ const PricingSection = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {payPerUse.map((item, index) => (
-              <Link key={index} to={`/checkout?type=payperuse&plan=${item.item}&price=${item.price}`}>
-                <Card className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer">
-                  <CardContent className="p-0">
-                    <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
-                    <div className="text-sm text-muted-foreground">{item.item}</div>
-                  </CardContent>
-                </Card>
-              </Link>
+            <Card 
+              key={index}
+              className="glass-card text-center p-4 hover:shadow-glow transition-all duration-300 cursor-pointer"
+              onClick={() => {
+                if (!user) {
+                  navigate('/auth', { state: { from: { pathname: '/dashboard' }, intent: 'trial' } });
+                } else {
+                  toast({
+                    title: "Coming Soon",
+                    description: "Payment integration is coming soon. For now, enjoy your free trial!",
+                  });
+                }
+              }}
+            >
+              <CardContent className="p-0">
+                <div className="text-2xl font-bold text-primary mb-1">{item.price}</div>
+                <div className="text-sm text-muted-foreground">{item.item}</div>
+              </CardContent>
+            </Card>
             ))}
           </div>
         </div>

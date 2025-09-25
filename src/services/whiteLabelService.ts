@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { isFeatureEnabled } from '@/utils/featureFlags';
 
 export interface WhiteLabelConfig {
   id?: string;
@@ -58,6 +59,10 @@ export interface WhiteLabelStats {
 export const whiteLabelService = {
   // Configuration management
   async getConfigs(): Promise<WhiteLabelConfig[]> {
+    if (!isFeatureEnabled('enableWhiteLabel')) {
+      console.warn('White-label feature is disabled');
+      return [];
+    }
     const { data, error } = await supabase
       .from('white_label_configs')
       .select('*')
@@ -73,6 +78,9 @@ export const whiteLabelService = {
   },
 
   async getActiveConfig(): Promise<WhiteLabelConfig | null> {
+    if (!isFeatureEnabled('enableWhiteLabel')) {
+      return null;
+    }
     const { data, error } = await supabase
       .from('white_label_configs')
       .select('*')
@@ -88,6 +96,10 @@ export const whiteLabelService = {
   },
 
   async saveConfig(config: Partial<WhiteLabelConfig>): Promise<WhiteLabelConfig | null> {
+    if (!isFeatureEnabled('enableWhiteLabel')) {
+      toast.error('White-label exports are currently disabled');
+      return null;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
@@ -160,6 +172,10 @@ export const whiteLabelService = {
 
   // Export job management
   async createExportJob(job: Partial<ExportJob>): Promise<ExportJob | null> {
+    if (!isFeatureEnabled('enableWhiteLabel')) {
+      toast.error('White-label exports are currently disabled');
+      return null;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 

@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWhiteLabelConfig, useExportJobs, useExportHistory, useWhiteLabelStats } from '@/hooks/useWhiteLabel';
+import { isFeatureEnabled } from "@/utils/featureFlags";
+import { Navigate } from "react-router-dom";
 
 const whiteLabelSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -50,6 +52,10 @@ const whiteLabelSchema = z.object({
 type WhiteLabelData = z.infer<typeof whiteLabelSchema>;
 
 const WhiteLabelExports = () => {
+  // Redirect if feature is disabled
+  if (!isFeatureEnabled('enableWhiteLabel')) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const [activeTab, setActiveTab] = useState("branding");
   const [previewMode, setPreviewMode] = useState(false);
   
