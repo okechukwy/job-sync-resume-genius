@@ -239,6 +239,17 @@ export const ModuleContentModal = ({
 
   const handleStart = () => {
     onStartModule(module.id, enrollmentId);
+    
+    // Auto-select first section and scroll to content after starting
+    setCurrentSection(0);
+    
+    // Scroll to module content section after a brief delay
+    setTimeout(() => {
+      const contentArea = document.querySelector('[data-content-area]');
+      if (contentArea) {
+        contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 500);
   };
 
   const handleComplete = () => {
@@ -358,7 +369,14 @@ export const ModuleContentModal = ({
 
             {/* Learning Content Sections */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Module Content</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Module Content</h3>
+                {isStarted && !isCompleted && (
+                  <Badge variant="outline" className="text-xs">
+                    Click sections to explore content
+                  </Badge>
+                )}
+              </div>
               
               <div className="grid lg:grid-cols-[20rem,1fr] gap-6 min-h-0">
                 {/* Progress Tracker Sidebar */}
@@ -380,14 +398,30 @@ export const ModuleContentModal = ({
 
                 {/* Current Section Content */}
                 <div className="min-w-0" data-content-area>
-                  {currentSectionData && (
-                    <ContentRenderer
-                      section={currentSectionData}
-                      isActive={true}
-                      isCompleted={completedSections.has(currentSectionData.id)}
-                      onComplete={handleSectionComplete}
-                      progress={currentSection === 0 ? progressPercentage : 0}
-                    />
+                  {isStarted ? (
+                    currentSectionData && (
+                      <ContentRenderer
+                        section={currentSectionData}
+                        isActive={true}
+                        isCompleted={completedSections.has(currentSectionData.id)}
+                        onComplete={handleSectionComplete}
+                        progress={currentSection === 0 ? progressPercentage : 0}
+                      />
+                    )
+                  ) : (
+                    <Card className="border-dashed">
+                      <CardContent className="p-8 text-center">
+                        <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <h4 className="font-medium mb-2">Ready to Learn?</h4>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Start this module to unlock the learning content and begin your journey.
+                        </p>
+                        <Button onClick={handleStart} disabled={isUpdating}>
+                          <BookOpen className="h-4 w-4 mr-2" />
+                          Start Learning
+                        </Button>
+                      </CardContent>
+                    </Card>
                   )}
                 </div>
               </div>
