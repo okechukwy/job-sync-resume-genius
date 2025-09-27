@@ -1097,11 +1097,15 @@ export type Database = {
           description: string
           duration_minutes: number
           id: string
+          industry_applications: string[] | null
           is_interactive: boolean
           learning_objectives: string[]
+          learning_outcomes: string[] | null
           order_index: number
+          practical_applications: string[] | null
           prerequisites: string[]
           program_id: string
+          target_audience: string[] | null
           title: string
           updated_at: string
         }
@@ -1113,11 +1117,15 @@ export type Database = {
           description: string
           duration_minutes?: number
           id?: string
+          industry_applications?: string[] | null
           is_interactive?: boolean
           learning_objectives?: string[]
+          learning_outcomes?: string[] | null
           order_index?: number
+          practical_applications?: string[] | null
           prerequisites?: string[]
           program_id: string
+          target_audience?: string[] | null
           title: string
           updated_at?: string
         }
@@ -1129,11 +1137,15 @@ export type Database = {
           description?: string
           duration_minutes?: number
           id?: string
+          industry_applications?: string[] | null
           is_interactive?: boolean
           learning_objectives?: string[]
+          learning_outcomes?: string[] | null
           order_index?: number
+          practical_applications?: string[] | null
           prerequisites?: string[]
           program_id?: string
+          target_audience?: string[] | null
           title?: string
           updated_at?: string
         }

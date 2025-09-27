@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ContentRenderer } from './ContentRenderer';
 import { SectionProgressTracker } from './SectionProgressTracker';
+import { useEnhancedContent } from './EnhancedContentLoader';
+import { ContentSection, LearningModule, ModuleProgress } from '@/types/coachingTypes';
 import { 
   FileText, 
   Clock, 
@@ -16,40 +18,6 @@ import {
   ArrowRight,
   X
 } from 'lucide-react';
-
-interface ContentSection {
-  id: string;
-  title: string;
-  type: 'article' | 'interactive' | 'assessment';
-  content_url?: string;
-  content?: any;
-  duration_minutes: number;
-  description: string;
-  is_required: boolean;
-  order_index: number;
-}
-
-interface LearningModule {
-  id: string;
-  title: string;
-  description: string;
-  content_type: string;
-  duration_minutes: number;
-  learning_objectives: string[];
-  prerequisites: string[];
-  difficulty_level?: string;
-  order_index: number;
-  content_sections?: ContentSection[];
-}
-
-interface ModuleProgress {
-  id: string;
-  progress_percentage: number;
-  status: string;
-  time_spent_minutes: number;
-  started_at: string | null;
-  completed_at: string | null;
-}
 
 interface ModuleContentModalProps {
   isOpen: boolean;
@@ -74,6 +42,9 @@ export const ModuleContentModal = ({
 }: ModuleContentModalProps) => {
   const [currentSection, setCurrentSection] = useState(0);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  
+  // Try to load enhanced content if available
+  const enhancedContent = useEnhancedContent(module?.id || '');
 
   // Define all hooks at the top before any early returns or conditional logic
   const handleStart = useCallback(() => {
@@ -136,7 +107,7 @@ export const ModuleContentModal = ({
   try {
   
   // Normalize content_sections to handle both camelCase and snake_case data
-  const normalizeContentSections = (sections: any): ContentSection[] => {
+  const normalizeContentSections = (sections: any) => {
     try {
       console.log('🔍 normalizeContentSections input:', sections);
       
@@ -203,7 +174,7 @@ export const ModuleContentModal = ({
   };
 
   // Create fallback content sections if none exist
-  const createFallbackContentSections = (module: LearningModule): ContentSection[] => {
+  const createFallbackContentSections = (module: LearningModule) => {
     try {
       console.log('🔍 Creating fallback content sections for module:', module.title);
       const moduleTitle = module.title || 'Learning Module';
@@ -368,20 +339,30 @@ export const ModuleContentModal = ({
   }
 };
 
-  let parsedContentSections: ContentSection[] = [];
-  let contentSections: ContentSection[] = [];
+  let parsedContentSections = [];
+  let contentSections = [];
   let currentSectionData: ContentSection | undefined;
+  
+  // Try to load enhanced content if available
+  const enhancedContent = useEnhancedContent(module?.id || '');
   
   try {
     console.log('🔍 Starting content sections processing for module:', module.id);
     console.log('🔍 Raw content_sections:', module.content_sections);
     
-    parsedContentSections = normalizeContentSections(module.content_sections);
-    console.log('🔍 Parsed content sections:', parsedContentSections);
+    // Use enhanced content if available
+    if (enhancedContent?.content_sections) {
+      console.log('✨ Using enhanced content for module:', module.title);
+      contentSections = enhancedContent.content_sections;
+    } else {
+      parsedContentSections = normalizeContentSections(module.content_sections);
+      console.log('🔍 Parsed content sections:', parsedContentSections);
+      
+      contentSections = parsedContentSections.length > 0 
+        ? parsedContentSections 
+        : createFallbackContentSections(module);
+    }
     
-    contentSections = parsedContentSections.length > 0 
-      ? parsedContentSections 
-      : createFallbackContentSections(module);
     console.log('🔍 Final content sections:', contentSections);
     
     currentSectionData = contentSections[currentSection];
@@ -415,6 +396,9 @@ export const ModuleContentModal = ({
         return <Target className="h-5 w-5" />;
       case 'assessment':
         return <CheckCircle2 className="h-5 w-5" />;
+      case 'case_study':
+      case 'framework_guide':
+        return <BookOpen className="h-5 w-5" />;
       default:
         return <FileText className="h-5 w-5" />;
     }
