@@ -15,7 +15,7 @@ import {
 interface ContentSection {
   id: string;
   title: string;
-  type: 'article' | 'interactive' | 'assessment';
+  type: 'article' | 'interactive' | 'assessment' | 'case_study' | 'framework_guide';
   content_url?: string;
   content?: {
     text?: string;
@@ -23,13 +23,64 @@ interface ContentSection {
     objectives?: string[];
     questions?: Array<{
       question: string;
-      type: 'multiple_choice' | 'text';
+      type: 'multiple_choice' | 'text' | 'scenario_based';
       options?: string[];
       correct_answer?: number;
+      explanation?: string;
+      scenario?: string;
     }>;
     reflection_questions?: string[];
     exercise_type?: string;
     instructions?: string;
+    content_blocks?: Array<{
+      id: string;
+      type: 'text' | 'key_points' | 'framework' | 'case_study' | 'interactive' | 'checklist';
+      title?: string;
+      content: any;
+      order_index: number;
+    }>;
+    case_studies?: Array<{
+      id: string;
+      title: string;
+      scenario: string;
+      background: string;
+      challenge: string;
+      analysis_points: string[];
+      discussion_questions: string[];
+      key_takeaways: string[];
+    }>;
+    frameworks?: Array<{
+      id: string;
+      name: string;
+      description: string;
+      steps: Array<{
+        step_number: number;
+        title: string;
+        description: string;
+        key_actions: string[];
+        examples: string[];
+      }>;
+      when_to_use: string;
+      benefits: string[];
+      common_pitfalls: string[];
+    }>;
+    interactive_elements?: Array<{
+      id: string;
+      title: string;
+      type: 'role_play' | 'decision_making' | 'skill_practice' | 'self_assessment';
+      instructions: string;
+      scenarios?: Array<{
+        id: string;
+        situation: string;
+        options: Array<{
+          text: string;
+          outcome: string;
+          feedback: string;
+        }>;
+      }>;
+      reflection_prompts: string[];
+      success_criteria: string[];
+    }>;
   };
   duration_minutes: number;
   description: string;
@@ -58,6 +109,10 @@ export const ContentRenderer = ({
         return <Target className="h-5 w-5" />;
       case 'assessment':
         return <CheckCircle2 className="h-5 w-5" />;
+      case 'case_study':
+        return <BookOpen className="h-5 w-5" />;
+      case 'framework_guide':
+        return <MessageSquare className="h-5 w-5" />;
       default:
         return <FileText className="h-5 w-5" />;
     }
@@ -69,35 +124,154 @@ export const ContentRenderer = ({
         return 'bg-accent';
       case 'assessment':
         return 'bg-secondary';
+      case 'case_study':
+        return 'bg-primary';
+      case 'framework_guide':
+        return 'bg-muted';
       default:
         return 'bg-muted-foreground';
     }
   };
 
 
-  const renderArticleContent = () => (
-    <div className="space-y-4">
-      {section.content?.text && (
-        <div className="prose prose-sm max-w-none">
-          <p>{section.content.text}</p>
-        </div>
-      )}
+  const renderContentBlock = (block: any, index: number) => {
+    switch (block.type) {
+      case 'text':
+        return (
+          <div key={block.id} className="space-y-4">
+            {block.title && (
+              <h4 className="font-semibold text-lg">{block.title}</h4>
+            )}
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-line">{block.content}</div>
+            </div>
+          </div>
+        );
       
-      {section.content?.key_points && section.content.key_points.length > 0 && (
-        <div>
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Key Points
-          </h4>
-          <ul className="space-y-1">
-            {section.content.key_points.map((point, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
+      case 'key_points':
+        return (
+          <div key={block.id} className="space-y-3">
+            {block.title && (
+              <h4 className="font-medium flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                {block.title}
+              </h4>
+            )}
+            <ul className="space-y-2">
+              {(block.content as string[]).map((point, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      
+      case 'framework':
+        return (
+          <div key={block.id} className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-lg flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                {block.content.name}
+              </h4>
+              <p className="text-sm text-muted-foreground">{block.content.description}</p>
+            </div>
+            
+            <div className="space-y-4">
+              {block.content.steps.map((step: any, stepIdx: number) => (
+                <div key={stepIdx} className="space-y-2 p-3 bg-background rounded border-l-4 border-primary">
+                  <h5 className="font-medium">
+                    Step {step.step_number}: {step.title}
+                  </h5>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  
+                  {step.key_actions.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">Key Actions:</p>
+                      <ul className="text-xs space-y-1">
+                        {step.key_actions.map((action: string, actionIdx: number) => (
+                          <li key={actionIdx} className="flex items-start gap-1">
+                            <div className="w-1 h-1 bg-primary rounded-full mt-1.5 flex-shrink-0" />
+                            {action}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {step.examples.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">Examples:</p>
+                      <ul className="text-xs space-y-1 text-muted-foreground">
+                        {step.examples.map((example: string, exampleIdx: number) => (
+                          <li key={exampleIdx} className="flex items-start gap-1">
+                            <div className="w-1 h-1 bg-muted-foreground rounded-full mt-1.5 flex-shrink-0" />
+                            {example}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-2">
+                <h6 className="font-medium">When to Use:</h6>
+                <p className="text-muted-foreground">{block.content.when_to_use}</p>
+              </div>
+              <div className="space-y-2">
+                <h6 className="font-medium">Benefits:</h6>
+                <ul className="space-y-1">
+                  {block.content.benefits.map((benefit: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-1 text-muted-foreground">
+                      <div className="w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  const renderArticleContent = () => (
+    <div className="space-y-6">
+      {section.content?.content_blocks && section.content.content_blocks.length > 0 ? (
+        section.content.content_blocks
+          .sort((a, b) => a.order_index - b.order_index)
+          .map((block, index) => renderContentBlock(block, index))
+      ) : (
+        <>
+          {section.content?.text && (
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-line">{section.content.text}</div>
+            </div>
+          )}
+          
+          {section.content?.key_points && section.content.key_points.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Key Points
+              </h4>
+              <ul className="space-y-1">
+                {section.content.key_points.map((point, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
       )}
 
       {section.content?.objectives && section.content.objectives.length > 0 && (
