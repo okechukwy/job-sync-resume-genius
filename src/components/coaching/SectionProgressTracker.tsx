@@ -21,6 +21,7 @@ interface ContentSection {
 interface SectionProgressTrackerProps {
   sections: ContentSection[];
   completedSections: Set<string>;
+  startedSections?: Set<string>;
   currentSection: number;
   onSectionSelect: (index: number) => void;
 }
@@ -28,6 +29,7 @@ interface SectionProgressTrackerProps {
 export const SectionProgressTracker = ({
   sections,
   completedSections,
+  startedSections = new Set(),
   currentSection,
   onSectionSelect
 }: SectionProgressTrackerProps) => {
@@ -42,6 +44,9 @@ export const SectionProgressTracker = ({
     if (index === currentSection) {
       return <PlayCircle className="h-4 w-4 text-primary" />;
     }
+    if (startedSections.has(section.id)) {
+      return <PlayCircle className="h-4 w-4 text-orange-500" />;
+    }
     return <Target className="h-4 w-4 text-muted-foreground" />;
   };
 
@@ -52,7 +57,10 @@ export const SectionProgressTracker = ({
     if (index === currentSection) {
       return 'border-primary bg-primary/5';
     }
-    return 'border-border hover:border-muted-foreground/50';
+    if (startedSections.has(section.id)) {
+      return 'border-orange-500 bg-orange-50 dark:bg-orange-950/20';
+    }
+    return 'border-muted-foreground/20 hover:border-muted-foreground/40';
   };
 
   return (

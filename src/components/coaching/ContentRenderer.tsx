@@ -17,7 +17,9 @@ interface ContentRendererProps {
   section: ContentSection;
   isActive: boolean;
   isCompleted: boolean;
+  isStarted?: boolean;
   onComplete: (sectionId: string) => void;
+  onSectionStart?: (sectionId: string) => void;
   progress?: number;
 }
 
@@ -25,7 +27,9 @@ export const ContentRenderer = ({
   section, 
   isActive, 
   isCompleted, 
+  isStarted = false,
   onComplete,
+  onSectionStart,
   progress = 0 
 }: ContentRendererProps) => {
   const getTypeIcon = (type: string) => {
@@ -479,15 +483,56 @@ export const ContentRenderer = ({
         {/* Content */}
         {isActive && (
           <div className="space-y-4" data-content-area>
-            {renderContent()}
-            
-            {/* Complete button */}
-            {!isCompleted && (
-              <div className="pt-4 border-t">
-                <Button onClick={() => onComplete(section.id)} className="w-full">
-                  Mark as Complete
-                </Button>
+            {/* Section action buttons */}
+            {!isStarted && !isCompleted && onSectionStart && (
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-primary">Ready to start learning?</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Begin this section to access interactive content and track your progress.
+                    </p>
+                  </div>
+                  <Button onClick={() => onSectionStart(section.id)} variant="default">
+                    Start Learning
+                  </Button>
+                </div>
               </div>
+            )}
+            
+            {/* Learning content - only show if started or completed */}
+            {(isStarted || isCompleted) && (
+              <>
+                {renderContent()}
+                
+                {/* Action buttons for started sections */}
+                {isStarted && !isCompleted && (
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button onClick={() => onComplete(section.id)} className="flex-1">
+                      Mark as Complete
+                    </Button>
+                    {onSectionStart && (
+                      <Button 
+                        onClick={() => onSectionStart(section.id)} 
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Review Content
+                      </Button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Completed state */}
+                {isCompleted && (
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Section completed successfully
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

@@ -43,6 +43,7 @@ export const ModuleContentModal = ({
 }: ModuleContentModalProps) => {
   const [currentSection, setCurrentSection] = useState(0);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [startedSections, setStartedSections] = useState<Set<string>>(new Set());
   
   // Try to load enhanced content if available - SINGLE hook call at top level
   const enhancedContent = useEnhancedContent(module?.id || '');
@@ -93,6 +94,11 @@ export const ModuleContentModal = ({
     handleSectionComplete(sectionId);
     checkAutoCompletion(sectionId, contentSections, completedSections);
   }, [handleSectionComplete, checkAutoCompletion, completedSections]);
+
+  const handleSectionStart = useCallback((sectionId: string) => {
+    setStartedSections(prev => new Set([...prev, sectionId]));
+    console.log('🎯 Section started:', sectionId);
+  }, []);
 
 
   // Early return after all hooks are defined
@@ -602,6 +608,7 @@ export const ModuleContentModal = ({
                         <SectionProgressTracker
                           sections={contentSections}
                           completedSections={completedSections}
+                          startedSections={startedSections}
                           currentSection={currentSection}
                           onSectionSelect={(index) => {
                             setCurrentSection(index);
@@ -642,7 +649,9 @@ export const ModuleContentModal = ({
                           section={currentSectionData}
                           isActive={true}
                           isCompleted={completedSections.has(currentSectionData.id)}
+                          isStarted={startedSections.has(currentSectionData.id)}
                           onComplete={(sectionId: string) => handleSectionCompleteWithAutoCompletion(sectionId, contentSections)}
+                          onSectionStart={handleSectionStart}
                           progress={currentSection === 0 ? progressPercentage : 0}
                         />
                       );
