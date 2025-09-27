@@ -11,7 +11,6 @@ interface ContentRendererProps {
   isCompleted: boolean;
   isStarted: boolean;
   onComplete: (sectionId: string) => void;
-  onStart?: (sectionId: string) => void;
   onSectionStart?: (sectionId: string) => void;
   onReview?: (sectionId: string) => void;
 }
@@ -22,7 +21,6 @@ export const ContentRenderer = ({
   isCompleted, 
   isStarted, 
   onComplete, 
-  onStart, 
   onSectionStart,
   onReview 
 }: ContentRendererProps) => {
@@ -632,7 +630,7 @@ export const ContentRenderer = ({
         {!isStarted && !isCompleted && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">Ready to begin this section?</p>
-            <Button onClick={() => onStart?.(section.id)}>
+            <Button onClick={() => onSectionStart?.(section.id)}>
               Start Learning
             </Button>
           </div>
