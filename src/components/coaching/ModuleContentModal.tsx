@@ -95,13 +95,14 @@ export const ModuleContentModal = ({
 
   if (!module) return null;
 
-  // A module is truly "started" if user has meaningful progress or completed sections
-  // Initial 10% progress from just opening modal counts as "started"
+  // Define module states more clearly
   const progressPercentage = progress?.progress_percentage || 0;
   const hasCompletedSections = completedSections.size > 0;
-  const hasMeaningfulProgress = progressPercentage >= 10;
-  const isStarted = progress?.status === 'completed' || progress?.status === 'in_progress' || hasMeaningfulProgress || hasCompletedSections;
+  
+  // Clear state detection logic
   const isCompleted = progress?.status === 'completed';
+  const isInProgress = progress?.status === 'in_progress' || (progressPercentage > 0 && progressPercentage < 100) || hasCompletedSections;
+  const isNotStarted = !progress || (progress.status !== 'completed' && progress.status !== 'in_progress' && progressPercentage === 0 && !hasCompletedSections);
 
   // Add error boundary for modal content
   try {
@@ -492,7 +493,22 @@ export const ModuleContentModal = ({
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-6 pr-2">
             {/* Progress Section */}
-            {(progress?.status === 'in_progress' || progress?.status === 'completed') && (
+            {isNotStarted ? (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Ready to Start</span>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      Not Started
+                    </Badge>
+                  </div>
+                  <Progress value={0} className="h-2" />
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Click "Start Module" to begin your learning journey
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (isInProgress || isCompleted) && (
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -638,24 +654,48 @@ export const ModuleContentModal = ({
 
         {/* Action Buttons */}
         <div className="flex-shrink-0 flex gap-3 pt-4 border-t mt-6">
-          {!isCompleted ? (
-            <Button 
-              onClick={handleComplete} 
-              disabled={isUpdating}
-              className="flex-1"
-              variant="outline"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Mark as Complete
-            </Button>
+          {isNotStarted ? (
+            // Not Started - Show Start Module button
+            <>
+              <Button 
+                onClick={handleStart} 
+                disabled={isUpdating}
+                className="flex-1"
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Start Module
+              </Button>
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </>
+          ) : isInProgress ? (
+            // In Progress - Show Continue Learning and Mark Complete options
+            <>
+              <Button 
+                onClick={handleComplete} 
+                disabled={isUpdating}
+                variant="outline"
+                className="flex-1"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Mark as Complete
+              </Button>
+              <Button variant="outline" onClick={onClose}>
+                Continue Learning
+              </Button>
+            </>
           ) : (
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              Close
-            </Button>
+            // Completed - Show Review Content option
+            <>
+              <Button variant="outline" onClick={onClose} className="flex-1">
+                Review Content
+              </Button>
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </>
           )}
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
