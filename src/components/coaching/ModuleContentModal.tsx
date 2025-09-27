@@ -94,43 +94,6 @@ export const ModuleContentModal = ({
     checkAutoCompletion(sectionId, contentSections, completedSections);
   }, [handleSectionComplete, checkAutoCompletion, completedSections]);
 
-  // Section navigation handlers
-  const handleNextSection = useCallback(() => {
-    // We'll get contentSections from the processed data below
-    return (contentSections: any[]) => {
-      if (currentSection < contentSections.length - 1) {
-        const newSection = currentSection + 1;
-        setCurrentSection(newSection);
-        
-        // Auto-complete current section when moving to next
-        if (contentSections[currentSection]) {
-          handleSectionComplete(contentSections[currentSection].id);
-        }
-        
-        // Scroll to content area
-        setTimeout(() => {
-          const contentArea = document.querySelector('[data-content-area]');
-          if (contentArea) {
-            contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
-      }
-    };
-  }, [currentSection, handleSectionComplete]);
-
-  const handlePreviousSection = useCallback(() => {
-    if (currentSection > 0) {
-      setCurrentSection(currentSection - 1);
-      
-      // Scroll to content area
-      setTimeout(() => {
-        const contentArea = document.querySelector('[data-content-area]');
-        if (contentArea) {
-          contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
-  }, [currentSection]);
 
   // Early return after all hooks are defined
   if (!module) return null;
@@ -394,7 +357,7 @@ export const ModuleContentModal = ({
   }
 
   // Create navigation handlers that work with the processed contentSections
-  const navigateToNextSection = useCallback(() => {
+  const navigateToNextSection = () => {
     if (currentSection < contentSections.length - 1) {
       const newSection = currentSection + 1;
       setCurrentSection(newSection);
@@ -412,9 +375,9 @@ export const ModuleContentModal = ({
         }
       }, 100);
     }
-  }, [currentSection, contentSections, handleSectionComplete]);
+  };
 
-  const navigateToPreviousSection = useCallback(() => {
+  const navigateToPreviousSection = () => {
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
       
@@ -426,7 +389,7 @@ export const ModuleContentModal = ({
         }
       }, 100);
     }
-  }, [currentSection]);
+  };
 
   // Define module states more clearly
   const progressPercentage = progress?.progress_percentage || 0;
