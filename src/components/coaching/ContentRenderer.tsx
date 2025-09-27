@@ -104,13 +104,38 @@ export const ContentRenderer = ({
     }
   };
 
+  // Helper function to format text content
+  const formatTextContent = (content: string) => {
+    if (!content) return '';
+    
+    // Replace literal \n with actual line breaks
+    let formatted = content.replace(/\\n/g, '\n');
+    
+    // Replace double line breaks with proper spacing
+    formatted = formatted.replace(/\n\n/g, '\n\n');
+    
+    // Parse basic markdown formatting
+    formatted = formatted
+      // Bold text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Italic text
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Code inline
+      .replace(/`(.*?)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-sm">$1</code>');
+    
+    return formatted;
+  };
+
   const renderContentBlock = (block: any, index: number) => {
     switch (block.type) {
       case 'text':
         return (
           <div key={index} className="prose prose-sm max-w-none">
             {block.title && <h4 className="font-semibold text-lg mb-2">{block.title}</h4>}
-            <div className="whitespace-pre-line">{block.content}</div>
+            <div 
+              className="whitespace-pre-line leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formatTextContent(block.content) }}
+            />
           </div>
         );
       
@@ -196,7 +221,10 @@ export const ContentRenderer = ({
         {/* Text content */}
         {text && (
           <div className="prose prose-sm max-w-none">
-            <div className="whitespace-pre-line">{text}</div>
+            <div 
+              className="whitespace-pre-line leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+            />
           </div>
         )}
 
