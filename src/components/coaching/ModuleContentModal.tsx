@@ -16,6 +16,7 @@ import {
   BookOpen,
   Target,
   ArrowRight,
+  ArrowLeft,
   X
 } from 'lucide-react';
 
@@ -46,68 +47,9 @@ export const ModuleContentModal = ({
   // Try to load enhanced content if available - SINGLE hook call at top level
   const enhancedContent = useEnhancedContent(module?.id || '');
 
-  // Define all hooks at the top before any early returns or conditional logic
-  const handleStart = useCallback(() => {
-    if (!module) return;
-    onStartModule(module.id, enrollmentId);
-    
-    // Auto-select first section
-    setCurrentSection(0);
-    
-    // Scroll to content area after a brief delay
-    setTimeout(() => {
-      const contentArea = document.querySelector('[data-content-area]');
-      if (contentArea) {
-        contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 500);
-  }, [module, enrollmentId, onStartModule]);
-
-  const handleComplete = useCallback(() => {
-    if (!module) return;
-    onCompleteModule(module.id, enrollmentId);
-  }, [module, enrollmentId, onCompleteModule]);
-
-  const handleSectionComplete = useCallback((sectionId: string) => {
-    if (!module) return;
-    setCompletedSections(prev => new Set([...prev, sectionId]));
-  }, [module]);
-
-  // Auto-completion logic for sections - moved to top to comply with hooks rules
-  const checkAutoCompletion = useCallback((sectionId: string, contentSections: any[], completedSections: Set<string>) => {
-    if (!module || !contentSections) return;
-    const requiredSections = contentSections.filter(s => s.is_required);
-    const completedRequiredSections = requiredSections.filter(s => 
-      completedSections.has(s.id) || s.id === sectionId
-    );
-    
-    if (completedRequiredSections.length === requiredSections.length) {
-      // Auto-complete the module if all required sections are done
-      setTimeout(() => onCompleteModule(module.id, enrollmentId), 1000);
-    }
-  }, [module, enrollmentId, onCompleteModule]);
-
-  // Update section complete handler to use the auto-completion logic - moved to top
-  const handleSectionCompleteWithAutoCompletion = useCallback((sectionId: string, contentSections: any[]) => {
-    handleSectionComplete(sectionId);
-    checkAutoCompletion(sectionId, contentSections, completedSections);
-  }, [handleSectionComplete, checkAutoCompletion, completedSections]);
-
   if (!module) return null;
 
-  // Define module states more clearly
-  const progressPercentage = progress?.progress_percentage || 0;
-  const hasCompletedSections = completedSections.size > 0;
-  
-  // Clear state detection logic
-  const isCompleted = progress?.status === 'completed';
-  const isInProgress = progress?.status === 'in_progress' || (progressPercentage > 0 && progressPercentage < 100) || hasCompletedSections;
-  const isNotStarted = !progress || (progress.status !== 'completed' && progress.status !== 'in_progress' && progressPercentage === 0 && !hasCompletedSections);
-
-  // Add error boundary for modal content
-  try {
-  
-  // Normalize content_sections to handle both camelCase and snake_case data
+  // Process content sections early so they can be used in callbacks
   const normalizeContentSections = (sections: any) => {
     try {
       console.log('🔍 normalizeContentSections input:', sections);
@@ -340,21 +282,18 @@ export const ModuleContentModal = ({
   }
 };
 
-  let parsedContentSections = [];
+  // Process content sections
   let contentSections = [];
-  let currentSectionData: ContentSection | undefined;
-  
   try {
     console.log('🔍 Starting content sections processing for module:', module.id);
-    console.log('🔍 Raw content_sections:', module.content_sections);
     console.log('🔍 Enhanced content available:', !!enhancedContent);
     
-    // Use enhanced content if available (from hook called at top of component)
+    // Use enhanced content if available
     if (enhancedContent?.content_sections) {
       console.log('✨ Using enhanced content for module:', module.title);
       contentSections = enhancedContent.content_sections;
     } else {
-      parsedContentSections = normalizeContentSections(module.content_sections);
+      const parsedContentSections = normalizeContentSections(module.content_sections);
       console.log('🔍 Parsed content sections:', parsedContentSections);
       
       contentSections = parsedContentSections.length > 0 
@@ -363,31 +302,106 @@ export const ModuleContentModal = ({
     }
     
     console.log('🔍 Final content sections:', contentSections);
-    
-    currentSectionData = contentSections[currentSection];
-    console.log('🔍 Current section data:', currentSectionData);
-
-    // Debug logging for development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('ModuleContentModal Debug:', {
-        moduleId: module.id,
-        moduleTitle: module.title,
-        hasEnhancedContent: !!enhancedContent,
-        enhancedContentSections: enhancedContent?.content_sections?.length || 0,
-        hasContentSections: !!module.content_sections,
-        contentSectionsRaw: module.content_sections,
-        contentSectionsLength: parsedContentSections.length,
-        finalContentSectionsLength: contentSections.length,
-        currentSection,
-        currentSectionData: currentSectionData?.title
-      });
-    }
   } catch (error) {
     console.error('Error processing content sections:', error);
-    // Use fallback content if parsing fails
     contentSections = createFallbackContentSections(module);
-    currentSectionData = contentSections[currentSection];
   }
+
+  // Define all hooks at the top before any early returns or conditional logic
+  const handleStart = useCallback(() => {
+    if (!module) return;
+    onStartModule(module.id, enrollmentId);
+    
+    // Auto-select first section
+    setCurrentSection(0);
+    
+    // Scroll to content area after a brief delay
+    setTimeout(() => {
+      const contentArea = document.querySelector('[data-content-area]');
+      if (contentArea) {
+        contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 500);
+  }, [module, enrollmentId, onStartModule]);
+
+  const handleComplete = useCallback(() => {
+    if (!module) return;
+    onCompleteModule(module.id, enrollmentId);
+  }, [module, enrollmentId, onCompleteModule]);
+
+  const handleSectionComplete = useCallback((sectionId: string) => {
+    if (!module) return;
+    setCompletedSections(prev => new Set([...prev, sectionId]));
+  }, [module]);
+
+  // Auto-completion logic for sections - moved to top to comply with hooks rules
+  const checkAutoCompletion = useCallback((sectionId: string, contentSections: any[], completedSections: Set<string>) => {
+    if (!module || !contentSections) return;
+    const requiredSections = contentSections.filter(s => s.is_required);
+    const completedRequiredSections = requiredSections.filter(s => 
+      completedSections.has(s.id) || s.id === sectionId
+    );
+    
+    if (completedRequiredSections.length === requiredSections.length) {
+      // Auto-complete the module if all required sections are done
+      setTimeout(() => onCompleteModule(module.id, enrollmentId), 1000);
+    }
+  }, [module, enrollmentId, onCompleteModule]);
+
+  // Update section complete handler to use the auto-completion logic - moved to top
+  const handleSectionCompleteWithAutoCompletion = useCallback((sectionId: string, contentSections: any[]) => {
+    handleSectionComplete(sectionId);
+    checkAutoCompletion(sectionId, contentSections, completedSections);
+  }, [handleSectionComplete, checkAutoCompletion, completedSections]);
+
+  // Section navigation handlers
+  const handleNextSection = useCallback(() => {
+    if (currentSection < contentSections.length - 1) {
+      const newSection = currentSection + 1;
+      setCurrentSection(newSection);
+      
+      // Auto-complete current section when moving to next
+      if (contentSections[currentSection]) {
+        handleSectionComplete(contentSections[currentSection].id);
+      }
+      
+      // Scroll to content area
+      setTimeout(() => {
+        const contentArea = document.querySelector('[data-content-area]');
+        if (contentArea) {
+          contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [currentSection, contentSections, handleSectionComplete]);
+
+  const handlePreviousSection = useCallback(() => {
+    if (currentSection > 0) {
+      setCurrentSection(currentSection - 1);
+      
+      // Scroll to content area
+      setTimeout(() => {
+        const contentArea = document.querySelector('[data-content-area]');
+        if (contentArea) {
+          contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [currentSection]);
+
+  // Define module states more clearly
+  const progressPercentage = progress?.progress_percentage || 0;
+  const hasCompletedSections = completedSections.size > 0;
+  
+  // Clear state detection logic
+  const isCompleted = progress?.status === 'completed';
+  const isInProgress = progress?.status === 'in_progress' || (progressPercentage > 0 && progressPercentage < 100) || hasCompletedSections;
+  const isNotStarted = !progress || (progress.status !== 'completed' && progress.status !== 'in_progress' && progressPercentage === 0 && !hasCompletedSections);
+
+  // Add error boundary for modal content
+  try {
+  
+  // Normalize content_sections to handle both camelCase and snake_case data
 
   const getContentIcon = (contentType: string) => {
     if (!contentType) return <FileText className="h-5 w-5" />;
@@ -421,6 +435,9 @@ export const ModuleContentModal = ({
   };
 
   // Helper functions (not hooks, so they can be defined here)
+
+  // Get current section data
+  const currentSectionData = contentSections[currentSection];
 
   // Error boundary for rendering issues
   if (!contentSections || contentSections.length === 0) {
@@ -653,10 +670,10 @@ export const ModuleContentModal = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex-shrink-0 flex gap-3 pt-4 border-t mt-6">
+        <div className="flex-shrink-0 pt-4 border-t mt-6">
           {isNotStarted ? (
             // Not Started - Show Start Module button
-            <>
+            <div className="flex gap-3">
               <Button 
                 onClick={handleStart} 
                 disabled={isUpdating}
@@ -668,33 +685,63 @@ export const ModuleContentModal = ({
               <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
-            </>
+            </div>
           ) : isInProgress ? (
-            // In Progress - Show Continue Learning and Mark Complete options
-            <>
-              <Button 
-                onClick={handleComplete} 
-                disabled={isUpdating}
-                variant="outline"
-                className="flex-1"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Mark as Complete
-              </Button>
-              <Button variant="outline" onClick={onClose}>
-                Continue Learning
-              </Button>
-            </>
+            // In Progress - Show navigation and completion options
+            <div className="space-y-3">
+              {/* Section Navigation */}
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handlePreviousSection}
+                    disabled={currentSection === 0}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleNextSection}
+                    disabled={currentSection >= contentSections.length - 1}
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Section {currentSection + 1} of {contentSections.length}
+                </div>
+              </div>
+
+              {/* Module Actions */}
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleComplete} 
+                  disabled={isUpdating}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Mark as Complete
+                </Button>
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+              </div>
+            </div>
           ) : (
             // Completed - Show Review Content option
-            <>
+            <div className="flex gap-3">
               <Button variant="outline" onClick={onClose} className="flex-1">
                 Review Content
               </Button>
               <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
-            </>
+            </div>
           )}
         </div>
       </DialogContent>
