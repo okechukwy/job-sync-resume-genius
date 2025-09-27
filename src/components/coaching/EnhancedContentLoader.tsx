@@ -20,10 +20,10 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
   return children(enhancedContent);
 };
 
-// Hook to get enhanced content for a module
 export const useEnhancedContent = (moduleId: string) => {
   return useMemo(() => {
     const enhancedModules: Record<string, any> = {
+      '783fcafa-1d71-4eae-94ff-cd1e948bbf07': leadershipFoundationsModule, // Foundations of Leadership
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
