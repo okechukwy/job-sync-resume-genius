@@ -687,7 +687,6 @@ export const ModuleContentModal = ({
                           onComplete={(sectionId: string) => handleSectionCompleteWithAutoCompletion(sectionId, contentSections)}
                           onSectionStart={handleSectionStart}
                           onReview={handleReview}
-                          progress={currentSection === 0 ? progressPercentage : 0}
                         />
                       );
                     } catch (error) {

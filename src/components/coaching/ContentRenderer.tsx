@@ -1,66 +1,108 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useEffect, useRef } from 'react';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { ContentSection } from '@/types/coachingTypes';
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle2, 
-  Target,
-  BookOpen,
-  MessageSquare
-} from 'lucide-react';
+import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, ExternalLink } from 'lucide-react';
+import { useContentEngagement } from '@/hooks/useContentEngagement';
 
 interface ContentRendererProps {
-  section: ContentSection;
+  section: any;
   isActive: boolean;
   isCompleted: boolean;
-  isStarted?: boolean;
+  isStarted: boolean;
   onComplete: (sectionId: string) => void;
+  onStart?: (sectionId: string) => void;
   onSectionStart?: (sectionId: string) => void;
   onReview?: (sectionId: string) => void;
-  progress?: number;
 }
 
 export const ContentRenderer = ({ 
   section, 
   isActive, 
   isCompleted, 
-  isStarted = false,
-  onComplete,
+  isStarted, 
+  onComplete, 
+  onStart, 
   onSectionStart,
-  onReview,
-  progress = 0 
+  onReview 
 }: ContentRendererProps) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [engagementState, engagementActions] = useContentEngagement(section.id, section.content);
+
+  // Auto-track text viewing when content is rendered
+  useEffect(() => {
+    if (isStarted && !engagementState.textContentViewed) {
+      const timer = setTimeout(() => {
+        engagementActions.markTextViewed();
+      }, 3000); // Mark as viewed after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isStarted, engagementState.textContentViewed, engagementActions]);
+
+  const handleExternalResourceClick = () => {
+    engagementActions.markExternalResourceOpened();
+    if (section.content_url) {
+      window.open(section.content_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleCaseStudyInteraction = (caseStudyId: string) => {
+    engagementActions.markCaseStudyViewed(caseStudyId);
+  };
+
+  const handleFrameworkInteraction = (frameworkId: string) => {
+    engagementActions.markFrameworkInteracted(frameworkId);
+  };
+
+  const handleInteractiveComplete = (elementId: string) => {
+    engagementActions.markInteractiveCompleted(elementId);
+  };
+
+  const handleReviewClick = () => {
+    onReview?.(section.id);
+    // Scroll to top of content
+    contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
+      case 'text':
+        return <BookOpen className="w-4 h-4" />;
+      case 'key_points':
+        return <Target className="w-4 h-4" />;
       case 'interactive':
-        return <Target className="h-5 w-5" />;
+        return <Users className="w-4 h-4" />;
       case 'assessment':
-        return <CheckCircle2 className="h-5 w-5" />;
+        return <CheckCircle className="w-4 h-4" />;
       case 'case_study':
-        return <BookOpen className="h-5 w-5" />;
+        return <BookOpen className="w-4 h-4" />;
       case 'framework_guide':
-        return <MessageSquare className="h-5 w-5" />;
+        return <Target className="w-4 h-4" />;
+      case 'framework':
+        return <Target className="w-4 h-4" />;
       default:
-        return <FileText className="h-5 w-5" />;
+        return <Lightbulb className="w-4 h-4" />;
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
+      case 'text':
+        return 'bg-blue-100';
+      case 'key_points':
+        return 'bg-green-100';
       case 'interactive':
-        return 'bg-accent';
+        return 'bg-purple-100';
       case 'assessment':
-        return 'bg-secondary';
+        return 'bg-orange-100';
       case 'case_study':
-        return 'bg-primary';
+        return 'bg-indigo-100';
       case 'framework_guide':
-        return 'bg-muted';
+        return 'bg-teal-100';
+      case 'framework':
+        return 'bg-cyan-100';
       default:
-        return 'bg-muted-foreground';
+        return 'bg-gray-100';
     }
   };
 
@@ -68,27 +110,23 @@ export const ContentRenderer = ({
     switch (block.type) {
       case 'text':
         return (
-          <div key={block.id} className="space-y-4">
-            {block.title && (
-              <h4 className="font-semibold text-lg">{block.title}</h4>
-            )}
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-line">{block.content}</div>
-            </div>
+          <div key={index} className="prose prose-sm max-w-none">
+            {block.title && <h4 className="font-semibold text-lg mb-2">{block.title}</h4>}
+            <div className="whitespace-pre-line">{block.content}</div>
           </div>
         );
       
       case 'key_points':
         return (
-          <div key={block.id} className="space-y-3">
+          <div key={index} className="space-y-2">
             {block.title && (
               <h4 className="font-medium flex items-center gap-2">
-                <Target className="h-4 w-4" />
+                <Target className="w-4 h-4" />
                 {block.title}
               </h4>
             )}
-            <ul className="space-y-2">
-              {(block.content as string[]).map((point, idx) => (
+            <ul className="space-y-1">
+              {(Array.isArray(block.content) ? block.content : []).map((point: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
                   {point}
@@ -99,72 +137,24 @@ export const ContentRenderer = ({
         );
       
       case 'framework':
+        const framework = block.content;
         return (
-          <div key={block.id} className="space-y-4 p-4 bg-muted/30 rounded-lg border">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-lg flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                {block.content.name}
-              </h4>
-              <p className="text-sm text-muted-foreground">{block.content.description}</p>
-            </div>
+          <div key={index} className="space-y-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <h4 className="font-semibold text-purple-900">{framework?.name || 'Framework'}</h4>
+            <p className="text-sm text-purple-800">{framework?.description}</p>
             
-            <div className="space-y-4">
-              {block.content.steps.map((step: any, stepIdx: number) => (
-                <div key={stepIdx} className="space-y-2 p-3 bg-background rounded border-l-4 border-primary">
-                  <h5 className="font-medium">
-                    Step {step.step_number}: {step.title}
-                  </h5>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
-                  
-                  {step.key_actions.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium mb-1">Key Actions:</p>
-                      <ul className="text-xs space-y-1">
-                        {step.key_actions.map((action: string, actionIdx: number) => (
-                          <li key={actionIdx} className="flex items-start gap-1">
-                            <div className="w-1 h-1 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                            {action}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {step.examples.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium mb-1">Examples:</p>
-                      <ul className="text-xs space-y-1 text-muted-foreground">
-                        {step.examples.map((example: string, exampleIdx: number) => (
-                          <li key={exampleIdx} className="flex items-start gap-1">
-                            <div className="w-1 h-1 bg-muted-foreground rounded-full mt-1.5 flex-shrink-0" />
-                            {example}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-4 text-xs">
+            {framework?.steps && framework.steps.length > 0 && (
               <div className="space-y-2">
-                <h6 className="font-medium">When to Use:</h6>
-                <p className="text-muted-foreground">{block.content.when_to_use}</p>
-              </div>
-              <div className="space-y-2">
-                <h6 className="font-medium">Benefits:</h6>
-                <ul className="space-y-1">
-                  {block.content.benefits.map((benefit: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-1 text-muted-foreground">
-                      <div className="w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
-                      {benefit}
+                <strong className="text-xs uppercase tracking-wide text-purple-700">Steps:</strong>
+                <ol className="list-decimal list-inside text-sm text-purple-800 space-y-1">
+                  {framework.steps.map((step: any, stepIdx: number) => (
+                    <li key={stepIdx}>
+                      <strong>{step.title}:</strong> {step.description}
                     </li>
                   ))}
-                </ul>
+                </ol>
               </div>
-            </div>
+            )}
           </div>
         );
       
@@ -177,142 +167,404 @@ export const ContentRenderer = ({
     // Handle both enhanced content and regular content structures
     const content = section.content || {};
     const blocks = content.content_blocks || [];
-    const text = content.text || (typeof section.content === 'string' ? section.content : '');
+    const text = content.text || content.instructions || (typeof section.content === 'string' ? section.content : '');
     const keyPoints = content.key_points || [];
     const objectives = content.objectives || [];
     const caseStudies = content.case_studies || [];
+    const frameworks = content.frameworks || [];
 
     return (
       <div className="space-y-6">
-        {/* External Resource Link */}
+        {/* External Resource Button */}
         {section.content_url && (
-          <div className="p-4 bg-primary/10 rounded-lg border-l-4 border-primary">
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-sm">External Resource</h4>
-                <p className="text-xs text-muted-foreground">This section includes an external learning resource</p>
+                <h4 className="font-medium text-blue-900">External Resource</h4>
+                <p className="text-sm text-blue-700">This section includes an external resource for additional learning.</p>
               </div>
               <Button 
-                size="sm" 
-                onClick={() => window.open(section.content_url, '_blank', 'noopener,noreferrer')}
+                onClick={handleExternalResourceClick}
                 className="flex items-center gap-2"
+                variant={engagementState.externalResourceOpened ? "secondary" : "outline"}
               >
-                <FileText className="h-3 w-3" />
-                Open Resource
+                <ExternalLink className="w-4 h-4" />
+                {engagementState.externalResourceOpened ? 'Resource Opened' : 'Open Resource'}
               </Button>
             </div>
           </div>
         )}
 
-        {blocks.length > 0 ? (
-          blocks
-            .sort((a, b) => a.order_index - b.order_index)
-            .map((block, index) => renderContentBlock(block, index))
-        ) : (
-          <div className="space-y-4">
-            {text && (
-              <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-line">{text}</div>
-              </div>
-            )}
-            
-            {keyPoints.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Key Points
-                </h4>
-                <ul className="space-y-1">
-                  {keyPoints.map((point, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {objectives.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Learning Objectives
-                </h4>
-                <ul className="space-y-1">
-                  {objectives.map((objective, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="h-3 w-3 text-primary mt-1 flex-shrink-0" />
-                      {objective}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Empty state fallback */}
-            {!text && !keyPoints.length && !objectives.length && !blocks.length && (
-              <div className="p-4 bg-muted/20 rounded-lg text-center">
-                <p className="text-sm text-muted-foreground">
-                  {section.content_url 
-                    ? "Click 'Open Resource' above to access the learning material for this section."
-                    : "Content is being prepared for this section."}
-                </p>
-              </div>
-            )}
+        {/* Text content */}
+        {text && (
+          <div className="prose prose-sm max-w-none">
+            <div className="whitespace-pre-line">{text}</div>
           </div>
         )}
 
-        {/* Case Studies from enhanced content */}
-        {caseStudies.length > 0 && (
+        {/* Content blocks */}
+        {blocks.length > 0 && (
           <div className="space-y-4">
+            {blocks
+              .sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+              .map((block: any, index: number) => renderContentBlock(block, index))}
+          </div>
+        )}
+
+        {/* Key Points */}
+        {keyPoints.length > 0 && (
+          <div className="space-y-2">
             <h4 className="font-medium flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Case Studies
+              <Target className="w-4 h-4" />
+              Key Points
             </h4>
-            {caseStudies.map((caseStudy: any, idx: number) => (
-              <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-3">
-                <h5 className="font-semibold">{caseStudy.title}</h5>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Scenario: </span>
+            <ul className="space-y-1">
+              {keyPoints.map((point: string, idx: number) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Learning Objectives */}
+        {objectives.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-medium flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Learning Objectives
+            </h4>
+            <ul className="space-y-1">
+              {objectives.map((objective: string, idx: number) => (
+                <li key={idx} className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="w-3 h-3 text-primary mt-1 flex-shrink-0" />
+                  {objective}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Case Studies with Engagement Tracking */}
+        {caseStudies.length > 0 && (
+          <div className="space-y-4 mb-6">
+            <h4 className="text-md font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Case Studies ({engagementState.caseStudiesViewed}/{engagementState.totalCaseStudies} viewed)
+            </h4>
+            {caseStudies.map((caseStudy: any, idx: number) => {
+              const isViewed = engagementState.caseStudiesViewed > idx;
+              return (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                    isViewed ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+                  }`}
+                  onClick={() => handleCaseStudyInteraction(caseStudy.id || `case-${idx}`)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className={`font-medium ${isViewed ? 'text-green-900' : 'text-blue-900'}`}>
+                      {caseStudy.title}
+                    </h5>
+                    {isViewed && <CheckCircle className="w-4 h-4 text-green-600" />}
+                  </div>
+                  <p className={`text-sm mb-3 ${isViewed ? 'text-green-800' : 'text-blue-800'}`}>
                     {caseStudy.scenario}
-                  </div>
-                  <div>
-                    <span className="font-medium">Background: </span>
-                    {caseStudy.background}
-                  </div>
-                  <div>
-                    <span className="font-medium">Challenge: </span>
-                    {caseStudy.challenge}
-                  </div>
+                  </p>
+                  
+                  {caseStudy.background && (
+                    <div className="mb-3">
+                      <strong className={`text-xs uppercase tracking-wide ${isViewed ? 'text-green-700' : 'text-blue-700'}`}>
+                        Background:
+                      </strong>
+                      <p className={`text-sm mt-1 ${isViewed ? 'text-green-800' : 'text-blue-800'}`}>
+                        {caseStudy.background}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {caseStudy.challenge && (
+                    <div className="mb-3">
+                      <strong className={`text-xs uppercase tracking-wide ${isViewed ? 'text-green-700' : 'text-blue-700'}`}>
+                        Challenge:
+                      </strong>
+                      <p className={`text-sm mt-1 ${isViewed ? 'text-green-800' : 'text-blue-800'}`}>
+                        {caseStudy.challenge}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {caseStudy.analysis_points && caseStudy.analysis_points.length > 0 && (
+                    <div className="mb-3">
+                      <strong className={`text-xs uppercase tracking-wide ${isViewed ? 'text-green-700' : 'text-blue-700'}`}>
+                        Key Analysis Points:
+                      </strong>
+                      <ul className={`list-disc list-inside text-sm mt-1 space-y-1 ${
+                        isViewed ? 'text-green-800' : 'text-blue-800'
+                      }`}>
+                        {caseStudy.analysis_points.map((point: string, pointIdx: number) => (
+                          <li key={pointIdx}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {caseStudy.key_takeaways && caseStudy.key_takeaways.length > 0 && (
+                    <div>
+                      <strong className={`text-xs uppercase tracking-wide ${isViewed ? 'text-green-700' : 'text-blue-700'}`}>
+                        Key Takeaways:
+                      </strong>
+                      <ul className={`list-disc list-inside text-sm mt-1 space-y-1 ${
+                        isViewed ? 'text-green-800' : 'text-blue-800'
+                      }`}>
+                        {caseStudy.key_takeaways.map((takeaway: string, takeawayIdx: number) => (
+                          <li key={takeawayIdx}>{takeaway}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                
-                {caseStudy.analysis_points && caseStudy.analysis_points.length > 0 && (
-                  <div>
-                    <h6 className="font-medium text-sm mb-2">Analysis Points:</h6>
-                    <ul className="space-y-1 text-sm">
-                      {caseStudy.analysis_points.map((point: string, pointIdx: number) => (
-                        <li key={pointIdx} className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                          {point}
-                        </li>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Frameworks with Engagement Tracking */}
+        {frameworks.length > 0 && (
+          <div className="space-y-4 mb-6">
+            <h4 className="text-md font-semibold flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Frameworks & Models ({engagementState.frameworksInteracted}/{engagementState.totalFrameworks} practiced)
+            </h4>
+            {frameworks.map((framework: any, idx: number) => {
+              const isInteracted = engagementState.frameworksInteracted > idx;
+              return (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                    isInteracted ? 'bg-green-50 border-green-200' : 'bg-purple-50 border-purple-200 hover:bg-purple-100'
+                  }`}
+                  onClick={() => handleFrameworkInteraction(framework.id || `framework-${idx}`)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className={`font-medium ${isInteracted ? 'text-green-900' : 'text-purple-900'}`}>
+                      {framework.name}
+                    </h5>
+                    {isInteracted && <CheckCircle className="w-4 h-4 text-green-600" />}
+                  </div>
+                  <p className={`text-sm mb-3 ${isInteracted ? 'text-green-800' : 'text-purple-800'}`}>
+                    {framework.description}
+                  </p>
+                  
+                  {framework.steps && framework.steps.length > 0 && (
+                    <div className="mb-3">
+                      <strong className={`text-xs uppercase tracking-wide ${isInteracted ? 'text-green-700' : 'text-purple-700'}`}>
+                        Steps:
+                      </strong>
+                      <ol className={`list-decimal list-inside text-sm mt-1 space-y-1 ${
+                        isInteracted ? 'text-green-800' : 'text-purple-800'
+                      }`}>
+                        {framework.steps.map((step: any, stepIdx: number) => (
+                          <li key={stepIdx}>
+                            <strong>{step.title}:</strong> {step.description}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                  
+                  {framework.when_to_use && (
+                    <div className="mb-3">
+                      <strong className={`text-xs uppercase tracking-wide ${isInteracted ? 'text-green-700' : 'text-purple-700'}`}>
+                        When to Use:
+                      </strong>
+                      <p className={`text-sm mt-1 ${isInteracted ? 'text-green-800' : 'text-purple-800'}`}>
+                        {framework.when_to_use}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {framework.benefits && framework.benefits.length > 0 && (
+                    <div>
+                      <strong className={`text-xs uppercase tracking-wide ${isInteracted ? 'text-green-700' : 'text-purple-700'}`}>
+                        Benefits:
+                      </strong>
+                      <ul className={`list-disc list-inside text-sm mt-1 space-y-1 ${
+                        isInteracted ? 'text-green-800' : 'text-purple-800'
+                      }`}>
+                        {framework.benefits.map((benefit: string, benefitIdx: number) => (
+                          <li key={benefitIdx}>{benefit}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Empty state fallback */}
+        {!text && !keyPoints.length && !objectives.length && !blocks.length && !caseStudies.length && !frameworks.length && (
+          <div className="p-4 bg-muted/20 rounded-lg text-center">
+            <p className="text-sm text-muted-foreground">
+              {section.content_url 
+                ? "Click 'Open Resource' above to access the learning material for this section."
+                : "Content is being prepared for this section."}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderInteractiveContent = () => {
+    const content = section.content || {};
+    const instructions = content.instructions || content.text || '';
+    const interactiveElements = content.interactive_elements || [];
+    
+    return (
+      <div className="space-y-6">
+        {instructions && (
+          <div className="p-4 bg-primary/10 rounded-lg border-l-4 border-primary">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Instructions
+            </h4>
+            <p className="text-sm">{instructions}</p>
+          </div>
+        )}
+        
+        {/* Interactive Elements with Engagement Tracking */}
+        {interactiveElements.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-md font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Interactive Exercises ({engagementState.interactiveElementsCompleted}/{engagementState.totalInteractiveElements} completed)
+            </h4>
+            {interactiveElements.map((element: any, idx: number) => {
+              const isCompleted = engagementState.interactiveElementsCompleted > idx;
+              return (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-lg border ${
+                    isCompleted ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className={`font-semibold ${isCompleted ? 'text-green-900' : 'text-yellow-900'}`}>
+                      {element.title}
+                    </h5>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleInteractiveComplete(element.id || `interactive-${idx}`)}
+                      variant={isCompleted ? "secondary" : "outline"}
+                    >
+                      {isCompleted ? <CheckCircle className="w-4 h-4" /> : 'Complete'}
+                    </Button>
+                  </div>
+                  <p className={`text-sm mb-3 ${isCompleted ? 'text-green-800' : 'text-yellow-800'}`}>
+                    {element.instructions}
+                  </p>
+                  
+                  {/* Scenarios for role-play exercises */}
+                  {element.scenarios && element.scenarios.length > 0 && (
+                    <div className="space-y-3">
+                      <h6 className={`font-medium text-sm ${isCompleted ? 'text-green-900' : 'text-yellow-900'}`}>
+                        Practice Scenarios:
+                      </h6>
+                      {element.scenarios.map((scenario: any, scenarioIdx: number) => (
+                        <div key={scenarioIdx} className={`p-3 rounded border ${
+                          isCompleted ? 'bg-green-100 border-green-300' : 'bg-yellow-100 border-yellow-300'
+                        }`}>
+                          <p className={`text-sm mb-3 font-medium ${
+                            isCompleted ? 'text-green-900' : 'text-yellow-900'
+                          }`}>
+                            {scenario.situation}
+                          </p>
+                          <div className="space-y-2">
+                            {scenario.options?.map((option: any, optionIdx: number) => (
+                              <details key={optionIdx} className="group">
+                                <summary className={`cursor-pointer text-sm p-2 rounded transition-colors ${
+                                  isCompleted ? 'bg-green-200 hover:bg-green-300' : 'bg-yellow-200 hover:bg-yellow-300'
+                                }`}>
+                                  {option.text}
+                                </summary>
+                                <div className={`mt-2 p-2 rounded text-xs space-y-1 ${
+                                  isCompleted ? 'bg-green-50' : 'bg-yellow-50'
+                                }`}>
+                                  <div><span className="font-medium">Outcome:</span> {option.outcome}</div>
+                                  <div><span className="font-medium">Feedback:</span> {option.feedback}</div>
+                                </div>
+                              </details>
+                            ))}
+                          </div>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
+                  )}
+                  
+                  {/* Reflection Prompts */}
+                  {element.reflection_prompts && element.reflection_prompts.length > 0 && (
+                    <div>
+                      <h6 className={`font-medium text-sm mb-2 ${isCompleted ? 'text-green-900' : 'text-yellow-900'}`}>
+                        Reflection Questions:
+                      </h6>
+                      <ul className="space-y-2">
+                        {element.reflection_prompts.map((prompt: string, promptIdx: number) => (
+                          <li key={promptIdx} className={`p-2 rounded text-sm ${
+                            isCompleted ? 'bg-green-100' : 'bg-yellow-100'
+                          }`}>
+                            {prompt}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAssessmentContent = () => {
+    const content = section.content || {};
+    const questions = content.questions || [];
+    
+    return (
+      <div className="space-y-4">
+        {questions.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="font-medium mb-4">Assessment Questions</h4>
+            {questions.map((question: any, idx: number) => (
+              <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-3">
+                <p className="font-medium">{question.question}</p>
+                
+                {question.type === 'multiple_choice' && question.options && (
+                  <div className="space-y-2">
+                    {question.options.map((option: string, optionIdx: number) => (
+                      <label key={optionIdx} className="flex items-start gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name={`question-${idx}`} 
+                          className="mt-1" 
+                        />
+                        <span className="text-sm">{option}</span>
+                      </label>
+                    ))}
                   </div>
                 )}
                 
-                {caseStudy.key_takeaways && caseStudy.key_takeaways.length > 0 && (
-                  <div>
-                    <h6 className="font-medium text-sm mb-2">Key Takeaways:</h6>
-                    <ul className="space-y-1 text-sm">
-                      {caseStudy.key_takeaways.map((takeaway: string, takeawayIdx: number) => (
-                        <li key={takeawayIdx} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
-                          {takeaway}
-                        </li>
-                      ))}
-                    </ul>
+                {question.explanation && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded border">
+                    <p className="text-sm text-blue-800">
+                      <strong>Explanation:</strong> {question.explanation}
+                    </p>
                   </div>
                 )}
               </div>
@@ -322,265 +574,117 @@ export const ContentRenderer = ({
       </div>
     );
   };
-      
-
-  const renderInteractiveContent = () => (
-    <div className="space-y-6">
-      {section.content?.instructions && (
-        <div className="p-4 bg-primary/10 rounded-lg border-l-4 border-primary">
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Instructions
-          </h4>
-          <p className="text-sm">{section.content.instructions}</p>
-        </div>
-      )}
-      
-      {/* Interactive Elements */}
-      {section.content?.interactive_elements && section.content.interactive_elements.length > 0 && (
-        <div className="space-y-4">
-          {section.content.interactive_elements.map((element: any, idx: number) => (
-            <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-4">
-              <h5 className="font-semibold">{element.title}</h5>
-              <p className="text-sm text-muted-foreground">{element.instructions}</p>
-              
-              {/* Scenarios for role-play exercises */}
-              {element.scenarios && element.scenarios.length > 0 && (
-                <div className="space-y-3">
-                  <h6 className="font-medium text-sm">Practice Scenarios:</h6>
-                  {element.scenarios.map((scenario: any, scenarioIdx: number) => (
-                    <div key={scenarioIdx} className="p-3 bg-background rounded border">
-                      <p className="text-sm mb-3 font-medium">{scenario.situation}</p>
-                      <div className="space-y-2">
-                        {scenario.options.map((option: any, optionIdx: number) => (
-                          <details key={optionIdx} className="group">
-                            <summary className="cursor-pointer text-sm p-2 bg-muted/30 rounded hover:bg-muted/50 transition-colors">
-                              {option.text}
-                            </summary>
-                            <div className="mt-2 p-2 bg-muted/10 rounded text-xs space-y-1">
-                              <div><span className="font-medium">Outcome:</span> {option.outcome}</div>
-                              <div><span className="font-medium">Feedback:</span> {option.feedback}</div>
-                            </div>
-                          </details>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {/* Reflection Prompts */}
-              {element.reflection_prompts && element.reflection_prompts.length > 0 && (
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Reflection Questions:</h6>
-                  <ul className="space-y-2">
-                    {element.reflection_prompts.map((prompt: string, promptIdx: number) => (
-                      <li key={promptIdx} className="p-2 bg-accent/20 rounded text-sm">
-                        {prompt}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {/* Success Criteria */}
-              {element.success_criteria && element.success_criteria.length > 0 && (
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Success Criteria:</h6>
-                  <ul className="space-y-1">
-                    {element.success_criteria.map((criteria: string, criteriaIdx: number) => (
-                      <li key={criteriaIdx} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
-                        {criteria}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* Legacy reflection questions */}
-      {section.content?.reflection_questions && section.content.reflection_questions.length > 0 && (
-        <div>
-          <h4 className="font-medium mb-2">Reflection Questions</h4>
-          <ul className="space-y-2">
-            {section.content.reflection_questions.map((question, idx) => (
-              <li key={idx} className="p-2 bg-secondary/50 rounded text-sm">
-                {question}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderAssessmentContent = () => (
-    <div className="space-y-4">
-      {section.content?.questions && section.content.questions.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium mb-4">Assessment Questions</h4>
-          {section.content.questions.map((question, idx) => (
-            <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-3">
-              <p className="font-medium">{question.question}</p>
-              
-              {question.type === 'multiple_choice' && question.options && (
-                <div className="space-y-2">
-                  {question.options.map((option, optionIdx) => (
-                    <label key={optionIdx} className="flex items-start gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name={`question-${idx}`} 
-                        className="mt-1" 
-                      />
-                      <span className="text-sm">{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              
-              {question.type === 'text' && (
-                <textarea 
-                  className="w-full p-2 border rounded text-sm" 
-                  rows={3}
-                  placeholder="Enter your answer..."
-                />
-              )}
-              
-              {question.explanation && (
-                <div className="text-xs text-muted-foreground p-2 bg-muted/10 rounded">
-                  <strong>Explanation:</strong> {question.explanation}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 
   const renderContent = () => {
     switch (section.type) {
+      case 'case_study':
+      case 'framework_guide':
+      case 'article':
+        return renderArticleContent();
       case 'interactive':
         return renderInteractiveContent();
       case 'assessment':
         return renderAssessmentContent();
-      case 'case_study':
-      case 'framework_guide':
-        return renderArticleContent(); // These types use the enhanced article renderer
       default:
         return renderArticleContent();
     }
   };
 
   return (
-    <Card className={`transition-all duration-200 ${isActive ? 'ring-2 ring-primary' : ''}`}>
-      <CardContent className="p-6">
-        {/* Section Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg ${getTypeColor(section.type)}`}>
+    <Card className="w-full">
+      <div className="p-6" ref={contentRef}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
               {getTypeIcon(section.type)}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold">{section.title}</h3>
-                {isCompleted && (
-                  <Badge variant="secondary" className="text-xs">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Completed
-                  </Badge>
-                )}
-                {section.is_required && (
-                  <Badge variant="outline" className="text-xs">
-                    Required
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {section.duration_minutes} min
-                </div>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold">{section.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {section.duration_minutes} minutes • {section.type?.replace('_', ' ')} 
+              </p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isCompleted && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Completed
+              </Badge>
+            )}
+            {isStarted && !isCompleted && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <Circle className="w-3 h-3 mr-1" />
+                In Progress ({engagementActions.getEngagementLevel()})
+              </Badge>
+            )}
+            {section.is_required && (
+              <Badge variant="outline">Required</Badge>
+            )}
           </div>
         </div>
 
-        {/* Section Description */}
-        <p className="text-sm text-muted-foreground mb-4">{section.description}</p>
+        {section.description && (
+          <p className="text-sm text-muted-foreground mb-4">{section.description}</p>
+        )}
 
-        {/* Progress indicator for active section */}
-        {isActive && progress > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-sm mb-1">
-              <span>Progress</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
+        {/* Not started state */}
+        {!isStarted && !isCompleted && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">Ready to begin this section?</p>
+            <Button onClick={() => onStart?.(section.id)}>
+              Start Learning
+            </Button>
           </div>
         )}
 
-        {/* Content */}
-        {isActive && (
-          <div className="space-y-4" data-content-area>
-            {/* Section action buttons */}
-            {!isStarted && !isCompleted && onSectionStart && (
-              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-primary">Ready to start learning?</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Begin this section to access interactive content and track your progress.
-                    </p>
-                  </div>
-                  <Button onClick={() => onSectionStart(section.id)} variant="default">
-                    Start Learning
-                  </Button>
-                </div>
-              </div>
-            )}
+        {/* Started content */}
+        {isStarted && !isCompleted && (
+          <div data-content-area className="space-y-6">
+            {renderContent()}
             
-            {/* Learning content - only show if started or completed */}
-            {(isStarted || isCompleted) && (
-              <>
-                {renderContent()}
-                
-                {/* Action buttons for started sections */}
-                {isStarted && !isCompleted && (
-                  <div className="flex gap-2 pt-4 border-t">
-                    <Button onClick={() => onComplete(section.id)} className="flex-1">
-                      Mark as Complete
-                    </Button>
-                    {onSectionStart && (
-                      <Button 
-                        onClick={() => onSectionStart(section.id)} 
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        Review Content
-                      </Button>
-                    )}
-                  </div>
-                )}
-                
-                {/* Completed state */}
-                {isCompleted && (
-                  <div className="pt-4 border-t">
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Section completed successfully
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+            {/* Action buttons for started sections */}
+            <div className="flex gap-2 pt-4 border-t">
+              <Button 
+                onClick={() => onComplete(section.id)} 
+                className="flex-1"
+                disabled={!engagementActions.canComplete()}
+              >
+                {engagementActions.canComplete() ? 'Mark as Complete' : 'Complete Learning First'}
+              </Button>
+              <Button 
+                onClick={handleReviewClick}
+                variant="outline"
+                className="flex-1"
+              >
+                {engagementActions.getNextAction()}
+              </Button>
+            </div>
           </div>
         )}
-      </CardContent>
+
+        {/* Completed state */}
+        {isCompleted && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-green-600 mb-4">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">Section Completed</span>
+            </div>
+            
+            {renderContent()}
+            
+            <div className="pt-4 border-t">
+              <Button 
+                onClick={handleReviewClick}
+                variant="outline" 
+                className="w-full"
+              >
+                Review Content
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };
