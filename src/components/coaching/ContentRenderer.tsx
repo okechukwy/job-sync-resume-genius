@@ -20,6 +20,7 @@ interface ContentRendererProps {
   isStarted?: boolean;
   onComplete: (sectionId: string) => void;
   onSectionStart?: (sectionId: string) => void;
+  onReview?: (sectionId: string) => void;
   progress?: number;
 }
 
@@ -30,6 +31,7 @@ export const ContentRenderer = ({
   isStarted = false,
   onComplete,
   onSectionStart,
+  onReview,
   progress = 0 
 }: ContentRendererProps) => {
   const getTypeIcon = (type: string) => {
@@ -171,114 +173,156 @@ export const ContentRenderer = ({
     }
   };
 
-  const renderArticleContent = () => (
-    <div className="space-y-6">
-      {section.content?.content_blocks && section.content.content_blocks.length > 0 ? (
-        section.content.content_blocks
-          .sort((a, b) => a.order_index - b.order_index)
-          .map((block, index) => renderContentBlock(block, index))
-      ) : (
-        <div className="space-y-4">
-          {section.content?.text && (
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-line">{section.content.text}</div>
-            </div>
-          )}
-          
-          {section.content?.key_points && section.content.key_points.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Key Points
-              </h4>
-              <ul className="space-y-1">
-                {section.content.key_points.map((point, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {section.content?.objectives && section.content.objectives.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2 flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Learning Objectives
-              </h4>
-              <ul className="space-y-1">
-                {section.content.objectives.map((objective, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="h-3 w-3 text-primary mt-1 flex-shrink-0" />
-                    {objective}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Case Studies */}
-      {section.content?.case_studies && section.content.case_studies.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Case Studies
-          </h4>
-          {section.content.case_studies.map((caseStudy: any, idx: number) => (
-            <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-3">
-              <h5 className="font-semibold">{caseStudy.title}</h5>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="font-medium">Scenario: </span>
-                  {caseStudy.scenario}
-                </div>
-                <div>
-                  <span className="font-medium">Background: </span>
-                  {caseStudy.background}
-                </div>
-                <div>
-                  <span className="font-medium">Challenge: </span>
-                  {caseStudy.challenge}
-                </div>
+  const renderArticleContent = () => {
+    // Handle both enhanced content and regular content structures
+    const content = section.content || {};
+    const blocks = content.content_blocks || [];
+    const text = content.text || (typeof section.content === 'string' ? section.content : '');
+    const keyPoints = content.key_points || [];
+    const objectives = content.objectives || [];
+    const caseStudies = content.case_studies || [];
+
+    return (
+      <div className="space-y-6">
+        {/* External Resource Link */}
+        {section.content_url && (
+          <div className="p-4 bg-primary/10 rounded-lg border-l-4 border-primary">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-sm">External Resource</h4>
+                <p className="text-xs text-muted-foreground">This section includes an external learning resource</p>
               </div>
-              
-              {caseStudy.analysis_points && caseStudy.analysis_points.length > 0 && (
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Analysis Points:</h6>
-                  <ul className="space-y-1 text-sm">
-                    {caseStudy.analysis_points.map((point: string, pointIdx: number) => (
-                      <li key={pointIdx} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {caseStudy.key_takeaways && caseStudy.key_takeaways.length > 0 && (
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Key Takeaways:</h6>
-                  <ul className="space-y-1 text-sm">
-                    {caseStudy.key_takeaways.map((takeaway: string, takeawayIdx: number) => (
-                      <li key={takeawayIdx} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
-                        {takeaway}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <Button 
+                size="sm" 
+                onClick={() => window.open(section.content_url, '_blank', 'noopener,noreferrer')}
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-3 w-3" />
+                Open Resource
+              </Button>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+          </div>
+        )}
+
+        {blocks.length > 0 ? (
+          blocks
+            .sort((a, b) => a.order_index - b.order_index)
+            .map((block, index) => renderContentBlock(block, index))
+        ) : (
+          <div className="space-y-4">
+            {text && (
+              <div className="prose prose-sm max-w-none">
+                <div className="whitespace-pre-line">{text}</div>
+              </div>
+            )}
+            
+            {keyPoints.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Key Points
+                </h4>
+                <ul className="space-y-1">
+                  {keyPoints.map((point, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {objectives.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Learning Objectives
+                </h4>
+                <ul className="space-y-1">
+                  {objectives.map((objective, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="h-3 w-3 text-primary mt-1 flex-shrink-0" />
+                      {objective}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Empty state fallback */}
+            {!text && !keyPoints.length && !objectives.length && !blocks.length && (
+              <div className="p-4 bg-muted/20 rounded-lg text-center">
+                <p className="text-sm text-muted-foreground">
+                  {section.content_url 
+                    ? "Click 'Open Resource' above to access the learning material for this section."
+                    : "Content is being prepared for this section."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Case Studies from enhanced content */}
+        {caseStudies.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="font-medium flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Case Studies
+            </h4>
+            {caseStudies.map((caseStudy: any, idx: number) => (
+              <div key={idx} className="p-4 bg-muted/20 rounded-lg border space-y-3">
+                <h5 className="font-semibold">{caseStudy.title}</h5>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-medium">Scenario: </span>
+                    {caseStudy.scenario}
+                  </div>
+                  <div>
+                    <span className="font-medium">Background: </span>
+                    {caseStudy.background}
+                  </div>
+                  <div>
+                    <span className="font-medium">Challenge: </span>
+                    {caseStudy.challenge}
+                  </div>
+                </div>
+                
+                {caseStudy.analysis_points && caseStudy.analysis_points.length > 0 && (
+                  <div>
+                    <h6 className="font-medium text-sm mb-2">Analysis Points:</h6>
+                    <ul className="space-y-1 text-sm">
+                      {caseStudy.analysis_points.map((point: string, pointIdx: number) => (
+                        <li key={pointIdx} className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {caseStudy.key_takeaways && caseStudy.key_takeaways.length > 0 && (
+                  <div>
+                    <h6 className="font-medium text-sm mb-2">Key Takeaways:</h6>
+                    <ul className="space-y-1 text-sm">
+                      {caseStudy.key_takeaways.map((takeaway: string, takeawayIdx: number) => (
+                        <li key={takeawayIdx} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
+                          {takeaway}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+      
 
   const renderInteractiveContent = () => (
     <div className="space-y-6">

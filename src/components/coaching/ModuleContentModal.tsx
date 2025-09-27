@@ -56,6 +56,12 @@ export const ModuleContentModal = ({
     // Auto-select first section
     setCurrentSection(0);
     
+    // Auto-start the first section
+    const contentSections = enhancedContent?.content_sections || normalizeContentSections(module.content_sections);
+    if (contentSections.length > 0) {
+      setStartedSections(prev => new Set([...prev, contentSections[0].id]));
+    }
+    
     // Scroll to content area after a brief delay
     setTimeout(() => {
       const contentArea = document.querySelector('[data-content-area]');
@@ -63,7 +69,7 @@ export const ModuleContentModal = ({
         contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 500);
-  }, [module, enrollmentId, onStartModule]);
+  }, [module, enrollmentId, onStartModule, enhancedContent]);
 
   const handleComplete = useCallback(() => {
     if (!module) return;
@@ -98,6 +104,14 @@ export const ModuleContentModal = ({
   const handleSectionStart = useCallback((sectionId: string) => {
     setStartedSections(prev => new Set([...prev, sectionId]));
     console.log('🎯 Section started:', sectionId);
+  }, []);
+
+  const handleReview = useCallback((sectionId: string) => {
+    // Scroll to content area
+    const contentArea = document.querySelector('[data-content-area]');
+    if (contentArea) {
+      contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, []);
 
 
@@ -337,6 +351,26 @@ export const ModuleContentModal = ({
   }
 };
 
+  // Normalize enhanced content to match expected structure
+  const normalizeEnhancedContent = (enhancedSections: any[]) => {
+    return enhancedSections.map((section: any) => ({
+      ...section,
+      content: {
+        content_blocks: section.content_blocks || [],
+        text: section.content?.text || (typeof section.content === 'string' ? section.content : ''),
+        key_points: section.content?.key_points || [],
+        objectives: section.content?.objectives || section.learning_outcomes || [],
+        instructions: section.content?.instructions || '',
+        questions: section.content?.questions || [],
+        reflection_questions: section.content?.reflection_questions || [],
+        interactive_elements: section.interactive_elements || [],
+        case_studies: section.case_studies || [],
+        frameworks: section.frameworks || []
+      },
+      content_url: section.content_url || null
+    }));
+  };
+
   // Process content sections
   let contentSections = [];
   try {
@@ -346,7 +380,7 @@ export const ModuleContentModal = ({
     // Use enhanced content if available
     if (enhancedContent?.content_sections) {
       console.log('✨ Using enhanced content for module:', module.title);
-      contentSections = enhancedContent.content_sections;
+      contentSections = normalizeEnhancedContent(enhancedContent.content_sections);
     } else {
       const parsedContentSections = normalizeContentSections(module.content_sections);
       console.log('🔍 Parsed content sections:', parsedContentSections);
@@ -652,6 +686,7 @@ export const ModuleContentModal = ({
                           isStarted={startedSections.has(currentSectionData.id)}
                           onComplete={(sectionId: string) => handleSectionCompleteWithAutoCompletion(sectionId, contentSections)}
                           onSectionStart={handleSectionStart}
+                          onReview={handleReview}
                           progress={currentSection === 0 ? progressPercentage : 0}
                         />
                       );
