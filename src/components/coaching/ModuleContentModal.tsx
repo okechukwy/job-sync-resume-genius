@@ -47,6 +47,92 @@ export const ModuleContentModal = ({
   // Try to load enhanced content if available - SINGLE hook call at top level
   const enhancedContent = useEnhancedContent(module?.id || '');
 
+  // Define all hooks at the top before any early returns or conditional logic
+  const handleStart = useCallback(() => {
+    if (!module) return;
+    onStartModule(module.id, enrollmentId);
+    
+    // Auto-select first section
+    setCurrentSection(0);
+    
+    // Scroll to content area after a brief delay
+    setTimeout(() => {
+      const contentArea = document.querySelector('[data-content-area]');
+      if (contentArea) {
+        contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 500);
+  }, [module, enrollmentId, onStartModule]);
+
+  const handleComplete = useCallback(() => {
+    if (!module) return;
+    onCompleteModule(module.id, enrollmentId);
+  }, [module, enrollmentId, onCompleteModule]);
+
+  const handleSectionComplete = useCallback((sectionId: string) => {
+    if (!module) return;
+    setCompletedSections(prev => new Set([...prev, sectionId]));
+  }, [module]);
+
+  // Auto-completion logic for sections
+  const checkAutoCompletion = useCallback((sectionId: string, contentSections: any[], completedSections: Set<string>) => {
+    if (!module || !contentSections) return;
+    const requiredSections = contentSections.filter(s => s.is_required);
+    const completedRequiredSections = requiredSections.filter(s => 
+      completedSections.has(s.id) || s.id === sectionId
+    );
+    
+    if (completedRequiredSections.length === requiredSections.length) {
+      // Auto-complete the module if all required sections are done
+      setTimeout(() => onCompleteModule(module.id, enrollmentId), 1000);
+    }
+  }, [module, enrollmentId, onCompleteModule]);
+
+  // Update section complete handler to use the auto-completion logic
+  const handleSectionCompleteWithAutoCompletion = useCallback((sectionId: string, contentSections: any[]) => {
+    handleSectionComplete(sectionId);
+    checkAutoCompletion(sectionId, contentSections, completedSections);
+  }, [handleSectionComplete, checkAutoCompletion, completedSections]);
+
+  // Section navigation handlers
+  const handleNextSection = useCallback(() => {
+    // We'll get contentSections from the processed data below
+    return (contentSections: any[]) => {
+      if (currentSection < contentSections.length - 1) {
+        const newSection = currentSection + 1;
+        setCurrentSection(newSection);
+        
+        // Auto-complete current section when moving to next
+        if (contentSections[currentSection]) {
+          handleSectionComplete(contentSections[currentSection].id);
+        }
+        
+        // Scroll to content area
+        setTimeout(() => {
+          const contentArea = document.querySelector('[data-content-area]');
+          if (contentArea) {
+            contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    };
+  }, [currentSection, handleSectionComplete]);
+
+  const handlePreviousSection = useCallback(() => {
+    if (currentSection > 0) {
+      setCurrentSection(currentSection - 1);
+      
+      // Scroll to content area
+      setTimeout(() => {
+        const contentArea = document.querySelector('[data-content-area]');
+        if (contentArea) {
+          contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [currentSection]);
+
+  // Early return after all hooks are defined
   if (!module) return null;
 
   // Process content sections early so they can be used in callbacks
@@ -307,55 +393,8 @@ export const ModuleContentModal = ({
     contentSections = createFallbackContentSections(module);
   }
 
-  // Define all hooks at the top before any early returns or conditional logic
-  const handleStart = useCallback(() => {
-    if (!module) return;
-    onStartModule(module.id, enrollmentId);
-    
-    // Auto-select first section
-    setCurrentSection(0);
-    
-    // Scroll to content area after a brief delay
-    setTimeout(() => {
-      const contentArea = document.querySelector('[data-content-area]');
-      if (contentArea) {
-        contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 500);
-  }, [module, enrollmentId, onStartModule]);
-
-  const handleComplete = useCallback(() => {
-    if (!module) return;
-    onCompleteModule(module.id, enrollmentId);
-  }, [module, enrollmentId, onCompleteModule]);
-
-  const handleSectionComplete = useCallback((sectionId: string) => {
-    if (!module) return;
-    setCompletedSections(prev => new Set([...prev, sectionId]));
-  }, [module]);
-
-  // Auto-completion logic for sections - moved to top to comply with hooks rules
-  const checkAutoCompletion = useCallback((sectionId: string, contentSections: any[], completedSections: Set<string>) => {
-    if (!module || !contentSections) return;
-    const requiredSections = contentSections.filter(s => s.is_required);
-    const completedRequiredSections = requiredSections.filter(s => 
-      completedSections.has(s.id) || s.id === sectionId
-    );
-    
-    if (completedRequiredSections.length === requiredSections.length) {
-      // Auto-complete the module if all required sections are done
-      setTimeout(() => onCompleteModule(module.id, enrollmentId), 1000);
-    }
-  }, [module, enrollmentId, onCompleteModule]);
-
-  // Update section complete handler to use the auto-completion logic - moved to top
-  const handleSectionCompleteWithAutoCompletion = useCallback((sectionId: string, contentSections: any[]) => {
-    handleSectionComplete(sectionId);
-    checkAutoCompletion(sectionId, contentSections, completedSections);
-  }, [handleSectionComplete, checkAutoCompletion, completedSections]);
-
-  // Section navigation handlers
-  const handleNextSection = useCallback(() => {
+  // Create navigation handlers that work with the processed contentSections
+  const navigateToNextSection = useCallback(() => {
     if (currentSection < contentSections.length - 1) {
       const newSection = currentSection + 1;
       setCurrentSection(newSection);
@@ -375,7 +414,7 @@ export const ModuleContentModal = ({
     }
   }, [currentSection, contentSections, handleSectionComplete]);
 
-  const handlePreviousSection = useCallback(() => {
+  const navigateToPreviousSection = useCallback(() => {
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
       
@@ -695,7 +734,7 @@ export const ModuleContentModal = ({
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handlePreviousSection}
+                    onClick={navigateToPreviousSection}
                     disabled={currentSection === 0}
                   >
                     <ArrowLeft className="h-4 w-4 mr-1" />
@@ -704,7 +743,7 @@ export const ModuleContentModal = ({
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleNextSection}
+                    onClick={navigateToNextSection}
                     disabled={currentSection >= contentSections.length - 1}
                   >
                     Next
