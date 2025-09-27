@@ -87,7 +87,7 @@ serve(async (req) => {
           const { data: anomalies } = await supabase.rpc('detect_login_anomaly', {
             p_user_id: event.user_id,
             p_ip_address: event.ip_address,
-            p_country_code: locationData.country_code || 'UNKNOWN',
+            p_country_code: (locationData as any)?.country_code || 'UNKNOWN',
             p_user_agent: event.user_agent || ''
           });
 
@@ -97,10 +97,10 @@ serve(async (req) => {
             email,
             ip_address: event.ip_address,
             user_agent: event.user_agent,
-            country_code: locationData.country_code,
-            city: locationData.city,
-            latitude: locationData.latitude,
-            longitude: locationData.longitude,
+            country_code: (locationData as any)?.country_code,
+            city: (locationData as any)?.city,
+            latitude: (locationData as any)?.latitude,
+            longitude: (locationData as any)?.longitude,
             success: true
           });
 
@@ -147,8 +147,8 @@ serve(async (req) => {
           device_name: event.metadata.device_name,
           user_agent: event.user_agent,
           ip_address: event.ip_address,
-          country_code: locationData.country_code,
-          city: locationData.city,
+          country_code: (locationData as any)?.country_code,
+          city: (locationData as any)?.city,
           trusted: false,
           last_used_at: new Date().toISOString()
         }, { onConflict: 'user_id,device_fingerprint' });

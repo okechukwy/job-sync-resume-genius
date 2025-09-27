@@ -164,7 +164,7 @@ serve(async (req) => {
     console.error('Error processing .doc file:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       suggestion: 'Please try converting your .doc file to .docx or PDF format for better compatibility.'
     }), {
       status: 400,

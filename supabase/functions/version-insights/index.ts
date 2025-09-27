@@ -141,7 +141,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
         insights: [],
         overall_strategy: "Analysis unavailable due to technical error.",
         next_steps: ["Please try again later"]

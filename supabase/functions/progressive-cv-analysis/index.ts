@@ -132,7 +132,7 @@ Focus on providing NEW, PROGRESSIVE insights that build upon previous optimizati
     console.error('Error in progressive-cv-analysis function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
         details: 'Failed to perform progressive CV analysis'
       }),
       {

@@ -52,7 +52,7 @@ const parseAIResponse = (responseText: string): any => {
   try {
     return JSON.parse(responseText);
   } catch (error) {
-    console.log('Direct JSON parsing failed:', error.message);
+    console.log('Direct JSON parsing failed:', error instanceof Error ? error.message : String(error));
   }
   
   // Step 2: Clean up common JSON issues
@@ -74,7 +74,7 @@ const parseAIResponse = (responseText: string): any => {
   try {
     return JSON.parse(cleanedText);
   } catch (error) {
-    console.log('Cleaned JSON parsing failed:', error.message);
+    console.log('Cleaned JSON parsing failed:', error instanceof Error ? error.message : String(error));
   }
   
   // Step 3: Extract JSON from mixed content
@@ -83,7 +83,7 @@ const parseAIResponse = (responseText: string): any => {
     try {
       return JSON.parse(jsonMatch[0]);
     } catch (error) {
-      console.log('Extracted JSON parsing failed:', error.message);
+      console.log('Extracted JSON parsing failed:', error instanceof Error ? error.message : String(error));
     }
   }
   

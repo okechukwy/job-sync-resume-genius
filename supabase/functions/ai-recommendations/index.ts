@@ -62,7 +62,7 @@ serve(async (req) => {
     // Get recommendation template - improved logic for personal_branding
     let templateCategory = recommendationType;
     if (recommendationType === 'skill_gap') {
-      templateCategory = 'skill_development';
+      templateCategory = 'content'; // Use 'content' instead of 'skill_development'
     }
 
     console.log(`Looking for template with category: ${templateCategory}`);
@@ -209,7 +209,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in AI recommendations function:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       success: false
     }), {
       status: 500,

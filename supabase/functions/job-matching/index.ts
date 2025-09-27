@@ -184,24 +184,27 @@ Analyze the specific skills, experience, and background mentioned in the resume.
       analysisWarnings: analysisResult.analysisWarnings || []
     };
 
-    // Add processing metadata
-    result.processingResult = {
-      content: resumeContent,
-      confidence: 'high',
-      extractedWords: resumeContent.trim().split(/\s+/).length,
-      warnings: [],
-      processingMethod: 'AI Analysis via OpenAI'
+    // Add processing metadata (using object spread to avoid type error)
+    const finalResult = {
+      ...result,
+      processingResult: {
+        content: resumeContent,
+        confidence: 'high',
+        extractedWords: resumeContent.trim().split(/\s+/).length,
+        warnings: [],
+        processingMethod: 'AI Analysis via OpenAI'
+      }
     };
 
     console.log('Analysis completed successfully');
 
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify(finalResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('Error in job-matching function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error occurred' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -292,7 +292,7 @@ MANDATORY: Your improvements array MUST contain at least 15 items. Analyze thoro
     console.error('Error in cv-analysis function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
         details: 'Failed to analyze CV. Please try again.'
       }), {
       status: 500,

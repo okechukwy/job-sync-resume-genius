@@ -370,7 +370,7 @@ IMPORTANT: Generate exactly 6 items in the missingKeywords array and exactly 6 i
         // Return structured error response with 6 items fallback for keyword-trends
         return new Response(JSON.stringify({ 
           error: 'Failed to parse AI response',
-          details: parseError.message,
+          details: parseError instanceof Error ? parseError.message : 'Parse error occurred',
           type: type,
           fallback: type === 'keyword-trends' ? {
             currentKeywords: {},
@@ -410,7 +410,7 @@ IMPORTANT: Generate exactly 6 items in the missingKeywords array and exactly 6 i
     console.error('Error in linkedin-generator function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
         details: 'Failed to generate LinkedIn content. Please try again.',
         timestamp: new Date().toISOString()
       }), {

@@ -225,7 +225,7 @@ MANDATORY: Your contentOptimizations array MUST contain at least 15-25 items cov
     console.error('Error in ats-optimization function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
         details: 'Failed to optimize resume for ATS. Please try again.'
       }), {
       status: 500,

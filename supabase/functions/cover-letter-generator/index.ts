@@ -326,7 +326,7 @@ REMEMBER:
   } catch (error) {
     console.error('Error in cover-letter-generator function:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       success: false 
     }), {
       status: 500,

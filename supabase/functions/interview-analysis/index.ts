@@ -146,7 +146,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in interview analysis:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       overallScore: 0,
       scores: { communication: 0, content: 0, structure: 0, impact: 0 },
       strengths: [],

@@ -245,7 +245,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         insights: fallbackInsights,
-        error: error.message || 'Failed to generate insights',
+        error: (error instanceof Error ? error.message : 'Unknown error occurred') || 'Failed to generate insights',
         success: false,
         generated_at: new Date().toISOString(),
         source: 'fallback_generated'

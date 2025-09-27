@@ -471,7 +471,7 @@ async function retryWithBackoff<T>(
   maxRetries: number = 3,
   baseDelay: number = 1000
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('No attempts made');
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -516,8 +516,8 @@ function selectQuestions(
   
   // Sort by difficulty for progression (easy -> medium -> hard)
   const difficultyOrder = { 'easy': 1, 'medium': 2, 'hard': 3 };
-  const sortedQuestions = availableQuestions.sort((a, b) => 
-    difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]
+  const sortedQuestions = availableQuestions.sort((a: any, b: any) => 
+    (difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 0) - (difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 0)
   );
   
   // Select questions with progressive difficulty
@@ -555,9 +555,9 @@ function getFallbackQuestions(
   count: number = 5,
   previousQuestions: string[] = []
 ) {
-  const questions = FALLBACK_QUESTIONS[sessionType]?.[roleFocus] || 
-                   FALLBACK_QUESTIONS[sessionType]?.['Business'] || 
-                   FALLBACK_QUESTIONS['behavioral']['Business'];
+  const questions = (FALLBACK_QUESTIONS as any)[sessionType]?.[roleFocus] || 
+                   (FALLBACK_QUESTIONS as any)[sessionType]?.['Business'] || 
+                   (FALLBACK_QUESTIONS as any)['behavioral']['Business'];
   
   const selectedQuestions = selectQuestions(questions, count, 'medium', previousQuestions);
   

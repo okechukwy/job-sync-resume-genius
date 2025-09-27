@@ -156,7 +156,13 @@ serve(async (req) => {
         }
 
         // Aggregate data for reporting
-        const aggregatedResults = {
+        const aggregatedResults: {
+          total_events: number;
+          event_types: Record<string, number>;
+          user_segments: Record<string, number>;
+          daily_counts: Record<string, number>;
+          popular_features: Record<string, number>;
+        } = {
           total_events: analyticsData?.length || 0,
           event_types: {},
           user_segments: {},
