@@ -37,6 +37,44 @@ export const ContentRenderer = ({
     }
   }, [isStarted, engagementState.textContentViewed, engagementActions]);
 
+  // Track reading progress based on scroll position
+  useEffect(() => {
+    if (!isStarted || !contentRef.current) return;
+
+    const handleScroll = () => {
+      const element = contentRef.current;
+      if (!element) return;
+
+      const scrollTop = element.scrollTop;
+      const scrollHeight = element.scrollHeight;
+      const clientHeight = element.clientHeight;
+      
+      // If content is short enough to be fully visible, mark as 100% read
+      if (scrollHeight <= clientHeight) {
+        engagementActions.updateReadingProgress(100);
+        return;
+      }
+      
+      // Calculate reading progress as percentage of content scrolled
+      const maxScroll = scrollHeight - clientHeight;
+      const scrollProgress = Math.min(100, Math.round((scrollTop / maxScroll) * 100));
+      
+      if (scrollProgress > engagementState.readingProgress) {
+        engagementActions.updateReadingProgress(scrollProgress);
+      }
+    };
+
+    const element = contentRef.current;
+    element.addEventListener('scroll', handleScroll);
+    
+    // Check initial state for short content
+    handleScroll();
+
+    return () => {
+      element.removeEventListener('scroll', handleScroll);
+    };
+  }, [isStarted, engagementState.readingProgress, engagementActions]);
+
   const handleExternalResourceClick = () => {
     engagementActions.markExternalResourceOpened();
     if (section.content_url) {
@@ -618,7 +656,7 @@ export const ContentRenderer = ({
 
   return (
     <Card className="w-full">
-      <div className="p-6" ref={contentRef}>
+      <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -639,10 +677,15 @@ export const ContentRenderer = ({
               </Badge>
             )}
             {isStarted && !isCompleted && (
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                <Circle className="w-3 h-3 mr-1" />
-                In Progress ({engagementActions.getEngagementLevel()})
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <Circle className="w-3 h-3 mr-1" />
+                  In Progress ({engagementActions.getEngagementLevel()})
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Read: {engagementState.readingProgress}%
+                </span>
+              </div>
             )}
             {section.is_required && (
               <Badge variant="outline">Required</Badge>
@@ -666,7 +709,12 @@ export const ContentRenderer = ({
 
         {/* Started content */}
         {isStarted && !isCompleted && (
-          <div data-content-area className="space-y-6">
+          <div 
+            ref={contentRef}
+            data-content-area 
+            className="space-y-6 max-h-96 overflow-y-auto pr-2"
+            style={{ scrollBehavior: 'smooth' }}
+          >
             {renderContent()}
             
             {/* Action buttons for started sections */}
