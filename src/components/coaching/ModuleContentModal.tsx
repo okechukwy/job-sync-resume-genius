@@ -43,7 +43,7 @@ export const ModuleContentModal = ({
   const [currentSection, setCurrentSection] = useState(0);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   
-  // Try to load enhanced content if available
+  // Try to load enhanced content if available - SINGLE hook call at top level
   const enhancedContent = useEnhancedContent(module?.id || '');
 
   // Define all hooks at the top before any early returns or conditional logic
@@ -343,14 +343,12 @@ export const ModuleContentModal = ({
   let contentSections = [];
   let currentSectionData: ContentSection | undefined;
   
-  // Try to load enhanced content if available
-  const enhancedContent = useEnhancedContent(module?.id || '');
-  
   try {
     console.log('🔍 Starting content sections processing for module:', module.id);
     console.log('🔍 Raw content_sections:', module.content_sections);
+    console.log('🔍 Enhanced content available:', !!enhancedContent);
     
-    // Use enhanced content if available
+    // Use enhanced content if available (from hook called at top of component)
     if (enhancedContent?.content_sections) {
       console.log('✨ Using enhanced content for module:', module.title);
       contentSections = enhancedContent.content_sections;
@@ -373,6 +371,8 @@ export const ModuleContentModal = ({
       console.log('ModuleContentModal Debug:', {
         moduleId: module.id,
         moduleTitle: module.title,
+        hasEnhancedContent: !!enhancedContent,
+        enhancedContentSections: enhancedContent?.content_sections?.length || 0,
         hasContentSections: !!module.content_sections,
         contentSectionsRaw: module.content_sections,
         contentSectionsLength: parsedContentSections.length,
