@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, ExternalLink, CheckCircle2, Clock, ArrowUp } from 'lucide-react';
+import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, CheckCircle2, Clock, ArrowUp } from 'lucide-react';
 import { useContentEngagement } from '@/hooks/useContentEngagement';
 
 interface ContentRendererProps {
@@ -75,12 +75,7 @@ export const ContentRenderer = ({
     };
   }, [isStarted, engagementState.readingProgress, engagementActions]);
 
-  const handleExternalResourceClick = () => {
-    engagementActions.markExternalResourceOpened();
-    if (section.content_url) {
-      window.open(section.content_url, '_blank', 'noopener,noreferrer');
-    }
-  };
+  // External resource functionality removed for internal content focus
 
   const handleCaseStudyInteraction = (caseStudyId: string) => {
     engagementActions.markCaseStudyViewed(caseStudyId);
@@ -236,25 +231,7 @@ export const ContentRenderer = ({
 
     return (
       <div className="space-y-6">
-        {/* External Resource Button */}
-        {section.content_url && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-blue-900">External Resource</h4>
-                <p className="text-sm text-blue-700">This section includes an external resource for additional learning.</p>
-              </div>
-              <Button 
-                onClick={handleExternalResourceClick}
-                className="flex items-center gap-2"
-                variant={engagementState.externalResourceOpened ? "secondary" : "outline"}
-              >
-                <ExternalLink className="w-4 h-4" />
-                {engagementState.externalResourceOpened ? 'Resource Opened' : 'Open Resource'}
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* External Resource Button - Removed for internal content focus */}
 
         {/* Text content */}
         {text && (
