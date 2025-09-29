@@ -5,6 +5,7 @@ import { teamDevelopmentModule } from '@/data/professionalContent/teamDevelopmen
 import { changeLeadershipModule } from '@/data/professionalContent/changeLeadershipModule';
 import { executivePresenceModule } from '@/data/professionalContent/executivePresenceModule';
 import { marketResearchModule } from '@/data/professionalContent/marketResearchModule';
+import { communicationInfluenceModule } from '@/data/professionalContent/communicationInfluenceModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -32,7 +33,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
   return children(enhancedContent);
 };
 
-export const useEnhancedContent = (moduleId: string) => {
+export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
   return useMemo(() => {
     const enhancedModules: Record<string, any> = {
       // Original and current Leadership Excellence Program modules
@@ -46,12 +47,33 @@ export const useEnhancedContent = (moduleId: string) => {
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
+    // Communication & Influence modules by title matching
+    const communicationModules: Record<string, any> = {
+      'Effective Communication Foundations': communicationInfluenceModule.content_sections[0],
+      'Public Speaking & Presentation Skills': communicationInfluenceModule.content_sections[1],
+      'Stakeholder Management & Influence': communicationInfluenceModule.content_sections[2],
+      'Conflict Resolution & Negotiation': communicationInfluenceModule.content_sections[3],
+      'Advanced Persuasion Techniques': communicationInfluenceModule.content_sections[4],
+    };
+
     console.log('🔍 Enhanced content lookup for moduleId:', moduleId);
+    console.log('🔍 Module title:', moduleTitle);
     console.log('🔍 Available enhanced modules:', Object.keys(enhancedModules));
+    console.log('🔍 Available communication modules:', Object.keys(communicationModules));
     
-    const content = enhancedModules[moduleId] || null;
+    // First try by module ID
+    let content = enhancedModules[moduleId] || null;
+    
+    // If not found and we have a title, try by title for Communication & Influence modules
+    if (!content && moduleTitle && communicationModules[moduleTitle]) {
+      console.log('🔍 Found Communication & Influence module by title:', moduleTitle);
+      content = {
+        content_sections: [communicationModules[moduleTitle]]
+      };
+    }
+    
     console.log('🔍 Enhanced content found:', !!content);
     
     return content;
-  }, [moduleId]);
+  }, [moduleId, moduleTitle]);
 };

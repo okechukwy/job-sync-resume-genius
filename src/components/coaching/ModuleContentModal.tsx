@@ -9,6 +9,7 @@ import { ContentRenderer } from './ContentRenderer';
 import { SectionProgressTracker } from './SectionProgressTracker';
 import { useEnhancedContent } from './EnhancedContentLoader';
 import { ContentSection, LearningModule, ModuleProgress } from '@/types/coachingTypes';
+import { enhanceCommunicationModule, isCommunicationModule } from '@/utils/communicationContentEnhancer';
 import { 
   FileText, 
   Clock, 
@@ -46,7 +47,7 @@ export const ModuleContentModal = ({
   const [startedSections, setStartedSections] = useState<Set<string>>(new Set());
   
   // Try to load enhanced content if available - SINGLE hook call at top level
-  const enhancedContent = useEnhancedContent(module?.id || '');
+  const enhancedContent = useEnhancedContent(module?.id || '', module?.title);
 
   // Define all hooks at the top before any early returns or conditional logic
   const handleStart = useCallback(() => {
@@ -381,6 +382,14 @@ export const ModuleContentModal = ({
     if (enhancedContent?.content_sections) {
       console.log('✨ Using enhanced content for module:', module.title);
       contentSections = normalizeEnhancedContent(enhancedContent.content_sections);
+    } else if (isCommunicationModule(module)) {
+      // Special handling for Communication & Influence modules
+      console.log('🔧 Enhancing Communication module:', module.title);
+      const enhancedModule = enhanceCommunicationModule(module);
+      const parsedContentSections = normalizeContentSections(enhancedModule.content_sections);
+      contentSections = parsedContentSections.length > 0 
+        ? parsedContentSections 
+        : createFallbackContentSections(module);
     } else {
       const parsedContentSections = normalizeContentSections(module.content_sections);
       console.log('🔍 Parsed content sections:', parsedContentSections);
