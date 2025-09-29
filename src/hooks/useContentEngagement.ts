@@ -82,9 +82,9 @@ export const useContentEngagement = (sectionId: string, sectionContent: any): [E
   }, [updateActivity]);
 
   const updateReadingProgress = useCallback((progress: number) => {
-    setReadingProgress(Math.max(readingProgress, progress));
+    setReadingProgress(prev => Math.max(prev, progress));
     updateActivity();
-  }, [readingProgress, updateActivity]);
+  }, [updateActivity]);
 
   const getEngagementLevel = useCallback((): 'minimal' | 'partial' | 'substantial' | 'complete' => {
     const hasMinimalText = textContentViewed || readingProgress > 20;
