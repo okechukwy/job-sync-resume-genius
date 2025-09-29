@@ -204,8 +204,36 @@ const CareerCoaching = () => {
   };
 
   const handleContinueLearning = (programId: string) => {
-    setSelectedProgramId(programId);
-    setActiveTab("learning");
+    try {
+      console.log('🎯 Starting continue learning for program:', programId);
+      
+      // Validate program exists
+      const program = coachingPrograms?.find(p => p.id === programId);
+      if (!program) {
+        console.error('❌ Program not found:', programId);
+        toast.error('Program not found. Please try again.');
+        return;
+      }
+
+      // Check enrollment
+      const enrollment = getProgramEnrollment(programId);
+      if (!enrollment) {
+        console.error('❌ Enrollment not found for program:', programId);
+        toast.error('You are not enrolled in this program. Please enroll first.');
+        return;
+      }
+
+      console.log('✅ Program and enrollment found, navigating to learning...');
+      setSelectedProgramId(programId);
+      setActiveTab("learning");
+      
+      // Show success feedback
+      toast.success(`Continuing with ${program.title}`);
+      
+    } catch (error) {
+      console.error('❌ Error in handleContinueLearning:', error);
+      toast.error('Failed to load learning modules. Please try again.');
+    }
   };
 
   // Get module progress for a specific module
@@ -537,9 +565,19 @@ const CareerCoaching = () => {
                                 variant="outline" 
                                 className="w-full"
                                 onClick={() => handleContinueLearning(program.id)}
+                                disabled={isLoading}
                               >
-                                Continue Learning
-                                <ArrowRight className="h-4 w-4 ml-2" />
+                                {isLoading ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                                    Loading...
+                                  </>
+                                ) : (
+                                  <>
+                                    Continue Learning
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                  </>
+                                )}
                               </Button>
                             </div>
                           );

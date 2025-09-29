@@ -87,17 +87,26 @@ export const useContentEngagement = (sectionId: string, sectionContent: any): [E
   }, [readingProgress, updateActivity]);
 
   const getEngagementLevel = useCallback((): 'minimal' | 'partial' | 'substantial' | 'complete' => {
-    const hasMinimalText = textContentViewed || readingProgress > 30;
+    const hasMinimalText = textContentViewed || readingProgress > 20;
     const hasCaseStudyProgress = totalCaseStudies === 0 || viewedCaseStudies.size > 0;
     const hasFrameworkProgress = totalFrameworks === 0 || interactedFrameworks.size > 0;
     const hasInteractiveProgress = totalInteractiveElements === 0 || completedInteractives.size > 0;
     
+    // Calculate completion rate for existing elements
+    const caseStudyCompletionRate = totalCaseStudies === 0 ? 1 : viewedCaseStudies.size / totalCaseStudies;
+    const frameworkCompletionRate = totalFrameworks === 0 ? 1 : interactedFrameworks.size / totalFrameworks;
+    const interactiveCompletionRate = totalInteractiveElements === 0 ? 1 : completedInteractives.size / totalInteractiveElements;
+    
     if (!hasMinimalText) return 'minimal';
+    
+    // More lenient partial progress - just need text viewing + any interaction
     if (hasMinimalText && (hasCaseStudyProgress || hasFrameworkProgress || hasInteractiveProgress)) return 'partial';
-    if (readingProgress > 70 && hasCaseStudyProgress && hasFrameworkProgress) return 'substantial';
-    if (readingProgress > 90 && viewedCaseStudies.size === totalCaseStudies && 
-        interactedFrameworks.size === totalFrameworks && 
-        completedInteractives.size === totalInteractiveElements) return 'complete';
+    
+    // Substantial - 50% reading + some progress on interactive elements  
+    if (readingProgress > 50 && (caseStudyCompletionRate > 0.5 || frameworkCompletionRate > 0.5 || interactiveCompletionRate > 0.5)) return 'substantial';
+    
+    // Complete - 80% reading + most interactive elements done
+    if (readingProgress > 80 && caseStudyCompletionRate >= 0.8 && frameworkCompletionRate >= 0.8 && interactiveCompletionRate >= 0.8) return 'complete';
     
     return 'partial';
   }, [textContentViewed, readingProgress, viewedCaseStudies.size, totalCaseStudies, 
@@ -132,8 +141,10 @@ export const useContentEngagement = (sectionId: string, sectionContent: any): [E
 
   const canComplete = useCallback((): boolean => {
     const level = getEngagementLevel();
-    return level === 'substantial' || level === 'complete';
-  }, [getEngagementLevel]);
+    // More lenient completion - allow completion at partial level if substantial engagement
+    return level === 'substantial' || level === 'complete' || 
+           (level === 'partial' && readingProgress > 50 && textContentViewed);
+  }, [getEngagementLevel, readingProgress, textContentViewed]);
 
   const actions: ContentEngagementActions = {
     markTextViewed,

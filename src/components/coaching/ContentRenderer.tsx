@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, ExternalLink } from 'lucide-react';
+import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, ExternalLink, CheckCircle2, Clock, ArrowUp } from 'lucide-react';
 import { useContentEngagement } from '@/hooks/useContentEngagement';
 
 interface ContentRendererProps {
@@ -718,20 +718,38 @@ export const ContentRenderer = ({
             {renderContent()}
             
             {/* Action buttons for started sections */}
-            <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                onClick={() => onComplete(section.id)} 
-                className="flex-1"
-                disabled={!engagementActions.canComplete()}
-              >
-                {engagementActions.canComplete() ? 'Mark as Complete' : 'Complete Learning First'}
-              </Button>
+            <div className="space-y-3 pt-4 border-t">
+              {engagementActions.canComplete() ? (
+                <Button 
+                  onClick={() => onComplete(section.id)} 
+                  className="w-full"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Mark as Complete
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button 
+                    disabled
+                    className="w-full"
+                    title={`Complete learning activities first: ${engagementActions.getNextAction()}`}
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    Complete Learning First
+                  </Button>
+                  <div className="text-xs text-muted-foreground text-center bg-muted/50 rounded-md p-2">
+                    📖 Next step: {engagementActions.getNextAction()}
+                  </div>
+                </div>
+              )}
+              
               <Button 
                 onClick={handleReviewClick}
                 variant="outline"
-                className="flex-1"
+                className="w-full"
               >
-                {engagementActions.getNextAction()}
+                <ArrowUp className="h-4 w-4 mr-2" />
+                Review Section
               </Button>
             </div>
           </div>
