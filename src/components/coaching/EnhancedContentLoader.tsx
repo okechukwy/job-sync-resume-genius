@@ -4,6 +4,7 @@ import { strategicDecisionMakingModule } from '@/data/professionalContent/strate
 import { teamDevelopmentModule } from '@/data/professionalContent/teamDevelopmentModule';
 import { changeLeadershipModule } from '@/data/professionalContent/changeLeadershipModule';
 import { executivePresenceModule } from '@/data/professionalContent/executivePresenceModule';
+import { marketResearchModule } from '@/data/professionalContent/marketResearchModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -21,7 +22,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': teamDevelopmentModule, // Team Development & Performance  
       'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
       'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
-      'e0ef2b42-5ed7-422a-ba73-60b0da7240be': strategicDecisionMakingModule, // Market Research Fundamentals
+      'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
@@ -41,7 +42,7 @@ export const useEnhancedContent = (moduleId: string) => {
       'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': teamDevelopmentModule, // Team Development & Performance  
       'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
       'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
-      'e0ef2b42-5ed7-422a-ba73-60b0da7240be': strategicDecisionMakingModule, // Market Research Fundamentals
+      'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
