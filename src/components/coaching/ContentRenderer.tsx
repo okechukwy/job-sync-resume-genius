@@ -578,8 +578,16 @@ export const ContentRenderer = ({
     const questions = content.questions || [];
     
     return (
-      <div className="space-y-4">
-        {questions.length > 0 && (
+      <div className="space-y-6">
+        {/* Render introductory content if available */}
+        {(content.text || content.key_points?.length > 0 || content.content_blocks?.length > 0) && (
+          <div className="space-y-4">
+            {renderArticleContent()}
+          </div>
+        )}
+        
+        {/* Render assessment questions */}
+        {questions.length > 0 ? (
           <div className="space-y-4">
             <h4 className="font-medium mb-4">Assessment Questions</h4>
             {questions.map((question: any, idx: number) => (
@@ -610,6 +618,10 @@ export const ContentRenderer = ({
                 )}
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="p-4 bg-muted/20 rounded-lg border">
+            <p className="text-muted-foreground italic">Assessment questions are being prepared for this section.</p>
           </div>
         )}
       </div>

@@ -361,7 +361,7 @@ export const ModuleContentModal = ({
         key_points: section.content?.key_points || [],
         objectives: section.content?.objectives || section.learning_outcomes || [],
         instructions: section.content?.instructions || '',
-        questions: section.content?.questions || [],
+        questions: section.content?.questions || section.assessment_questions || [],
         reflection_questions: section.content?.reflection_questions || [],
         interactive_elements: section.interactive_elements || [],
         case_studies: section.case_studies || [],
