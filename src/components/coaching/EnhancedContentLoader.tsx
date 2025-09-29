@@ -1,5 +1,9 @@
 import React, { useMemo } from 'react';
 import { leadershipFoundationsModule } from '@/data/professionalContent/leadershipModule';
+import { strategicDecisionMakingModule } from '@/data/professionalContent/strategicDecisionMakingModule';
+import { teamDevelopmentModule } from '@/data/professionalContent/teamDevelopmentModule';
+import { changeLeadershipModule } from '@/data/professionalContent/changeLeadershipModule';
+import { executivePresenceModule } from '@/data/professionalContent/executivePresenceModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -13,10 +17,10 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       // Leadership Excellence Program modules
       '783fcafa-1d71-4eae-94ff-cd1e948bbf07': leadershipFoundationsModule, // Original Foundations of Leadership
       '24f320e8-308a-4e08-b483-0e17f9bba7fc': leadershipFoundationsModule, // Foundations of Leadership
-      'b8e3f9d2-4c1a-4b7e-9e8f-1234567890ab': leadershipFoundationsModule, // Strategic Decision Making
-      'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': leadershipFoundationsModule, // Team Development & Performance  
-      'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': leadershipFoundationsModule, // Change Leadership & Innovation
-      'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': leadershipFoundationsModule, // Executive Presence & Influence
+      'b8e3f9d2-4c1a-4b7e-9e8f-1234567890ab': strategicDecisionMakingModule, // Strategic Decision Making
+      'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': teamDevelopmentModule, // Team Development & Performance  
+      'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
+      'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
@@ -32,10 +36,10 @@ export const useEnhancedContent = (moduleId: string) => {
       // Original and current Leadership Excellence Program modules
       '783fcafa-1d71-4eae-94ff-cd1e948bbf07': leadershipFoundationsModule, // Original Foundations of Leadership
       '24f320e8-308a-4e08-b483-0e17f9bba7fc': leadershipFoundationsModule, // Foundations of Leadership
-      'b8e3f9d2-4c1a-4b7e-9e8f-1234567890ab': leadershipFoundationsModule, // Strategic Decision Making
-      'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': leadershipFoundationsModule, // Team Development & Performance  
-      'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': leadershipFoundationsModule, // Change Leadership & Innovation
-      'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': leadershipFoundationsModule, // Executive Presence & Influence
+      'b8e3f9d2-4c1a-4b7e-9e8f-1234567890ab': strategicDecisionMakingModule, // Strategic Decision Making
+      'c9f4a0e3-5d2b-4c8f-0f9a-2345678901bc': teamDevelopmentModule, // Team Development & Performance  
+      'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
+      'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
