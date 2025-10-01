@@ -8,6 +8,7 @@ import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import Navigation from "./components/Navigation";
+import AIChatbot from "./components/chat/AIChatbot";
 
 // Page imports
 import Index from "./pages/Index";
@@ -136,6 +137,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             </BrowserRouter>
+            <AIChatbot />
           </TooltipProvider>
         </SubscriptionProvider>
       </AuthProvider>
