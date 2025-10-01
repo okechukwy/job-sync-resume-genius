@@ -256,14 +256,15 @@ const CareerCoaching = () => {
 
   // Handle module click
   const handleModuleClick = (module: any) => {
-    console.log('🎯 Clicked module:', module);
+    console.log('🎯 Clicked module:', {
+      id: module.id,
+      title: module.title,
+      type: module.content_type,
+      hasContentSections: !!module.content_sections
+    });
     setSelectedModule(module);
-    // Use test dialog first to verify basic functionality
-    if (process.env.NODE_ENV === 'development') {
-      setIsTestDialogOpen(true);
-    } else {
-      setIsModuleModalOpen(true);
-    }
+    // Always open the full module modal to see content
+    setIsModuleModalOpen(true);
   };
 
   // Handle starting a module

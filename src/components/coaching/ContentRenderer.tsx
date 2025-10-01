@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, CheckCircle2, Clock, ArrowUp } from 'lucide-react';
+import { CheckCircle, Circle, BookOpen, Users, Target, Lightbulb, CheckCircle2, Clock, ArrowUp, ExternalLink } from 'lucide-react';
 import { useContentEngagement } from '@/hooks/useContentEngagement';
 
 interface ContentRendererProps {
@@ -228,10 +228,34 @@ export const ContentRenderer = ({
     const objectives = content.objectives || [];
     const caseStudies = content.case_studies || [];
     const frameworks = content.frameworks || [];
+    const hasExternalResource = section.content_url || content.url;
 
     return (
       <div className="space-y-6">
-        {/* External Resource Button - Removed for internal content focus */}
+        {/* External Resource Button */}
+        {hasExternalResource && (
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h5 className="font-medium mb-1 flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  External Learning Resource
+                </h5>
+                <p className="text-sm text-muted-foreground">
+                  Access additional materials and resources for this section
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => window.open(section.content_url || content.url, '_blank')}
+                className="flex items-center gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                Start Learning
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Text content */}
         {text && (
@@ -629,6 +653,13 @@ export const ContentRenderer = ({
   };
 
   const renderContent = () => {
+    console.log('🎯 ContentRenderer rendering section:', {
+      id: section.id,
+      title: section.title,
+      type: section.type,
+      hasContent: !!section.content
+    });
+    
     switch (section.type) {
       case 'case_study':
       case 'framework_guide':
@@ -639,6 +670,7 @@ export const ContentRenderer = ({
       case 'assessment':
         return renderAssessmentContent();
       default:
+        console.log('⚠️ Unknown section type, defaulting to article:', section.type);
         return renderArticleContent();
     }
   };

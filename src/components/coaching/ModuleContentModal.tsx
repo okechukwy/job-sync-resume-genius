@@ -376,11 +376,13 @@ export const ModuleContentModal = ({
   let contentSections = [];
   try {
     console.log('🔍 Starting content sections processing for module:', module.id);
+    console.log('🔍 Module title:', module.title);
     console.log('🔍 Enhanced content available:', !!enhancedContent);
     
     // Use enhanced content if available
     if (enhancedContent?.content_sections) {
       console.log('✨ Using enhanced content for module:', module.title);
+      console.log('📋 Enhanced content sections count:', enhancedContent.content_sections.length);
       contentSections = normalizeEnhancedContent(enhancedContent.content_sections);
     } else if (isCommunicationModule(module)) {
       // Special handling for Communication & Influence modules
@@ -399,6 +401,7 @@ export const ModuleContentModal = ({
         : createFallbackContentSections(module);
     }
     
+    console.log('🔍 Final content sections count:', contentSections.length);
     console.log('🔍 Final content sections:', contentSections);
   } catch (error) {
     console.error('Error processing content sections:', error);

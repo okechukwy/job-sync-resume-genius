@@ -65,21 +65,26 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
 
     console.log('🔍 Enhanced content lookup for moduleId:', moduleId);
     console.log('🔍 Module title:', moduleTitle);
-    console.log('🔍 Available enhanced modules:', Object.keys(enhancedModules));
-    console.log('🔍 Available communication modules:', Object.keys(communicationModules));
     
     // First try by module ID
     let content = enhancedModules[moduleId] || null;
     
+    if (content) {
+      console.log('✅ Found enhanced content by module ID:', moduleId);
+      console.log('📋 Content sections:', content.content_sections?.length || 0);
+    }
+    
     // If not found and we have a title, try by title for Communication & Influence modules
     if (!content && moduleTitle && communicationModules[moduleTitle]) {
-      console.log('🔍 Found Communication & Influence module by title:', moduleTitle);
+      console.log('✅ Found Communication & Influence module by title:', moduleTitle);
       content = {
         content_sections: [communicationModules[moduleTitle]]
       };
     }
     
-    console.log('🔍 Enhanced content found:', !!content);
+    if (!content) {
+      console.log('⚠️ No enhanced content found for:', { moduleId, moduleTitle });
+    }
     
     return content;
   }, [moduleId, moduleTitle]);
