@@ -222,13 +222,26 @@ export const ContentRenderer = ({
   const renderArticleContent = () => {
     // Handle both enhanced content and regular content structures
     const content = section.content || {};
-    const blocks = content.content_blocks || [];
+    
+    // Check section-level arrays first (DevOps module structure), then fall back to content object
+    const blocks = section.content_blocks || content.content_blocks || [];
     const text = content.text || content.instructions || (typeof section.content === 'string' ? section.content : '');
     const keyPoints = content.key_points || [];
-    const objectives = content.objectives || [];
-    const caseStudies = content.case_studies || [];
-    const frameworks = content.frameworks || [];
+    const objectives = section.learning_outcomes || content.objectives || [];
+    const caseStudies = section.case_studies || content.case_studies || [];
+    const frameworks = section.frameworks || content.frameworks || [];
+    const interactiveElements = section.interactive_elements || content.interactive_elements || [];
     const hasExternalResource = section.content_url || content.url;
+    
+    console.log('[ContentRenderer] renderArticleContent data:', {
+      sectionId: section.id,
+      blocksCount: blocks.length,
+      caseStudiesCount: caseStudies.length,
+      frameworksCount: frameworks.length,
+      interactiveCount: interactiveElements.length,
+      hasText: !!text,
+      hasExternalResource
+    });
 
     return (
       <div className="space-y-6">
@@ -471,8 +484,63 @@ export const ContentRenderer = ({
           </div>
         )}
 
+        {/* Interactive Elements with Engagement Tracking */}
+        {interactiveElements.length > 0 && (
+          <div className="space-y-4 mb-6">
+            <h4 className="text-md font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Interactive Exercises ({engagementState.interactiveElementsCompleted}/{interactiveElements.length} completed)
+            </h4>
+            {interactiveElements.map((element: any, idx: number) => {
+              const isCompleted = engagementState.interactiveElementsCompleted > idx;
+              return (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-lg border ${
+                    isCompleted ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className={`font-semibold ${isCompleted ? 'text-green-900' : 'text-yellow-900'}`}>
+                      {element.title}
+                    </h5>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleInteractiveComplete(element.id || `interactive-${idx}`)}
+                      variant={isCompleted ? "secondary" : "outline"}
+                    >
+                      {isCompleted ? <CheckCircle className="w-4 h-4" /> : 'Complete'}
+                    </Button>
+                  </div>
+                  <p className={`text-sm mb-3 ${isCompleted ? 'text-green-800' : 'text-yellow-800'}`}>
+                    {element.instructions}
+                  </p>
+                  
+                  {/* Reflection Prompts */}
+                  {element.reflection_prompts && element.reflection_prompts.length > 0 && (
+                    <div>
+                      <h6 className={`font-medium text-sm mb-2 ${isCompleted ? 'text-green-900' : 'text-yellow-900'}`}>
+                        Reflection Questions:
+                      </h6>
+                      <ul className="space-y-2">
+                        {element.reflection_prompts.map((prompt: string, promptIdx: number) => (
+                          <li key={promptIdx} className={`p-2 rounded text-sm ${
+                            isCompleted ? 'bg-green-100' : 'bg-yellow-100'
+                          }`}>
+                            {prompt}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Empty state fallback */}
-        {!text && !keyPoints.length && !objectives.length && !blocks.length && !caseStudies.length && !frameworks.length && (
+        {!text && !keyPoints.length && !objectives.length && !blocks.length && !caseStudies.length && !frameworks.length && !interactiveElements.length && (
           <div className="p-4 bg-muted/20 rounded-lg text-center">
             <p className="text-sm text-muted-foreground">
               {section.content_url 
@@ -486,9 +554,26 @@ export const ContentRenderer = ({
   };
 
   const renderInteractiveContent = () => {
+    // Interactive sections can have either:
+    // 1. Section-level arrays (content_blocks, case_studies, frameworks, interactive_elements)
+    // 2. Content object with nested arrays
     const content = section.content || {};
     const instructions = content.instructions || content.text || '';
-    const interactiveElements = content.interactive_elements || [];
+    
+    // Check for section-level rich content (DevOps module structure)
+    const hasRichContent = 
+      (section.content_blocks && section.content_blocks.length > 0) ||
+      (section.case_studies && section.case_studies.length > 0) ||
+      (section.frameworks && section.frameworks.length > 0);
+    
+    // If section has rich content blocks, render like article content
+    if (hasRichContent) {
+      console.log('[ContentRenderer] Interactive section has rich content, rendering as article');
+      return renderArticleContent();
+    }
+    
+    // Otherwise, render traditional interactive elements
+    const interactiveElements = section.interactive_elements || content.interactive_elements || [];
     
     return (
       <div className="space-y-6">
