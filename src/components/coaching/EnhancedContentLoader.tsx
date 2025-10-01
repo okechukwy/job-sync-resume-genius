@@ -9,6 +9,7 @@ import { communicationInfluenceModule } from '@/data/professionalContent/communi
 import { devOpsFundamentalsModule } from '@/data/professionalContent/devOpsFundamentalsModule';
 import { javaScriptCSSFoundationsModule } from '@/data/professionalContent/javaScriptCSSFoundationsModule';
 import { systemArchitectureModule } from '@/data/professionalContent/systemArchitectureModule';
+import { codeReviewQualityAssuranceModule } from '@/data/professionalContent/codeReviewQualityAssuranceModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -35,6 +36,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
+      'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
     };
 
     return enhancedModules[moduleId] || null;
@@ -62,6 +64,7 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
+      'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
     };
 
     // Communication & Influence modules by title matching
