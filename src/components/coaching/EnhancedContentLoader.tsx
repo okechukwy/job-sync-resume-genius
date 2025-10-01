@@ -25,6 +25,8 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
       'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
       'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
+      // Technical Skills Acceleration Program modules
+      '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
@@ -46,6 +48,8 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       'd0a5b1f4-6e3c-4d9a-1a0b-3456789012cd': changeLeadershipModule, // Change Leadership & Innovation
       'e1b6c2a5-7f4d-4e0b-2b1c-4567890123de': executivePresenceModule, // Executive Presence & Influence
       'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
+      // Technical Skills Acceleration Program modules
+      '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
