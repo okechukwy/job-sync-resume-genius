@@ -7,6 +7,7 @@ import { executivePresenceModule } from '@/data/professionalContent/executivePre
 import { marketResearchModule } from '@/data/professionalContent/marketResearchModule';
 import { communicationInfluenceModule } from '@/data/professionalContent/communicationInfluenceModule';
 import { devOpsFundamentalsModule } from '@/data/professionalContent/devOpsFundamentalsModule';
+import { javaScriptCSSFoundationsModule } from '@/data/professionalContent/javaScriptCSSFoundationsModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -28,6 +29,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
+      'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
@@ -51,6 +53,7 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
+      'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
