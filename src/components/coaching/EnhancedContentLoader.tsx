@@ -8,6 +8,7 @@ import { marketResearchModule } from '@/data/professionalContent/marketResearchM
 import { communicationInfluenceModule } from '@/data/professionalContent/communicationInfluenceModule';
 import { devOpsFundamentalsModule } from '@/data/professionalContent/devOpsFundamentalsModule';
 import { javaScriptCSSFoundationsModule } from '@/data/professionalContent/javaScriptCSSFoundationsModule';
+import { systemArchitectureModule } from '@/data/professionalContent/systemArchitectureModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -29,8 +30,10 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       '8abda41a-643e-4ed3-bd86-64fa1449ef0e': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations (Database UUID)
+      '07f8ac81-e3c1-48d2-931c-75d17adeacc6': systemArchitectureModule, // System Architecture & Design (Database UUID)
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
+      'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
@@ -54,8 +57,10 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
       '8abda41a-643e-4ed3-bd86-64fa1449ef0e': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations (Database UUID)
+      '07f8ac81-e3c1-48d2-931c-75d17adeacc6': systemArchitectureModule, // System Architecture & Design (Database UUID)
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
+      'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
     };
 
