@@ -28,6 +28,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
+      '8abda41a-643e-4ed3-bd86-64fa1449ef0e': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations (Database UUID)
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'leadership-foundations-enhanced': leadershipFoundationsModule,
@@ -52,6 +53,7 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       'e0ef2b42-5ed7-422a-ba73-60b0da7240be': marketResearchModule, // Market Research Fundamentals
       // Technical Skills Acceleration Program modules
       '25450a66-2711-4593-9620-cac4922d5293': devOpsFundamentalsModule, // DevOps Fundamentals: CI/CD, Docker & Kubernetes
+      '8abda41a-643e-4ed3-bd86-64fa1449ef0e': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations (Database UUID)
       'devops-fundamentals-cicd-docker-kubernetes': devOpsFundamentalsModule, // DevOps Fundamentals
       'javascript-css-foundations': javaScriptCSSFoundationsModule, // JavaScript & CSS Foundations
       'leadership-foundations-enhanced': leadershipFoundationsModule,
