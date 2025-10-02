@@ -3,63 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const CareerDevelopment = () => {
-  const sections = [
-    {
-      title: "Building Your Personal Brand",
-      content: [
-        "Define your unique value proposition and professional identity",
-        "Create consistent messaging across LinkedIn, resume, and portfolio",
-        "Develop thought leadership through content creation and speaking",
-        "Build an online presence that showcases your expertise",
-        "Network authentically and maintain professional relationships"
-      ]
-    },
-    {
-      title: "Networking Strategies That Work",
-      content: [
-        "Quality over quantity: focus on meaningful connections",
-        "Attend industry events, conferences, and professional meetups",
-        "Leverage LinkedIn for professional networking and outreach",
-        "Offer value first before asking for favors or opportunities",
-        "Follow up consistently and maintain long-term relationships"
-      ]
-    },
-    {
-      title: "Leadership Development Resources",
-      content: [
-        "Take on stretch assignments and leadership opportunities",
-        "Develop emotional intelligence and communication skills",
-        "Learn to delegate effectively and empower team members",
-        "Study successful leaders in your industry and beyond",
-        "Seek mentorship and consider becoming a mentor yourself"
-      ]
-    },
-    {
-      title: "Skill Development Roadmaps",
-      content: [
-        "Identify in-demand skills for your industry and role",
-        "Create a learning plan with specific goals and timelines",
-        "Mix formal education with online courses and certifications",
-        "Practice new skills through projects and real-world application",
-        "Stay current with industry trends and emerging technologies"
-      ]
-    },
-    {
-      title: "Career Transition Planning",
-      content: [
-        "Assess your transferable skills and identify gaps",
-        "Research target roles and required qualifications",
-        "Build bridges through networking and informational interviews",
-        "Consider lateral moves that provide relevant experience",
-        "Plan financially for potential salary changes during transition"
-      ]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  const sections = [{
+    title: "Building Your Personal Brand",
+    content: ["Define your unique value proposition and professional identity", "Create consistent messaging across LinkedIn, resume, and portfolio", "Develop thought leadership through content creation and speaking", "Build an online presence that showcases your expertise", "Network authentically and maintain professional relationships"]
+  }, {
+    title: "Networking Strategies That Work",
+    content: ["Quality over quantity: focus on meaningful connections", "Attend industry events, conferences, and professional meetups", "Leverage LinkedIn for professional networking and outreach", "Offer value first before asking for favors or opportunities", "Follow up consistently and maintain long-term relationships"]
+  }, {
+    title: "Leadership Development Resources",
+    content: ["Take on stretch assignments and leadership opportunities", "Develop emotional intelligence and communication skills", "Learn to delegate effectively and empower team members", "Study successful leaders in your industry and beyond", "Seek mentorship and consider becoming a mentor yourself"]
+  }, {
+    title: "Skill Development Roadmaps",
+    content: ["Identify in-demand skills for your industry and role", "Create a learning plan with specific goals and timelines", "Mix formal education with online courses and certifications", "Practice new skills through projects and real-world application", "Stay current with industry trends and emerging technologies"]
+  }, {
+    title: "Career Transition Planning",
+    content: ["Assess your transferable skills and identify gaps", "Research target roles and required qualifications", "Build bridges through networking and informational interviews", "Consider lateral moves that provide relevant experience", "Plan financially for potential salary changes during transition"]
+  }];
+  return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card sticky top-0 z-50 rounded-xl">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -74,7 +35,7 @@ const CareerDevelopment = () => {
               <span className="text-2xl">🚀</span>
               <div>
                 <div className="text-xl font-bold gradient-text">Career Development</div>
-                <div className="text-sm text-muted-foreground">30 min read</div>
+                
               </div>
             </div>
           </div>
@@ -99,23 +60,19 @@ const CareerDevelopment = () => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {sections.map((section, index) => (
-            <Card key={index} className="glass-card">
+          {sections.map((section, index) => <Card key={index} className="glass-card">
               <CardHeader>
                 <CardTitle className="text-xl">{section.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {section.content.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
+                  {section.content.map((item, idx) => <div key={idx} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-muted-foreground">{item}</p>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Call to Action */}
@@ -133,8 +90,6 @@ const CareerDevelopment = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CareerDevelopment;
