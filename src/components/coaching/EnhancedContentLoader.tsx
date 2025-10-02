@@ -10,6 +10,7 @@ import { devOpsFundamentalsModule } from '@/data/professionalContent/devOpsFunda
 import { javaScriptCSSFoundationsModule } from '@/data/professionalContent/javaScriptCSSFoundationsModule';
 import { systemArchitectureModule } from '@/data/professionalContent/systemArchitectureModule';
 import { codeReviewQualityAssuranceModule } from '@/data/professionalContent/codeReviewQualityAssuranceModule';
+import { cyberSecurityModule } from '@/data/professionalContent/cyberSecurityModule';
 
 interface ContentLoaderProps {
   moduleId: string;
@@ -37,6 +38,7 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
       'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
+      '8a2d43f9-1b56-4e78-9c3d-2f6b8d4e9a1c': cyberSecurityModule, // Cybersecurity Excellence Program
     };
 
     return enhancedModules[moduleId] || null;
@@ -65,6 +67,7 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       'system-architecture-design': systemArchitectureModule, // System Architecture & Design
       'leadership-foundations-enhanced': leadershipFoundationsModule,
       'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
+      '8a2d43f9-1b56-4e78-9c3d-2f6b8d4e9a1c': cyberSecurityModule, // Cybersecurity Excellence Program
     };
 
     // Communication & Influence modules by title matching
