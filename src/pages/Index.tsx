@@ -1,4 +1,3 @@
-
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import TemplatesSection from "@/components/TemplatesSection";
@@ -7,10 +6,8 @@ import ResourcesSection from "@/components/ResourcesSection";
 import { TrialStatusBanner } from "@/components/subscription/TrialStatusBanner";
 import Navigation from "@/components/Navigation";
 import { Link } from "react-router-dom";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  return <div className="min-h-screen bg-gradient-hero">
       <Navigation />
       <TrialStatusBanner />
       <HeroSection />
@@ -24,7 +21,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="text-xl font-bold gradient-text mb-4">ResumeAI</div>
+              <div className="text-xl font-bold gradient-text mb-4">Jobzuma</div>
               <p className="text-sm text-muted-foreground">
                 AI-powered resume optimization to help you land your dream job.
               </p>
@@ -66,8 +63,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
