@@ -3,59 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const ResumeWritingGuide = () => {
-  const sections = [
-    {
-      title: "Resume Structure & Format",
-      content: [
-        "Choose the right resume format (chronological, functional, or hybrid)",
-        "Optimize your resume length (1-2 pages maximum)",
-        "Use professional fonts and proper spacing",
-        "Include essential sections: contact info, summary, experience, education, skills"
-      ]
-    },
-    {
-      title: "Writing Compelling Professional Summaries",
-      content: [
-        "Craft a powerful opening statement in 2-3 sentences",
-        "Highlight your key achievements and unique value proposition",
-        "Tailor your summary to match the job requirements",
-        "Use action words and quantifiable results"
-      ]
-    },
-    {
-      title: "Quantifying Achievements with Metrics",
-      content: [
-        "Use numbers, percentages, and dollar amounts when possible",
-        "Show impact: 'Increased sales by 25%' vs 'Responsible for sales'",
-        "Include timeframes to demonstrate efficiency",
-        "Highlight awards, recognition, and performance rankings"
-      ]
-    },
-    {
-      title: "Tailoring Resumes for Different Industries",
-      content: [
-        "Research industry-specific keywords and terminology",
-        "Emphasize relevant skills and experiences",
-        "Adjust your professional summary for each application",
-        "Consider industry formatting preferences"
-      ]
-    },
-    {
-      title: "Common Resume Mistakes to Avoid",
-      content: [
-        "Typos and grammatical errors",
-        "Using generic, one-size-fits-all resumes",
-        "Including irrelevant personal information",
-        "Poor formatting and inconsistent styling",
-        "Listing duties instead of achievements"
-      ]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  const sections = [{
+    title: "Resume Structure & Format",
+    content: ["Choose the right resume format (chronological, functional, or hybrid)", "Optimize your resume length (1-2 pages maximum)", "Use professional fonts and proper spacing", "Include essential sections: contact info, summary, experience, education, skills"]
+  }, {
+    title: "Writing Compelling Professional Summaries",
+    content: ["Craft a powerful opening statement in 2-3 sentences", "Highlight your key achievements and unique value proposition", "Tailor your summary to match the job requirements", "Use action words and quantifiable results"]
+  }, {
+    title: "Quantifying Achievements with Metrics",
+    content: ["Use numbers, percentages, and dollar amounts when possible", "Show impact: 'Increased sales by 25%' vs 'Responsible for sales'", "Include timeframes to demonstrate efficiency", "Highlight awards, recognition, and performance rankings"]
+  }, {
+    title: "Tailoring Resumes for Different Industries",
+    content: ["Research industry-specific keywords and terminology", "Emphasize relevant skills and experiences", "Adjust your professional summary for each application", "Consider industry formatting preferences"]
+  }, {
+    title: "Common Resume Mistakes to Avoid",
+    content: ["Typos and grammatical errors", "Using generic, one-size-fits-all resumes", "Including irrelevant personal information", "Poor formatting and inconsistent styling", "Listing duties instead of achievements"]
+  }];
+  return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card sticky top-0 z-50 rounded-xl">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -70,7 +35,7 @@ const ResumeWritingGuide = () => {
               <span className="text-2xl">📚</span>
               <div>
                 <div className="text-xl font-bold gradient-text">Resume Writing Guide</div>
-                <div className="text-sm text-muted-foreground">15 min read</div>
+                
               </div>
             </div>
           </div>
@@ -95,23 +60,19 @@ const ResumeWritingGuide = () => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {sections.map((section, index) => (
-            <Card key={index} className="glass-card">
+          {sections.map((section, index) => <Card key={index} className="glass-card">
               <CardHeader>
                 <CardTitle className="text-xl">{section.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {section.content.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
+                  {section.content.map((item, idx) => <div key={idx} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-muted-foreground">{item}</p>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Call to Action */}
@@ -129,8 +90,6 @@ const ResumeWritingGuide = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ResumeWritingGuide;
