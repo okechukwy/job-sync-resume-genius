@@ -3,63 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const SalaryNegotiation = () => {
-  const sections = [
-    {
-      title: "Research and Benchmarking Your Worth",
-      content: [
-        "Use salary comparison websites like Glassdoor, PayScale, and Salary.com",
-        "Research industry standards for your role and experience level",
-        "Consider geographic location and cost of living adjustments",
-        "Factor in your unique skills, certifications, and achievements",
-        "Gather data from multiple sources for accurate benchmarking"
-      ]
-    },
-    {
-      title: "Negotiation Scripts and Templates",
-      content: [
-        "'Thank you for the offer. I'm excited about the opportunity. Can we discuss the compensation?'",
-        "'Based on my research and experience, I was hoping for a salary in the range of $X to $Y'",
-        "'I'd love to accept this offer. Is there flexibility in the base salary?'",
-        "'Given my track record of [specific achievement], I believe $X would be appropriate'",
-        "Always express enthusiasm before discussing compensation"
-      ]
-    },
-    {
-      title: "Beyond Salary: Benefits Negotiation",
-      content: [
-        "Health insurance premiums and coverage options",
-        "Retirement contributions and matching programs",
-        "Vacation time, sick leave, and flexible work arrangements",
-        "Professional development budget and training opportunities",
-        "Stock options, bonuses, and performance incentives"
-      ]
-    },
-    {
-      title: "Handling Counteroffers",
-      content: [
-        "Evaluate the total compensation package, not just salary",
-        "Consider long-term career growth and opportunities",
-        "Be prepared to justify your counteroffer with data",
-        "Maintain professionalism even if negotiations stall",
-        "Have a clear minimum acceptable offer in mind"
-      ]
-    },
-    {
-      title: "When and How to Walk Away",
-      content: [
-        "Know your worth and stick to your minimum requirements",
-        "Red flags: company won't budge on reasonable requests",
-        "Trust your instincts about company culture and values",
-        "Walking away professionally keeps doors open",
-        "Sometimes the best negotiation is finding a better opportunity"
-      ]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  const sections = [{
+    title: "Research and Benchmarking Your Worth",
+    content: ["Use salary comparison websites like Glassdoor, PayScale, and Salary.com", "Research industry standards for your role and experience level", "Consider geographic location and cost of living adjustments", "Factor in your unique skills, certifications, and achievements", "Gather data from multiple sources for accurate benchmarking"]
+  }, {
+    title: "Negotiation Scripts and Templates",
+    content: ["'Thank you for the offer. I'm excited about the opportunity. Can we discuss the compensation?'", "'Based on my research and experience, I was hoping for a salary in the range of $X to $Y'", "'I'd love to accept this offer. Is there flexibility in the base salary?'", "'Given my track record of [specific achievement], I believe $X would be appropriate'", "Always express enthusiasm before discussing compensation"]
+  }, {
+    title: "Beyond Salary: Benefits Negotiation",
+    content: ["Health insurance premiums and coverage options", "Retirement contributions and matching programs", "Vacation time, sick leave, and flexible work arrangements", "Professional development budget and training opportunities", "Stock options, bonuses, and performance incentives"]
+  }, {
+    title: "Handling Counteroffers",
+    content: ["Evaluate the total compensation package, not just salary", "Consider long-term career growth and opportunities", "Be prepared to justify your counteroffer with data", "Maintain professionalism even if negotiations stall", "Have a clear minimum acceptable offer in mind"]
+  }, {
+    title: "When and How to Walk Away",
+    content: ["Know your worth and stick to your minimum requirements", "Red flags: company won't budge on reasonable requests", "Trust your instincts about company culture and values", "Walking away professionally keeps doors open", "Sometimes the best negotiation is finding a better opportunity"]
+  }];
+  return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card sticky top-0 z-50 rounded-xl">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -74,7 +35,7 @@ const SalaryNegotiation = () => {
               <span className="text-2xl">📊</span>
               <div>
                 <div className="text-xl font-bold gradient-text">Salary Negotiation</div>
-                <div className="text-sm text-muted-foreground">18 min read</div>
+                
               </div>
             </div>
           </div>
@@ -99,23 +60,19 @@ const SalaryNegotiation = () => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {sections.map((section, index) => (
-            <Card key={index} className="glass-card">
+          {sections.map((section, index) => <Card key={index} className="glass-card">
               <CardHeader>
                 <CardTitle className="text-xl">{section.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {section.content.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
+                  {section.content.map((item, idx) => <div key={idx} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-muted-foreground">{item}</p>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Call to Action */}
@@ -133,8 +90,6 @@ const SalaryNegotiation = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SalaryNegotiation;
