@@ -39,6 +39,11 @@ export const EnhancedContentLoader = ({ moduleId, children }: ContentLoaderProps
       'leadership-foundations-enhanced': leadershipFoundationsModule,
       'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
       '8a2d43f9-1b56-4e78-9c3d-2f6b8d4e9a1c': cyberSecurityModule, // Cybersecurity Excellence Program
+      // Cybersecurity Excellence Program individual modules
+      'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d': { content_sections: [cyberSecurityModule.content_sections[0]] }, // Security Foundations & Risk Management
+      'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e': { content_sections: [cyberSecurityModule.content_sections[1]] }, // Threat Intelligence & Detection
+      'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f': { content_sections: [cyberSecurityModule.content_sections[2]] }, // Security Architecture & Zero Trust
+      'd4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a': { content_sections: [cyberSecurityModule.content_sections[3]] }, // Incident Response & Security Operations
     };
 
     return enhancedModules[moduleId] || null;
@@ -68,6 +73,11 @@ export const useEnhancedContent = (moduleId: string, moduleTitle?: string) => {
       'leadership-foundations-enhanced': leadershipFoundationsModule,
       'f83d96a7-78f5-46cd-b4e0-1c6888d1f76a': codeReviewQualityAssuranceModule, // Code Review & Quality Assurance
       '8a2d43f9-1b56-4e78-9c3d-2f6b8d4e9a1c': cyberSecurityModule, // Cybersecurity Excellence Program
+      // Cybersecurity Excellence Program individual modules
+      'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d': { content_sections: [cyberSecurityModule.content_sections[0]] }, // Security Foundations & Risk Management
+      'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e': { content_sections: [cyberSecurityModule.content_sections[1]] }, // Threat Intelligence & Detection
+      'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f': { content_sections: [cyberSecurityModule.content_sections[2]] }, // Security Architecture & Zero Trust
+      'd4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a': { content_sections: [cyberSecurityModule.content_sections[3]] }, // Incident Response & Security Operations
     };
 
     // Communication & Influence modules by title matching
