@@ -3,63 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const InterviewPreparation = () => {
-  const sections = [
-    {
-      title: "50+ Most Common Interview Questions",
-      content: [
-        "Tell me about yourself - craft your elevator pitch",
-        "Why do you want to work here? - research and personalize",
-        "What are your strengths and weaknesses? - be authentic and strategic",
-        "Where do you see yourself in 5 years? - align with company goals",
-        "Why are you leaving your current job? - stay positive and professional"
-      ]
-    },
-    {
-      title: "STAR Method for Behavioral Questions",
-      content: [
-        "Situation: Set the context for your story",
-        "Task: Describe what you needed to accomplish",
-        "Action: Explain what you did to address the situation",
-        "Result: Share what outcomes your actions achieved",
-        "Practice with real examples from your experience"
-      ]
-    },
-    {
-      title: "Technical Interview Preparation",
-      content: [
-        "Review fundamental concepts in your field",
-        "Practice coding problems on platforms like LeetCode",
-        "Prepare for system design questions (senior roles)",
-        "Be ready to walk through your portfolio/projects",
-        "Practice explaining complex concepts simply"
-      ]
-    },
-    {
-      title: "Questions to Ask Your Interviewer",
-      content: [
-        "What does success look like in this role?",
-        "What are the biggest challenges facing the team?",
-        "How do you measure performance and provide feedback?",
-        "What opportunities are there for growth and development?",
-        "What do you enjoy most about working here?"
-      ]
-    },
-    {
-      title: "Post-Interview Follow-Up Strategies",
-      content: [
-        "Send a thank-you email within 24 hours",
-        "Reference specific points discussed in the interview",
-        "Reiterate your interest and qualifications",
-        "Provide any additional information requested",
-        "Follow up appropriately if you don't hear back"
-      ]
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-hero">
+  const sections = [{
+    title: "50+ Most Common Interview Questions",
+    content: ["Tell me about yourself - craft your elevator pitch", "Why do you want to work here? - research and personalize", "What are your strengths and weaknesses? - be authentic and strategic", "Where do you see yourself in 5 years? - align with company goals", "Why are you leaving your current job? - stay positive and professional"]
+  }, {
+    title: "STAR Method for Behavioral Questions",
+    content: ["Situation: Set the context for your story", "Task: Describe what you needed to accomplish", "Action: Explain what you did to address the situation", "Result: Share what outcomes your actions achieved", "Practice with real examples from your experience"]
+  }, {
+    title: "Technical Interview Preparation",
+    content: ["Review fundamental concepts in your field", "Practice coding problems on platforms like LeetCode", "Prepare for system design questions (senior roles)", "Be ready to walk through your portfolio/projects", "Practice explaining complex concepts simply"]
+  }, {
+    title: "Questions to Ask Your Interviewer",
+    content: ["What does success look like in this role?", "What are the biggest challenges facing the team?", "How do you measure performance and provide feedback?", "What opportunities are there for growth and development?", "What do you enjoy most about working here?"]
+  }, {
+    title: "Post-Interview Follow-Up Strategies",
+    content: ["Send a thank-you email within 24 hours", "Reference specific points discussed in the interview", "Reiterate your interest and qualifications", "Provide any additional information requested", "Follow up appropriately if you don't hear back"]
+  }];
+  return <div className="min-h-screen bg-gradient-hero">
       {/* Header */}
       <div className="glass-card sticky top-0 z-50 rounded-xl">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -74,7 +35,7 @@ const InterviewPreparation = () => {
               <span className="text-2xl">💼</span>
               <div>
                 <div className="text-xl font-bold gradient-text">Interview Preparation</div>
-                <div className="text-sm text-muted-foreground">25 min read</div>
+                
               </div>
             </div>
           </div>
@@ -99,23 +60,19 @@ const InterviewPreparation = () => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {sections.map((section, index) => (
-            <Card key={index} className="glass-card">
+          {sections.map((section, index) => <Card key={index} className="glass-card">
               <CardHeader>
                 <CardTitle className="text-xl">{section.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {section.content.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
+                  {section.content.map((item, idx) => <div key={idx} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-muted-foreground">{item}</p>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Call to Action */}
@@ -133,8 +90,6 @@ const InterviewPreparation = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default InterviewPreparation;
