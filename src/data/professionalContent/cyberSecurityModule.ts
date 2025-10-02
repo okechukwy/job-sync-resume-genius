@@ -1083,6 +1083,991 @@ SIEMs integrate with Security Orchestration, Automation, and Response (SOAR):
           internal: true
         }
       ]
+    },
+    {
+      id: 'security-architecture',
+      title: 'Security Architecture & Zero Trust',
+      type: 'article',
+      duration_minutes: 900,
+      description: 'Design secure architectures using Zero Trust principles, implement defense-in-depth strategies, and secure cloud-native environments.',
+      is_required: true,
+      order_index: 3,
+      learning_outcomes: [
+        'Design and implement Zero Trust Architecture',
+        'Apply defense-in-depth security principles',
+        'Secure cloud environments (AWS, Azure, GCP)',
+        'Implement identity and access management (IAM)',
+        'Design network segmentation and microsegmentation',
+        'Integrate security into DevOps (DevSecOps)'
+      ],
+      content_blocks: [
+        {
+          id: 'zero-trust-intro',
+          type: 'text',
+          title: 'Zero Trust Architecture: Never Trust, Always Verify',
+          content: `Zero Trust is a security paradigm that eliminates implicit trust and continuously validates every transaction and access request. Unlike traditional perimeter-based security that assumes everything inside the network is safe, Zero Trust assumes breach and verifies explicitly.
+
+**Core Principles of Zero Trust:**
+
+**1. Verify Explicitly**
+Always authenticate and authorize based on all available data points:
+- User identity and credentials (who)
+- Device health and compliance status (from what)
+- Application being accessed (what)
+- Network location and risk level (from where)
+- Time and behavioral patterns (when)
+
+Multi-factor authentication (MFA) is mandatory for all users, especially privileged accounts. Device posture checks ensure endpoints meet security requirements before granting access.
+
+**2. Use Least Privilege Access**
+Limit user and application access with just-in-time (JIT) and just-enough-access (JEA):
+- Grant minimum permissions required to complete tasks
+- Implement time-bound access that expires automatically
+- Use privileged access management (PAM) for administrative functions
+- Enforce separation of duties for sensitive operations
+- Regularly review and revoke unnecessary permissions
+
+**3. Assume Breach**
+Design architecture assuming adversaries are already inside:
+- Minimize blast radius through segmentation
+- Monitor all activity for suspicious behavior
+- Encrypt data in transit and at rest
+- Implement end-to-end encryption for sensitive data
+- Maintain comprehensive logging for forensics
+- Deploy deception technologies to detect lateral movement
+
+**The Traditional vs. Zero Trust Model:**
+
+**Traditional Perimeter Model:**
+- Trust but verify (once inside, free movement)
+- Network location determines trust
+- Broad access zones (DMZ, internal network)
+- Firewall-centric security
+- VPN provides network access
+- Limited visibility into internal traffic
+
+**Zero Trust Model:**
+- Never trust, always verify (continuous validation)
+- Identity and context determine trust
+- Microsegmentation (minimal access zones)
+- Identity-centric security
+- Direct, secure access without VPN
+- Complete visibility and analytics
+
+**Real-World Impact: Google's BeyondCorp**
+
+Google pioneered Zero Trust with BeyondCorp after the Aurora attacks (2010) demonstrated vulnerabilities in perimeter security. BeyondCorp eliminates the corporate VPN and grants access based on device and user credentials, regardless of network location.
+
+Results:
+- Employees access internal applications from any network
+- No privileged internal network (same security everywhere)
+- Improved user experience (no VPN connection required)
+- Enhanced security with continuous authentication
+- Reduced attack surface and lateral movement risk
+
+This transformation took Google 6+ years and required fundamental changes to infrastructure, applications, and security operations.`,
+          order_index: 1
+        },
+        {
+          id: 'zero-trust-framework',
+          type: 'framework',
+          title: 'Implementing Zero Trust Architecture',
+          content: {
+            id: 'zero-trust-implementation',
+            name: 'Zero Trust Implementation Framework',
+            description: 'A practical framework for implementing Zero Trust Architecture based on NIST SP 800-207 and industry best practices. This framework guides organizations through the transformation from perimeter-based security to Zero Trust.',
+            steps: [
+              {
+                step_number: 1,
+                title: 'Identify Protect Surface (Crown Jewels)',
+                description: 'Define what you need to protect rather than trying to protect everything. Focus on critical data, assets, applications, and services (DAAS).',
+                key_actions: [
+                  'Catalog all sensitive data and intellectual property',
+                  'Identify critical business applications and services',
+                  'Map dependencies and data flows between systems',
+                  'Classify data by sensitivity and business criticality',
+                  'Document who needs access to what resources'
+                ],
+                examples: [
+                  'Customer database with PII and payment information',
+                  'Source code repositories for proprietary software',
+                  'Financial systems and accounting databases',
+                  'Email and collaboration platforms',
+                  'HR systems containing employee records'
+                ]
+              },
+              {
+                step_number: 2,
+                title: 'Map Transaction Flows',
+                description: 'Understand how data moves across your infrastructure and how users and applications interact with protect surface resources.',
+                key_actions: [
+                  'Document application dependencies and communication patterns',
+                  'Identify all access paths to critical resources',
+                  'Map user journeys and typical access patterns',
+                  'Analyze east-west (internal) and north-south (external) traffic',
+                  'Identify legacy applications and technical debt'
+                ],
+                examples: [
+                  'Web application → API gateway → microservices → database',
+                  'User → SSO portal → SaaS application → data storage',
+                  'Mobile app → authentication service → backend API',
+                  'Employee → workstation → internal app → file share',
+                  'Third-party vendor → API → production environment'
+                ]
+              },
+              {
+                step_number: 3,
+                title: 'Architect Zero Trust Network',
+                description: 'Design network segmentation using microsegmentation, software-defined perimeters, and next-generation access control.',
+                key_actions: [
+                  'Implement microsegmentation to isolate workloads',
+                  'Deploy software-defined perimeter (SDP) or SASE architecture',
+                  'Replace VPN with Zero Trust Network Access (ZTNA)',
+                  'Use identity-aware proxies for application access',
+                  'Implement east-west traffic inspection and encryption'
+                ],
+                examples: [
+                  'Segment production, development, and testing environments',
+                  'Isolate each application tier (web, app, database)',
+                  'Create separate zones for PCI-DSS cardholder data',
+                  'Implement ZTNA using tools like Zscaler, Palo Alto Prisma, or Cloudflare Access',
+                  'Deploy service mesh (Istio, Linkerd) for microservices security'
+                ]
+              },
+              {
+                step_number: 4,
+                title: 'Create Zero Trust Policy',
+                description: 'Define granular access policies based on identity, device posture, application, and contextual factors.',
+                key_actions: [
+                  'Implement identity and access management (IAM) with MFA',
+                  'Define access policies using least privilege principle',
+                  'Create conditional access policies based on risk',
+                  'Implement device health checks and compliance requirements',
+                  'Establish adaptive authentication based on context'
+                ],
+                examples: [
+                  'Require MFA for all administrative access',
+                  'Deny access from non-compliant devices (missing patches, no EDR)',
+                  'Allow read-only access for contractors, full access for employees',
+                  'Step-up authentication for high-risk actions (money transfer, data export)',
+                  'Block access from high-risk countries or anonymous proxies'
+                ]
+              },
+              {
+                step_number: 5,
+                title: 'Monitor and Maintain',
+                description: 'Continuously monitor all activity, analyze for anomalies, and refine policies based on insights.',
+                key_actions: [
+                  'Implement comprehensive logging for all access attempts',
+                  'Deploy User and Entity Behavior Analytics (UEBA)',
+                  'Create dashboards for security posture visibility',
+                  'Conduct regular access reviews and recertification',
+                  'Test policies and validate effectiveness',
+                  'Automate policy enforcement and response'
+                ],
+                examples: [
+                  'Alert on unusual access patterns (time, location, volume)',
+                  'Generate weekly reports on access violations and policy exceptions',
+                  'Quarterly access reviews to remove unnecessary permissions',
+                  'Automated revocation of access for dormant accounts',
+                  'Continuous validation of device compliance status'
+                ]
+              }
+            ],
+            when_to_use: 'Use Zero Trust Architecture when modernizing security infrastructure, moving to cloud environments, supporting remote work, or addressing inadequate perimeter security. Essential for organizations handling sensitive data or subject to compliance requirements.',
+            benefits: [
+              'Reduces attack surface and limits lateral movement',
+              'Enables secure remote work without VPN complexity',
+              'Improves visibility into user and application activity',
+              'Supports cloud migration and hybrid environments',
+              'Aligns with compliance requirements (PCI-DSS 4.0, NIST)',
+              'Reduces risk from insider threats and compromised credentials',
+              'Facilitates digital transformation and cloud adoption'
+            ],
+            common_pitfalls: [
+              'Trying to implement everything at once (start with protect surface)',
+              'Focusing only on network without addressing identity and applications',
+              'Underestimating cultural change and user impact',
+              'Not having executive sponsorship and adequate budget',
+              'Implementing without sufficient visibility into current state',
+              'Forgetting about legacy applications that cannot support Zero Trust',
+              'Not planning for exceptions and emergency access procedures',
+              'Inadequate testing before deploying policies to production'
+            ]
+          },
+          order_index: 2
+        },
+        {
+          id: 'beyondcorp-case-study',
+          type: 'case_study',
+          title: 'Google BeyondCorp: Zero Trust at Enterprise Scale',
+          content: {
+            id: 'google-beyondcorp',
+            title: 'Google BeyondCorp: Transforming to Zero Trust Architecture',
+            scenario: 'Following the Aurora attacks in 2010, where sophisticated adversaries targeted Google and other tech companies through compromised credentials and internal network access, Google embarked on a multi-year journey to eliminate the concept of a privileged corporate network.',
+            background: `In traditional security models, Google operated like most enterprises:
+- Employees connected via VPN for remote access
+- Internal network was considered more trusted than external
+- Perimeter security (firewalls, IDS/IPS) protected internal resources
+- Once inside the network, users had relatively broad access
+
+The Aurora attacks demonstrated fundamental weaknesses in this model. Even with sophisticated perimeter defenses, determined attackers who gained initial access could move laterally within the internal network.
+
+Google realized that the traditional castle-and-moat approach was insufficient for:
+- Increasingly mobile and remote workforce
+- Cloud-first application architecture
+- Sophisticated nation-state and APT threats
+- Need for consistent security regardless of location`,
+            challenge: `**The Transformation Challenge:**
+
+**Technical Challenges:**
+1. **Application Inventory**: Google had thousands of internal applications to migrate
+2. **Authentication & Authorization**: Needed unified, scalable identity and access management
+3. **Device Trust**: Required visibility into device health and compliance status
+4. **Network Architecture**: Had to redesign network without privileged internal zones
+5. **Legacy Systems**: Some systems couldn't support modern authentication
+
+**Organizational Challenges:**
+1. **Cultural Shift**: Engineers were accustomed to broad internal access
+2. **User Experience**: Couldn't degrade productivity with cumbersome security
+3. **Cross-Team Coordination**: Required collaboration across security, network, and application teams
+4. **Timeline**: Multi-year transformation with no "big bang" migration possible
+
+**BeyondCorp Architecture Components:**
+
+**1. Access Proxy**
+- Single entry point for all application access
+- Enforces authentication and authorization policies
+- Works for both managed and unmanaged devices
+- No VPN required (direct internet access)
+
+**2. Trust Inference**
+- Continuously evaluates device security posture
+- Considers factors: OS version, encryption status, security agent presence
+- Assigns trust score to each device
+- Trust level influences access decisions
+
+**3. Access Control Engine**
+- Centralized policy engine for all applications
+- Policies based on user, device, application, and context
+- Real-time policy evaluation for each request
+- Supports least privilege and just-in-time access
+
+**4. User and Device Database**
+- Single source of truth for identity and device inventory
+- Integrates with HR systems for user lifecycle management
+- Automated device enrollment and provisioning
+- Tracks device ownership and compliance status`,
+            context: {
+              industry: 'Technology / Internet Services',
+              company_size: 'Large enterprise (100,000+ employees globally)',
+              timeline: 'Project began 2011; major milestones 2014-2016; ongoing evolution'
+            },
+            analysis_points: [
+              '**Phased Migration Approach**: Google didn\'t try to migrate everything at once. They started with new applications, then gradually migrated existing services. This reduced risk and allowed learning from each phase.',
+              '**Device Trust is Critical**: BeyondCorp assigns trust levels to devices based on security posture. Untrusted devices get limited access, while fully managed and compliant devices get broader access. This balances security with flexibility.',
+              '**Access Proxy as Enforcement Point**: Rather than modifying every application, Google placed an access proxy in front of all internal apps. The proxy enforces authentication, authorization, and policy in a consistent way.',
+              '**Context-Aware Access Control**: Access decisions consider multiple factors: user identity, device trust level, application being accessed, location, time, and behavioral patterns. This provides adaptive security.',
+              '**Improved User Experience**: Ironically, Zero Trust improved user experience. Employees can access internal applications from any device, anywhere, without VPN. Security is transparent when policies are satisfied.',
+              '**Infrastructure as Code**: All policies and configurations are defined as code, versioned in Git, and deployed through CI/CD pipelines. This enables audit trails, rollback capabilities, and consistent enforcement.',
+              '**Cultural Transformation**: Moving from "trust the internal network" to "trust nothing" required significant cultural change. Google invested heavily in training, communication, and gradual rollout to bring engineers along.'
+            ],
+            discussion_questions: [
+              'How would you prioritize which applications to migrate first in a Zero Trust transformation? What factors would influence your decision?',
+              'What are the tradeoffs between security and user convenience in Zero Trust? How do you find the right balance for your organization?',
+              'How should organizations handle legacy applications that cannot support modern authentication? Is there a point where you accept the security risk?',
+              'What organizational structure and governance is needed to successfully implement Zero Trust? Who should own the initiative?',
+              'How do you measure the success of a Zero Trust implementation? What metrics matter?',
+              'Google took 6+ years for this transformation. How can smaller organizations with fewer resources approach Zero Trust?',
+              'What role does cloud adoption play in enabling Zero Trust architecture? Is Zero Trust easier or harder in hybrid environments?'
+            ],
+            key_takeaways: [
+              'Zero Trust is a journey, not a destination - plan for multi-year transformation',
+              'Start with protect surface (crown jewels) rather than trying to secure everything',
+              'Phased migration reduces risk and enables learning from each phase',
+              'Device trust and posture assessment are critical components',
+              'Access proxy pattern enables centralized policy enforcement',
+              'Infrastructure as code and automation are essential for consistency',
+              'User experience should improve or stay neutral (not degrade)',
+              'Executive sponsorship and cross-functional collaboration are mandatory',
+              'Cultural change is as important as technical implementation',
+              'Zero Trust enables cloud adoption and remote work at scale',
+              'Continuous monitoring and policy refinement are necessary',
+              'Plan for exceptions, emergency access, and legacy systems'
+            ],
+            related_concepts: [
+              'Zero Trust Network Access (ZTNA)',
+              'Software-Defined Perimeter (SDP)',
+              'Secure Access Service Edge (SASE)',
+              'Identity and Access Management (IAM)',
+              'Privileged Access Management (PAM)',
+              'Device Trust and Endpoint Security',
+              'Microsegmentation and Network Segmentation',
+              'Context-Aware Access Control'
+            ]
+          },
+          order_index: 3
+        },
+        {
+          id: 'cloud-security',
+          type: 'key_points',
+          title: 'Cloud Security and DevSecOps',
+          content: [
+            '**Shared Responsibility Model** - Cloud security is shared between provider and customer. Provider secures infrastructure (physical, hypervisor, network), customer secures data, applications, IAM, and configurations. IaaS gives more control but more responsibility; SaaS gives less control but less responsibility.',
+            '**Identity and Access Management (IAM)** - Use cloud-native IAM (AWS IAM, Azure AD, GCP IAM) with least privilege. Implement role-based access control (RBAC), enforce MFA for all users, use service accounts for applications, rotate credentials regularly, audit IAM permissions quarterly.',
+            '**Data Encryption** - Encrypt data at rest using cloud-managed keys (AWS KMS, Azure Key Vault, Google Cloud KMS) or customer-managed keys. Encrypt data in transit using TLS 1.3. Consider client-side encryption for highly sensitive data before uploading to cloud.',
+            '**Network Security** - Use Virtual Private Cloud (VPC) with private subnets for sensitive resources. Implement network ACLs and security groups for traffic filtering. Deploy Web Application Firewall (WAF) for web apps. Use VPC peering or transit gateways for secure cross-VPC communication.',
+            '**Container Security** - Scan container images for vulnerabilities before deployment. Use minimal base images (Alpine, distroless). Implement runtime security monitoring (Falco, Aqua). Run containers as non-root users. Use secrets management for credentials, not environment variables.',
+            '**Kubernetes Security** - Enable RBAC and restrict pod permissions. Use network policies to control pod-to-pod traffic. Implement pod security standards (restricted profile). Scan Kubernetes configurations (kube-bench, kube-hunter). Use service mesh (Istio) for mTLS between services.',
+            '**DevSecOps Integration** - Shift security left by integrating into CI/CD pipelines. Implement Static Application Security Testing (SAST) in code review. Run Dynamic Application Security Testing (DAST) in testing environments. Scan dependencies for vulnerabilities (Snyk, Dependabot). Automate infrastructure as code (IaC) security scanning (Checkov, tfsec).',
+            '**Cloud Security Posture Management (CSPM)** - Use tools like Prisma Cloud, Wiz, or native services (AWS Security Hub, Azure Security Center) to continuously assess cloud configurations. Detect misconfigurations like public S3 buckets, overly permissive IAM roles, unencrypted databases, publicly exposed resources.',
+            '**Logging and Monitoring** - Enable CloudTrail (AWS), Activity Log (Azure), Cloud Audit Logs (GCP) for all API activities. Send logs to SIEM for analysis. Set up alerts for suspicious activities: privilege escalation, unusual API calls, resource deletion, failed authentication attempts.',
+            '**Infrastructure as Code (IaC) Security** - Treat infrastructure code like application code with security scanning. Use Terraform, CloudFormation, or ARM templates with version control. Scan IaC for security issues before deployment. Implement policy as code (Open Policy Agent, Sentinel) to enforce security standards.'
+          ],
+          order_index: 4
+        },
+        {
+          id: 'architecture-design-exercise',
+          type: 'interactive',
+          title: 'Zero Trust Architecture Design Exercise',
+          content: {
+            id: 'zero-trust-design',
+            title: 'Design Zero Trust Architecture for FinanceFirst Bank',
+            type: 'decision_making',
+            instructions: 'You are the Chief Security Architect at FinanceFirst Bank, a regional bank undergoing digital transformation. Design a Zero Trust architecture to support mobile banking, remote employees, and cloud migration while meeting regulatory requirements.',
+            scenarios: [
+              {
+                id: 'design-scenario-1',
+                situation: 'FinanceFirst has 500 employees (200 in branches, 300 work-from-home) and 100,000 customers using mobile banking. Critical systems include: core banking system (on-premises), customer database (cloud), mobile banking API (cloud), teller applications (branch networks). How do you design the identity and access architecture?',
+                options: [
+                  {
+                    text: 'Keep current VPN solution and expand capacity for remote workers',
+                    outcome: 'VPN becomes bottleneck. Complex split-tunnel configurations. Security still perimeter-based.',
+                    feedback: '❌ VPN is traditional perimeter security, not Zero Trust. It provides network access rather than application access, increases attack surface, and creates operational complexity.'
+                  },
+                  {
+                    text: 'Implement Zero Trust Network Access (ZTNA) with identity-aware proxy, requiring MFA for all access, device posture checks before granting access, and microsegmentation between critical systems',
+                    outcome: 'Users securely access applications from anywhere. No VPN needed. Each application protected independently. Limited lateral movement if breach occurs.',
+                    feedback: '✅ Excellent. This implements core Zero Trust principles: verify explicitly (MFA + device checks), least privilege (application-level access), assume breach (microsegmentation). Users get direct, secure access without complex VPN.'
+                  },
+                  {
+                    text: 'Move everything to cloud and rely on cloud provider security',
+                    outcome: 'Cloud provider secures infrastructure, but misconfigured access controls expose customer data. Security responsibilities unclear.',
+                    feedback: '❌ This misunderstands the shared responsibility model. Cloud migration alone doesn\'t provide Zero Trust. You still need IAM, network segmentation, and access controls in the cloud.'
+                  },
+                  {
+                    text: 'Deploy firewall appliances at branch locations and home offices',
+                    outcome: 'Expensive hardware deployment. Maintenance overhead. Still network-perimeter focused.',
+                    feedback: '❌ This extends the perimeter rather than eliminating it. Expensive, complex, and doesn\'t align with Zero Trust principles. Modern Zero Trust uses identity and cloud-native controls.'
+                  }
+                ]
+              },
+              {
+                id: 'design-scenario-2',
+                situation: 'The mobile banking API currently allows any request from the internet to reduce latency. The API sits in front of the customer database. Security team wants to restrict access. How do you secure the API in a Zero Trust model?',
+                options: [
+                  {
+                    text: 'Implement API gateway with OAuth 2.0 and JWT tokens, require mobile app attestation (prove legitimate app, not compromised), rate limiting per user, contextual risk scoring (device, location, behavior), and WAF for common attacks',
+                    outcome: 'API access controlled by identity and context. Compromised credentials have limited impact due to rate limiting and risk scoring. Attackers cannot easily impersonate legitimate mobile app.',
+                    feedback: '✅ Excellent. This implements Zero Trust for APIs: identity-based authentication (OAuth/JWT), device trust (app attestation), continuous evaluation (risk scoring), and defense in depth (WAF, rate limiting).'
+                  },
+                  {
+                    text: 'Block all internet access and require VPN connection',
+                    outcome: 'Customers cannot use mobile banking outside branch network. Business value destroyed.',
+                    feedback: '❌ This prioritizes security over business requirements. Zero Trust should enable business while managing risk, not block legitimate use cases.'
+                  },
+                  {
+                    text: 'Use IP whitelisting for known mobile carrier networks',
+                    outcome: 'Fragile and incomplete. Attackers can easily use mobile carrier networks. Breaks when users travel or use Wi-Fi.',
+                    feedback: '❌ IP-based access control is not Zero Trust. IPs are not reliable indicators of identity or trust, especially for mobile devices that frequently change networks.'
+                  },
+                  {
+                    text: 'Move API behind firewall and disable internet access',
+                    outcome: 'Mobile app cannot connect to API. Customers cannot access accounts. Business stopped.',
+                    feedback: '❌ This makes the service unusable. Zero Trust enables secure access from anywhere, not blocks all access. You need to authenticate and authorize, not block.'
+                  }
+                ]
+              }
+            ],
+            reflection_prompts: [
+              'How did you balance security requirements with user experience and business needs?',
+              'What trade-offs did you make between security controls and implementation complexity?',
+              'How would you handle legacy systems that cannot support modern authentication?',
+              'What metrics would you use to measure the success of your Zero Trust implementation?',
+              'How would you sequence the implementation to manage risk and demonstrate value?'
+            ],
+            success_criteria: [
+              'Implemented identity-centric access control with MFA',
+              'Considered device trust and posture assessment',
+              'Applied microsegmentation to limit lateral movement',
+              'Balanced security with user experience and business requirements',
+              'Addressed both employee and customer access scenarios',
+              'Considered cloud and on-premises systems',
+              'Incorporated defense-in-depth principles'
+            ]
+          },
+          order_index: 5
+        }
+      ],
+      practical_applications: [
+        'Design Zero Trust architecture for organization',
+        'Implement ZTNA solution replacing VPN',
+        'Secure cloud workloads (AWS, Azure, GCP)',
+        'Implement microsegmentation and network isolation',
+        'Integrate security into DevOps pipelines (DevSecOps)',
+        'Deploy identity and access management (IAM) with MFA',
+        'Implement device trust and compliance checking'
+      ],
+      additional_resources: [
+        {
+          title: 'NIST SP 800-207 Zero Trust Architecture',
+          type: 'article',
+          description: 'Official NIST publication defining Zero Trust Architecture',
+          internal: false
+        },
+        {
+          title: 'Google BeyondCorp Papers',
+          type: 'article',
+          description: 'Technical papers describing Google\'s Zero Trust implementation',
+          internal: false
+        },
+        {
+          title: 'Cloud Security Alliance (CSA) Guidance',
+          type: 'article',
+          description: 'Best practices for cloud security',
+          internal: false
+        },
+        {
+          title: 'Zero Trust Architecture Template',
+          type: 'template',
+          description: 'Architecture diagram template for Zero Trust design',
+          internal: true
+        }
+      ]
+    },
+    {
+      id: 'incident-response',
+      title: 'Incident Response & Security Operations',
+      type: 'article',
+      duration_minutes: 1200,
+      description: 'Master incident response planning, digital forensics, and security operations to effectively detect, contain, and recover from cybersecurity incidents.',
+      is_required: true,
+      order_index: 4,
+      learning_outcomes: [
+        'Develop comprehensive incident response plans',
+        'Execute incident response using NIST lifecycle',
+        'Conduct digital forensics and evidence collection',
+        'Lead tabletop exercises and IR drills',
+        'Implement security automation and orchestration (SOAR)',
+        'Manage business continuity and disaster recovery'
+      ],
+      content_blocks: [
+        {
+          id: 'ir-lifecycle',
+          type: 'framework',
+          title: 'NIST Incident Response Lifecycle',
+          content: {
+            id: 'nist-ir-lifecycle',
+            name: 'NIST Incident Response Lifecycle',
+            description: 'The NIST Computer Security Incident Handling Guide (SP 800-61 Rev. 2) provides a comprehensive framework for incident response. This lifecycle is the industry standard for managing cybersecurity incidents from preparation through post-incident activity.',
+            steps: [
+              {
+                step_number: 1,
+                title: 'Preparation',
+                description: 'Establish incident response capability and prepare for potential security incidents before they occur.',
+                key_actions: [
+                  'Create and document incident response plan with clear procedures',
+                  'Form Computer Security Incident Response Team (CSIRT) with defined roles',
+                  'Deploy detection capabilities (SIEM, IDS/IPS, EDR)',
+                  'Establish communication channels and escalation procedures',
+                  'Maintain incident response toolkit (forensics software, backup systems)',
+                  'Conduct training and tabletop exercises regularly',
+                  'Create playbooks for common incident types',
+                  'Establish relationships with external resources (legal, law enforcement, forensics firms)'
+                ],
+                examples: [
+                  'IR Plan covering ransomware, data breach, DDoS, insider threat scenarios',
+                  'CSIRT with Incident Commander, Technical Lead, Communications Lead roles',
+                  'Incident response toolkit: forensics workstation, write blockers, memory capture tools, forensic images, backup credentials',
+                  'Playbooks for: ransomware response, data breach notification, BEC fraud, compromised credentials',
+                  'Quarterly tabletop exercises with executives',
+                  'Annual penetration testing and purple team exercises',
+                  'Retainer agreements with external forensics firms (Mandiant, CrowdStrike Services)'
+                ]
+              },
+              {
+                step_number: 2,
+                title: 'Detection and Analysis',
+                description: 'Identify, validate, and analyze security incidents to determine scope and severity.',
+                key_actions: [
+                  'Monitor security alerts from all sources (SIEM, EDR, IDS/IPS, user reports)',
+                  'Triage and prioritize alerts based on severity and potential impact',
+                  'Perform initial analysis to confirm genuine incident vs. false positive',
+                  'Gather and preserve evidence following chain of custody',
+                  'Determine incident scope, affected systems, and attack vectors',
+                  'Classify incident type and severity using predefined criteria',
+                  'Document all findings, actions, and timestamps',
+                  'Escalate to appropriate stakeholders based on severity'
+                ],
+                examples: [
+                  'Alert: Multiple failed logins followed by successful login → Investigate for credential compromise',
+                  'Alert: Unusual outbound traffic to foreign IP → Investigate for data exfiltration',
+                  'User report: Cannot access files, ransom note on screen → Ransomware incident',
+                  'Alert: New admin account created outside business hours → Investigate for unauthorized access',
+                  'Evidence collection: Memory dump, disk image, network traffic capture, log files',
+                  'Incident severity classification: P1 (Critical) = ransomware encrypting production, P2 (High) = confirmed data exfiltration, P3 (Medium) = phishing campaign affecting users, P4 (Low) = policy violation'
+                ]
+              },
+              {
+                step_number: 3,
+                title: 'Containment, Eradication, and Recovery',
+                description: 'Limit incident damage, remove threat actor presence, and restore systems to normal operations.',
+                key_actions: [
+                  '**Short-term containment**: Isolate affected systems to prevent spread (disconnect network, disable accounts)',
+                  '**Long-term containment**: Apply temporary fixes to allow business operations while preparing for eradication',
+                  '**Eradication**: Remove malware, delete attacker accounts, close vulnerabilities, patch systems',
+                  '**Recovery**: Restore systems from clean backups, rebuild compromised systems, return to production',
+                  'Monitor for reinfection or persistent threats',
+                  'Validate systems are clean before reconnecting to network',
+                  'Implement additional controls to prevent recurrence'
+                ],
+                examples: [
+                  'Ransomware containment: Isolate infected systems, disable domain admin accounts, block C2 domains at firewall, shut down affected network segments',
+                  'Data breach containment: Revoke compromised API keys, rotate credentials, block attacker IPs, disable attacker accounts',
+                  'Eradication: Run antimalware scans, remove persistence mechanisms (registry keys, scheduled tasks), delete web shells, patch vulnerabilities',
+                  'Recovery: Restore from last clean backup (before infection), rebuild systems from known-good images, reset all passwords, restore from immutable backup for ransomware',
+                  'Validation: Run security scans, review logs for anomalies, monitor network traffic, confirm no backdoors remain'
+                ]
+              },
+              {
+                step_number: 4,
+                title: 'Post-Incident Activity',
+                description: 'Learn from incidents to improve security posture and incident response capabilities.',
+                key_actions: [
+                  'Conduct post-incident review (lessons learned) within 1-2 weeks',
+                  'Document what happened, how it was detected, what worked and didn\'t',
+                  'Identify root causes and contributing factors',
+                  'Create action items to address gaps and vulnerabilities',
+                  'Update incident response plan and playbooks based on learnings',
+                  'Share indicators of compromise (IoCs) with community',
+                  'Assess financial impact and document costs',
+                  'Provide training based on lessons learned'
+                ],
+                examples: [
+                  'Post-incident review findings: Phishing bypassed email filter because attachment type not blocked, MFA not enabled on compromised account, lateral movement possible due to lack of network segmentation',
+                  'Action items: Enable MFA for all users (not just admins), block additional file types in email gateway, implement network segmentation between departments, conduct phishing awareness training',
+                  'IoC sharing: Submit malware samples to VirusTotal, share phishing URLs with abuse@provider.com, report to CISA for nation-state activity',
+                  'Cost documentation: $150k incident response, $50k legal counsel, $30k notification costs, $100k lost productivity, $500k reputation damage',
+                  'Playbook updates: Add step to check for specific persistence mechanism seen in this incident, update criteria for escalation'
+                ]
+              }
+            ],
+            when_to_use: 'Follow this lifecycle for all security incidents from initial detection through post-incident review. The iterative nature allows continuous improvement of incident response capabilities.',
+            benefits: [
+              'Provides structured approach to incident response',
+              'Ensures consistent handling across different incident types',
+              'Emphasizes preparation and learning, not just response',
+              'Facilitates communication with stakeholders using common framework',
+              'Improves response effectiveness with each incident',
+              'Industry-standard framework recognized globally',
+              'Supports compliance with regulations (GDPR, HIPAA, PCI-DSS)'
+            ],
+            common_pitfalls: [
+              'Skipping preparation phase until after first major incident',
+              'Not documenting actions during incident (impacts forensics and lessons learned)',
+              'Rushing to eradication without proper containment (allows spread)',
+              'Recovering from backup without identifying and fixing root cause (reinfection)',
+              'Not conducting post-incident reviews due to "moving on" pressure',
+              'Failing to test incident response plan and playbooks before real incident',
+              'Not involving legal counsel early enough in data breach scenarios',
+              'Inadequate evidence preservation affecting legal or insurance proceedings'
+            ]
+          },
+          order_index: 1
+        },
+        {
+          id: 'maersk-case-study',
+          type: 'case_study',
+          title: 'Maersk NotPetya: Resilience and Recovery',
+          content: {
+            id: 'maersk-notpetya',
+            title: 'Maersk NotPetya Recovery: Rebuilding 4,000 Servers in 10 Days',
+            scenario: 'On June 27, 2017, global shipping giant Maersk was hit by NotPetya ransomware, one of the most destructive cyberattacks ever against a single company. Within minutes, NotPetya destroyed 4,000 servers, 45,000 PCs, and 2,500 applications across 600 locations in 130 countries. Global shipping operations ground to a halt.',
+            background: `A.P. Moller-Maersk is the world\'s largest container shipping company, handling one in seven containers shipped globally. The company operates:
+- 76 container terminals in 50+ countries
+- Fleet of 700+ container vessels
+- Annual revenue exceeding $40 billion
+- 90,000+ employees worldwide
+
+NotPetya (initially thought to be ransomware but later identified as wiper malware attributed to Russian military intelligence) spread through a compromised Ukrainian accounting software update. It exploited the EternalBlue vulnerability and wiped master boot records, making recovery impossible without reimaging.
+
+Maersk was not the primary target. The attack aimed to disrupt Ukraine but spread globally to any organization with Ukrainian software in their supply chain. Maersk\'s entire global IT infrastructure was destroyed in minutes.`,
+            challenge: `**The Devastating Impact:**
+
+**Initial Compromise (June 27, 2017, 12:30 PM CEST):**
+- NotPetya entered through M.E.Doc accounting software used by Ukrainian office
+- Spread through Active Directory using EternalBlue (same exploit as WannaCry)
+- Lateral movement across global network within minutes
+- 4,000 servers encrypted/destroyed
+- 45,000 PCs rendered inoperable
+- All domain controllers worldwide destroyed simultaneously
+- No Active Directory = no authentication = no email, no file shares, no applications
+
+**Operational Chaos:**
+- Global shipping operations stopped (ships couldn't be unloaded or loaded)
+- Cannot track containers (lost visibility of 3.5 million containers worldwide)
+- Manual booking with pen and paper (40,000+ bookings per day)
+- Phones overwhelmed (10x normal call volume)
+- Ports backing up (ships waiting days to be serviced)
+- Estimated loss: $300 million in 10 days
+
+**The Recovery Challenge:**
+
+**Infrastructure Scope:**
+- 4,000 servers across 600 locations needed rebuilding
+- 45,000 PCs to reimage
+- 2,500 applications to reinstall and configure
+- Complete Active Directory reconstruction required
+- No functioning backup infrastructure (backup servers also destroyed)
+
+**Critical Discovery - The Miracle of Ghana:**
+A domain controller in a remote Ghana office was offline during the attack (power outage). This single domain controller became the seed to rebuild the entire global Active Directory.
+
+**Recovery Approach:**
+
+**Days 1-2: Assessment and Triage**
+- Incident confirmed as global, not localized issue
+- Decision made to rebuild, not pay ransom (later learned payment wouldn't help as NotPetya was wiper, not ransomware)
+- All IT staff recalled from vacation
+- War room established with 24/7 operations
+
+**Days 3-7: Foundation Rebuild**
+- Ghana domain controller flown to UK headquarters by employee courier
+- Active Directory restored from Ghana DC
+- Core infrastructure servers rebuilt (DNS, DHCP, email)
+- Skeleton crew of critical systems brought online
+- Manual workarounds implemented for shipping operations
+
+**Days 8-10: Scale and Speed**
+- 500+ IT staff working 24/7 globally
+- Installed Windows, applications, and configurations on 4,000 servers
+- Reimaged 45,000 PCs
+- Hired 200+ contractor PCs with 4G modems as temporary solution
+- Containers tracked using paper, phones, and WhatsApp
+
+**Week 2: Operational Recovery**
+- Critical shipping applications back online
+- Container tracking system restored
+- Booking systems operational
+- Ports clearing backlog
+
+**Month 2: Full Recovery**
+- All systems rebuilt and operational
+- Enhanced security measures implemented
+- Supply chain security review conducted`,
+            context: {
+              industry: 'Shipping / Logistics / Global Transportation',
+              company_size: 'Enterprise (90,000 employees, 600 sites globally)',
+              timeline: 'Attack: June 27, 2017; Initial recovery: 10 days; Full recovery: 2-3 months; Total cost: $300M+'
+            },
+            analysis_points: [
+              '**Cascading Failure from Single Point**: Destruction of all domain controllers globally demonstrates risk of centralized authentication without geographic isolation. Maersk\'s AD replication design (full mesh) meant infection spread to all DCs simultaneously.',
+              '**Supply Chain as Attack Vector**: Maersk was collateral damage. The attack targeted Ukraine through M.E.Doc software but spread to any global company using that software. Demonstrates supply chain risk similar to SolarWinds.',
+              '**Backup Strategy Failure**: Traditional backup strategy failed because backup servers were connected to the network and destroyed along with production. NotPetya specifically targeted volume shadow copies and backup systems.',
+              '**The Ghana Miracle**: Pure luck that Ghana office was offline during attack. Without that single DC, Maersk would have needed to rebuild AD from scratch (weeks, not days). Highlights importance of geographic diversity and offline backups.',
+              '**Speed and Scale of Recovery**: Rebuilding 4,000 servers in 10 days is extraordinary. Required massive coordination, all hands on deck, and executive support. Most organizations would take 6+ months.',
+              '**Business Continuity Success Factors**: Manual workarounds kept business operating during recovery. Customer service reps tracked containers on paper and WhatsApp. Shows importance of planning for "worst case" scenarios.',
+              '**Cultural Impact**: Maersk\'s maritime culture (dealing with storms, emergencies at sea) translated to incident response. Crew mentality, clear command structure, and focus on "getting the ship sailing" drove recovery.',
+              '**Financial Impact**: $300M loss in 10 days, primarily from lost revenue (ships idle). Actual recovery costs were much lower. Demonstrates that business disruption costs far exceed technical recovery costs.',
+              '**Patching Failure**: EternalBlue vulnerability was patched by Microsoft 2 months earlier. Maersk hadn\'t fully deployed patches. Highlights challenges of global patch management.'
+            ],
+            discussion_questions: [
+              'What backup strategy would have protected Maersk from losing all domain controllers simultaneously? How do you balance cost vs. redundancy?',
+              'Should organizations maintain offline/air-gapped backups even though they\'re inconvenient and expensive? What data/systems warrant this protection?',
+              'How would you test whether your organization could recover from a NotPetya-style attack? What would a realistic DR test look like?',
+              'Maersk\'s maritime culture helped in recovery. How do you build organizational culture that supports incident response?',
+              'Was Maersk lucky (Ghana DC offline) or prepared (having staff who could execute recovery)? What\'s the role of luck vs. preparation in IR?',
+              'How do you justify spending on disaster recovery and security to executives when incidents are rare?',
+              'What responsibility do software vendors have when their product becomes attack vector? Should there be liability?'
+            ],
+            key_takeaways: [
+              'Implement immutable, offline, or air-gapped backups for critical systems',
+              'Geographic diversity in critical infrastructure (don\'t replicate destruction everywhere)',
+              'Practice disaster recovery and test ability to rebuild from nothing',
+              'Supply chain security is critical - vet all third-party software',
+              'Patch management is essential - EternalBlue was patched before attack',
+              'Network segmentation can limit spread of wiper malware',
+              'Manual business continuity procedures for "lights out" scenarios',
+              'Executive support and "all hands" mobilization enable rapid recovery',
+              'Document and communicate during crisis (Maersk kept customers informed)',
+              'Consider cyber insurance (can\'t prevent attack but helps recovery costs)',
+              'Maintain relationships with vendors and support (Maersk got Microsoft, HPE, others onsite)',
+              'Culture of resilience and problem-solving is as important as technical controls',
+              'Test your crown jewels recovery: "If we lost everything, how would we rebuild?"',
+              'Implement defense in depth: patching, segmentation, EDR, application whitelisting',
+              '3-2-1 backup rule: 3 copies, 2 different media, 1 offsite (add: and offline/immutable)'
+            ],
+            related_concepts: [
+              'Business Continuity and Disaster Recovery (BC/DR)',
+              'Immutable and Air-Gapped Backups',
+              'Incident Response and Crisis Management',
+              'Supply Chain Risk Management',
+              'Active Directory Security and Recovery',
+              'Wiper Malware vs. Ransomware',
+              'Network Segmentation and Isolation',
+              'Cyber Insurance and Risk Transfer'
+            ]
+          },
+          order_index: 2
+        },
+        {
+          id: 'digital-forensics',
+          type: 'text',
+          title: 'Digital Forensics Fundamentals',
+          content: `Digital forensics is the process of collecting, preserving, analyzing, and presenting digital evidence in a manner that is legally admissible. Proper forensics practices are essential for incident response, legal proceedings, and thorough security investigations.
+
+**Core Principles of Digital Forensics:**
+
+**1. Minimize Data Loss**
+- Avoid altering evidence during collection
+- Use write blockers when imaging drives
+- Capture volatile data before non-volatile (memory before disk)
+- Follow proper shutdown procedures to preserve evidence
+
+**2. Record Everything**
+- Document every action taken with timestamps
+- Maintain chain of custody for all evidence
+- Photograph systems before and after examination
+- Take detailed notes of observations and findings
+
+**3. Analyze All Data Collected**
+- Examine all potential sources of evidence
+- Consider multiple interpretations of findings
+- Look for anti-forensics techniques (data hiding, timestomp)
+- Correlate evidence from multiple sources
+
+**4. Report Findings**
+- Document methodology and tools used
+- Present findings clearly to technical and non-technical audiences
+- Support conclusions with evidence
+- Acknowledge limitations and assumptions
+
+**Evidence Collection Priority (Order of Volatility):**
+
+**1. Registers and Cache** (most volatile)
+- CPU registers, cache memory
+- Collected using memory forensics tools
+- Lost immediately on power off
+
+**2. Memory (RAM)**
+- Running processes and network connections
+- Encryption keys and passwords
+- Malware code in memory
+- Tools: FTK Imager, Magnet RAM Capture, WinPMEM
+
+**3. Network Traffic**
+- Active connections and recent communications
+- Packet captures using Wireshark, tcpdump
+- NetFlow/IPFIX data from routers
+- Often ephemeral unless logging enabled
+
+**4. Running Processes**
+- Process list and command lines
+- Tools: Process Explorer, ps (Linux), lsof
+- Must capture before shutdown
+
+**5. Disk Storage**
+- Files, deleted files, file metadata
+- Most persistent evidence
+- Can be imaged after system shutdown
+- Tools: FTK Imager, dd, dcfldd
+
+**6. Remote Logs and Archives** (least volatile)
+- SIEM logs, cloud logs, backup data
+- Most stable and preserved
+- Should be collected but lower priority than volatile data
+
+**Common Forensics Tools:**
+
+**Memory Forensics:**
+- Volatility Framework - Open-source memory analysis
+- Magnet RAM Capture - Memory acquisition
+- WinPMEM - Windows memory driver
+
+**Disk Forensics:**
+- Autopsy - Open-source digital forensics platform
+- FTK (Forensic Toolkit) - Commercial forensics suite
+- EnCase - Enterprise forensics platform
+- X-Ways Forensics - Low-level disk analysis
+
+**Network Forensics:**
+- Wireshark - Packet capture and analysis
+- NetworkMiner - Network forensics analysis
+- Zeek (formerly Bro) - Network security monitor
+
+**Incident Response:**
+- KAPE (Kroll Artifact Parser and Extractor)
+- GRR Rapid Response - Remote forensics framework
+- Velociraptor - Endpoint visibility and collection
+
+**Evidence Preservation:**
+
+**Chain of Custody Requirements:**
+- Who collected evidence and when
+- How evidence was collected (tools, methods)
+- Where evidence is stored
+- Who has accessed evidence
+- Any transfers or copies made
+- Integrity verification (hashes)
+
+**Hash Verification:**
+- Calculate cryptographic hash (MD5, SHA-256) immediately after collection
+- Document hash in chain of custody
+- Verify hash before analysis to prove no tampering
+- Re-calculate hash after analysis to demonstrate evidence unchanged
+
+**Legal Considerations:**
+
+- **Attorney-Client Privilege**: Engage legal counsel early, work under their direction
+- **Work Product Doctrine**: Forensics reports prepared for litigation may be protected
+- **Fourth Amendment**: Government searches require warrants (private sector different)
+- **ECPA/SCA**: Electronic communications have privacy protections
+- **GDPR/CCPA**: Personal data in forensics must follow privacy regulations
+- **Admissibility**: Evidence must be relevant, authentic, reliable, and properly obtained`,
+          order_index: 3
+        },
+        {
+          id: 'ransomware-playbook',
+          type: 'checklist',
+          title: 'Ransomware Response Playbook',
+          content: [
+            '**Immediate Actions (First Hour)** - Isolate infected systems from network immediately (disconnect network, disable WiFi). Do NOT power off systems (preserves memory evidence). Document what you observe (ransom note, encrypted file extensions). Alert security team and management. Activate incident response team. Preserve evidence: screenshot ransom note, capture memory if possible.',
+            '**Containment (Hours 1-4)** - Identify patient zero (first infected system). Disable domain admin accounts to prevent spread. Block C2 domains at firewall/DNS. Segment network to contain spread. Check backups are not affected. Identify ransomware variant (upload ransom note to ID Ransomware). Assess scope: how many systems affected. Review EDR/AV logs for infection timeline.',
+            '**Eradication (Day 1-3)** - DO NOT pay ransom initially (wait for assessment). Check if free decryptor exists (No More Ransom project). Remove malware from all systems using EDR/AV. Identify and close entry point (phishing email, RDP, vulnerability). Patch all systems with latest security updates. Reset all credentials, especially privileged accounts. Remove persistence mechanisms (scheduled tasks, registry keys).',
+            '**Recovery (Day 3-7)** - Restore from last clean backup before encryption. If no backups, consider paying ransom as last resort (after executive and legal approval). Validate restored systems are clean. Scan for backdoors and additional malware. Rebuild systems if necessary. Gradually bring systems back online starting with critical systems. Monitor closely for reinfection attempts.',
+            '**Communication** - Internal: Notify executives, legal, HR, communications. External: Law enforcement (FBI IC3, local authorities), cyber insurance, external forensics if needed. Customers: If data breach, comply with notification requirements (GDPR 72 hours, state laws vary). DO NOT negotiate with attackers yourself (use professional negotiators if considering payment).',
+            '**Post-Incident (Week 2+)** - Conduct post-incident review. Identify root cause (how ransomware got in). Implement preventive controls: MFA everywhere, email filtering improvements, application whitelisting, endpoint protection. Review and test backups (3-2-1 rule plus immutable). Train users on phishing recognition. Update incident response plan with lessons learned. Consider penetration testing to identify vulnerabilities.'
+          ],
+          order_index: 4
+        },
+        {
+          id: 'tabletop-exercise',
+          type: 'interactive',
+          title: 'Ransomware Tabletop Exercise',
+          content: {
+            id: 'ransomware-tabletop',
+            title: 'Ransomware Incident Response Drill',
+            type: 'role_play',
+            instructions: 'You are the Incident Commander for a ransomware incident at your organization. Lead your team through the response following NIST IR Lifecycle. Make decisions under pressure with incomplete information.',
+            scenarios: [
+              {
+                id: 'tabletop-1',
+                situation: '8:00 AM Monday: Help desk reports 15 users cannot access files. Files have .locked extension and ransom note demands $500,000 Bitcoin payment within 48 hours or files will be permanently destroyed. Users report ransomware message appeared after opening email attachment "Invoice.pdf.exe" from spoofed CFO email.',
+                options: [
+                  {
+                    text: 'Immediately shut down entire network to stop spread',
+                    outcome: 'All business operations stopped. Phones don\'t work. Internet down. Cannot coordinate response. Extreme but possibly appropriate if spread is rapid.',
+                    feedback: '⚠️ This is an extreme measure that might be necessary for fast-spreading ransomware. However, consider targeted isolation first. Complete shutdown prevents business operations and your team\'s ability to investigate and coordinate. Better: Isolate affected segments while maintaining core operations.'
+                  },
+                  {
+                    text: 'Activate incident response team, isolate affected systems and network segment, disable domain admin accounts, check if ransomware is still spreading, preserve evidence, and gather information before deciding next steps',
+                    outcome: 'IR team activated. Affected systems isolated. Network monitoring shows no new infections in last 30 minutes. Appears contained to one department. Team can now assess and plan response.',
+                    feedback: '✅ Excellent. This follows NIST IR lifecycle: organized response, containment without over-reacting, evidence preservation, assessment before action. You\'ve bought time to make informed decisions.'
+                  },
+                  {
+                    text: 'Pay the ransom immediately to avoid business disruption',
+                    outcome: 'Payment processed. 72 hours later, no decryption key received. Attackers disappeared. $500k lost. Systems still encrypted. FBI investigation complicated by payment.',
+                    feedback: '❌ Never pay ransom as first response. Payment funds criminal activity, provides no guarantee of decryption, may lead to repeat attacks, and complicates law enforcement investigation. Paying should only be considered as absolute last resort after full assessment and executive/legal approval.'
+                  },
+                  {
+                    text: 'Restore all systems from backup immediately',
+                    outcome: 'Backup restoration in progress. 6 hours later, restored systems are re-encrypted. Ransomware still in environment. Lost another 6 hours.',
+                    feedback: '❌ Restoring before eradicating malware causes reinfection. Must first: identify and remove malware, close entry point, ensure systems are clean, then restore. Rushing to recovery without eradication wastes time and resources.'
+                  }
+                ]
+              },
+              {
+                id: 'tabletop-2',
+                situation: '12:00 PM Monday: You\'ve contained the ransomware. Analysis shows: 150 systems affected, ransomware is Ryuk variant (known for targeting backups), initial infection via phishing email 72 hours ago, attacker had domain admin credentials, your backup server was also encrypted. Last clean backup is 14 days old (before major project completion). What is your recovery strategy?',
+                options: [
+                  {
+                    text: 'Restore from 14-day-old backup and accept 2 weeks of lost work',
+                    outcome: '2 weeks of work lost. Major project needs to be redone. Customers angry about delays. But systems are clean and operational.',
+                    feedback: '⚠️ This is a valid option when backups are available, but 2 weeks is significant data loss. Have you confirmed this backup is clean and not also compromised? Have you identified and closed the entry point? Consider if partial recovery or data reconstruction is possible.'
+                  },
+                  {
+                    text: 'Engage professional ransomware negotiators and consider paying ransom after executive approval, while simultaneously working on recovery alternatives',
+                    outcome: 'Professional negotiator reduces ransom to $150k. After executive and legal approval, payment made. Decryption key received and verified. Most files successfully decrypted (90% recovery). Remaining files restored from backup. Total cost: $150k ransom + $100k response costs.',
+                    feedback: '✅ This is a reasonable approach given circumstances: no recent clean backup, professional negotiation, executive approval, legal counsel involved, FBI notified, and parallel recovery efforts. Payment is last resort but sometimes necessary for business survival. The key is: proper assessment, approvals, professional handling, and ensuring clean recovery.'
+                  },
+                  {
+                    text: 'Rebuild all systems from scratch without backups or ransom payment',
+                    outcome: 'Complete rebuild takes 4 weeks. All data from 150 systems permanently lost. Business operations severely impacted. Several major customers lost due to inability to deliver. Estimated total impact: $5M in lost business.',
+                    feedback: '❌ While admirable from security perspective, this ignores business impact. Sometimes paying $150k ransom is more cost-effective than losing $5M in business. Incident response requires balancing security with business needs. Would be different if you had recent backups or data was not critical.'
+                  },
+                  {
+                    text: 'Use publicly available Ryuk decryptor',
+                    outcome: 'Research shows no public decryptor exists for Ryuk. Time wasted researching. Some ransomware has decryptors (check No More Ransom), but Ryuk is professional operation with strong encryption.',
+                    feedback: '❌ Good thought to check for free decryption tools, but Ryuk uses strong encryption without known weaknesses. This approach works for some ransomware families (WannaCry, some older variants) but not sophisticated modern ransomware.'
+                  }
+                ]
+              }
+            ],
+            reflection_prompts: [
+              'How did you balance speed of response with thoroughness of investigation?',
+              'What information was most critical to your decision-making? What additional information would have been helpful?',
+              'How would you communicate with executives during this incident? What would you tell them and when?',
+              'What preventive measures would you implement to avoid similar incidents in the future?',
+              'How would this incident change your organization\'s backup strategy and disaster recovery planning?'
+            ],
+            success_criteria: [
+              'Followed systematic incident response process',
+              'Made containment decisions to limit spread',
+              'Preserved evidence for forensic analysis',
+              'Considered business impact in decision-making',
+              'Involved appropriate stakeholders (legal, executive, law enforcement)',
+              'Balanced security goals with business continuity',
+              'Identified lessons learned and preventive measures'
+            ]
+          },
+          order_index: 5
+        }
+      ],
+      practical_applications: [
+        'Create comprehensive incident response plan for organization',
+        'Develop playbooks for common incident types',
+        'Conduct tabletop exercises with executives and IR team',
+        'Perform digital forensics investigation and evidence collection',
+        'Implement security orchestration, automation, and response (SOAR)',
+        'Design business continuity and disaster recovery procedures',
+        'Test backup restoration and recovery procedures'
+      ],
+      additional_resources: [
+        {
+          title: 'NIST SP 800-61 Rev 2',
+          type: 'article',
+          description: 'Computer Security Incident Handling Guide',
+          internal: false
+        },
+        {
+          title: 'SANS Incident Handler\'s Handbook',
+          type: 'article',
+          description: 'Practical guide to incident response',
+          internal: false
+        },
+        {
+          title: 'No More Ransom Project',
+          type: 'tool',
+          description: 'Free ransomware decryption tools',
+          internal: false
+        },
+        {
+          title: 'Incident Response Plan Template',
+          type: 'template',
+          description: 'Comprehensive IR plan template with playbooks',
+          internal: true
+        }
+      ]
     }
   ],
   capstone_project: {
