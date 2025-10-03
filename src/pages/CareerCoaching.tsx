@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleContentModal } from "@/components/coaching/ModuleContentModal";
+import { InsightsSection } from "@/components/coaching/InsightsSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   GraduationCap, 
@@ -836,35 +837,11 @@ const CareerCoaching = () => {
           </TabsContent>
 
           <TabsContent value="insights">
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold">Personalized Career Insights</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {personalizedInsights.map((insight, index) => (
-                  <Card key={index} className="glass-card">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        {insight.icon}
-                        {insight.category}
-                        <Badge 
-                          variant={insight.impact === "High" ? "default" : 
-                                 insight.impact === "Medium" ? "secondary" : "outline"}
-                          className="ml-auto"
-                        >
-                          {insight.impact} Impact
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground mb-3">{insight.insight}</p>
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm font-medium">Recommended Action:</p>
-                        <p className="text-sm">{insight.action}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <InsightsSection 
+              insights={personalizedInsights || []}
+              onMarkAsRead={markInsightAsRead}
+              isMarkingAsRead={false}
+            />
           </TabsContent>
 
           <TabsContent value="sessions">
