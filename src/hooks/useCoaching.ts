@@ -177,9 +177,19 @@ export const useCoaching = (userId?: string, selectedProgramId?: string | null) 
 
   const calculateAchievementsMutation = useMutation({
     mutationFn: () => userId ? CoachingService.calculateAchievements(userId) : Promise.reject('No user ID'),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['user-achievements', userId] });
       toast.success('Achievements updated!');
+      
+      // Generate insights after achievements are calculated
+      try {
+        await supabase.functions.invoke('generate-coaching-insights', {
+          body: { userId }
+        });
+        queryClient.invalidateQueries({ queryKey: ['personalized-insights', userId] });
+      } catch (error) {
+        console.error('Failed to generate insights:', error);
+      }
     },
   });
 

@@ -44,6 +44,7 @@ const CareerCoaching = () => {
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const { user } = useAuth();
   
   // Get coaching data using the hook
@@ -93,6 +94,34 @@ const CareerCoaching = () => {
     } catch (error) {
       console.error('🚫 Test fetch error:', error);
       toast.error('Failed to fetch data: ' + (error as Error).message);
+    }
+  };
+
+  // Generate insights manually
+  const handleGenerateInsights = async () => {
+    if (!user?.id) {
+      toast.error('User not found');
+      return;
+    }
+    
+    setIsGeneratingInsights(true);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.functions.invoke('generate-coaching-insights', {
+        body: { userId: user.id }
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Generated ${data?.insightsGenerated || 0} new insights!`);
+      
+      // Trigger data refresh by calling calculateAchievements
+      calculateAchievements();
+    } catch (error) {
+      console.error('Failed to generate insights:', error);
+      toast.error('Failed to generate insights. Please try again.');
+    } finally {
+      setIsGeneratingInsights(false);
     }
   };
 
@@ -841,6 +870,8 @@ const CareerCoaching = () => {
               insights={personalizedInsights || []}
               onMarkAsRead={markInsightAsRead}
               isMarkingAsRead={false}
+              onGenerateInsights={handleGenerateInsights}
+              isGenerating={isGeneratingInsights}
             />
           </TabsContent>
 

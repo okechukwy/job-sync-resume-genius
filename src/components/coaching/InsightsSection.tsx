@@ -41,12 +41,16 @@ interface InsightsSectionProps {
   insights: PersonalizedInsight[];
   onMarkAsRead: (insightId: string) => void;
   isMarkingAsRead?: boolean;
+  onGenerateInsights?: () => void;
+  isGenerating?: boolean;
 }
 
 export const InsightsSection = ({ 
   insights, 
   onMarkAsRead,
-  isMarkingAsRead 
+  isMarkingAsRead,
+  onGenerateInsights,
+  isGenerating
 }: InsightsSectionProps) => {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
@@ -114,10 +118,29 @@ export const InsightsSection = ({
           <Lightbulb className="h-12 w-12 text-muted-foreground" />
         </div>
         <h3 className="text-xl font-semibold mb-2">No Insights Yet</h3>
-        <p className="text-muted-foreground max-w-md mx-auto">
+        <p className="text-muted-foreground max-w-md mx-auto mb-6">
           As you engage with your coaching programs and complete activities, 
           you'll receive personalized insights to help accelerate your career growth.
         </p>
+        {onGenerateInsights && (
+          <Button 
+            onClick={onGenerateInsights}
+            disabled={isGenerating}
+            className="mt-4"
+          >
+            {isGenerating ? (
+              <>
+                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                Generating Insights...
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 mr-2" />
+                Generate Insights Now
+              </>
+            )}
+          </Button>
+        )}
       </div>
     );
   }
